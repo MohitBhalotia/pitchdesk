@@ -8,36 +8,36 @@ import { Rocket, Code, Paintbrush } from 'lucide-react';
 const features = [
   {
     step: 'Step 1',
-    title: 'Build Faster',
+    title: 'Present Your Pitch',
     content:
-      'Create your MVP in record time with our pre-built blocks and components.',
+      'Select one from 10+ available VC personalities supporting both English and Hindi languages to Present your pitch and have a structured QnA session. ',
     icon: <Rocket className="text-primary h-6 w-6" />,
     image:
       'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?q=80&w=2070&auto=format&fit=crop',
   },
   {
     step: 'Step 2',
-    title: 'Customize Easily',
+    title: 'Get your Curated Pitch Report',
     content:
-      'Tailor every component to your needs with our intuitive design system and flexible architecture.',
+      'A detailed analysis of your pitch and the QnA session by our AI Powered Pitch Analyzer. Get suggestions and changes to make it better.',
     icon: <Paintbrush className="text-primary h-6 w-6" />,
     image:
       'https://images.unsplash.com/photo-1618761714954-0b8cd0026356?q=80&w=2070&auto=format&fit=crop',
   },
   {
     step: 'Step 3',
-    title: 'Deploy Confidently',
+    title: 'Increased Visibility among Investors',
     content:
-      'Launch your product with confidence using our optimized, responsive, and accessible components.',
+      'Create your presence among our partnered Venture Capitalists and list yourself on our crowdfunding platform.',
     icon: <Code className="text-primary h-6 w-6" />,
     image:
       'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop',
   },
   {
     step: 'Step 4',
-    title: 'Add Yours!',
+    title: 'Dont have a Pitch ?',
     content:
-      'Contribute your own blocks and become part of the MVPBlocks community.',
+      'Get personalized pitch by our highly trained AI Agent.',
     icon: <Code className="text-primary h-6 w-6" />,
     image:
       'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop',
@@ -67,11 +67,12 @@ export default function FeatureSteps() {
         <div className="relative mx-auto mb-12 max-w-2xl sm:text-center">
           <div className="relative z-10">
             <h2 className="font-geist text-3xl font-bold tracking-tighter md:text-4xl lg:text-5xl">
-              Build Your MVP in Three Steps
+              Perfect Your Pitch in 2 Steps
             </h2>
             <p className="font-geist text-foreground/60 mt-3">
-              MVPBlocks helps you create, customize, and deploy your product
-              faster than ever before.
+              Pitch Desk help you refine your pitch and also generates
+              personalized pitches with increased chances of
+              cracking the deal of your dreams
             </p>
           </div>
           <div

@@ -82,7 +82,7 @@ export default function ContactUs1() {
                   maxSize={1.4}
                   particleDensity={500}
                   className="absolute inset-0 top-0 h-24 w-full"
-                  particleColor="#e60a64"
+                  particleColor="#9B40B7"
                 />
               </motion.div>
 
@@ -155,7 +155,7 @@ export default function ContactUs1() {
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-gradient-to-b from-rose-500 to-rose-700 text-white shadow-[0px_2px_0px_0px_rgba(255,255,255,0.3)_inset]"
+                    className="w-full bg-gradient-to-b from-primary to-purple-700 text-white shadow-[0px_2px_0px_0px_rgba(255,255,255,0.3)_inset]"
                   >
                     {isSubmitting ? (
                       <span className="flex items-center justify-center">
@@ -182,14 +182,14 @@ export default function ContactUs1() {
               className="relative my-8 flex items-center justify-center overflow-hidden pr-8"
             >
               <div className="flex flex-col items-center justify-center overflow-hidden">
-                <article className="relative mx-auto h-[350px] min-h-60 max-w-[450px] overflow-hidden rounded-3xl border bg-gradient-to-b from-[#e60a64] to-[#e60a64]/5 p-6 text-3xl tracking-tight text-white md:h-[450px] md:min-h-80 md:p-8 md:text-4xl md:leading-[1.05] lg:text-5xl">
-                  Presenting you with the best UI possible.
+                <article className="relative mx-auto h-[350px] min-h-60 max-w-[450px] overflow-hidden rounded-3xl border bg-gradient-to-b from-[#b102f6] to-[#e60a64]/5 p-6 text-3xl tracking-tight text-white md:h-[450px] md:min-h-80 md:p-8 md:text-4xl md:leading-[1.05] lg:text-5xl">
+                  Pitch with Power. Train with AI.
                   <div className="absolute -right-20 -bottom-20 z-10 mx-auto flex h-full w-full max-w-[300px] items-center justify-center transition-all duration-700 hover:scale-105 md:-right-28 md:-bottom-28 md:max-w-[550px]">
                     <Earth
                       scale={1.1}
-                      baseColor={[1, 0, 0.3]}
+                      baseColor={[0.6, 0.4, 0.8]}
                       markerColor={[0, 0, 0]}
-                      glowColor={[1, 0.3, 0.4]}
+                      glowColor={[0.7, 0.3, 0.9]}
                     />
                   </div>
                 </article>
