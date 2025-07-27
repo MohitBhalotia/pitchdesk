@@ -1,72 +1,148 @@
-import NextAuth from "next-auth";
-import AppleProvider from "next-auth/providers/apple";
-import FacebookProvider from "next-auth/providers/facebook";
-import GoogleProvider from "next-auth/providers/google";
-import EmailProvider from "next-auth/providers/email";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import type { NextAuthOptions } from "next-auth";
-import { dbConnect } from "@/lib/db";
-// import { env } from "@/env.mjs";
+import GoogleProvider from "next-auth/providers/google";
+import UserModel from "@/models/UserModel";
+import bcrypt from "bcryptjs";
+import dbConnect from "@/lib/db";
+import { nanoid } from "nanoid";
 
 export const authOptions: NextAuthOptions = {
+  providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      profile(profile) {
+        return {
+          id: profile.sub,
+          fullName: profile.name || "",
+          email: profile.email || "",
+          isVerified: true,
+          provider: "google",
+        };
+      },
+    }),
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: {
+          label: "Email",
+          type: "email",
+          placeholder: "Enter your email",
+        },
+        password: {
+          label: "Password",
+          type: "password",
+          placeholder: "Enter your password",
+        },
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      async authorize(credentials): Promise<any> {
+        await dbConnect();
+        try {
+          const user = await UserModel.findOne({
+            email: credentials?.email,
+          });
+          if (!user) {
+            throw new Error("No user found with this email");
+          }
+          if (!user.isVerified) {
+            throw new Error("You are not verified. Please verify your email.");
+          }
+
+          const isPasswordCorrect = await bcrypt.compare(
+            credentials?.password as string,
+            user.password
+          );
+          if (isPasswordCorrect) {
+            return user;
+          } else {
+            throw new Error("Invalid credentials. Please try again.");
+          }
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+          throw new Error(
+            error instanceof Error ? error.message : "Authentication failed"
+          );
+        }
+      },
+    }),
+  ],
+  pages: {
+    signIn: "/login",
+  },
+  session: {
+    strategy: "jwt",
+  },
+  secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    async session({ session, token, user }) {
-      // Try to get provider from token (if available)
-      if (token?.provider) {
-        session.user.provider = token.provider;
-      } else if (user?.provider) {
-        session.user.provider = user.provider;
+    async signIn({ user, account }) {
+      if (account?.provider === "google") {
+        await dbConnect();
+        const existingUser = await UserModel.findOne({ email: user.email });
+        if (!existingUser) {
+          const newUser = new UserModel({
+            fullName: user.fullName as string,
+            email: user.email as string,
+            password: nanoid(8),
+            isVerified: true,
+            verificationCode: null,
+            verificationExpiry: null,
+            role: "founder",
+            userPlan: "free",
+            resetPasswordToken: null,
+            provider: "google",
+          });
+
+          console.log(newUser);
+
+          await newUser.save();
+          console.log("user created");
+
+          user._id = newUser._id?.toString();
+          user.isVerified = true;
+          user.fullName = newUser.fullName;
+          user.email = newUser.email;
+          user.role = "founder";
+          user.userPlan = "free";
+        } else {
+          user._id = existingUser._id?.toString();
+          user.isVerified = existingUser.isVerified;
+          user.fullName = existingUser.fullName;
+          user.email = existingUser.email;
+          user.role = existingUser.role;
+          user.userPlan = existingUser.userPlan;
+          user.provider = existingUser.provider;
+        }
       }
-      return session;
+      return true;
     },
-    async jwt({ token, account, user }) {
-      if (account?.provider) {
-        token.provider = account.provider;
-      } else if (user?.provider) {
+    async jwt({ token, user }) {
+      if (user) {
+        token._id = user._id?.toString();
+        token.isVerified = user.isVerified;
+        token.fullName = user.fullName;
+        token.email = user.email;
+        token.role = user.role;
+        token.userPlan = user.userPlan;
         token.provider = user.provider;
       }
       return token;
     },
-  },
-  providers: [
-    // AppleProvider({
-    //   clientId: process.env.APPLE_ID!,
-    //   clientSecret: process.env.APPLE_SECRET!,
-    // }),
-    // FacebookProvider({
-    //   clientId: process.env.FACEBOOK_ID!,
-    //   clientSecret: process.env.FACEBOOK_SECRET!,
-    // }),
-    GoogleProvider({
-      clientId: process.env.GOOGLE_AUTH_ID!,
-      clientSecret: process.env.GOOGLE_AUTH_SECRET!,
-    }),
-    CredentialsProvider({
-      name: 'Credentials',
-      credentials: {
-        email: { label: "Email", type: "email", placeholder: "jsmith@example.com" },
-        password: { label: "Password", type: "password" }
-      },
-      async authorize(credentials, req) {
-        // Replace this with your own logic to validate user
-        // For demo: accept any non-empty email and password
-        if (credentials?.email && credentials?.password) {
-          // You can fetch user from DB here
-          return { id: credentials.email, email: credentials.email };
-        }
-        // If login fails, return null
-        return null;
+    async session({ session, token }) {
+      if (token) {
+        session.user._id = token._id;
+        session.user.isVerified = token.isVerified;
+        session.user.fullName = token.fullName;
+        session.user.email = token.email;
+        session.user.role = token.role;
+        session.user.userPlan = token.userPlan;
+        session.user.provider = token.provider;
       }
-    })
-  ],
-  secret: process.env.NEXTAUTH_SECRET,
+      return session;
+    },
+  },
 };
 
-// Ensure DB connection before NextAuth handler
-const handler = async (...args: any) => {
-  await dbConnect();
-  // @ts-ignore
-  return NextAuth(authOptions)(...args);
-};
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };

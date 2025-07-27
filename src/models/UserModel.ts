@@ -1,66 +1,60 @@
-import mongoose, { Schema, Document } from 'mongoose';
-import { User } from '../types/index';
+import mongoose, { Schema } from "mongoose";
 
-const userSchema = new Schema<User>({
-    fullname: {
-        type: String,
-        required: true,
-        unique: true,
+const userSchema = new Schema<User>(
+  {
+    fullName: {
+      type: String,
+      required: true,
     },
     email: {
-        type: String,
-        required: true,
-        unique: true,
+      type: String,
+      required: true,
+      unique: true,
     },
     password: {
-        type: String,
-        required: true,
+      type: String,
+      required: true,
     },
     profileImage: {
-        type: String,
+      type: String,
     },
     isVerified: {
-        type: Boolean,
-        default: false,
+      type: Boolean,
+      default: false,
     },
     verificationCode: {
-        type: String,
-        default: null,
+      type: String,
+      default: null,
     },
     verificationExpiry: {
-        type: Date,
-        default: null,
+      type: Date,
+      default: null,
     },
     resetPasswordToken: {
-        type: String,
-        default: null,
-    },
-
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now,
+      type: String,
+      default: null,
     },
     role: {
-        type: String,
-        enum: ['founder', 'vc'],
-        required: true,
+      type: String,
+      enum: ["founder", "vc"],
+      required: true,
     },
     userPlan: {
-        type: String,
-        enum: ['free', 'starter', 'professional', 'enterprise'],
-        required: true,
+      type: String,
+      enum: ["free", "starter", "professional", "enterprise"],
+      required: true,
     },
     company: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Company',
-        default: null,
-        required: true,
+      type: Schema.Types.ObjectId,
+      ref: "Company",
+      default:null,
+      required: false,
     },
-});
+  },
+  { timestamps: true }
+);
 
-export const UserModel = mongoose.models.User || mongoose.model<User>('User', userSchema);
+const UserModel =
+  mongoose.models.User || mongoose.model<User>("User", userSchema);
 
+export default UserModel;

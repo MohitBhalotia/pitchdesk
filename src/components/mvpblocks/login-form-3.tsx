@@ -1,267 +1,161 @@
-'use client';
-
-import { useState } from 'react';
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import Link from "next/link";
 import {
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  Loader2,
-  Palette,
-  Users,
-  Cloud,
-  ShieldCheck,
-} from 'lucide-react';
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { loginSchema } from "@/schemas/loginSchema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import OAuthButtons from "../ouath-button";
+import { signIn } from "next-auth/react";
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useSession, signIn, signOut } from "next-auth/react"
-
-export default function SignInPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+export function LoginForm() {
+  const form = useForm<z.infer<typeof loginSchema>>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (data: z.infer<typeof loginSchema>) => {
     setLoading(true);
-    const res = await signIn("credentials", {
-    redirect: false,
-    email,
-    password,
-  });
+    try {
+      const result = await signIn("credentials", {
+        redirect: false,
+        identifier: data.email,
+        password: data.password,
+        callbackUrl: "/dashboard",
+      });
 
-  if (res?.ok) {
-    router.push("/");
-  } else {
-    alert("Login failed");
-  }
-    setLoading(false);
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+
+      
+      if (result?.url) {
+        toast.success("Login successful");
+        router.replace(result.url);
+      } else {
+        toast.error("Login failed");
+      }
+    } catch {
+      toast.error("Login failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden p-4">
-      <style jsx>{`
-        .login-btn {
-          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-          position: relative;
-          overflow: hidden;
-        }
-        .login-btn::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(
-            90deg,
-            transparent,
-            rgba(255, 255, 255, 0.3),
-            transparent
-          );
-          transition: left 0.5s;
-        }
-        .login-btn:hover::before {
-          left: 100%;
-        }
-      `}</style>
-      <div className="z-10 w-full max-w-6xl">
-        <div className="bg-secondary/50 overflow-hidden rounded-[40px] shadow-2xl">
-          <div className="grid min-h-[700px] lg:grid-cols-2">
-            {/* Left Side */}
-            <div className="brand-side relative m-4 rounded-3xl bg-[url('https://cdn.midjourney.com/299f94f9-ecb9-4b26-bead-010b8d8b01d9/0_0.png?w=800&q=80')] bg-cover p-12 text-white">
-              <div>
-                <div className="mb-12 text-lg font-semibold uppercase">
-                  PixelForge Studio
-                </div>
-                <h1 className="mb-4 text-6xl font-medium">
-                  Create, Design, and Innovate
-                </h1>
-                <p className="mb-12 text-xl opacity-80">
-                  Join thousands of creators who trust PixelForge Studio to
-                  bring their vision to life
-                </p>
-
-                <div className="space-y-6">
-                  {[
-                    {
-                      icon: <Palette size={16} />,
-                      title: 'Advanced Design Tools',
-                      desc: 'Professional-grade tools for every project',
-                    },
-                    {
-                      icon: <Users size={16} />,
-                      title: 'Team Collaboration',
-                      desc: 'Work together seamlessly in real-time',
-                    },
-                    {
-                      icon: <Cloud size={16} />,
-                      title: 'Cloud Storage',
-                      desc: 'Access your projects from anywhere',
-                    },
-                    {
-                      icon: <ShieldCheck size={16} />,
-                      title: 'Enterprise Security',
-                      desc: 'Bank-level security for your data',
-                    },
-                  ].map(({ icon, title, desc }, i) => (
-                    <div
-                      key={i}
-                      className="feature-item animate-fadeInUp flex items-center"
-                      style={{ animationDelay: `${0.2 * (i + 1)}s` }}
-                    >
-                      <div className="mr-4 flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 text-white backdrop-blur-sm">
-                        {icon}
-                      </div>
-                      <div>
-                        <div className="font-semibold">{title}</div>
-                        <div className="text-sm opacity-70">{desc}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+    <Form {...form}>
+      <div className="flex flex-col items-center gap-2 text-center mb-8">
+        <h1 className="text-2xl font-bold ">Welcome back</h1>
+        <p className="text-muted-foreground text-sm text-balance">
+          Login to your account
+        </p>
+      </div>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  placeholder="name@example.com"
+                  type="email"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  autoCorrect="off"
+                  disabled={loading}
+                  className="h-11"
+                />
+              </FormControl>
+              <FormDescription />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          name="password"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+              <div className="flex items-center justify-between">
+                <FormLabel>Password</FormLabel>
+                <Link
+                  href="/forgot-password"
+                  className="text-sm text-muted-foreground hover:text-foreground underline"
+                >
+                  Forgot password?
+                </Link>
               </div>
-            </div>
-
-            {/* Right Side */}
-            <div className="flex flex-col justify-center p-12">
-              <div className="mx-auto w-full max-w-md">
-                <div className="mb-8 text-center">
-                  <h2 className="text-3xl font-light uppercase">
-                    Welcome back
-                  </h2>
-                  <p className="mt-2 text-sm text-stone-600">
-                    Sign in to continue your creative journey
-                  </p>
-                </div>
-
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div>
-                    <label
-                      htmlFor="email"
-                      className="mb-2 block text-sm font-medium uppercase"
-                    >
-                      Email address
-                    </label>
-                    <div className="relative">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <Mail className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <input
-                        id="email"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        className="border-border bg-input block w-full rounded-lg border py-3 pr-3 pl-10 text-sm"
-                        placeholder="Enter your email"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label
-                      htmlFor="password"
-                      className="mb-2 block text-sm font-medium uppercase"
-                    >
-                      Password
-                    </label>
-                    <div className="relative">
-                      <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <Lock className="h-5 w-5 text-gray-400" />
-                      </div>
-                      <input
-                        id="password"
-                        type={showPassword ? 'text' : 'password'}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        className="border-border bg-input block w-full rounded-lg border py-3 pr-12 pl-10 text-sm"
-                        placeholder="Enter your password"
-                      />
-                      <button
-                        type="button"
-                        className="absolute inset-y-0 right-0 flex items-center pr-3"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? (
-                          <EyeOff className="h-5 w-5 text-gray-400" />
-                        ) : (
-                          <Eye className="h-5 w-5 text-gray-400" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <label className="text-muted-foreground flex items-center text-sm">
-                      <input
-                        type="checkbox"
-                        className="border-border text-primary h-4 w-4 rounded"
-                      />
-                      <span className="ml-2">Remember me</span>
-                    </label>
-                    <Link
-                      href="signup"
-                      className="text-primary hover:text-primary/80 text-sm"
-                    >
-                      Forgot password?
-                    </Link>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="login-btn relative flex w-full items-center justify-center rounded-lg px-4 py-3 text-sm font-medium text-white transition-all duration-300"
+              <FormControl>
+                <div className="relative">
+                  <Input
+                    {...field}
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
                     disabled={loading}
+                    className="h-11 pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute cursor-pointer right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    tabIndex={-1}
                   >
-                    {loading ? (
-                      <>
-                        <Loader2 className="h-5 w-5 animate-spin" />
-                        <span className="ml-2">Signing in...</span>
-                      </>
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
                     ) : (
-                      'Sign in to your account'
+                      <Eye className="h-4 w-4" />
                     )}
                   </button>
-
-                  <div className="relative text-center text-sm text-stone-500">
-                    <div className="absolute inset-0 flex items-center">
-                      <div className="border-border w-full border-t"></div>
-                    </div>
-                    <span className="relative px-2">Or continue with</span>
-                  </div>
-
-                  <div className="grid grid-cols-1 justify-items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => signIn("google")}
-                      className="border-border bg-secondary text-foreground hover:bg-secondary/80 flex items-center justify-center rounded-lg border px-10 py-2.5 text-sm shadow-sm"
-                    >
-                      <img
-                        src="https://www.svgrepo.com/show/475656/google-color.svg"
-                        className="h-5 w-5"
-                        alt="Google"
-                      />
-                      <span className="ml-2">Google</span>
-                    </button>
-                    
-                  </div>
-                </form>
-
-                <div className="text-muted-foreground mt-8 text-center text-sm">
-                  Don&apos;t have an account?{' '}
-                  <a href="signup" className="text-primary hover:text-primary/80">
-                    Sign up for free
-                  </a>
                 </div>
-              </div>
-            </div>
-          </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <span>Login</span>
+          )}
+        </Button>
+
+        <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
+          <span className="bg-background text-muted-foreground relative z-10 px-2">
+            Or 
+          </span>
         </div>
-      </div>
-    </div>
+        <OAuthButtons />
+        <div className="text-center text-sm">
+          Don&apos;t have an account?{" "}
+          <Link href="/register" className="underline underline-offset-4">
+            Sign up
+          </Link>
+        </div>
+      </form>
+    </Form>
   );
 }

@@ -1,5 +1,4 @@
 import mongoose ,{Schema} from "mongoose";
-import { Company } from "../types/index";
 
 const companySchema = new Schema<Company>({
     companyName: {

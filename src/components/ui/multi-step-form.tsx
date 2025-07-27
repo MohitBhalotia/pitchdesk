@@ -157,10 +157,10 @@ export default function MultiStepForm({
         const signInRes = await (await import('next-auth/react')).signIn('credentials', {
           email: updatedData.email,
           password: updatedData.password,
-          redirect: false,
+          redirectUrl: '/dashboard',
         });
         if (signInRes?.ok) {
-          window.location.href = '/dashboard';
+        
         } else {
           alert('Signup succeeded, but login failed. Please login manually.');
         }
