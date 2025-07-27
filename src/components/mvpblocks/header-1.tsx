@@ -16,25 +16,33 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { name: "Home", href: "/" },
-  { name: "Features", href: "/features" },
   {
-    name: "Products",
-    href: "/products",
+    name: "Features",
+    href: "/features",
     hasDropdown: true,
     dropdownItems: [
       {
-        name: "Analytics",
-        href: "/analytics",
-        description: "Track your metrics",
+        name: "AI Powered VC's",
+        href: "#",
+        description: "Talk with different Real Persona VC's",
       },
       {
-        name: "Dashboard",
-        href: "/dashboard",
-        description: "Manage your data",
+        name: "Personalised Pitches",
+        href: "$",
+        description: "Get Your Perfect Pitch",
       },
-      { name: "Reports", href: "/reports", description: "Generate insights" },
+      { name: "Pitch Analysis",
+        href:"#",
+        description: "Detailed Report of Your Pitch"
+      },
+      {
+        name: "Pitch Improvement",
+        href:"#",
+        description:"Improve Your Existing Pitch"
+      }
     ],
   },
+  { name: "CrowdFunding", href: "/pricing" },
   { name: "Pricing", href: "/pricing" },
   { name: "About", href: "/about" },
 ];
@@ -102,8 +110,8 @@ export default function Header1() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-rose-500 to-rose-700">
                 <Sparkles className="h-5 w-5 text-white" />
               </div>
-              <span className="bg-gradient-to-r from-rose-500 to-rose-700 bg-clip-text text-xl font-bold text-transparent">
-                Acme Inc.
+              <span className="bg-gradient-to-r from-primary to-purple-700 bg-clip-text text-xl font-bold text-transparent">
+                Pitch Desk
               </span>
             </Link>
           </motion.div>
@@ -174,7 +182,7 @@ export default function Header1() {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link
                 href="/signup"
-                className="inline-flex items-center space-x-2 rounded-full bg-gradient-to-r from-rose-500 to-rose-700 px-6 py-2.5 font-medium text-white transition-all duration-200 hover:shadow-lg"
+                className="inline-flex items-center space-x-2 rounded-full bg-gradient-to-r from-primary to-purple-700 px-6 py-2.5 font-medium text-white transition-all duration-200 hover:shadow-lg"
               >
                 <span>Get Started</span>
                 <ArrowRight className="h-4 w-4" />
@@ -230,7 +238,7 @@ export default function Header1() {
                   </Link>
                   <Link
                     href="/signup"
-                    className="block w-full rounded-lg bg-gradient-to-r from-rose-500 to-rose-700 py-2.5 text-center font-medium text-white transition-all duration-200 hover:shadow-lg"
+                    className="block w-full rounded-lg bg-gradient-to-r from-primary to-purple-700 py-2.5 text-center font-medium text-white transition-all duration-200 hover:shadow-lg"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Get Started

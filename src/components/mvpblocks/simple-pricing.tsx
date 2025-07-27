@@ -26,50 +26,78 @@ const plans = [
       yearly: 'Free forever',
     },
     description:
-      'The perfect starting place for your web app or personal project.',
+      'The perfect starting place for your Entrepreneurial journey.',
     features: [
-      '50 API calls / month',
-      '60 second checks',
+      '5 minutes of pitch time',
+      'Includes qna session',
       'Single-user account',
-      '5 monitors',
+      'Personalised Pitch generation',
+      'General english AI VC',
       'Basic email support',
     ],
     cta: 'Get started for free',
   },
   {
-    id: 'pro',
-    name: 'Pro',
+    id: 'standard',
+    name: 'Standard',
     icon: Zap,
     price: {
-      monthly: 90,
-      yearly: 75,
+      monthly: 699,
     },
     description: 'Everything you need to build and scale your business.',
     features: [
-      'Unlimited API calls',
-      '30 second checks',
-      'Multi-user account',
-      '10 monitors',
+      '3 Pitches of 20 minutes each',
+      'Includes a deeper and longer qna session',
+      'Single-user account',
+      '1 English + 1 Hindi general AI VC',
       'Priority email support',
+      'Analysis and improvement of your pitch',
+      'Pitch improvement suggestions',
+      'Perrsonalised pitch generation',
     ],
-    cta: 'Subscribe to Pro',
+    cta: 'Subscribe to Standard',
     popular: true,
+  },
+  {
+    id: 'pro',
+    name: 'Pro',
+    icon: Shield,
+    price: {
+      monthly: 1999,
+    },
+    description: 'Critical security, performance, observability and support.',
+    features: [
+      '10 Pitches of 20 minutes each',
+      'Includes a deeper and longer qna session',
+      '-user account',
+      '6 English + 6 Hindi AI VC',
+      'All 12 having different personalities',
+      'Priority email support',
+      'Analysis and improvement of your pitch',
+      'Pitch improvement suggestions',
+      'Perrsonalised pitch generation',
+    ],
+    cta: 'Contact us',
   },
   {
     id: 'enterprise',
     name: 'Enterprise',
     icon: Shield,
     price: {
-      monthly: 'Get in touch for pricing',
-      yearly: 'Get in touch for pricing',
+      monthly: 4999,
     },
     description: 'Critical security, performance, observability and support.',
     features: [
-      'You can DDOS our API.',
-      'Nano-second checks.',
-      'Invite your extended family.',
-      'Unlimited monitors.',
-      "We'll sit on your desk.",
+      '25 Pitches of 20 minutes each',
+      'Includes a deeper and longer qna session',
+      '-user account',
+      '6 English + 6 Hindi AI VC',
+      'All 12 having different personalities',
+      'Real time venture capitalists connections',
+      'Priority email support',
+      'Analysis and improvement of your pitch',
+      'Pitch improvement suggestions',
+      'Personalised pitch generation',
     ],
     cta: 'Contact us',
   },
@@ -154,7 +182,7 @@ export default function SimplePricing() {
           </Tabs>
         </motion.div>
 
-        <div className="mt-8 grid w-full max-w-6xl grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="mt-8 grid w-full max-w-6xl grid-cols-1 gap-6 md:grid-cols-4">
           {plans.map((plan, index) => (
             <motion.div
               key={plan.id}
@@ -278,9 +306,9 @@ export default function SimplePricing() {
                   <Button
                     variant={plan.popular ? 'default' : 'outline'}
                     className={cn(
-                      'w-full font-medium transition-all duration-300',
+                      'w-[80%] font-medium transition-all duration-300 absolute bottom-3 right-0 left-0 mx-auto rounded-lg px-6 py-3',
                       plan.popular
-                        ? 'bg-primary hover:bg-primary/90 hover:shadow-primary/20 hover:shadow-md'
+                        ? 'bg-primary hover:bg-primary/90 hover:shadow-primary/20 hover:shadow-md '
                         : 'hover:border-primary/30 hover:bg-primary/5 hover:text-primary',
                     )}
                   >

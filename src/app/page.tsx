@@ -12,7 +12,7 @@ export default function Home() {
       <Header1 />
       <AppHero />
       <FeatureSteps />
-      <TestimonialsCarousel />
+      {/* <TestimonialsCarousel /> */}
       <SimplePricing />
       <ContactUs1 />
       <Footer4Col />
