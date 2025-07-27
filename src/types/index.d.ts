@@ -17,7 +17,7 @@ declare global {
 
   export interface Company extends Document {
     companyName: string;
-    websiteURL: string;
+    websiteUrl: string;
     createdAt: Date;
     updatedAt: Date;
   }

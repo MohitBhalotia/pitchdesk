@@ -1,5 +1,5 @@
 "use client";
-import { GalleryVerticalEnd } from "lucide-react";
+import { GalleryVerticalEnd, Sparkle, Sparkles } from "lucide-react";
 
 import { LoginForm } from "@/components/login-form";
 import Image from "next/image";
@@ -9,8 +9,8 @@ export default function LoginPage() {
   return (
     <div className="flex flex-row justify-between min-h-svh lg:grid-cols-2">
       <div className="flex flex-2/3 flex-col gap-4 p-6 md:p-10 w-full">
-        <div className="flex justify-center gap-2 md:justify-start">
-          <Image src="/logo.svg" alt="Logo" width={100} height={100} />
+        <div className="flex justify-center items-center gap-4 md:justify-start">
+          <Sparkles className="h-5 w-5 text-white" />
           <Link href="/">
             <h1 className="text-2xl font-bold">Pitch Desk</h1>
           </Link>

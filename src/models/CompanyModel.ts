@@ -4,12 +4,10 @@ const companySchema = new Schema<Company>({
     companyName: {
         type: String,
         required: true,
-        unique: true,
     },
-    websiteURL: {
+    websiteUrl: {
         type: String,
         required: true,
-        unique: true,
     },
     createdAt: {
         type: Date,
@@ -21,4 +19,5 @@ const companySchema = new Schema<Company>({
     },
 });
 
-export const CompanyModel = mongoose.models.Company || mongoose.model<Company>('Company', companySchema);
+const CompanyModel = mongoose.models.Company || mongoose.model<Company>('Company', companySchema);
+export default CompanyModel;

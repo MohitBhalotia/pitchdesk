@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import dbConnect from "@/lib/db";
 import { nanoid } from "nanoid";
 
+const salt=await bcrypt.genSalt(10);
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
@@ -83,7 +84,7 @@ export const authOptions: NextAuthOptions = {
           const newUser = new UserModel({
             fullName: user.fullName as string,
             email: user.email as string,
-            password: nanoid(8),
+            password: await bcrypt.hash(nanoid(8), salt),
             isVerified: true,
             verificationCode: null,
             verificationExpiry: null,
@@ -93,10 +94,8 @@ export const authOptions: NextAuthOptions = {
             provider: "google",
           });
 
-          console.log(newUser);
 
           await newUser.save();
-          console.log("user created");
 
           user._id = newUser._id?.toString();
           user.isVerified = true;
