@@ -31,7 +31,7 @@ export async function POST(req: NextRequest){
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(validatedData.password, salt);
-
+ 
     // Create user
     const user = new UserModel({
       fullName: validatedData.fullName,
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest){
     return NextResponse.json(
       {
         success: true,
-        message: "User created",
+        message: "User created successfully",
       },
       { status: 201 }
     );

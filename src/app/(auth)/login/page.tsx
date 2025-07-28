@@ -1,5 +1,5 @@
 "use client";
-import { GalleryVerticalEnd, Sparkle, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 import { LoginForm } from "@/components/login-form";
 import Image from "next/image";
