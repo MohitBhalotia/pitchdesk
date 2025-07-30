@@ -41,7 +41,9 @@ export function LoginForm({
         throw new Error(result.error);
       }
       if (result?.url) {
+        toast.success("Login successfull");
         router.replace(result.url);
+
       }
     } catch (error) {
       toast.error(

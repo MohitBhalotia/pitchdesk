@@ -39,7 +39,7 @@ export default function RootLayout({
           >
             <SessionWrapper>
               {children}
-              <Toaster position="top-center" />
+              <Toaster position="top-center" richColors/>
             </SessionWrapper>
           </ThemeProvider>
         </body>
