@@ -47,7 +47,7 @@ export async function POST(req: NextRequest){
       provider: "credentials",
     });
     await user.save();
-    await resend(user.verificationCode,user.fullName,user.email);
+    await resend(user.verificationCode,user.fullName,user.email, user._id);
 
     return NextResponse.json(
       {

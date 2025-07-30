@@ -16,6 +16,7 @@ import {
 interface VerifyProps {
   verificationCode: string;
   fullName: string;
+  userId: string
 }
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
@@ -23,6 +24,7 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
 export default function VerifyEmail({
   verificationCode,
   fullName,
+  userId
 }: VerifyProps) {
   return (
     <Html>
