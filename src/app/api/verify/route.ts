@@ -1,4 +1,4 @@
-import { verifySchema } from "@/models/verifySchema"
+import { verifySchema } from "@/schemas/verifySchema"
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import UserModel from "@/models/UserModel";
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
         if(error instanceof z.ZodError){
             return NextResponse.json({
                 success: false,
-                message: error.errors.map((e) => e.message).join(",")
+                message: error.issues.map((e) => e.message).join(",")
             })
         }
 
