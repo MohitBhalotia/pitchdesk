@@ -34,6 +34,10 @@ const userSchema = new Schema<User>(
       type: String,
       default: null,
     },
+    resetPasswordTokenExpiry: {
+      type: Date,
+      default: null,
+    },
     role: {
       type: String,
       enum: ["founder", "vc"],

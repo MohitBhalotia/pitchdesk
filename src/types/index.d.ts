@@ -9,9 +9,10 @@ declare global {
     verificationCode: string | null;
     verificationExpiry: Date | null;
     resetPasswordToken: string | null;
+    resetPasswordTokenExpiry: Date | null;
     role: "founder" | "vc" | null;
     userPlan: "free" | "starter" | "professional" | "enterprise";
-    company: moongose.Schema.Types.ObjectId | null;
+    company: mongoose.Schema.Types.ObjectId | null;
     provider: "credentials" | "google";
   }
 

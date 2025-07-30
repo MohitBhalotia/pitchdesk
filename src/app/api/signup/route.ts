@@ -5,7 +5,7 @@ import CompanyModel from "@/models/CompanyModel";
 import bcrypt from "bcryptjs";
 import signupSchema from "@/schemas/signUpSchema";
 import { z } from "zod";
-import resend from "@/lib/resend";
+import resend from "@/lib/resend/resend-verification";
 export async function POST(req: NextRequest){
   await dbConnect();
   try {
