@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import signupSchemaStep1 from "@/schemas/signUpSchemaStep1"
+import OAuthButtons from "@/components/ouath-button"
 
 export default function Step1Form() {
   const router = useRouter()
@@ -100,10 +101,10 @@ export default function Step1Form() {
               </FormItem>
             )}
           />
-
           <div className="text-center">
             <Button type="submit" className="w-1/2">Submit</Button>
           </div>
+          <OAuthButtons />
         </form>
       </div>
     </Form>

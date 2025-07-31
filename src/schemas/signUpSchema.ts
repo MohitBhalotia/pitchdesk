@@ -1,6 +1,6 @@
 import { z } from "zod"
 
-const signUpSchema = z.object({
+const signupSchema = z.object({
     fullName:z.string().min(3,{message:"Full name must be at least 3 characters long"}),
     email:z.string().email({message:"Invalid email address"}),
     password:z.string().min(8,{message:"Password must be at least 8 characters long"}),
@@ -11,4 +11,4 @@ const signUpSchema = z.object({
 
 })
 
-export default signUpSchema
+export default signupSchema

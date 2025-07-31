@@ -3,7 +3,7 @@ import dbConnect from "@/lib/db";
 import UserModel from "@/models/UserModel";
 import CompanyModel from "@/models/CompanyModel";
 import bcrypt from "bcryptjs";
-import signUpSchema from "@/schemas/signUpSchema";
+import signUpSchema from "@/schemas/signupSchema";
 import { z } from "zod";
 import resend from "@/lib/resend";
 export async function POST(req: NextRequest){

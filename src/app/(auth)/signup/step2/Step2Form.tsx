@@ -16,7 +16,6 @@ import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -24,45 +23,64 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import axios from "axios"
-import signupSchemaStep2 from "@/schemas/signUpSchemaStep2"
+import signupSchemaStep2, { SignupStep2Type } from "@/schemas/signUpSchemaStep2"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
-
-
-
+import { useEffect, useState } from "react"
+import { useSession } from "next-auth/react"
 
 export default function Step2Form() {
-
   const router = useRouter()
 
-  const form = useForm({
+  const form = useForm<SignupStep2Type>({
     resolver: zodResolver(signupSchemaStep2),
     defaultValues: {
-      role:"founder",
+      role: "founder",
       company: "",
       websiteUrl: ""
     },
   })
 
-  const onSubmit = async (data: z.infer<typeof signupSchemaStep2>) => {
-  const step1Data = JSON.parse(localStorage.getItem("step1Data") || "{}")
-  console.log(step1Data)
-  const step2Data = data
-  console.log(step2Data)
-  const finalPayload = {...step1Data, ...step2Data}
-  console.log(finalPayload)
-  try{
-    const res = await axios.post("/api/signup", finalPayload)
-    if(res.data.success){
-      toast.success("User created successfully" )
-      router.push("/login")
+  const { data: session, status } = useSession()
+  const [isGoogleUser, setIsGoogleUser] = useState(false)
+
+  useEffect(() => {
+    // Check if Google user is logged in
+    
+        if (status === "authenticated" && session?.user?.email) {
+      setIsGoogleUser(true)
+        }
+  }, [status, session])
+
+  const onSubmit = async (data: SignupStep2Type) => {
+    const step2Data = data
+
+    try {
+      console.log(isGoogleUser)
+      if (isGoogleUser) {
+        // Google sign-in user → just update
+        const res = await axios.post("/api/users/update", step2Data)
+        if (res.status === 200) {
+          toast.success("User details updated successfully")
+          router.push("/login")
+        }
+      } else {
+        // Step1 user (stored in localStorage)
+        const step1Data = JSON.parse(localStorage.getItem("step1Data") || "{}")
+        localStorage.removeItem("step1Data")
+        const finalPayload = { ...step1Data, ...step2Data }
+
+        const res = await axios.post("/api/signup", finalPayload)
+        if (res.data.success) {
+          toast.success("User created successfully")
+          router.push("/login")
+        }
+      }
+    } catch (error) {
+      console.error(error)
+      toast.error("Error submitting details")
     }
-  }catch(error){
-    console.log(error)
-    toast.error("Error creating user, please try again")
   }
-  
-}
 
   return (
     <Form {...form}>
@@ -72,27 +90,37 @@ export default function Step2Form() {
           className="w-full max-w-2xl space-y-8 bg-gray-800 p-10 rounded-3xl shadow-lg text-white"
         >
           <h2 className="text-2xl font-bold text-center">Company Details</h2>
-          <FormLabel>Select Role</FormLabel>
-          <Select>
-            <SelectTrigger className="w-[50%]">
-              <SelectValue placeholder="Role" />
-            </SelectTrigger>
-            <SelectContent>
-              
-              <SelectItem value="founder">Founder</SelectItem>
-              <SelectItem value="vc">VC</SelectItem>
-              <SelectItem value="dark"></SelectItem>
-              <SelectItem value="system"></SelectItem>
-            </SelectContent>
-          </Select>
+
+          <FormField
+            control={form.control}
+            name="role"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Select Role</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="w-[50%]">
+                      <SelectValue placeholder="Role" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="founder">Founder</SelectItem>
+                    <SelectItem value="vc">VC</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="company"
             render={({ field }) => (
-              <FormItem className="">
+              <FormItem>
                 <FormLabel>Company Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g. John Doe" {...field} />
+                  <Input placeholder="e.g. Microsoft" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -103,10 +131,10 @@ export default function Step2Form() {
             control={form.control}
             name="websiteUrl"
             render={({ field }) => (
-              <FormItem className="">
-                <FormLabel>Website Url</FormLabel>
+              <FormItem>
+                <FormLabel>Website URL</FormLabel>
                 <FormControl>
-                  <Input type="string" placeholder="e.g. you@example.com" {...field} />
+                  <Input placeholder="e.g. https://microsoft.com" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

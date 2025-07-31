@@ -6,4 +6,6 @@ const signupSchemaStep2=z.object({
     websiteUrl:z.string().url({message:"Invalid website URL"}),
 });
 
+export type SignupStep2Type = z.infer<typeof signupSchemaStep2>;
+
 export default signupSchemaStep2;
