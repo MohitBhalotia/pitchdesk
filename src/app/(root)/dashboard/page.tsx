@@ -40,6 +40,13 @@ export default function DashboardPage() {
       >
         Sign Out
       </button>
+      <button
+        className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+        onClick={() => router.push('/change-password')}
+      >
+        Change Password
+      </button>
+      <h4 className='text-2xl'>Naresh ne sara kaam kr diya he.....mohit and prat G** marwa rhe </h4>
     </div>
   );
 }
