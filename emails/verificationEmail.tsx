@@ -66,7 +66,7 @@ export default function VerifyEmail({
 
               {/* Call to Action */}
               <Button
-                href={`${baseUrl}/verify-email?code=${verificationCode}`}
+                href={`${baseUrl}/verify-email?code=${verificationCode}&id=${userId}`}
                 style={button}
               >
                 Verify Email
