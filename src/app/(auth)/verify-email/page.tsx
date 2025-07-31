@@ -56,7 +56,6 @@ export default function InputOTPForm() {
           router.push("/login")
         }
       }catch(error){
-        console.log(error)
         toast.error("verification failed please try again")
     }
   }

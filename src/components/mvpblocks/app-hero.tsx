@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import TextGenerateEffect from "@/components/ui/typewriter"
 import { BorderBeam } from "@/components/ui/border-beam"
 
-export default function Trading() {
+export default function appHero() {
   return (
     <section className="relative container mx-auto max-w-6xl px-4 py-20 animate-in fade-in duration-500">
       <div

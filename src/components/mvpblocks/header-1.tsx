@@ -237,7 +237,7 @@ export default function Header1() {
                     Sign In
                   </Link>
                   <Link
-                    href="/signup"
+                    href="/signup/step1"
                     className="block w-full rounded-lg bg-gradient-to-r from-primary to-purple-700 py-2.5 text-center font-medium text-white transition-all duration-200 hover:shadow-lg"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
