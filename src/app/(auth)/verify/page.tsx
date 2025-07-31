@@ -25,12 +25,15 @@ import {
 import { Axis3DIcon } from "lucide-react"
 
 const FormSchema = z.object({
-  pin: z.string().min(6, {
+  pin: z.string().length(6, {
     message: "Your one-time password must be 6 characters.",
   }),
 })
 
 export default function InputOTPForm() {
+
+  const router = useRouter()
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -44,43 +47,52 @@ export default function InputOTPForm() {
   
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     try{
+        if(!userId || !code){
+          toast.error("Invalid verification link")
+          return 
+        }
         const res = await axios.post("/api/verify", {userId, code})
-    }catch(error){
-        
+        if(res.data.success){
+          toast.success("Verification successfull")
+          router.push("/login")
+        }
+      }catch(error){
+        toast.error("verification failed please try again")
     }
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-2/3 space-y-6">
-        <FormField
-          control={form.control}
-          name="pin"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Verification code</FormLabel>
-              <FormControl>
-                <InputOTP maxLength={6} {...field}>
-                  <InputOTPGroup>
-                    <InputOTPSlot index={0} />
-                    <InputOTPSlot index={1} />
-                    <InputOTPSlot index={2} />
-                    <InputOTPSlot index={3} />
-                    <InputOTPSlot index={4} />
-                    <InputOTPSlot index={5} />
-                  </InputOTPGroup>
-                </InputOTP>
-              </FormControl>
-              <FormDescription>
-                Please enter the verification code sent on your registered email.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <Button type="submit">Submit</Button>
-      </form>
+    <Form {...form} >
+      <div className="min-h-screen w-screen flex items-center justify-center">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="w-full p-6 bg-gray-900 rounded-4xl max-w-md space-y-6">
+          <FormField
+            control={form.control}
+            name="pin"
+            render={({ field }) => (
+              <FormItem className="flex-col items-center justify-center">
+                <FormLabel className="m-auto">Verification code</FormLabel>
+                <FormControl>
+                  <InputOTP maxLength={6} {...field}>
+                    <InputOTPGroup className="m-auto">
+                      <InputOTPSlot index={0} />
+                      <InputOTPSlot index={1} />
+                      <InputOTPSlot index={2} />
+                      <InputOTPSlot index={3} />
+                      <InputOTPSlot index={4} />
+                      <InputOTPSlot index={5} />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </FormControl>
+                <FormDescription className="m-auto">
+                  Please enter the verification code sent on your registered email.
+                </FormDescription>
+                <FormMessage />
+                <Button className="m-auto w-2xs cursor-pointer" type="submit">Submit</Button>
+              </FormItem>
+            )}
+          />
+        </form>
+      </div>
     </Form>
   )
 }
