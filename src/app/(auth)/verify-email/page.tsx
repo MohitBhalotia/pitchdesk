@@ -22,7 +22,6 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp"
-import { Axis3DIcon } from "lucide-react"
 
 const FormSchema = z.object({
   pin: z.string().length(6, {
@@ -42,21 +41,22 @@ export default function InputOTPForm() {
   })
 
   const searchParams = useSearchParams()
-  const userId = searchParams.get("userId")
+  const id = searchParams.get("id")
   const code = searchParams.get("code")
   
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     try{
-        if(!userId || !code){
+        if(!id || !code){
           toast.error("Invalid verification link")
           return 
         }
-        const res = await axios.post("/api/verify", {userId, code})
+        const res = await axios.post("/api/verify", {id, code})
         if(res.data.success){
           toast.success("Verification successfull")
           router.push("/login")
         }
       }catch(error){
+        console.log(error)
         toast.error("verification failed please try again")
     }
   }

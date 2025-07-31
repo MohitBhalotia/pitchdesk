@@ -7,8 +7,8 @@ import UserModel from "@/models/UserModel";
 export async function POST(req: Request) {
     const body = await req.json();
     try {
-        const { userId, code } = verifySchema.parse(body)
-        const user = await UserModel.findById(userId)
+        const { code, id } = verifySchema.parse(body)
+        const user = await UserModel.findById(id)
         if(!user){
             return NextResponse.json({
                 success: false,
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
 
         if(user?.verificationCode === code) {
             await UserModel.findByIdAndUpdate(
-                userId,
+                id,
                 {
                     $set: {
                         verificationCode: null,
