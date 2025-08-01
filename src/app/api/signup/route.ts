@@ -3,14 +3,14 @@ import dbConnect from "@/lib/db";
 import UserModel from "@/models/UserModel";
 import CompanyModel from "@/models/CompanyModel";
 import bcrypt from "bcryptjs";
-import signupSchema from "@/schemas/signUpSchema";
+import signUpSchema from "@/schemas/signupSchema";
 import { z } from "zod";
 import resend from "@/lib/resend/resend-verification";
 export async function POST(req: NextRequest){
   await dbConnect();
   try {
     const body = await req.json();
-    const validatedData = signupSchema.parse(body);
+    const validatedData = signUpSchema.parse(body);
 
     // Check if user already exists
     const existingUser = await UserModel.findOne({
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest){
 
     const companyDoc = await CompanyModel.create({
       companyName: validatedData.company,
-      websiteURL: validatedData.websiteUrl,
+      websiteUrl: validatedData.websiteUrl,
     });
 
     // Hash password
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest){
       provider: "credentials",
     });
     await user.save();
-    await resend(user.verificationCode,user.fullName,user.email);
+    await resend(user.verificationCode,user.fullName,user.email, user._id);
 
     return NextResponse.json(
       {

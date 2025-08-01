@@ -9,15 +9,7 @@ const companySchema = new Schema<Company>({
         type: String,
         required: true,
     },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now,
-    },
-});
+},{timestamps:true});
 
 const CompanyModel = mongoose.models.Company || mongoose.model<Company>('Company', companySchema);
 export default CompanyModel;
