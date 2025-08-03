@@ -111,6 +111,7 @@ export const authOptions: NextAuthOptions = {
           user.role = existingUser.role;
           user.userPlan = existingUser.userPlan;
           user.provider = existingUser.provider;
+          user.signupStep2Done = existingUser.signupStep2Done;
         }
       }
       return true;
@@ -124,6 +125,7 @@ export const authOptions: NextAuthOptions = {
         token.role = user.role;
         token.userPlan = user.userPlan;
         token.provider = user.provider;
+        token.signupStep2Done = user.signupStep2Done;
       }
       return token;
     },
@@ -136,6 +138,7 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role;
         session.user.userPlan = token.userPlan;
         session.user.provider = token.provider;
+        session.user.signupStep2Done = token.signupStep2Done;
       }
       return session;
     },

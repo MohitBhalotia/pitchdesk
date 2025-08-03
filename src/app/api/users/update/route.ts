@@ -28,6 +28,7 @@ export async function POST(req: Request) {
     role,
     company:companyDoc._id,
     websiteUrl,
+    signupStep2Done: true
     });
 
     return new Response("updated", { status: 200})

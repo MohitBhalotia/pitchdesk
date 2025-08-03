@@ -71,9 +71,13 @@ export default function Step2Form() {
         const finalPayload = { ...step1Data, ...step2Data }
 
         const res = await axios.post("/api/signup", finalPayload)
+
+
         if (res.data.success) {
           toast.success("User created successfully")
           router.push("/login")
+        }else{
+          toast.error(res.data.error.message || "an error occured while submitting details")
         }
       }
     } catch (error) {
