@@ -9,7 +9,7 @@ export default function OAuthButtons() {
         variant="outline"
         type="button"
         className="w-full flex justify-center"
-        onClick={() => signIn("google", { callbackUrl: "/callback" })}
+        onClick={() => signIn("google", { callbackUrl: "/callBack" })}
       >
         <span className="flex items-center gap-2">
           <Image src="/google.svg" alt="Google" width={20} height={20} />
