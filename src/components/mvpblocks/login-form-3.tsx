@@ -19,7 +19,7 @@ import { loginSchema } from "@/schemas/loginSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import OAuthButtons from "../ouath-button";
+import OAuthButtons from "../ouath-buttonSignup";
 import { signIn } from "next-auth/react";
 
 export function LoginForm() {

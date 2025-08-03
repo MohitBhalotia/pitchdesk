@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import { boolean } from "zod";
 
 const userSchema = new Schema<User>(
   {
@@ -47,6 +48,10 @@ const userSchema = new Schema<User>(
       type: String,
       enum: ["free", "starter", "professional", "enterprise"],
       required: true,
+    },
+    signupStep2Done: {
+      type: boolean,
+      default: false,
     },
     company: {
       type: Schema.Types.ObjectId,

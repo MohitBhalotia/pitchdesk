@@ -19,15 +19,16 @@ export async function POST(req: Request) {
     return new Response("User not found", { status: 404 });
     }
 
-    const companyDoc = await CompanyModel.findOne({ companyName: company });
-        if (!companyDoc) {
-        return new Response("Company not found", { status: 404 });
-        }
+    const companyDoc = await CompanyModel.create({
+        companyName: company,
+        websiteUrl: websiteUrl
+    })
 
     await UserModel.findByIdAndUpdate(user._id, {
     role,
     company:companyDoc._id,
     websiteUrl,
+    signupStep2Done: true
     });
 
     return new Response("updated", { status: 200})

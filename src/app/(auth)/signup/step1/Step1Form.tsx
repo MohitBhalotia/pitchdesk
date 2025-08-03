@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import signupSchemaStep1 from "@/schemas/signUpSchemaStep1"
-import OAuthButtons from "@/components/ouath-button"
+import OAuthButtons from "@/components/oauth-button"
 
 export default function Step1Form() {
   const router = useRouter()
@@ -31,6 +31,7 @@ export default function Step1Form() {
       confirmPassword: "",
     },
   })
+
 
   const onSubmit = async (data: z.infer<typeof signupSchemaStep1>) => {
   localStorage.setItem("step1Data",JSON.stringify(data))
