@@ -1,6 +1,9 @@
 "use client"
 import { useState, useEffect } from "react";
-import { TrendingUp, Users, FileText, BarChart3, Play, Clock, Trophy, Zap, ArrowUpRight, Crown, Sparkles, User, Settings, CreditCard, Lock, Building2, MessageSquare, LogOut } from "lucide-react";
+import { useSession } from "next-auth/react";
+import Link from "next/link";
+import { signOut } from "next-auth/react";
+import { TrendingUp, Users, FileText, BarChart3, Play, Clock, Trophy, Zap, ArrowUpRight, Crown, Sparkles, User, Settings, CreditCard, Lock, Building2, MessageSquare, LogOut, } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -86,12 +89,11 @@ const ActivityFeed = ({ activities }: { activities: ActivityItem[] }) => (
     <div className="space-y-4">
       {activities.map((activity) => (
         <div key={activity.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-          <div className={`p-2 rounded-full ${
-            activity.type === 'pitch' ? 'bg-teal-500/20 text-teal-400' :
+          <div className={`p-2 rounded-full ${activity.type === 'pitch' ? 'bg-teal-500/20 text-teal-400' :
             activity.type === 'feedback' ? 'bg-violet-500/20 text-violet-400' :
-            activity.type === 'document' ? 'bg-blue-500/20 text-blue-400' :
-            'bg-pink-500/20 text-pink-400'
-          }`}>
+              activity.type === 'document' ? 'bg-blue-500/20 text-blue-400' :
+                'bg-pink-500/20 text-pink-400'
+            }`}>
             {activity.type === 'pitch' && <Play className="h-4 w-4" />}
             {activity.type === 'feedback' && <Sparkles className="h-4 w-4" />}
             {activity.type === 'document' && <FileText className="h-4 w-4" />}
@@ -102,11 +104,10 @@ const ActivityFeed = ({ activities }: { activities: ActivityItem[] }) => (
             <p className="text-xs text-muted-foreground">{activity.timestamp}</p>
           </div>
           {activity.status && (
-            <span className={`px-2 py-1 rounded-full text-xs ${
-              activity.status === 'completed' ? 'bg-teal-500/20 text-teal-400' :
+            <span className={`px-2 py-1 rounded-full text-xs ${activity.status === 'completed' ? 'bg-teal-500/20 text-teal-400' :
               activity.status === 'scheduled' ? 'bg-violet-500/20 text-violet-400' :
-              'bg-blue-500/20 text-blue-400'
-            }`}>
+                'bg-blue-500/20 text-blue-400'
+              }`}>
               {activity.status}
             </span>
           )}
@@ -147,11 +148,10 @@ const ProfileDropdown = ({ user }: { user: { name: string; email: string; avatar
               <p className="font-semibold">{user.name}</p>
               <p className="text-sm text-muted-foreground">{user.email}</p>
               <div className="flex items-center gap-2 mt-1">
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  user.tier === "Premium" ? "bg-gradient-to-r from-violet-500/20 to-teal-500/20 text-violet-400" :
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${user.tier === "Premium" ? "bg-gradient-to-r from-violet-500/20 to-teal-500/20 text-violet-400" :
                   user.tier === "Pro" ? "bg-blue-500/20 text-blue-400" :
-                  "bg-muted text-muted-foreground"
-                }`}>
+                    "bg-muted text-muted-foreground"
+                  }`}>
                   {user.tier} Plan
                 </span>
                 {user.tier === "Premium" && <Crown className="h-3 w-3 text-violet-400" />}
@@ -183,13 +183,17 @@ const ProfileDropdown = ({ user }: { user: { name: string; email: string; avatar
             </div>
           </DropdownMenuItem>
 
-          <DropdownMenuItem className="flex items-center gap-3 px-4 py-3 cursor-pointer">
-            <Lock className="h-4 w-4 text-muted-foreground" />
-            <div>
-              <p className="font-medium">Change Password</p>
-              <p className="text-xs text-muted-foreground">Update security settings</p>
-            </div>
-          </DropdownMenuItem>
+          <Link href="/change-password" passHref>
+            <DropdownMenuItem asChild>
+              <div className="flex items-center gap-3 px-4 py-3 cursor-pointer">
+                <Lock className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="font-medium">Change Password</p>
+                  <p className="text-xs text-muted-foreground">Update security settings</p>
+                </div>
+              </div>
+            </DropdownMenuItem>
+          </Link>
 
           <DropdownMenuItem className="flex items-center gap-3 px-4 py-3 cursor-pointer">
             <Building2 className="h-4 w-4 text-muted-foreground" />
@@ -221,11 +225,7 @@ const ProfileDropdown = ({ user }: { user: { name: string; email: string; avatar
 
           <DropdownMenuItem
             className="flex items-center gap-3 px-4 py-3 cursor-pointer text-red-400 hover:bg-red-500/10"
-            onClick={() => {
-              if (typeof window !== 'undefined') {
-                import('next-auth/react').then(({ signOut }) => signOut({ callbackUrl: '/login' }));
-              }
-            }}
+            onClick={() => signOut({ callbackUrl: '/' })}
           >
             <LogOut className="h-4 w-4" />
             <div>
@@ -272,9 +272,8 @@ const AITipsPanel = () => {
         {tips.map((_, index) => (
           <div
             key={index}
-            className={`h-1 flex-1 rounded-full transition-colors ${
-              index === currentTip ? 'bg-violet-400' : 'bg-muted'
-            }`}
+            className={`h-1 flex-1 rounded-full transition-colors ${index === currentTip ? 'bg-violet-400' : 'bg-muted'
+              }`}
           />
         ))}
       </div>
@@ -283,14 +282,17 @@ const AITipsPanel = () => {
 };
 
 export default function Index() {
-  const [user] = useState({
-    name: "Naresh",
-    email: "naresh@startup.com",
-    avatar: "/placeholder.svg",
-    tier: "Free" as "Free" | "Pro" | "Premium",
-    sessionsUsed: 3,
-    sessionsLimit: 10
-  });
+  const { data: session, status } = useSession();
+
+  // Fallbacks for demo if session is not loaded
+  const user = {
+    name: session?.user?.fullName || "User",
+    email: session?.user?.email || "user@email.com",
+    avatar: session?.user?.image || "/placeholder.svg",
+    tier: (session?.user as any)?.tier || "Free",
+    sessionsUsed: 3, // Optionally, fetch from API or user object if available
+    sessionsLimit: 10 // Optionally, fetch from API or user object if available
+  };
 
   const stats = [
     {
@@ -392,59 +394,90 @@ export default function Index() {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-background via-[#f7fafd] to-[#e7f0ff] dark:from-background dark:via-[#181c29] dark:to-[#1a202c] transition-colors">
+      <div className="max-w-7xl mx-auto px-4 py-10 space-y-10">
         {/* Welcome Banner */}
-        <div className="glass-card p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold gradient-text">
-                Welcome back, {user.name}!
-              </h1>
-              <p className="text-muted-foreground mt-2">
-                Ready to perfect your pitch? Your {user.tier} plan gives you access to powerful AI coaching.
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              {user.tier !== "Premium" && (
-                <button className="px-6 py-2 bg-gradient-to-r from-teal-500 to-violet-500 text-white rounded-lg font-medium hover:shadow-lg hover:shadow-teal-500/25 transition-all hidden sm:block">
-                  Upgrade Plan
-                </button>
-              )}
-              <ProfileDropdown user={user} />
-            </div>
+        <div className="backdrop-blur-lg bg-white/70 dark:bg-card/80 rounded-3xl shadow-xl border border-border/30 p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div className="flex-1">
+            <h1 className="text-4xl font-extrabold bg-gradient-to-r from-teal-500 to-violet-500 bg-clip-text text-transparent tracking-tight mb-2">
+              Welcome back, {user.name}!
+            </h1>
+            <p className="text-lg text-muted-foreground mb-2">
+              Ready to perfect your pitch? Your <span className="font-semibold text-teal-500">{user.tier}</span> plan gives you access to powerful AI coaching.
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            {user.tier !== "Premium" && (
+              <button className="px-7 py-2 bg-gradient-to-r from-teal-500 to-violet-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-teal-500/30 transition-all">
+                Upgrade Plan
+              </button>
+            )}
+            <ProfileDropdown user={user} />
           </div>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
           {stats.map((stat, index) => (
-            <StatCard key={index} {...stat} />
+            <div className="rounded-2xl shadow-md bg-white/80 dark:bg-card/90 p-6 flex flex-col gap-2 border border-border/20 hover:shadow-xl transition-shadow" key={index}>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-3 rounded-xl bg-gradient-to-br from-teal-100 to-violet-100 dark:from-teal-900 dark:to-violet-900">
+                  {stat.icon}
+                </div>
+                <div>
+                  <p className="text-lg font-semibold text-foreground">{stat.title}</p>
+                  <p className="text-2xl font-bold text-teal-600 dark:text-teal-300">{stat.value}</p>
+                </div>
+              </div>
+              {stat.trend && (
+                <div className={`text-xs font-medium flex items-center gap-1 ${stat.trendUp ? 'text-teal-500' : 'text-red-400'}`}>
+                  <TrendingUp className={`h-3 w-3 ${!stat.trendUp ? 'rotate-180' : ''}`} />
+                  {stat.trend}
+                </div>
+              )}
+            </div>
           ))}
         </div>
 
         {/* Quick Actions */}
         <div>
-          <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <h2 className="text-2xl font-bold mb-6 text-foreground">Quick Actions</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {quickActions.map((action, index) => (
-              <ActionCard key={index} {...action} />
+              <div
+                key={index}
+                className={`rounded-2xl border border-border/20 bg-white/70 dark:bg-card/90 shadow-md p-6 flex items-center gap-5 hover:shadow-xl transition-shadow group ${action.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                onClick={!action.disabled ? action.onClick : undefined}
+              >
+                <div className={`p-4 rounded-xl ${action.premium ? 'bg-gradient-to-r from-violet-100 to-teal-100 dark:from-violet-900 dark:to-teal-900' : 'bg-muted/40 dark:bg-muted/10'}`}>
+                  {action.icon}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-lg">{action.title}</h3>
+                    {action.premium && <Crown className="h-4 w-4 text-violet-400" />}
+                  </div>
+                  <p className="text-muted-foreground text-sm mt-1">{action.description}</p>
+                </div>
+                <ArrowUpRight className="h-6 w-6 text-muted-foreground group-hover:text-teal-400 transition-colors" />
+              </div>
             ))}
           </div>
         </div>
 
         {/* Bottom Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Activity Feed */}
           <div className="lg:col-span-2">
-            <ActivityFeed activities={recentActivities} />
+            <div className="rounded-2xl bg-white/80 dark:bg-card/90 shadow-md border border-border/20 p-8">
+              <ActivityFeed activities={recentActivities} />
+            </div>
           </div>
 
           {/* Right Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* Usage Widget */}
-            <div className="glass-card p-6">
+            <div className="rounded-2xl bg-white/80 dark:bg-card/90 shadow-md border border-border/20 p-8">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
                 <Zap className="h-5 w-5 text-teal-400" />
                 Session Usage
@@ -455,7 +488,7 @@ export default function Index() {
                   <span>{user.sessionsUsed}/{user.sessionsLimit}</span>
                 </div>
                 <div className="w-full bg-muted rounded-full h-2">
-                  <div 
+                  <div
                     className="bg-gradient-to-r from-teal-500 to-violet-500 h-2 rounded-full transition-all"
                     style={{ width: `${(user.sessionsUsed / user.sessionsLimit) * 100}%` }}
                   />
@@ -467,7 +500,9 @@ export default function Index() {
             </div>
 
             {/* AI Tips */}
-            <AITipsPanel />
+            <div className="rounded-2xl bg-white/80 dark:bg-card/90 shadow-md border border-border/20 p-8">
+              <AITipsPanel />
+            </div>
           </div>
         </div>
       </div>
