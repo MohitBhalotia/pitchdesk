@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useRouter } from "next/navigation";
 
 interface StatCardProps {
   title: string;
@@ -283,6 +284,7 @@ const AITipsPanel = () => {
 
 export default function Index() {
   const { data: session, status } = useSession();
+  const router = useRouter();
 
   // Fallbacks for demo if session is not loaded
   const user = {
@@ -344,7 +346,7 @@ export default function Index() {
       title: "Generate New Pitch Document",
       description: "Create a professional pitch deck template",
       icon: <FileText className="h-6 w-6 text-blue-400" />,
-      onClick: () => console.log("Generate document")
+      onClick: () => router.push('/generate-pitch')
     },
     {
       title: "View Session Analytics",

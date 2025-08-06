@@ -45,6 +45,7 @@ const navItems: NavItem[] = [
   { name: "CrowdFunding", href: "/pricing" },
   { name: "Pricing", href: "/pricing" },
   { name: "About", href: "/about" },
+{ name: "Meet the VCs", href: "/meet-the-vcs" },
 ];
 
 export default function Header1() {
