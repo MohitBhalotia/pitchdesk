@@ -1,7 +1,7 @@
 interface ApiResponse {
   success: boolean;
   message: string;
-  data?: Object;
+  data?: object;
 }
 
 export default ApiResponse;

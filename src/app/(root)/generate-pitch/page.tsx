@@ -821,7 +821,7 @@ export default function PitchGenerator() {
                     </div>
                   ) : (
                     <div className="text-center py-8 text-muted-foreground">
-                      <p>Fill out the form and click "Generate Pitch" to see your startup pitch here.</p>
+                      <p>{'Fill out the form and click "Generate Pitch" to see your startup pitch here.'}</p>
                     </div>
                   )}
                 </CardContent>

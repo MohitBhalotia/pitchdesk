@@ -51,8 +51,11 @@ export default function ForgetPasswordPreview() {
     try {
       setLoading(true);
       const res = await axios.post("/api/forgot-password", { email: form.getValues("email") });
-      toast.success("Password reset link sent to your email.");
-      router.replace("/login");
+      if(res.data.success){
+        toast.success("Password reset link sent to your email.");
+        router.replace("/login");
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast.error(err.response?.data?.error || "Something went wrong.");
     }

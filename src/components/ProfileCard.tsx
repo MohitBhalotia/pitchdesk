@@ -1,5 +1,6 @@
 import React from 'react';
 import { CheckCircle } from 'lucide-react';
+import Image from 'next/image';
 
 interface ProfileCardProps {
   name: string;
@@ -23,7 +24,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   return (
     <div className="bg-[#18181b] text-[#fafafa] rounded-2xl shadow-xl border border-[#27272a] p-8 hover:shadow-2xl transition-all group flex flex-col">
       <div className="flex items-center gap-6 mb-6">
-        <img
+        <Image
           src={image || AVATAR_PLACEHOLDER}
           alt={name}
           className="w-24 h-24 rounded-full border-4 border-teal-400/60 shadow-lg bg-white object-cover"

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 
-export default function callBackPage(){
+export default function CallBackPage(){
     const { data: session, status } = useSession();
     const router = useRouter()
 

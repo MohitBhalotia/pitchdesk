@@ -9,7 +9,7 @@ import forgotPasswordSchema from "@/schemas/forgotPasswordSchema";
 
 
 
-export  async function POST(req: NextRequest, res: NextResponse) {
+export  async function POST(req: NextRequest/*, res: NextResponse*/) {
     try {
         const body = await req.json();
         const validatedData = forgotPasswordSchema.safeParse(body);

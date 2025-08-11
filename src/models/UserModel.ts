@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { boolean } from "zod";
+//import { boolean } from "zod";
 
 const userSchema = new Schema<User>(
   {
@@ -50,7 +50,7 @@ const userSchema = new Schema<User>(
       required: true,
     },
     signupStep2Done: {
-      type: boolean,
+      type: Boolean,
       default: false,
     },
     company: {

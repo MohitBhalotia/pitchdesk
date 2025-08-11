@@ -15,8 +15,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 
 export function LoginForm({
-  className,
-  ...props
+  /*className,
+  ...props*/
 }: React.ComponentProps<"form">) {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);

@@ -8,6 +8,8 @@ interface VCSummaryCardProps {
   onClick: () => void;
 }
 
+import Image from 'next/image';
+
 const AVATAR_PLACEHOLDER = '/ai-vc-avatar.svg';
 
 const VCSummaryCard: React.FC<VCSummaryCardProps> = ({ name, title, tagline, image, onClick }) => {
@@ -16,7 +18,7 @@ const VCSummaryCard: React.FC<VCSummaryCardProps> = ({ name, title, tagline, ima
       onClick={onClick}
       className="bg-[#18181b] text-[#fafafa] rounded-2xl shadow-lg border border-[#27272a] p-6 hover:shadow-2xl hover:scale-105 transition-all group cursor-pointer flex flex-col text-center items-center"
     >
-      <img
+      <Image
         src={image || AVATAR_PLACEHOLDER}
         alt={name}
         className="w-28 h-28 rounded-full border-4 border-teal-400/60 shadow-lg bg-white object-cover mb-4"

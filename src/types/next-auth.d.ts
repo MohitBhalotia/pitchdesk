@@ -10,7 +10,7 @@ declare module "next-auth" {
     role?: "founder" | "vc" | null;
     userPlan?: "free" | "starter" | "professional" | "enterprise";
     provider?: "google" | "credentials";
-    signupStep2Done?: boolean
+    signupStep2Done: boolean
   }
   interface Session {
     user: {

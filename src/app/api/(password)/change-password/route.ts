@@ -4,7 +4,7 @@ import dbConnect from "@/lib/db";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // adjust path
+import authOptions from "@/lib/auth"; // adjust path
 
 const PasswordSchema = z.object({
   currentPassword: z.string().min(8),
@@ -52,6 +52,7 @@ export async function POST(req: NextRequest) {
     await user.save();
 
     return NextResponse.json({ message: "Password updated successfully." });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error:any) {
     console.error("Reset Password Error:", error.message);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

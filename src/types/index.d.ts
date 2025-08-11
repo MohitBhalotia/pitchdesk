@@ -14,6 +14,7 @@ declare global {
     userPlan: "free" | "starter" | "professional" | "enterprise";
     company: mongoose.Schema.Types.ObjectId | null;
     provider: "credentials" | "google";
+    signupStep2Done: boolean;
   }
 
   export interface Company extends Document {

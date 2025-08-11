@@ -3,7 +3,7 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-export default async (resetPasswordToken:string,fullName:string,email:string) => {
+const resendForgot =  async (resetPasswordToken:string,fullName:string,email:string) => {
   const { data, error } = await resend.emails.send({
     from: 'info@pitchdesk.in',
     to: email,
@@ -16,6 +16,6 @@ export default async (resetPasswordToken:string,fullName:string,email:string) =>
   }
 
   return data;
-
-
 };
+
+export default resendForgot

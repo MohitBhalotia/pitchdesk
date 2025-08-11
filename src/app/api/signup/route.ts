@@ -5,7 +5,7 @@ import CompanyModel from "@/models/CompanyModel";
 import bcrypt from "bcryptjs";
 import signupSchema from "@/schemas/signUpSchema";
 import { z } from "zod";
-import resend from "@/lib/resend/resend-verification";
+import resendVerify from "@/lib/resend/resend-verification";
 export async function POST(req: NextRequest){
   await dbConnect();
   try {
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest){
       signupStep2Done: true
     });
     await user.save();
-    await resend(user.verificationCode,user.fullName,user.email, user._id);
+    await resendVerify(user.verificationCode,user.fullName,user.email, user._id);
 
     return NextResponse.json(
       {

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Rocket, Code, Paintbrush } from 'lucide-react';
+import Image from 'next/image';
 
 const features = [
   {
@@ -139,7 +140,7 @@ export default function FeatureSteps() {
                       exit={{ y: -100, opacity: 0, rotateX: 20 }}
                       transition={{ duration: 0.5, ease: 'easeInOut' }}
                     >
-                      <img
+                      <Image
                         src={feature.image}
                         alt={feature.title}
                         className="h-full w-full transform object-cover transition-transform hover:scale-105"

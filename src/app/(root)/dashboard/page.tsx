@@ -3,34 +3,34 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
-import { TrendingUp, Users, FileText, BarChart3, Play, Clock, Trophy, Zap, ArrowUpRight, Crown, Sparkles, User, Settings, CreditCard, Lock, Building2, MessageSquare, LogOut, } from "lucide-react";
+import { TrendingUp, Users, FileText, BarChart3, Play, Clock, Trophy, Zap, ArrowUpRight, Crown, Sparkles, /*User,*/ Settings, CreditCard, Lock, Building2, MessageSquare, LogOut, } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
+ // DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
 
-interface StatCardProps {
+/*interface StatCardProps {
   title: string;
   value: string | number;
   icon: React.ReactNode;
   trend?: string;
   trendUp?: boolean;
-}
+}*/
 
-interface ActionCardProps {
+/*interface ActionCardProps {
   title: string;
   description: string;
   icon: React.ReactNode;
   onClick: () => void;
   disabled?: boolean;
   premium?: boolean;
-}
+}*/
 
 interface ActivityItem {
   id: string;
@@ -40,46 +40,46 @@ interface ActivityItem {
   status?: 'completed' | 'scheduled' | 'in-progress';
 }
 
-const StatCard = ({ title, value, icon, trend, trendUp }: StatCardProps) => (
-  <div className="stat-card">
-    <div className="flex items-start justify-between">
-      <div>
-        <p className="text-muted-foreground text-sm font-medium">{title}</p>
-        <p className="text-2xl font-bold mt-1">{value}</p>
-        {trend && (
-          <div className={`flex items-center gap-1 mt-2 text-xs ${trendUp ? 'text-teal-400' : 'text-red-400'}`}>
-            <TrendingUp className={`h-3 w-3 ${!trendUp ? 'rotate-180' : ''}`} />
-            {trend}
-          </div>
-        )}
-      </div>
-      <div className="text-muted-foreground/60">
-        {icon}
-      </div>
-    </div>
-  </div>
-);
+// const StatCard = ({ title, value, icon, trend, trendUp }: StatCardProps) => (
+//   <div className="stat-card">
+//     <div className="flex items-start justify-between">
+//       <div>
+//         <p className="text-muted-foreground text-sm font-medium">{title}</p>
+//         <p className="text-2xl font-bold mt-1">{value}</p>
+//         {trend && (
+//           <div className={`flex items-center gap-1 mt-2 text-xs ${trendUp ? 'text-teal-400' : 'text-red-400'}`}>
+//             <TrendingUp className={`h-3 w-3 ${!trendUp ? 'rotate-180' : ''}`} />
+//             {trend}
+//           </div>
+//         )}
+//       </div>
+//       <div className="text-muted-foreground/60">
+//         {icon}
+//       </div>
+//     </div>
+//   </div>
+// );
 
-const ActionCard = ({ title, description, icon, onClick, disabled, premium }: ActionCardProps) => (
-  <div
-    className={`action-card group ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-    onClick={!disabled ? onClick : undefined}
-  >
-    <div className="flex items-start gap-4 relative z-10">
-      <div className={`p-3 rounded-lg ${premium ? 'bg-gradient-to-r from-violet-500/20 to-teal-500/20' : 'bg-muted/50'}`}>
-        {icon}
-      </div>
-      <div className="flex-1">
-        <div className="flex items-center gap-2">
-          <h3 className="font-semibold">{title}</h3>
-          {premium && <Crown className="h-4 w-4 text-violet-400" />}
-        </div>
-        <p className="text-muted-foreground text-sm mt-1">{description}</p>
-      </div>
-      <ArrowUpRight className="h-5 w-5 text-muted-foreground group-hover:text-teal-400 transition-colors" />
-    </div>
-  </div>
-);
+// const ActionCard = ({ title, description, icon, onClick, disabled, premium }: ActionCardProps) => (
+//   <div
+//     className={`action-card group ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+//     onClick={!disabled ? onClick : undefined}
+//   >
+//     <div className="flex items-start gap-4 relative z-10">
+//       <div className={`p-3 rounded-lg ${premium ? 'bg-gradient-to-r from-violet-500/20 to-teal-500/20' : 'bg-muted/50'}`}>
+//         {icon}
+//       </div>
+//       <div className="flex-1">
+//         <div className="flex items-center gap-2">
+//           <h3 className="font-semibold">{title}</h3>
+//           {premium && <Crown className="h-4 w-4 text-violet-400" />}
+//         </div>
+//         <p className="text-muted-foreground text-sm mt-1">{description}</p>
+//       </div>
+//       <ArrowUpRight className="h-5 w-5 text-muted-foreground group-hover:text-teal-400 transition-colors" />
+//     </div>
+//   </div>
+// );
 
 const ActivityFeed = ({ activities }: { activities: ActivityItem[] }) => (
   <div className="glass-card p-6">
@@ -266,7 +266,7 @@ const AITipsPanel = () => {
       </h3>
       <div className="relative min-h-[60px] flex items-center">
         <p className="text-muted-foreground italic">
-          "{tips[currentTip]}"
+          {`${tips[currentTip]}`}
         </p>
       </div>
       <div className="flex gap-1 mt-4">
@@ -283,7 +283,7 @@ const AITipsPanel = () => {
 };
 
 export default function Index() {
-  const { data: session, status } = useSession();
+  const { data: session, /*status*/ } = useSession();
   const router = useRouter();
 
   // Fallbacks for demo if session is not loaded
@@ -291,6 +291,7 @@ export default function Index() {
     name: session?.user?.fullName || "User",
     email: session?.user?.email || "user@email.com",
     avatar: session?.user?.image || "/placeholder.svg",
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     tier: (session?.user as any)?.tier || "Free",
     sessionsUsed: 3, // Optionally, fetch from API or user object if available
     sessionsLimit: 10 // Optionally, fetch from API or user object if available

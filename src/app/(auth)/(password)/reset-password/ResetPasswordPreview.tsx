@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
+
 import {
   Form,
   FormControl,
@@ -24,31 +25,41 @@ import {
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 
+import { useSearchParams } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
 import { useState } from 'react'
 
 const formSchema = z.object({
-    currentPassword: z.string().min(8, "Current password must be at least 8 characters long"),
   password: z.string().min(8, "Password must be at least 8 characters long"),
   confirmPassword: z.string().min(8, "Confirm password must be at least 8 characters long"),
 })
 
 export default function ResetPasswordPreview() {
-    const router = useRouter();
+  const router = useRouter()
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-        currentPassword: '',
       password: '',
       confirmPassword: '',
     },
   })
 
 
-  
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+
   const [loading,setLoading]=useState(false);
   const handleReset = async (values: z.infer<typeof formSchema>) => {
-   
+    if (!token) {
+      toast.error("Reset token is missing.");
+      return;
+    }
+
+    if (!values.password || values.password.length < 8) {
+      toast.warning("Password must be at least 8 characters.");
+      return;
+    }
+
     if (values.password !== values.confirmPassword) {
       toast.error("Passwords do not match.");
       return;
@@ -56,18 +67,18 @@ export default function ResetPasswordPreview() {
 
     try {
       setLoading(true);
-      const response = await axios.post("/api/change-password", {
-        currentPassword: values.currentPassword,
-        newPassword: values.password,
+      const response = await axios.post("/api/reset-password", {
+        token,
+        password: values.password || "",
       });
 
       if (response.status === 200) {
         toast.success("Password updated successfully!");
-        router.push("/dashboard");
+        router.push("/login");
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      toast.error(err.response?.data?.error || "Failed to change password.");
+      toast.error(err.response?.data?.error || "Failed to reset password.");
     }finally{
       setLoading(false);
     }
@@ -79,9 +90,9 @@ export default function ResetPasswordPreview() {
       <Card className="w-full max-w-md bg-card rounded-xl shadow-lg p-10">
 
         <CardHeader>
-          <CardTitle className="text-2xl">Change Password</CardTitle>
+          <CardTitle className="text-2xl">Reset Password</CardTitle>
           <CardDescription>
-            If you wish to change your password, you can change from here.
+            Enter your new password to reset your password.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -89,24 +100,6 @@ export default function ResetPasswordPreview() {
             <form onSubmit={form.handleSubmit(handleReset)} className="space-y-8">
               <div className="grid gap-4">
                 {/* New Password Field */}
-                <FormField
-                  control={form.control}
-                  name="currentPassword"
-                  render={({ field }) => (
-                    <FormItem className="grid gap-2 mt-2">
-                      <FormLabel >Current Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          type='password'
-                          id="currentPassword"
-                          placeholder="••••••••"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
                 <FormField
                   control={form.control}
                   name="password"
@@ -149,7 +142,7 @@ export default function ResetPasswordPreview() {
                 />
 
                 <Button type="submit" className="w-full mt-4">
-                  {loading?<span className='flex items-center gap-2'><Loader2 className='animate-spin'/></span>:<span>Change Password</span>}
+                  {loading?<span className='flex items-center gap-2'><Loader2 className='animate-spin'/></span>:<span>Reset Password</span>}
                 </Button>
               </div>
             </form>

@@ -1,7 +1,8 @@
-import { ArrowRight, Command } from "lucide-react"
+import {  Command } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import TextGenerateEffect from "@/components/ui/typewriter"
 import { BorderBeam } from "@/components/ui/border-beam"
+import Image from "next/image"
 
 export default function appHero() {
   return (
@@ -49,7 +50,7 @@ export default function appHero() {
 
       <div className="relative mx-auto mt-20 max-w-5xl overflow-hidden rounded-xl animate-in slide-in-from-bottom-8 duration-700 delay-600">
         <div className="overflow-hidden rounded-xl">
-          <img
+          <Image
             src="https://blocks.mvp-subha.me/assets/trading-hero/db.jpg"
             alt="CryptoTrade Dashboard"
             className="h-auto w-full"
