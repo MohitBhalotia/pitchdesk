@@ -51,6 +51,7 @@ export default function appHero() {
       <div className="relative mx-auto mt-20 max-w-5xl overflow-hidden rounded-xl animate-in slide-in-from-bottom-8 duration-700 delay-600">
         <div className="overflow-hidden rounded-xl">
           <Image
+            fill
             src="https://blocks.mvp-subha.me/assets/trading-hero/db.jpg"
             alt="CryptoTrade Dashboard"
             className="h-auto w-full"

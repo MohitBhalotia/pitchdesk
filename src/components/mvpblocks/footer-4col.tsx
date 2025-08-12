@@ -89,6 +89,7 @@ export default function Footer4Col() {
           <div>
             <div className="text-primary flex justify-center gap-2 sm:justify-start">
               <Image
+                fill
                 src={data.company.logo || '/placeholder.svg'}
                 alt="logo"
                 className="h-8 w-8 rounded-full"

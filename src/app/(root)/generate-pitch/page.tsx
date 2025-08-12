@@ -675,7 +675,7 @@ export default function PitchGenerator() {
     const formData = new FormData(e.currentTarget)
 
     try {
-      const res = await fetch("http://localhost:8080/generate-pitch", {
+      const res = await fetch("http://127.0.0.1:8000/generate-pitch", {
         method: "POST",
         body: formData,
       })
