@@ -6,6 +6,7 @@ export interface VC {
   shortDescription: string;
   highlights: string[];
   image: string;
+  agentLink: string;
 }
 
 export const vcs: VC[] = [
@@ -23,7 +24,8 @@ export const vcs: VC[] = [
       "Known for asking tough, analytical questions",
       "Offers more than capital — brings strategic value and vision"
     ],
-    image: "/images/vcs/mark-cuban.png"
+    image: "https://res.cloudinary.com/mohitbhalotia/image/upload/v1755015127/Mark_Cuban_bctoyu.jpg",
+    agentLink: "https://agents-pitchdesk.vercel.app?agentId=689a45f989f40f995de7356b"
   },
   {
     id: "kevin-oleary",
@@ -42,7 +44,8 @@ export const vcs: VC[] = [
       "Delivers harsh truths to save entrepreneurs from bigger failures",
       "Communicates directly — no sugar-coating"
     ],
-    image: "/images/vcs/kevin-oleary.png"
+    image: "https://res.cloudinary.com/mohitbhalotia/image/upload/v1755015127/Lori_cmumd0.jpg",
+    agentLink: "https://agents-pitchdesk.vercel.app?agentId=689b10c587ca77bb1ee1e293"
   },
   {
     id: "lori-greiner",
@@ -61,7 +64,8 @@ export const vcs: VC[] = [
       "Asks practical, consumer-first questions",
       "Builds long-term, collaborative relationships"
     ],
-    image: "/images/vcs/lori-greiner.png"
+    image: "https://res.cloudinary.com/mohitbhalotia/image/upload/v1755015127/Lori_cmumd0.jpg",
+    agentLink: "https://agents-pitchdesk.vercel.app?agentId=689b111c87ca77bb1ee1e295"
   },
   {
     id: "barbara-corcoran",
@@ -80,7 +84,8 @@ export const vcs: VC[] = [
       "Offers tough love and radical honesty",
       "Builds trust-based relationships with founders"
     ],
-    image: "/images/vcs/barbara-corcoran.png"
+    image: "https://res.cloudinary.com/mohitbhalotia/image/upload/v1755015127/Lori_cmumd0.jpg",
+    agentLink: "https://agents-pitchdesk.vercel.app?agentId=689b116687ca77bb1ee1e297"
   },
   {
     id: "daymond-john",
@@ -99,7 +104,8 @@ export const vcs: VC[] = [
       "Offers mentorship and strategic branding guidance",
       "Communicates with empathy, patience, and personal insight"
     ],
-    image: "/images/vcs/daymond-john.png"
+    image: "https://res.cloudinary.com/mohitbhalotia/image/upload/v1755015127/Daymond_glmsjl.jpg",
+    agentLink: "https://agents-pitchdesk.vercel.app?agentId=689b0fae87ca77bb1ee1e28f"
   },
   {
     id: "robert-herjavec",
@@ -118,7 +124,8 @@ export const vcs: VC[] = [
       "Supports entrepreneurs through long-term relationships and mentorship",
       "Communicates with warmth, professionalism, and clarity"
     ],
-    image: "/images/vcs/robert-herjavec.png"
+    image: "https://res.cloudinary.com/mohitbhalotia/image/upload/v1755015127/Lori_cmumd0.jpg",
+    agentLink: "https://agents-pitchdesk.vercel.app?agentId=689b105987ca77bb1ee1e291"
   },
 
   {
@@ -135,7 +142,8 @@ export const vcs: VC[] = [
       "Known for asking tough, analytical questions",
       "Offers more than capital — brings strategic value and vision"
     ],
-    image: "/images/vcs/mark-cuban.png"
+    image: "/images/vcs/mark-cuban.png",
+    agentLink: "#"
   },
   {
     id: "prat chaiwala",
@@ -154,7 +162,8 @@ export const vcs: VC[] = [
       "Delivers harsh truths to save entrepreneurs from bigger failures",
       "Communicates directly — no sugar-coating"
     ],
-    image: "/images/vcs/kevin-oleary.png"
+    image: "/images/vcs/kevin-oleary.png",
+    agentLink: "#"
   },
   {
     id: "Ram meetha",
@@ -173,7 +182,8 @@ export const vcs: VC[] = [
       "Asks practical, consumer-first questions",
       "Builds long-term, collaborative relationships"
     ],
-    image: "/images/vcs/lori-greiner.png"
+    image: "/images/vcs/lori-greiner.png",
+    agentLink: "#"
   },
   {
     id: "Daksh doodwala",
@@ -192,7 +202,8 @@ export const vcs: VC[] = [
       "Offers tough love and radical honesty",
       "Builds trust-based relationships with founders"
     ],
-    image: "/images/vcs/barbara-corcoran.png"
+    image: "/images/vcs/barbara-corcoran.png",
+    agentLink: "#"
   },
   {
     id: "Naresh Mahiya",
@@ -211,7 +222,8 @@ export const vcs: VC[] = [
       "Offers mentorship and strategic branding guidance",
       "Communicates with empathy, patience, and personal insight"
     ],
-    image: "/images/vcs/daymond-john.png"
+    image: "/images/vcs/daymond-john.png",
+    agentLink: "#"
   },
   {
     id: "Bhargav bsdwala",
@@ -230,7 +242,8 @@ export const vcs: VC[] = [
       "Supports entrepreneurs through long-term relationships and mentorship",
       "Communicates with warmth, professionalism, and clarity"
     ],
-    image: "/images/vcs/robert-herjavec.png"
+    image: "/images/vcs/robert-herjavec.png",
+    agentLink: "#"
   }
   
   

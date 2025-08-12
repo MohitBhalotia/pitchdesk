@@ -5,16 +5,17 @@ interface VCSummaryCardProps {
   title: string;
   tagline: string;
   image: string;
+  agentLink: string;
   onClick: () => void;
 }
 
-const AVATAR_PLACEHOLDER = '/ai-vc-avatar.svg';
+const AVATAR_PLACEHOLDER = 'avatar-placeholder.png';//
 
-const VCSummaryCard: React.FC<VCSummaryCardProps> = ({ name, title, tagline, image, onClick }) => {
+const VCSummaryCard: React.FC<VCSummaryCardProps> = ({ name, title, tagline, image, agentLink, onClick }) => {
   return (
     <div 
       onClick={onClick}
-      className="bg-[#18181b] text-[#fafafa] rounded-2xl shadow-lg border border-[#27272a] p-6 hover:shadow-2xl hover:scale-105 transition-all group cursor-pointer flex flex-col text-center items-center"
+      className="relative bg-[#18181b] text-[#fafafa] rounded-2xl shadow-lg border border-[#27272a] p-6 hover:shadow-2xl hover:scale-105 transition-all group cursor-pointer flex flex-col text-center items-center"
     >
       <img
         src={image || AVATAR_PLACEHOLDER}
@@ -28,6 +29,15 @@ const VCSummaryCard: React.FC<VCSummaryCardProps> = ({ name, title, tagline, ima
       <p className="text-muted-foreground text-sm italic flex-grow">
         &ldquo;{tagline}&rdquo;
       </p>
+      <button
+      className="absolute top-4 right-4 bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700"
+      onClick={(e) => {
+        e.stopPropagation();
+        window.open(agentLink, '_blank');
+      }}
+    >
+      Start
+    </button>
     </div>
   );
 };
