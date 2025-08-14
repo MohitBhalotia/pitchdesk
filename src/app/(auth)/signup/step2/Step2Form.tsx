@@ -22,12 +22,13 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import axios from "axios"
+import axios, { AxiosError } from "axios"
 import signupSchemaStep2, { SignupStep2Type } from "@/schemas/signUpSchemaStep2"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { useSession } from "next-auth/react"
+import ApiResponse from "@/types/ApiResponse"
 
 export default function Step2Form() {
   const router = useRouter()
@@ -70,17 +71,18 @@ export default function Step2Form() {
         localStorage.removeItem("step1Data")
         const finalPayload = { ...step1Data, ...step2Data }
 
-        const res = await axios.post("/api/signup", finalPayload)
-
+        const res = await axios.post<ApiResponse>("/api/signup", finalPayload)
 
         if (res.data.success) {
-          toast.success("User created successfully")
+          toast.success(res.data.message)
           router.push("/login")
-        }else{
-          toast.error(res.data.error.message || "an error occured while submitting details")
         }
       }
     } catch (error) {
+
+      const axiosError = error as AxiosError<ApiResponse>
+      toast.error(axiosError.response?.data.message || "an error occured while submitting details")
+
       console.error(error)
       toast.error("Error submitting details")
     }
