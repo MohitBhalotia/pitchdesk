@@ -27,14 +27,15 @@ declare global {
   export interface Pitch extends Document {
     userId: mongoose.Schema.Types.ObjectId | null;
     recordingUrl: string | null;
-    conversationHistory: Conversation[];
+    duration: number;
+    conversationHistory: Message[];
   }
 
-  export interface Conversation {
-    conversationDate: Date;
-    messages: Message[];
-    Duration: number
-  }
+  // export interface Conversation {
+  //   conversationDate: Date;
+  //   messages: Message[];
+  //   Duration: number
+  // }
 
   export interface Message {
     role: "user" | "bot";

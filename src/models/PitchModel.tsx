@@ -14,21 +14,21 @@ const MessageSchema = new Schema<Message>({
         type: Date,
         default: Date.now
     },
-}, {_id: false})
+})
 
-const ConversationSchema = new Schema<Conversation>({
-    conversationDate: {
-        type: Date,
-        default: Date.now
-    },
-    messages: [
-        MessageSchema
-    ],
-    Duration: {
-        type: Number,
-        default: 0
-    }
-}, {_id: false})
+// const ConversationSchema = new Schema<Conversation>({
+//     conversationDate: {
+//         type: Date,
+//         default: Date.now
+//     },
+//     messages: [
+//         MessageSchema
+//     ],
+//     Duration: {
+//         type: Number,
+//         default: 0
+//     }
+// }, {_id: false})
 
 
 const PitchSchema = new Schema<Pitch>(
@@ -38,18 +38,22 @@ const PitchSchema = new Schema<Pitch>(
             ref: 'User',
             default: null
         },
+        duration:{
+            type: Number,
+            default: 0
+        },
         recordingUrl: {
             type: String,
             default: null
         },
         conversationHistory: [
-            ConversationSchema
+            MessageSchema
         ]   
     },{
         timestamps: true
     }
 )
 
-const PitchMode = mongoose.models.Pitch || mongoose.model<Pitch>("Pich", PitchSchema);
+const PitchModel = mongoose.models.Pitch || mongoose.model<Pitch>("Pich", PitchSchema);
 
-export default PitchSchema
+export default PitchModel
