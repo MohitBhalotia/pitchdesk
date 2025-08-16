@@ -9,7 +9,7 @@ export async function POST(req: Request){
         const body = await req.json()
         const validatedData = pitchSchema.parse(body)
 
-        const pitch = await PitchModel.create({
+        await PitchModel.create({
             userId: validatedData.userId,
             recordingUrl: validatedData.recordingUrl,
             conversationHistory: validatedData.conversationHistory
