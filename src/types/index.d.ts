@@ -23,4 +23,25 @@ declare global {
     createdAt: Date;
     updatedAt: Date;
   }
+
+  export interface Pitch extends Document {
+    userId: mongoose.Schema.Types.ObjectId | null;
+    recordingUrl: string | null;
+    conversationHistory: Conversation[];
+  }
+
+  export interface Conversation {
+    conversationDate: Date;
+    messages: Message[];
+    Duration: number
+  }
+
+  export interface Message {
+    role: "user" | "bot";
+    content: string;
+    timestamp: Date
+  }
+
 }
+
+
