@@ -12,4 +12,6 @@ const pitchSchema = z.object({
     )
 })
 
+export type pitchSchema = z.infer<typeof pitchSchema>;
+
 export default pitchSchema
