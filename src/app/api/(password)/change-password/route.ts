@@ -11,6 +11,7 @@ const PasswordSchema = z.object({
   newPassword: z.string().min(8),
 });
 
+
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
