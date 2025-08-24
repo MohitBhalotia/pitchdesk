@@ -26,7 +26,7 @@ interface ActivityItem {
 
 
 const ActivityFeed = ({ activities }: { activities: ActivityItem[] }) => (
-  <div className="glass-card p-6">
+  <div className="glass-card p-4">
     <h3 className="font-semibold mb-4 flex items-center gap-2">
       <Clock className="h-5 w-5 text-teal-400" />
       Latest Activity
@@ -342,8 +342,8 @@ export default function Index() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-[#f7fafd] to-[#e7f0ff] dark:from-background dark:via-[#181c29] dark:to-[#1a202c] transition-colors">
-      <div className="max-w-7xl mx-auto px-4 py-10 space-y-10">
+    <div className="min-h-screen bg-gradient-to-br from-background via-[#f7fafd] to-[#e7f0ff] dark:from-[#09090b] dark:via-[#09090b] dark:to-[#09090b] transition-colors">
+      <div className="max-w-7xl mx-auto px-2 py-6 space-y-6">
         {/* Welcome Banner */}
         {/* <div className="backdrop-blur-lg bg-white/70 dark:bg-card/80 rounded-3xl shadow-xl border border-border/30 p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div className="flex-1">
@@ -365,16 +365,16 @@ export default function Index() {
         </div> */}
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           {stats.map((stat, index) => (
-            <div className="rounded-2xl shadow-md bg-white/80 dark:bg-card/90 p-6 flex flex-col gap-2 border border-border/20 hover:shadow-xl transition-shadow" key={index}>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-3 rounded-xl bg-gradient-to-br from-teal-100 to-violet-100 dark:from-teal-900 dark:to-violet-900">
+            <div className="rounded-xl shadow bg-white/80 dark:bg-card/90 p-4 flex flex-col gap-1 border border-border/20 hover:shadow-lg transition-shadow" key={index}>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-teal-100 to-violet-100 dark:from-teal-900 dark:to-violet-900">
                   {stat.icon}
                 </div>
                 <div>
-                  <p className="text-lg font-semibold text-foreground">{stat.title}</p>
-                  <p className="text-2xl font-bold text-teal-600 dark:text-teal-300">{stat.value}</p>
+                  <p className="text-base font-medium text-foreground">{stat.title}</p>
+                  <p className="text-xl font-bold text-teal-600 dark:text-teal-300">{stat.value}</p>
                 </div>
               </div>
               {/* {stat.trend && (
@@ -390,31 +390,31 @@ export default function Index() {
         {/* Quick Actions */}
         <div>
           <h2 className="text-2xl font-bold mb-6 text-foreground">Quick Actions</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {quickActions.map((action, index) => (
               <div
                 key={index}
-                className={`rounded-2xl border border-border/20 bg-white/70 dark:bg-card/90 shadow-md p-6 flex items-center gap-5 hover:shadow-xl transition-shadow group ${action.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                className={`rounded-xl border border-border/20 bg-white/70 dark:bg-card/90 shadow p-4 flex items-center gap-3 hover:shadow-lg transition-shadow group ${action.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                 onClick={!action.disabled ? action.onClick : undefined}
               >
-                <div className={`p-4 rounded-xl ${action.premium ? 'bg-gradient-to-r from-violet-100 to-teal-100 dark:from-violet-900 dark:to-teal-900' : 'bg-muted/40 dark:bg-muted/10'}`}>
+                <div className={`p-2 rounded-lg ${action.premium ? 'bg-gradient-to-r from-violet-100 to-teal-100 dark:from-violet-900 dark:to-teal-900' : 'bg-muted/40 dark:bg-muted/10'}`}>
                   {action.icon}
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-lg">{action.title}</h3>
+                    <h3 className="font-semibold text-base">{action.title}</h3>
                     {action.premium && <Crown className="h-4 w-4 text-violet-400" />}
                   </div>
-                  <p className="text-muted-foreground text-sm mt-1">{action.description}</p>
+                  <p className="text-muted-foreground text-xs mt-0.5">{action.description}</p>
                 </div>
-                <ArrowUpRight className="h-6 w-6 text-muted-foreground group-hover:text-teal-400 transition-colors" />
+                <ArrowUpRight className="h-5 w-5 text-muted-foreground group-hover:text-teal-400 transition-colors" />
               </div>
             ))}
           </div>
         </div>
 
         {/* Bottom Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Activity Feed */}
           <div className="lg:col-span-2">
             <div className="rounded-2xl bg-white/80 dark:bg-card/90 shadow-md border border-border/20 p-8">
@@ -423,9 +423,9 @@ export default function Index() {
           </div>
 
           {/* Right Sidebar */}
-          <div className="space-y-8">
+          <div className="space-y-4">
             {/* Usage Widget */}
-            <div className="rounded-2xl bg-white/80 dark:bg-card/90 shadow-md border border-border/20 p-8">
+            <div className="rounded-xl bg-white/80 dark:bg-card/90 shadow border border-border/20 p-5">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
                 <Zap className="h-5 w-5 text-teal-400" />
                 Session Usage
@@ -448,7 +448,7 @@ export default function Index() {
             </div>
 
             {/* AI Tips */}
-            <div className="rounded-2xl bg-white/80 dark:bg-card/90 shadow-md border border-border/20 p-8">
+            <div className="rounded-xl bg-white/80 dark:bg-card/90 shadow border border-border/20 p-5">
               <AITipsPanel />
             </div>
           </div>

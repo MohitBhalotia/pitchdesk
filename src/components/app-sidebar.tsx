@@ -20,6 +20,7 @@ import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
+import { ModeToggle } from "@/components/theme-toggle"
 import {
   Sidebar,
   SidebarContent,
@@ -131,6 +132,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <span className="truncate font-medium">PitchDesk</span>
                   <span className="truncate text-xs">kuch bhi</span>
                 </div>
+                <div className="flex justify-center pt-2">
+                  <ModeToggle />
+                </div>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -142,7 +146,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <div className="flex flex-col gap-2">
+          <NavUser user={data.user} />
+        </div>
       </SidebarFooter>
     </Sidebar>
   );

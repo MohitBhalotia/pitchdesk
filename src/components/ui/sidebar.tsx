@@ -253,31 +253,39 @@ function Sidebar({
   )
 }
 
+import { ChevronsLeft, ChevronsRight } from "lucide-react";
+
 function SidebarTrigger({
   className,
   onClick,
   ...props
-}: React.ComponentProps<typeof Button>) {
-  const { toggleSidebar } = useSidebar()
+}: React.ComponentProps<"span"> & { className?: string; onClick?: React.MouseEventHandler }) {
+  const { open, toggleSidebar } = useSidebar();
 
   return (
-    <Button
+    <span
       data-sidebar="trigger"
       data-slot="sidebar-trigger"
-      variant="ghost"
-      size="icon"
-      className={cn("size-7", className)}
+      tabIndex={0}
+      role="button"
+      aria-label="Toggle Sidebar"
+      className={cn(
+        "inline-flex items-center justify-center cursor-pointer p-1 rounded-md hover:bg-muted transition-colors text-muted-foreground",
+        className
+      )}
+      style={{ fontSize: 20, width: 32, height: 32 }}
       onClick={(event) => {
-        onClick?.(event)
-        toggleSidebar()
+        onClick?.(event);
+        toggleSidebar();
       }}
       {...props}
     >
-      <PanelLeftIcon />
+      {open ? <ChevronsLeft size={20} /> : <ChevronsRight size={20} />}
       <span className="sr-only">Toggle Sidebar</span>
-    </Button>
-  )
+    </span>
+  );
 }
+
 
 function SidebarRail({ className, ...props }: React.ComponentProps<"button">) {
   const { toggleSidebar } = useSidebar()
