@@ -367,7 +367,7 @@ export default function Index() {
           </div>
           <div className="flex items-center gap-4">
             {user.tier !== "Premium" && (
-              <button className="px-7 py-2 bg-gradient-to-r from-teal-500 to-violet-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-teal-500/30 transition-all">
+              <button onClick={() => router.push('/payment')} className="px-7 py-2 bg-gradient-to-r from-teal-500 to-violet-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-teal-500/30 transition-all">
                 Upgrade Plan
               </button>
             )}

@@ -69,7 +69,7 @@ const plans = [
     features: [
       '10 Pitches of 20 minutes each',
       'Includes a deeper and longer qna session',
-      '-user account',
+      'Single-user account',
       '6 English + 6 Hindi AI VC',
       'All 12 having different personalities',
       'Priority email support',
@@ -90,7 +90,7 @@ const plans = [
     features: [
       '25 Pitches of 20 minutes each',
       'Includes a deeper and longer qna session',
-      '-user account',
+      'Single-user account',
       '6 English + 6 Hindi AI VC',
       'All 12 having different personalities',
       'Real time venture capitalists connections',
@@ -245,7 +245,7 @@ export default function SimplePricing() {
                             )}
                             format={{
                               style: 'currency',
-                              currency: 'USD',
+                              currency: 'INR',
                               maximumFractionDigits: 0,
                             }}
                             value={
