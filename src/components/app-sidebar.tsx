@@ -12,12 +12,10 @@ import {
   Mic,
   History,
   FileText,
-  User,
 } from "lucide-react"
 import Link from "next/link";
 
 import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-projects"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
 import { ModeToggle } from "@/components/theme-toggle"
@@ -32,8 +30,9 @@ import {
 } from "@/components/ui/sidebar"
 
 import { useSession } from "next-auth/react";
+import { Session } from "next-auth";
 
-const getUserFromSession = (session: any) => ({
+const getUserFromSession = (session: Session) => ({
   name: session?.user?.fullName || "User",
   email: session?.user?.email || "user@email.com",
   avatar: session?.user?.image || "/avatars/shadcn.jpg",
@@ -41,7 +40,7 @@ const getUserFromSession = (session: any) => ({
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: session } = useSession();
-  const user = getUserFromSession(session);
+  const user = getUserFromSession(session!);
 
   const data = {
     user,
@@ -73,7 +72,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       },
       {
         title: "Start pitch",
-        url: "/start-pitch",
+        url: "/start-a-pitch",
         icon: Mic,
       },
       {
@@ -81,11 +80,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: "/generate-pitch",
         icon: FileText,
       },
-      {
-        title: "Meet VCs",
-        url: "/meet-the-vcs",
-        icon: User,
-      },
+      
     ],
     navSecondary: [
       {
@@ -130,7 +125,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">PitchDesk</span>
-                  <span className="truncate text-xs">kuch bhi</span>
                 </div>
                 <div className="flex justify-center pt-2">
                   <ModeToggle />

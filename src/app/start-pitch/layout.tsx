@@ -1,13 +1,13 @@
 import type { ReactNode } from "react";
 import { Inter, Fira_Code } from "next/font/google";
 import localFont from "next/font/local";
-import { DeepgramContextProvider } from "../../../context/DeepgramContextProvider";
-import { MicrophoneContextProvider } from "../../../context/MicrophoneContextProvider";
-import { VoiceBotProvider } from "../../../context/VoiceBotContextProvider";
-import AnimatedBackground from "../../../components/AnimatedBackground";
+import { DeepgramContextProvider } from "../../context/DeepgramContextProvider";
+import { MicrophoneContextProvider } from "../../context/MicrophoneContextProvider";
+import { VoiceBotProvider } from "../../context/VoiceBotContextProvider";
+import AnimatedBackground from "../../components/AnimatedBackground";
 
-import "../../globals.css";
-import { sharedOpenGraphMetadata } from "../../../lib/constants";
+import "../globals.css";
+import { sharedOpenGraphMetadata } from "../../lib/constants";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -20,14 +20,16 @@ const fira = Fira_Code({
   display: "fallback",
 });
 const favorit = localFont({
-  src: "../../../fonts/ABCFavorit-Bold.woff2",
+  src: "../../fonts/ABCFavorit-Bold.woff2",
   weight: "700",
   variable: "--font-favorit",
   display: "fallback",
 });
 
 export const metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+  ),
   title: "Voice Agent",
   description: "Voice Agent",
   openGraph: sharedOpenGraphMetadata,
@@ -44,15 +46,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`${fonts} font-inter`}>
       <body>
-          <VoiceBotProvider>
-            <MicrophoneContextProvider>
-              <DeepgramContextProvider>
-                <AnimatedBackground>
-                  {children}
-                </AnimatedBackground>
-              </DeepgramContextProvider>
-            </MicrophoneContextProvider>
-          </VoiceBotProvider>
+        <VoiceBotProvider>
+          <MicrophoneContextProvider>
+            <DeepgramContextProvider>
+              <AnimatedBackground>{children}</AnimatedBackground>
+            </DeepgramContextProvider>
+          </MicrophoneContextProvider>
+        </VoiceBotProvider>
       </body>
     </html>
   );

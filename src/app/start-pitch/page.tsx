@@ -1,9 +1,9 @@
 "use client";
-import { Suspense,  useState } from "react";
-import { App } from "../../../components/App";
-import Intelligence from "../../../components/Intelligence";
-import { stsConfig } from "../../../lib/constants";
-import Conversation from "../../../components/Conversation";
+import { Suspense, useState } from "react";
+import { App } from "../../components/App";
+import Intelligence from "../../components/Intelligence";
+import { stsConfig } from "../../lib/constants";
+import Conversation from "../../components/Conversation";
 import { isMobile } from "react-device-detect";
 import { useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -31,7 +31,6 @@ function HomeContent() {
     }
   };
 
-
   return (
     <div className="min-h-screen bg-black">
       {/* Header */}
@@ -54,36 +53,39 @@ function HomeContent() {
               </Suspense>
             </div>
 
-            <div className="w-full max-w-md">
+            <div className="w-full max-w-md flex flex-col items-center">
               <Suspense>
                 {loading ? (
-                  <Loader2 className="animate-spin" size={24} />
+                  <Loader2 className="animate-spin " size={24} />
                 ) : agentId ? (
                   <>
-                  {started && 
-                    <App
-                      defaultStsConfig={config}
-                      requiresUserActionToInitialize={isMobile}
-                    />
-                  }
+                    {started && (
+                      <App
+                        defaultStsConfig={config}
+                        requiresUserActionToInitialize={isMobile}
+                      />
+                    )}
                     <div className="flex justify-center mt-20">
-                      
-                      {!started ? <Button
-                        type="button"
-                        onClick={() => {
-                          fetchConfig();
-                        }}
-                      >
-                        Start your Pitch!
-                      </Button> : <Button
-                        type="button"
-                        onClick={() => {
-                          setStarted(false);
-                        }}
-                        disabled={!started}
-                      >
-                        End pitch!
-                      </Button>}
+                      {!started ? (
+                        <Button
+                          type="button"
+                          onClick={() => {
+                            fetchConfig();
+                          }}
+                        >
+                          Start your Pitch!
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          onClick={() => {
+                            setStarted(false);
+                          }}
+                          disabled={!started}
+                        >
+                          End pitch!
+                        </Button>
+                      )}
                     </div>
                   </>
                 ) : (
@@ -113,8 +115,8 @@ export default function Home() {
   return (
     <Suspense
       fallback={
-        <div className="text-white">
-          <Loader2 className="animate-spin" size={24} />
+        <div className="text-white min-h-screen flex items-center justify-center">
+          Loading...
         </div>
       }
     >

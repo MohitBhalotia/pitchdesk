@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import VCSummaryCard from '@/components/VCSummaryCard';
 import ProfileCard from '@/components/ProfileCard';
-import { vcs, VC } from '../../../data/aiVCs';
+import { vcs, VC } from '../../../../data/aiVCs';
 
 export default function MeetTheVCsPage() {
   const [selectedVc, setSelectedVc] = useState<VC | null>(null);
