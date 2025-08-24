@@ -43,6 +43,51 @@ declare global {
     timestamp: Date
   }
 
+  export interface IPlan extends document {
+    name: "standard" | "pro" | "enterprise"
+    amount: number
+    pitchesNumber: number
+    pitchesTime: number // in minutes
+    englishVCs: number
+    hindiVCs: number
+    capatalistConnecction: boolean
+    priorityEmailSupport: boolean
+    pitchAnalysis: boolean
+    pitchImprovement: boolean
+    personalisedPitch: boolean
+  }
+
+  export interface IUserPlan extends document {
+    userId: mongoose.Schema.Types.ObjectId 
+    planId: mongoose.Schema.Types.ObjectId
+    
+    isActive: boolean
+
+    usage: {
+      pitchNumberUsed: number
+      pitchTimeUsed: number
+    }
+  }
+
+  export interface IOrder extends document {
+    userId: mongoose.Schema.Types.ObjectId
+    planId: mongoose.Schema.Types.ObjectId
+
+    razorpayOrderId: string
+    razorPaymentId?: string
+    razorpaySignature?: string
+
+    amount: number
+    currency: string
+
+    status: "created" | "paid" | "failed" | "pending"
+
+    createdAt: Date
+    updatedAt: Date
+  }
+
+
+
 }
 
 
