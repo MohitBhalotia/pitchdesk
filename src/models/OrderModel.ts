@@ -14,7 +14,7 @@ const OrderSchema = new Schema<IOrder>(
 
     status: {
       type: String,
-      enum: ["created", "paid", "failed"],
+      enum: ["created", "paid", "failed", "pending"],
       default: "created",
     },
   },

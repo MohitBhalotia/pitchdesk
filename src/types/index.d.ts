@@ -80,7 +80,7 @@ declare global {
     amount: number
     currency: string
 
-    status: "created" | "paid" | "failed"
+    status: "created" | "paid" | "failed" | "pending"
 
     createdAt: Date
     updatedAt: Date
