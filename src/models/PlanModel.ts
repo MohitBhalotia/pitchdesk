@@ -3,6 +3,7 @@ import mongoose, { Schema } from "mongoose"
 const PlanSchema = new Schema<IPlan>(
   {
     name: { type: String, enum: ["standard", "pro", "enterprise"], required: true },
+    amount: {type: Number, required: true},
     pitchesNumber: { type: Number, required: true },
     pitchesTime: { type: Number, required: true },
     englishVCs: { type: Number, required: true },

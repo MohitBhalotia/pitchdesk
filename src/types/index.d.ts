@@ -45,6 +45,7 @@ declare global {
 
   export interface IPlan extends document {
     name: "standard" | "pro" | "enterprise"
+    amount: number
     pitchesNumber: number
     pitchesTime: number // in minutes
     englishVCs: number
