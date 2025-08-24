@@ -15,22 +15,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
 
-/*interface StatCardProps {
-  title: string;
-  value: string | number;
-  icon: React.ReactNode;
-  trend?: string;
-  trendUp?: boolean;
-}*/
-
-/*interface ActionCardProps {
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  onClick: () => void;
-  disabled?: boolean;
-  premium?: boolean;
-}*/
 
 interface ActivityItem {
   id: string;
@@ -40,46 +24,6 @@ interface ActivityItem {
   status?: 'completed' | 'scheduled' | 'in-progress';
 }
 
-// const StatCard = ({ title, value, icon, trend, trendUp }: StatCardProps) => (
-//   <div className="stat-card">
-//     <div className="flex items-start justify-between">
-//       <div>
-//         <p className="text-muted-foreground text-sm font-medium">{title}</p>
-//         <p className="text-2xl font-bold mt-1">{value}</p>
-//         {trend && (
-//           <div className={`flex items-center gap-1 mt-2 text-xs ${trendUp ? 'text-teal-400' : 'text-red-400'}`}>
-//             <TrendingUp className={`h-3 w-3 ${!trendUp ? 'rotate-180' : ''}`} />
-//             {trend}
-//           </div>
-//         )}
-//       </div>
-//       <div className="text-muted-foreground/60">
-//         {icon}
-//       </div>
-//     </div>
-//   </div>
-// );
-
-// const ActionCard = ({ title, description, icon, onClick, disabled, premium }: ActionCardProps) => (
-//   <div
-//     className={`action-card group ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-//     onClick={!disabled ? onClick : undefined}
-//   >
-//     <div className="flex items-start gap-4 relative z-10">
-//       <div className={`p-3 rounded-lg ${premium ? 'bg-gradient-to-r from-violet-500/20 to-teal-500/20' : 'bg-muted/50'}`}>
-//         {icon}
-//       </div>
-//       <div className="flex-1">
-//         <div className="flex items-center gap-2">
-//           <h3 className="font-semibold">{title}</h3>
-//           {premium && <Crown className="h-4 w-4 text-violet-400" />}
-//         </div>
-//         <p className="text-muted-foreground text-sm mt-1">{description}</p>
-//       </div>
-//       <ArrowUpRight className="h-5 w-5 text-muted-foreground group-hover:text-teal-400 transition-colors" />
-//     </div>
-//   </div>
-// );
 
 const ActivityFeed = ({ activities }: { activities: ActivityItem[] }) => (
   <div className="glass-card p-6">
@@ -118,127 +62,127 @@ const ActivityFeed = ({ activities }: { activities: ActivityItem[] }) => (
   </div>
 );
 
-const ProfileDropdown = ({ user }: { user: { name: string; email: string; avatar: string; tier: string } }) => {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button className="flex items-center gap-3 p-2 rounded-full hover:bg-card/50 transition-colors group">
-          <Avatar className="h-10 w-10 ring-2 ring-transparent group-hover:ring-teal-500/50 transition-all">
-            <AvatarImage src={user.avatar} alt={user.name} />
-            <AvatarFallback className="bg-gradient-to-r from-teal-500 to-violet-500 text-white font-semibold">
-              {user.name.split(' ').map(n => n[0]).join('')}
-            </AvatarFallback>
-          </Avatar>
-          <div className="text-left hidden sm:block">
-            <p className="text-sm font-medium">{user.name}</p>
-            <p className="text-xs text-muted-foreground">{user.tier} Plan</p>
-          </div>
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-80 glass-card border-border/50" align="end" sideOffset={8}>
-        {/* User Info Header */}
-        <div className="px-4 py-4 border-b border-border/50">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-12 w-12">
-              <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback className="bg-gradient-to-r from-teal-500 to-violet-500 text-white font-semibold">
-                {user.name.split(' ').map(n => n[0]).join('')}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-              <p className="font-semibold">{user.name}</p>
-              <p className="text-sm text-muted-foreground">{user.email}</p>
-              <div className="flex items-center gap-2 mt-1">
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${user.tier === "Premium" ? "bg-gradient-to-r from-violet-500/20 to-teal-500/20 text-violet-400" :
-                  user.tier === "Pro" ? "bg-blue-500/20 text-blue-400" :
-                    "bg-muted text-muted-foreground"
-                  }`}>
-                  {user.tier} Plan
-                </span>
-                {user.tier === "Premium" && <Crown className="h-3 w-3 text-violet-400" />}
-              </div>
-            </div>
-          </div>
-        </div>
+// const ProfileDropdown = ({ user }: { user: { name: string; email: string; avatar: string; tier: string } }) => {
+//   return (
+//     <DropdownMenu>
+//       <DropdownMenuTrigger asChild>
+//         <button className="flex items-center gap-3 p-2 rounded-full hover:bg-card/50 transition-colors group">
+//           <Avatar className="h-10 w-10 ring-2 ring-transparent group-hover:ring-teal-500/50 transition-all">
+//             <AvatarImage src={user.avatar} alt={user.name} />
+//             <AvatarFallback className="bg-gradient-to-r from-teal-500 to-violet-500 text-white font-semibold">
+//               {user.name.split(' ').map(n => n[0]).join('')}
+//             </AvatarFallback>
+//           </Avatar>
+//           <div className="text-left hidden sm:block">
+//             <p className="text-sm font-medium">{user.name}</p>
+//             <p className="text-xs text-muted-foreground">{user.tier} Plan</p>
+//           </div>
+//         </button>
+//       </DropdownMenuTrigger>
+//       <DropdownMenuContent className="w-80 glass-card border-border/50" align="end" sideOffset={8}>
+//         {/* User Info Header */}
+//         <div className="px-4 py-4 border-b border-border/50">
+//           <div className="flex items-center gap-3">
+//             <Avatar className="h-12 w-12">
+//               <AvatarImage src={user.avatar} alt={user.name} />
+//               <AvatarFallback className="bg-gradient-to-r from-teal-500 to-violet-500 text-white font-semibold">
+//                 {user.name.split(' ').map(n => n[0]).join('')}
+//               </AvatarFallback>
+//             </Avatar>
+//             <div className="flex-1">
+//               <p className="font-semibold">{user.name}</p>
+//               <p className="text-sm text-muted-foreground">{user.email}</p>
+//               <div className="flex items-center gap-2 mt-1">
+//                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${user.tier === "Premium" ? "bg-gradient-to-r from-violet-500/20 to-teal-500/20 text-violet-400" :
+//                   user.tier === "Pro" ? "bg-blue-500/20 text-blue-400" :
+//                     "bg-muted text-muted-foreground"
+//                   }`}>
+//                   {user.tier} Plan
+//                 </span>
+//                 {user.tier === "Premium" && <Crown className="h-3 w-3 text-violet-400" />}
+//               </div>
+//             </div>
+//           </div>
+//         </div>
 
-        {/* Action Items */}
-        <div className="py-2">
-          {user.tier !== "Premium" && (
-            <>
-              <DropdownMenuItem className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gradient-to-r hover:from-teal-500/10 hover:to-violet-500/10">
-                <Crown className="h-4 w-4 text-violet-400" />
-                <div>
-                  <p className="font-medium">Upgrade Plan</p>
-                  <p className="text-xs text-muted-foreground">Unlock premium features</p>
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-border/50" />
-            </>
-          )}
+//         {/* Action Items */}
+//         <div className="py-2">
+//           {user.tier !== "Premium" && (
+//             <>
+//               <DropdownMenuItem className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gradient-to-r hover:from-teal-500/10 hover:to-violet-500/10">
+//                 <Crown className="h-4 w-4 text-violet-400" />
+//                 <div>
+//                   <p className="font-medium">Upgrade Plan</p>
+//                   <p className="text-xs text-muted-foreground">Unlock premium features</p>
+//                 </div>
+//               </DropdownMenuItem>
+//               <DropdownMenuSeparator className="bg-border/50" />
+//             </>
+//           )}
 
-          <DropdownMenuItem className="flex items-center gap-3 px-4 py-3 cursor-pointer">
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
-            <div>
-              <p className="font-medium">Payment History</p>
-              <p className="text-xs text-muted-foreground">View billing and invoices</p>
-            </div>
-          </DropdownMenuItem>
+//           <DropdownMenuItem className="flex items-center gap-3 px-4 py-3 cursor-pointer">
+//             <CreditCard className="h-4 w-4 text-muted-foreground" />
+//             <div>
+//               <p className="font-medium">Payment History</p>
+//               <p className="text-xs text-muted-foreground">View billing and invoices</p>
+//             </div>
+//           </DropdownMenuItem>
 
-          <Link href="/change-password" passHref>
-            <DropdownMenuItem asChild>
-              <div className="flex items-center gap-3 px-4 py-3 cursor-pointer">
-                <Lock className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <p className="font-medium">Change Password</p>
-                  <p className="text-xs text-muted-foreground">Update security settings</p>
-                </div>
-              </div>
-            </DropdownMenuItem>
-          </Link>
+//           <Link href="/change-password" passHref>
+//             <DropdownMenuItem asChild>
+//               <div className="flex items-center gap-3 px-4 py-3 cursor-pointer">
+//                 <Lock className="h-4 w-4 text-muted-foreground" />
+//                 <div>
+//                   <p className="font-medium">Change Password</p>
+//                   <p className="text-xs text-muted-foreground">Update security settings</p>
+//                 </div>
+//               </div>
+//             </DropdownMenuItem>
+//           </Link>
 
-          <DropdownMenuItem className="flex items-center gap-3 px-4 py-3 cursor-pointer">
-            <Building2 className="h-4 w-4 text-muted-foreground" />
-            <div>
-              <p className="font-medium">Startup Information</p>
-              <p className="text-xs text-muted-foreground">Update company details</p>
-            </div>
-          </DropdownMenuItem>
+//           <DropdownMenuItem className="flex items-center gap-3 px-4 py-3 cursor-pointer">
+//             <Building2 className="h-4 w-4 text-muted-foreground" />
+//             <div>
+//               <p className="font-medium">Startup Information</p>
+//               <p className="text-xs text-muted-foreground">Update company details</p>
+//             </div>
+//           </DropdownMenuItem>
 
-          <DropdownMenuSeparator className="bg-border/50" />
+//           <DropdownMenuSeparator className="bg-border/50" />
 
-          <DropdownMenuItem className="flex items-center gap-3 px-4 py-3 cursor-pointer">
-            <MessageSquare className="h-4 w-4 text-muted-foreground" />
-            <div>
-              <p className="font-medium">Support & Feedback</p>
-              <p className="text-xs text-muted-foreground">Get help or share ideas</p>
-            </div>
-          </DropdownMenuItem>
+//           <DropdownMenuItem className="flex items-center gap-3 px-4 py-3 cursor-pointer">
+//             <MessageSquare className="h-4 w-4 text-muted-foreground" />
+//             <div>
+//               <p className="font-medium">Support & Feedback</p>
+//               <p className="text-xs text-muted-foreground">Get help or share ideas</p>
+//             </div>
+//           </DropdownMenuItem>
 
-          <DropdownMenuItem className="flex items-center gap-3 px-4 py-3 cursor-pointer">
-            <Settings className="h-4 w-4 text-muted-foreground" />
-            <div>
-              <p className="font-medium">Account Settings</p>
-              <p className="text-xs text-muted-foreground">Manage preferences</p>
-            </div>
-          </DropdownMenuItem>
+//           <DropdownMenuItem className="flex items-center gap-3 px-4 py-3 cursor-pointer">
+//             <Settings className="h-4 w-4 text-muted-foreground" />
+//             <div>
+//               <p className="font-medium">Account Settings</p>
+//               <p className="text-xs text-muted-foreground">Manage preferences</p>
+//             </div>
+//           </DropdownMenuItem>
 
-          <DropdownMenuSeparator className="bg-border/50" />
+//           <DropdownMenuSeparator className="bg-border/50" />
 
-          <DropdownMenuItem
-            className="flex items-center gap-3 px-4 py-3 cursor-pointer text-red-400 hover:bg-red-500/10"
-            onClick={() => signOut({ callbackUrl: '/' })}
-          >
-            <LogOut className="h-4 w-4" />
-            <div>
-              <p className="font-medium">Sign Out</p>
-              <p className="text-xs text-red-400/70">End your session</p>
-            </div>
-          </DropdownMenuItem>
-        </div>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-};
+//           <DropdownMenuItem
+//             className="flex items-center gap-3 px-4 py-3 cursor-pointer text-red-400 hover:bg-red-500/10"
+//             onClick={() => signOut({ callbackUrl: '/' })}
+//           >
+//             <LogOut className="h-4 w-4" />
+//             <div>
+//               <p className="font-medium">Sign Out</p>
+//               <p className="text-xs text-red-400/70">End your session</p>
+//             </div>
+//           </DropdownMenuItem>
+//         </div>
+//       </DropdownMenuContent>
+//     </DropdownMenu>
+//   );
+// };
 
 const AITipsPanel = () => {
   const tips = [
@@ -302,36 +246,37 @@ export default function Index() {
       title: "Total Pitches Practiced",
       value: 24,
       icon: <Play className="h-6 w-6" />,
-      trend: "+12% this month",
-      trendUp: true
+      // trend: "+12% this month",
+      // trendUp: true
     },
     {
       title: "AI Feedback Sessions",
       value: 18,
       icon: <Sparkles className="h-6 w-6" />,
-      trend: "+8% this month",
-      trendUp: true
+      // trend: "+8% this month",
+      // trendUp: true
     },
     {
       title: "Pitch Documents Generated",
       value: 7,
       icon: <FileText className="h-6 w-6" />,
-      trend: "+3 this week",
-      trendUp: true
+      // trend: "+3 this week",
+      // trendUp: true
     },
     {
       title: "Average Success Score",
       value: "8.2/10",
       icon: <Trophy className="h-6 w-6" />,
-      trend: "+0.5 improvement",
-      trendUp: true
+      // trend: "+0.5 improvement",
+      // trendUp: true
     },
     {
       title: "Remaining Sessions",
-      value: user.sessionsLimit - user.sessionsUsed,
+      // value: user.sessionsLimit - user.sessionsUsed,
+      value: `${user.sessionsUsed}/${user.sessionsLimit}`,
       icon: <Zap className="h-6 w-6" />,
-      trend: `${user.sessionsUsed}/${user.sessionsLimit} used`,
-      trendUp: false
+      // trend: `${user.sessionsUsed}/${user.sessionsLimit} used`,
+      // trendUp: false
     }
   ];
 
@@ -400,7 +345,7 @@ export default function Index() {
     <div className="min-h-screen bg-gradient-to-br from-background via-[#f7fafd] to-[#e7f0ff] dark:from-background dark:via-[#181c29] dark:to-[#1a202c] transition-colors">
       <div className="max-w-7xl mx-auto px-4 py-10 space-y-10">
         {/* Welcome Banner */}
-        <div className="backdrop-blur-lg bg-white/70 dark:bg-card/80 rounded-3xl shadow-xl border border-border/30 p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        {/* <div className="backdrop-blur-lg bg-white/70 dark:bg-card/80 rounded-3xl shadow-xl border border-border/30 p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div className="flex-1">
             <h1 className="text-4xl font-extrabold bg-gradient-to-r from-teal-500 to-violet-500 bg-clip-text text-transparent tracking-tight mb-2">
               Welcome back, {user.name}!
@@ -417,7 +362,7 @@ export default function Index() {
             )}
             <ProfileDropdown user={user} />
           </div>
-        </div>
+        </div> */}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
@@ -432,12 +377,12 @@ export default function Index() {
                   <p className="text-2xl font-bold text-teal-600 dark:text-teal-300">{stat.value}</p>
                 </div>
               </div>
-              {stat.trend && (
+              {/* {stat.trend && (
                 <div className={`text-xs font-medium flex items-center gap-1 ${stat.trendUp ? 'text-teal-500' : 'text-red-400'}`}>
                   <TrendingUp className={`h-3 w-3 ${!stat.trendUp ? 'rotate-180' : ''}`} />
                   {stat.trend}
                 </div>
-              )}
+              )} */}
             </div>
           ))}
         </div>
