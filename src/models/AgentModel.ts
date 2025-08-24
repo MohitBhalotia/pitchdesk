@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Model } from "mongoose";
+import mongoose, { Schema, Document} from "mongoose";
 
 export interface IAgent extends Document {
   name: string;
@@ -26,7 +26,7 @@ const agentSchema = new Schema({
   },
 });
 
-const Agent: Model<IAgent> = mongoose.models.Agent || mongoose.model<IAgent>("Agent", agentSchema);
+const Agent = mongoose.model<IAgent>("Agent", agentSchema);
 
 export default Agent;
 

@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
 
     const razorpayOrder = await razorpay.orders.create(options)
 
-    const order = await orderModel.create({
+    await orderModel.create({
       userId,
       planId,
       amount: plan.amount,
@@ -41,7 +41,10 @@ export async function POST(req: NextRequest) {
       currency: razorpayOrder.currency,
       key: process.env.RAZOR_KEY_ID
     })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   }catch(error: any){
+    console.log(error);
+    
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

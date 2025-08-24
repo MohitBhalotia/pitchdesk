@@ -28,7 +28,7 @@ export async function POST(req: NextRequest){
     }
 
     order.status = "paid";
-    order.razorpayPaymentId = razorpay_payment_id;
+    order.razorPaymentId = razorpay_payment_id;
     await order.save();
 
     await userPlanModel.create({
@@ -40,6 +40,7 @@ export async function POST(req: NextRequest){
 
     return NextResponse.json({ success: true });
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   }catch(error: any){
     return NextResponse.json({ error: error.message }, { status: 500 });
   } 

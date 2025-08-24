@@ -54,6 +54,6 @@ const PitchSchema = new Schema<Pitch>(
     }
 )
 
-const PitchModel = mongoose.models.Pitch || mongoose.model<Pitch>("Pitch", PitchSchema);
+const PitchModel = mongoose.model<Pitch>("Pitch", PitchSchema);
 
 export default PitchModel

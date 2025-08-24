@@ -13,4 +13,4 @@ const UserPlanSchema = new Schema<IUserPlan>(
   { timestamps: true }
 );
 
-export const userPlanModel = mongoose.models.UserPlan || mongoose.model<IUserPlan>("UserPlan", UserPlanSchema)
+export const userPlanModel = mongoose.model<IUserPlan>("UserPlan", UserPlanSchema)

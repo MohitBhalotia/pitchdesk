@@ -82,28 +82,28 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
                 <Crown />
                 Upgrade Plan
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
                 <CreditCard />
                 Payment History
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
                 <Lock/>
                 Change Password
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
                 <Bell />
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/' })}>
+            <DropdownMenuItem className="cursor-pointer flex items-center gap-2" onClick={() => signOut({ callbackUrl: '/' })}>
               <LogOut />
               Log out
             </DropdownMenuItem>

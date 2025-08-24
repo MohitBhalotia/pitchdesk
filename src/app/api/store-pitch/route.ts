@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+import {  NextResponse } from "next/server"
 import dbConnect from "@/lib/db"
 import PitchModel from "@/models/PitchModel"
 import pitchSchema from "@/schemas/pitchSchema"
@@ -19,6 +19,7 @@ export async function POST(req: Request){
             success: true,
             message: "pitch session stored successfully"
         })
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }catch(error: any){
         if(error.errors){
             return NextResponse.json({

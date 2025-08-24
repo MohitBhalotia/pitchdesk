@@ -48,7 +48,7 @@ export async function POST(req: NextRequest){
       signupStep2Done: true
     });
     await user.save();
-    await resendVerify(user.verificationCode,user.fullName,user.email, user._id);
+    await resendVerify(user.verificationCode,user.fullName,user.email, user._id.toString());
 
     return NextResponse.json(
       {

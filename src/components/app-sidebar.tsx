@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import {
-  Command,
   Frame,
   LifeBuoy,
   Map,
@@ -35,7 +34,7 @@ import { Session } from "next-auth";
 const getUserFromSession = (session: Session) => ({
   name: session?.user?.fullName || "User",
   email: session?.user?.email || "user@email.com",
-  avatar: session?.user?.image || "/avatars/shadcn.jpg",
+  avatar: session?.user?.image,
 });
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -49,7 +48,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "Dashboard",
         url: "/dashboard",
         icon: LayoutDashboard,
-        isActive: true,
       // items: [
       //   {
       //     title: "History",
@@ -119,17 +117,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
+              <div className="flex justify-between items-center">
               <Link href="/dashboard">
-                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <Command className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">PitchDesk</span>
-                </div>
-                <div className="flex justify-center pt-2">
-                  <ModeToggle />
+               
+                <div className="flex-1 text-left text-2xl leading-tight">
+                  <span className="truncate font-bold">PitchDesk</span>
                 </div>
               </Link>
+                <div className="flex justify-center ">
+                  <ModeToggle />
+                </div>
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

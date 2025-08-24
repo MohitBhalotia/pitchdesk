@@ -1,11 +1,11 @@
 import React from "react";
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "../../components/app-sidebar";
 
 import {
   SidebarProvider,
   SidebarInset,
   SidebarTrigger,
-} from "@/components/ui/sidebar";
+} from "../../components/ui/sidebar";
 
 export default function RootLayout({
   children,

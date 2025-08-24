@@ -1,8 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
-import Razorpay from "razorpay";
+// import Razorpay from "razorpay";
 
-export default function Checkout({ planId }: { planId: string }) {
+export default function Checkout() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -16,7 +16,7 @@ export default function Checkout({ planId }: { planId: string }) {
     setLoading(true);
     const res = await fetch("/api/razorpay/create-order", {
       method: "POST",
-      body: JSON.stringify({ planId: "", userId: "" }),
+      body: JSON.stringify({ planId: "68aa8cbf5958f9468e59ca14", userId: "6886923965ec64a7db9f69a9" }),
     });
     const data = await res.json();
 
@@ -31,6 +31,7 @@ export default function Checkout({ planId }: { planId: string }) {
       order_id: data.orderId,
       name: "PitchDesk",
       description: "Plan Subscription",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       handler: async function (response: any){
         const res = await fetch("/api/razorpay/payment/verify", {
           method: "POST",
@@ -48,6 +49,7 @@ export default function Checkout({ planId }: { planId: string }) {
       },
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rzp = new (window as any).Razorpay(options);
     rzp.open();
     setLoading(false);

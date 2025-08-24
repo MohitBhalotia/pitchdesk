@@ -1,85 +1,83 @@
 "use client";
-import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import {  useSession } from "next-auth/react";
 import {
   Users,
   FileText,
   BarChart3,
   Play,
-  Clock,
   Trophy,
   Zap,
   ArrowUpRight,
   Crown,
-  Sparkles,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-interface ActivityItem {
-  id: string;
-  type: "pitch" | "feedback" | "document" | "call";
-  title: string;
-  timestamp: string;
-  status?: "completed" | "scheduled" | "in-progress";
-}
 
-const ActivityFeed = ({ activities }: { activities: ActivityItem[] }) => (
-  <div className="glass-card p-4">
-    <h3 className="font-semibold mb-4 flex items-center gap-2">
-      <Clock className="h-5 w-5 text-teal-400" />
-      Latest Activity
-    </h3>
-    <div className="space-y-4">
-      {activities.map((activity) => (
-        <div
-          key={activity.id}
-          className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
-        >
-          <div
-            className={`p-2 rounded-full ${
-              activity.type === "pitch"
-                ? "bg-teal-500/20 text-teal-400"
-                : activity.type === "feedback"
-                  ? "bg-violet-500/20 text-violet-400"
-                  : activity.type === "document"
-                    ? "bg-blue-500/20 text-blue-400"
-                    : "bg-pink-500/20 text-pink-400"
-            }`}
-          >
-            {activity.type === "pitch" && <Play className="h-4 w-4" />}
-            {activity.type === "feedback" && <Sparkles className="h-4 w-4" />}
-            {activity.type === "document" && <FileText className="h-4 w-4" />}
-            {activity.type === "call" && <Users className="h-4 w-4" />}
-          </div>
-          <div className="flex-1">
-            <p className="font-medium text-sm">{activity.title}</p>
-            <p className="text-xs text-muted-foreground">
-              {activity.timestamp}
-            </p>
-          </div>
-          {activity.status && (
-            <span
-              className={`px-2 py-1 rounded-full text-xs ${
-                activity.status === "completed"
-                  ? "bg-teal-500/20 text-teal-400"
-                  : activity.status === "scheduled"
-                    ? "bg-violet-500/20 text-violet-400"
-                    : "bg-blue-500/20 text-blue-400"
-              }`}
-            >
-              {activity.status}
-            </span>
-          )}
-        </div>
-      ))}
-    </div>
-  </div>
-);
+// interface ActivityItem {
+//   id: string;
+//   type: "pitch" | "feedback" | "document" | "call";
+//   title: string;
+//   timestamp: string;
+//   status?: "completed" | "scheduled" | "in-progress";
+// }
+
+// const ActivityFeed = ({ activities }: { activities: ActivityItem[] }) => (
+//   <div className="glass-card p-4">
+//     <h3 className="font-semibold mb-4 flex items-center gap-2">
+//       <Clock className="h-5 w-5 text-teal-400" />
+//       Latest Activity
+//     </h3>
+//     <div className="space-y-4">
+//       {activities.map((activity) => (
+//         <div
+//           key={activity.id}
+//           className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
+//         >
+//           <div
+//             className={`p-2 rounded-full ${
+//               activity.type === "pitch"
+//                 ? "bg-teal-500/20 text-teal-400"
+//                 : activity.type === "feedback"
+//                   ? "bg-violet-500/20 text-violet-400"
+//                   : activity.type === "document"
+//                     ? "bg-blue-500/20 text-blue-400"
+//                     : "bg-pink-500/20 text-pink-400"
+//             }`}
+//           >
+//             {activity.type === "pitch" && <Play className="h-4 w-4" />}
+//             {activity.type === "feedback" && <Sparkles className="h-4 w-4" />}
+//             {activity.type === "document" && <FileText className="h-4 w-4" />}
+//             {activity.type === "call" && <Users className="h-4 w-4" />}
+//           </div>
+//           <div className="flex-1">
+//             <p className="font-medium text-sm">{activity.title}</p>
+//             <p className="text-xs text-muted-foreground">
+//               {activity.timestamp}
+//             </p>
+//           </div>
+//           {activity.status && (
+//             <span
+//               className={`px-2 py-1 rounded-full text-xs ${
+//                 activity.status === "completed"
+//                   ? "bg-teal-500/20 text-teal-400"
+//                   : activity.status === "scheduled"
+//                     ? "bg-violet-500/20 text-violet-400"
+//                     : "bg-blue-500/20 text-blue-400"
+//               }`}
+//             >
+//               {activity.status}
+//             </span>
+//           )}
+//         </div>
+//       ))}
+//     </div>
+//   </div>
+// );
 
 // const ProfileDropdown = ({ user }: { user: { name: string; email: string; avatar: string; tier: string } }) => {
 //   return (
 //     <DropdownMenu>
-//       <DropdownMenuTrigger asChild>
+//       <DropdownMenuTrigger  asChild>
 //         <button className="flex items-center gap-3 p-2 rounded-full hover:bg-card/50 transition-colors group">
 //           <Avatar className="h-10 w-10 ring-2 ring-transparent group-hover:ring-teal-500/50 transition-all">
 //             <AvatarImage src={user.avatar} alt={user.name} />
@@ -198,46 +196,46 @@ const ActivityFeed = ({ activities }: { activities: ActivityItem[] }) => (
 //   );
 // };
 
-const AITipsPanel = () => {
-  const tips = [
-    "Focus on your problem statement in the first 30 seconds",
-    "Use concrete numbers and metrics to support your claims",
-    "Practice your elevator pitch until it's under 60 seconds",
-    "Show, don't tell - use visuals and demos when possible",
-    "Address potential investor concerns proactively",
-  ];
+// const AITipsPanel = () => {
+//   const tips = [
+//     "Focus on your problem statement in the first 30 seconds",
+//     "Use concrete numbers and metrics to support your claims",
+//     "Practice your elevator pitch until it's under 60 seconds",
+//     "Show, don't tell - use visuals and demos when possible",
+//     "Address potential investor concerns proactively",
+//   ];
 
-  const [currentTip, setCurrentTip] = useState(0);
+//   const [currentTip, setCurrentTip] = useState(0);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTip((prev) => (prev + 1) % tips.length);
-    }, 8000);
-    return () => clearInterval(interval);
-  }, [tips.length]);
+//   useEffect(() => {
+//     const interval = setInterval(() => {
+//       setCurrentTip((prev) => (prev + 1) % tips.length);
+//     }, 8000);
+//     return () => clearInterval(interval);
+//   }, [tips.length]);
 
-  return (
-    <div className="glass-card p-6 neon-border">
-      <h3 className="font-semibold mb-4 flex items-center gap-2">
-        <Sparkles className="h-5 w-5 text-violet-400" />
-        AI Tips & Suggestions
-      </h3>
-      <div className="relative min-h-[60px] flex items-center">
-        <p className="text-muted-foreground italic">{`${tips[currentTip]}`}</p>
-      </div>
-      <div className="flex gap-1 mt-4">
-        {tips.map((_, index) => (
-          <div
-            key={index}
-            className={`h-1 flex-1 rounded-full transition-colors ${
-              index === currentTip ? "bg-violet-400" : "bg-muted"
-            }`}
-          />
-        ))}
-      </div>
-    </div>
-  );
-};
+//   return (
+//     <div className="glass-card p-6 neon-border">
+//       <h3 className="font-semibold mb-4 flex items-center gap-2">
+//         <Sparkles className="h-5 w-5 text-violet-400" />
+//         AI Tips & Suggestions
+//       </h3>
+//       <div className="relative min-h-[60px] flex items-center">
+//         <p className="text-muted-foreground italic">{`${tips[currentTip]}`}</p>
+//       </div>
+//       <div className="flex gap-1 mt-4">
+//         {tips.map((_, index) => (
+//           <div
+//             key={index}
+//             className={`h-1 flex-1 rounded-full transition-colors ${
+//               index === currentTip ? "bg-violet-400" : "bg-muted"
+//             }`}
+//           />
+//         ))}
+//       </div>
+//     </div>
+//   );
+// };
 
 export default function Index() {
   const { data: session /*status*/ } = useSession();
@@ -262,13 +260,13 @@ export default function Index() {
       // trend: "+12% this month",
       // trendUp: true
     },
-    {
-      title: "AI Feedback Sessions",
-      value: 18,
-      icon: <Sparkles className="h-6 w-6" />,
-      // trend: "+8% this month",
-      // trendUp: true
-    },
+    // {
+    //   title: "AI Feedback Sessions",
+    //   value: 18,
+    //   icon: <Sparkles className="h-6 w-6" />,
+    //   // trend: "+8% this month",
+    //   // trendUp: true
+    // },
     {
       title: "Pitch Documents Generated",
       value: 7,
@@ -298,7 +296,7 @@ export default function Index() {
       title: "Start Pitch Practice Session",
       description: "Practice your pitch with our AI VC agents",
       icon: <Play className="h-6 w-6 text-teal-400" />,
-      onClick: () => console.log("Start pitch practice"),
+      onClick: () => router.push("/start-a-pitch"),
       disabled: user.sessionsUsed >= user.sessionsLimit && user.tier === "Free",
     },
     {
@@ -311,7 +309,7 @@ export default function Index() {
       title: "View Session Analytics",
       description: "Analyze your pitch performance and improvements",
       icon: <BarChart3 className="h-6 w-6 text-violet-400" />,
-      onClick: () => console.log("View analytics"),
+      onClick: () => router.push("/my-pitches"),
     },
     {
       title: "Connect with Real VCs",
@@ -323,42 +321,42 @@ export default function Index() {
     },
   ];
 
-  const recentActivities: ActivityItem[] = [
-    {
-      id: "1",
-      type: "pitch",
-      title: "Completed pitch practice session",
-      timestamp: "2 hours ago",
-      status: "completed",
-    },
-    {
-      id: "2",
-      type: "feedback",
-      title: "Received AI feedback on Series A pitch",
-      timestamp: "5 hours ago",
-      status: "completed",
-    },
-    {
-      id: "3",
-      type: "document",
-      title: "Generated pitch deck template",
-      timestamp: "1 day ago",
-      status: "completed",
-    },
-    {
-      id: "4",
-      type: "call",
-      title: "Scheduled call with Sarah Chen (VC)",
-      timestamp: "2 days ago",
-      status: "scheduled",
-    },
-  ];
+  // const recentActivities: ActivityItem[] = [
+  //   {
+  //     id: "1",
+  //     type: "pitch",
+  //     title: "Completed pitch practice session",
+  //     timestamp: "2 hours ago",
+  //     status: "completed",
+  //   },
+  //   {
+  //     id: "2",
+  //     type: "feedback",
+  //     title: "Received AI feedback on Series A pitch",
+  //     timestamp: "5 hours ago",
+  //     status: "completed",
+  //   },
+  //   {
+  //     id: "3",
+  //     type: "document",
+  //     title: "Generated pitch deck template",
+  //     timestamp: "1 day ago",
+  //     status: "completed",
+  //   },
+  //   {
+  //     id: "4",
+  //     type: "call",
+  //     title: "Scheduled call with Sarah Chen (VC)",
+  //     timestamp: "2 days ago",
+  //     status: "scheduled",
+  //   },
+  // ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-[#f7fafd] to-[#e7f0ff] dark:from-[#09090b] dark:via-[#09090b] dark:to-[#09090b] transition-colors">
-      <div className="max-w-7xl mx-auto px-2 py-6 space-y-6">
+    <div className="">
+      <div className="flex flex-col gap-8 items-center mx-auto px-2 py-6">
         {/* Welcome Banner */}
-        {/* <div className="backdrop-blur-lg bg-white/70 dark:bg-card/80 rounded-3xl shadow-xl border border-border/30 p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div className="backdrop-blur-lg max-w-7xl mx-auto bg-white/70 dark:bg-card/80 rounded-3xl shadow-xl border border-border/30 p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6 w-full">
           <div className="flex-1">
             <h1 className="text-4xl font-extrabold bg-gradient-to-r from-teal-500 to-violet-500 bg-clip-text text-transparent tracking-tight mb-2">
               Welcome back, {user.name}!
@@ -373,19 +371,19 @@ export default function Index() {
                 Upgrade Plan
               </button>
             )}
-            <ProfileDropdown user={user} />
+            {/* <ProfileDropdown user={user} /> */}
           </div>
-        </div> */}
+        </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <div className="flex gap-8 w-full justify-center">
           {stats.map((stat, index) => (
             <div
-              className="rounded-xl shadow bg-white/80 dark:bg-card/90 p-4 flex flex-col gap-1 border border-border/20 hover:shadow-lg transition-shadow"
+              className="rounded-xl flex items-center py-8 shadow bg-white/80 dark:bg-card/90 p-6 flex-col gap-1 border border-border/20 hover:shadow-lg transition-shadow"
               key={index}
             >
-              <div className="flex items-center gap-2 mb-1">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-teal-100 to-violet-100 dark:from-teal-900 dark:to-violet-900">
+              <div className="flex items-center gap-4 mb-1">
+                <div className="p-4 rounded-lg bg-primary text-primary-foreground">
                   {stat.icon}
                 </div>
                 <div>
@@ -408,11 +406,11 @@ export default function Index() {
         </div>
 
         {/* Quick Actions */}
-        <div>
-          <h2 className="text-2xl font-bold mb-6 text-foreground">
+        <div className="w-full max-w-7xl mx-auto mt-8">
+          <h2 className="text-2xl font-bold mb-6 text-foreground text-left">
             Quick Actions
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {quickActions.map((action, index) => (
               <div
                 key={index}
@@ -442,18 +440,18 @@ export default function Index() {
         </div>
 
         {/* Bottom Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* <div className="grid grid-cols-1 lg:grid-cols-3 gap-4"> */}
           {/* Activity Feed */}
-          <div className="lg:col-span-2">
+          {/* <div className="lg:col-span-2">
             <div className="rounded-2xl bg-white/80 dark:bg-card/90 shadow-md border border-border/20 p-8">
               <ActivityFeed activities={recentActivities} />
             </div>
-          </div>
+          </div> */}
 
           {/* Right Sidebar */}
-          <div className="space-y-4">
+          {/* <div className="space-y-4"> */}
             {/* Usage Widget */}
-            <div className="rounded-xl bg-white/80 dark:bg-card/90 shadow border border-border/20 p-5">
+            {/* <div className="rounded-xl bg-white/80 dark:bg-card/90 shadow border border-border/20 p-5">
               <h3 className="font-semibold mb-4 flex items-center gap-2">
                 <Zap className="h-5 w-5 text-teal-400" />
                 Session Usage
@@ -479,14 +477,14 @@ export default function Index() {
                     : "Unlimited sessions available"}
                 </p>
               </div>
-            </div>
+            </div> */}
 
             {/* AI Tips */}
-            <div className="rounded-xl bg-white/80 dark:bg-card/90 shadow border border-border/20 p-5">
+            {/* <div className="rounded-xl bg-white/80 dark:bg-card/90 shadow border border-border/20 p-5">
               <AITipsPanel />
-            </div>
-          </div>
-        </div>
+            </div> */}
+          {/* </div> */}
+        {/* </div> */}
       </div>
     </div>
   );

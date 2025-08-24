@@ -17,4 +17,4 @@ const PlanSchema = new Schema<IPlan>(
   { timestamps: true }
 );
 
-export const planModel = mongoose.models.Plan || mongoose.model<IPlan>("Plan", PlanSchema)
+export const planModel = mongoose.model<IPlan>("Plan", PlanSchema)
