@@ -2,10 +2,19 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: [
-      "blocks.mvp-subha.me",
-      "images.unsplash.com",
-      "res.cloudinary.com"
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "blocks.mvp-subha.me",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      }
     ],
   },
 };
