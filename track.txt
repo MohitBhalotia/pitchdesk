@@ -1,0 +1,3 @@
+dashboard
+start session
+history
