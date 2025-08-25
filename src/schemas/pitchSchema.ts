@@ -2,7 +2,7 @@ import z from "zod"
 
 const pitchSchema = z.object({
     userId: z.string(),
-    recordingUrl: z.string().url(),
+    duration: z.number(),
     conversationHistory: z.array(
         z.object({
             role: z.enum(["user", "bot"]),

@@ -11,8 +11,8 @@ export async function POST(req: Request){
 
         await PitchModel.create({
             userId: validatedData.userId,
-            recordingUrl: validatedData.recordingUrl,
-            conversationHistory: validatedData.conversationHistory
+            conversationHistory: validatedData.conversationHistory,
+            duration: validatedData.duration
         })
         
         return NextResponse.json({

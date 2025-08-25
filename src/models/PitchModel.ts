@@ -42,10 +42,6 @@ const PitchSchema = new Schema<Pitch>(
             type: Number,
             default: 0
         },
-        recordingUrl: {
-            type: String,
-            default: null
-        },
         conversationHistory: [
             MessageSchema
         ]   
