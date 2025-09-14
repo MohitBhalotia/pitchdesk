@@ -30,6 +30,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export function NavUser({
   user,
@@ -41,6 +42,7 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const router = useRouter()
 
   return (
     <SidebarMenu>
@@ -82,7 +84,7 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
+              <DropdownMenuItem className="cursor-pointer flex items-center gap-2" onClick={() => {router.push('/payment')}}>
                 <Crown />
                 Upgrade Plan
               </DropdownMenuItem>
@@ -93,7 +95,7 @@ export function NavUser({
                 <CreditCard />
                 Payment History
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
+              <DropdownMenuItem className="cursor-pointer flex items-center gap-2" onClick={() => {router.push('/change-password')}}>
                 <Lock/>
                 Change Password
               </DropdownMenuItem>
