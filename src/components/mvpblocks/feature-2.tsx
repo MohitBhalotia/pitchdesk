@@ -63,9 +63,8 @@ export default function FeatureSteps() {
   }, [progress]);
 
   return (
-    <div className={'p-8 md:p-12'}>
-      <div className="mx-auto w-full max-w-7xl">
-        <div className="relative mx-auto mb-12 max-w-2xl sm:text-center">
+      <div className="mx-auto w-full max-w-7xl mt-50">
+        <div className="mx-auto mb-12 max-w-2xl sm:text-center">
           <div className="relative z-10">
             <h2 className="font-geist text-3xl font-bold tracking-tighter md:text-4xl lg:text-5xl">
               Perfect Your Pitch in 2 Steps
@@ -161,6 +160,5 @@ export default function FeatureSteps() {
           </div>
         </div>
       </div>
-    </div>
   );
 }

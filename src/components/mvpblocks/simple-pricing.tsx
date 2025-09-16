@@ -1,8 +1,7 @@
-'use client';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import NumberFlow from '@number-flow/react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+"use client";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -10,111 +9,38 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { cn } from '@/lib/utils';
-import { Sparkles, ArrowRight, Check, Star, Zap, Shield } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+} from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
-const plans = [
-  {
-    id: 'hobby',
-    name: 'Hobby',
-    icon: Star,
-    price: {
-      monthly: 'Free forever',
-      yearly: 'Free forever',
-    },
-    description:
-      'The perfect starting place for your Entrepreneurial journey.',
-    features: [
-      '5 minutes of pitch time',
-      'Includes qna session',
-      'Single-user account',
-      'Personalised Pitch generation',
-      'General english AI VC',
-      'Basic email support',
-    ],
-    cta: 'Get started for free',
-  },
-  {
-    id: 'standard',
-    name: 'Standard',
-    icon: Zap,
-    price: {
-      monthly: 699,
-    },
-    description: 'Everything you need to build and scale your business.',
-    features: [
-      '3 Pitches of 20 minutes each',
-      'Includes a deeper and longer qna session',
-      'Single-user account',
-      '1 English + 1 Hindi general AI VC',
-      'Priority email support',
-      'Analysis and improvement of your pitch',
-      'Pitch improvement suggestions',
-      'Perrsonalised pitch generation',
-    ],
-    cta: 'Subscribe to Standard',
-    popular: true,
-  },
-  {
-    id: 'pro',
-    name: 'Pro',
-    icon: Shield,
-    price: {
-      monthly: 1999,
-    },
-    description: 'Critical security, performance, observability and support.',
-    features: [
-      '10 Pitches of 20 minutes each',
-      'Includes a deeper and longer qna session',
-      '-user account',
-      '6 English + 6 Hindi AI VC',
-      'All 12 having different personalities',
-      'Priority email support',
-      'Analysis and improvement of your pitch',
-      'Pitch improvement suggestions',
-      'Perrsonalised pitch generation',
-    ],
-    cta: 'Contact us',
-  },
-  {
-    id: 'enterprise',
-    name: 'Enterprise',
-    icon: Shield,
-    price: {
-      monthly: 4999,
-    },
-    description: 'Critical security, performance, observability and support.',
-    features: [
-      '25 Pitches of 20 minutes each',
-      'Includes a deeper and longer qna session',
-      '-user account',
-      '6 English + 6 Hindi AI VC',
-      'All 12 having different personalities',
-      'Real time venture capitalists connections',
-      'Priority email support',
-      'Analysis and improvement of your pitch',
-      'Pitch improvement suggestions',
-      'Personalised pitch generation',
-    ],
-    cta: 'Contact us',
-  },
-];
+import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { ArrowRight, Check, IndianRupee, Sparkles } from "lucide-react";
+import { plans } from "@/plans";
+import { useSession } from "next-auth/react";
+
+
 
 export default function SimplePricing() {
-  const [frequency, setFrequency] = useState<string>('monthly');
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
+  const router = useRouter();
+  const {data: session} = useSession(); //useUser();
+  const user = session?.user;
+  // const getCheckoutUrl = async (plan: string) => {
+  //   const response = await axios.post("/api/stripe/checkout", {
+  //     plan: plan,
+  //     email: user?.email as string,
+  //   });
+  //   if (response.data.url) {
+  //     console.log("response.data.url", response.data.url);
+  //     localStorage.setItem('checkoutToken', response.data.token);
+  //     router.push(response.data.url);
+  //   } else {
+  //     toast.error("Failed to get checkout URL");
+  //   }
+  // };
 
   return (
-    <div className="not-prose relative flex w-full flex-col gap-16 overflow-hidden px-4 py-24 text-center sm:px-8">
+    <div id="pricing" className="not-prose mt-20 relative flex w-full flex-col gap-16 overflow-hidden px-4 py-2 mb-10 text-center ">
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div className="bg-primary/10 absolute -top-[10%] left-[50%] h-[40%] w-[60%] -translate-x-1/2 rounded-full blur-3xl" />
         <div className="bg-primary/5 absolute -right-[10%] -bottom-[10%] h-[40%] w-[40%] rounded-full blur-3xl" />
@@ -128,15 +54,16 @@ export default function SimplePricing() {
             className="border-primary/20 bg-primary/5 mb-4 rounded-full px-4 py-1 text-sm font-medium"
           >
             <Sparkles className="text-primary mr-1 h-3.5 w-3.5 animate-pulse" />
-            Pricing Plans
+            Simple, Transparent Pricing
           </Badge>
           <motion.h1
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="from-foreground to-foreground/30 bg-gradient-to-b bg-clip-text text-4xl font-bold text-transparent sm:text-5xl"
+            className="pb-4 from-foreground to-foreground/30 bg-gradient-to-b bg-clip-text text-4xl font-bold text-transparent sm:text-5xl"
           >
-            Pick the perfect plan for your needs
+            Start with our free trial and scale as you grow. No hidden fees, no
+            surprises.
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 10 }}
@@ -149,41 +76,8 @@ export default function SimplePricing() {
           </motion.p>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-        >
-          <Tabs
-            defaultValue={frequency}
-            onValueChange={setFrequency}
-            className="bg-muted/30 inline-block rounded-full p-1 shadow-sm"
-          >
-            <TabsList className="bg-transparent">
-              <TabsTrigger
-                value="monthly"
-                className="data-[state=active]:bg-background rounded-full transition-all duration-300 data-[state=active]:shadow-sm"
-              >
-                Monthly
-              </TabsTrigger>
-              <TabsTrigger
-                value="yearly"
-                className="data-[state=active]:bg-background rounded-full transition-all duration-300 data-[state=active]:shadow-sm"
-              >
-                Yearly
-                <Badge
-                  variant="secondary"
-                  className="bg-primary/10 text-primary hover:bg-primary/15 ml-2"
-                >
-                  20% off
-                </Badge>
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </motion.div>
-
         <div className="mt-8 grid w-full max-w-6xl grid-cols-1 gap-6 md:grid-cols-4">
-          {plans.map((plan, index) => (
+          {Object.values(plans).map((plan, index) => (
             <motion.div
               key={plan.id}
               initial={{ opacity: 0, y: 20 }}
@@ -194,12 +88,12 @@ export default function SimplePricing() {
             >
               <Card
                 className={cn(
-                  'bg-secondary/20 relative h-full w-full text-left transition-all duration-300 hover:shadow-lg',
+                  "bg-secondary/20 relative h-full w-full text-left transition-all duration-300 hover:shadow-lg",
                   plan.popular
-                    ? 'ring-primary/50 dark:shadow-primary/10 shadow-md ring-2'
-                    : 'hover:border-primary/30',
+                    ? "ring-primary/50 dark:shadow-primary/10 shadow-md ring-2"
+                    : "hover:border-primary/30",
                   plan.popular &&
-                    'from-primary/[0.03] bg-gradient-to-b to-transparent',
+                    "from-primary/[0.03] bg-gradient-to-b to-transparent"
                 )}
               >
                 {plan.popular && (
@@ -210,22 +104,22 @@ export default function SimplePricing() {
                     </Badge>
                   </div>
                 )}
-                <CardHeader className={cn('pb-4', plan.popular && 'pt-8')}>
+                <CardHeader className={cn("pb-4", plan.popular && "pt-8")}>
                   <div className="flex items-center gap-2">
                     <div
                       className={cn(
-                        'flex h-8 w-8 items-center justify-center rounded-full',
+                        "flex h-8 w-8 items-center justify-center rounded-full",
                         plan.popular
-                          ? 'bg-primary/10 text-primary'
-                          : 'bg-secondary text-foreground',
+                          ? "bg-primary/10 text-primary"
+                          : "bg-secondary text-foreground"
                       )}
                     >
                       <plan.icon className="h-4 w-4" />
                     </div>
                     <CardTitle
                       className={cn(
-                        'text-xl font-bold',
-                        plan.popular && 'text-primary',
+                        "text-xl font-bold",
+                        plan.popular && "text-primary"
                       )}
                     >
                       {plan.name}
@@ -234,40 +128,16 @@ export default function SimplePricing() {
                   <CardDescription className="mt-3 space-y-2">
                     <p className="text-sm">{plan.description}</p>
                     <div className="pt-2">
-                      {typeof plan.price[
-                        frequency as keyof typeof plan.price
-                      ] === 'number' ? (
                         <div className="flex items-baseline">
-                          <NumberFlow
+                          <span
                             className={cn(
-                              'text-3xl font-bold',
-                              plan.popular ? 'text-primary' : 'text-foreground',
+                              "text-3xl font-bold flex items-center gap-1",
+                              plan.popular ? "text-primary" : "text-foreground"
                             )}
-                            format={{
-                              style: 'currency',
-                              currency: 'USD',
-                              maximumFractionDigits: 0,
-                            }}
-                            value={
-                              plan.price[
-                                frequency as keyof typeof plan.price
-                              ] as number
-                            }
-                          />
-                          <span className="text-muted-foreground ml-1 text-sm">
-                            /month, billed {frequency}
+                          >
+                          <IndianRupee/>{plan.price}
                           </span>
                         </div>
-                      ) : (
-                        <span
-                          className={cn(
-                            'text-2xl font-bold',
-                            plan.popular ? 'text-primary' : 'text-foreground',
-                          )}
-                        >
-                          {plan.price[frequency as keyof typeof plan.price]}
-                        </span>
-                      )}
                     </div>
                   </CardDescription>
                 </CardHeader>
@@ -282,10 +152,10 @@ export default function SimplePricing() {
                     >
                       <div
                         className={cn(
-                          'flex h-5 w-5 items-center justify-center rounded-full',
+                          "flex h-5 w-5 items-center justify-center rounded-full",
                           plan.popular
-                            ? 'bg-primary/10 text-primary'
-                            : 'bg-secondary text-secondary-foreground',
+                            ? "bg-primary/10 text-primary"
+                            : "bg-secondary text-secondary-foreground"
                         )}
                       >
                         <Check className="h-3.5 w-3.5" />
@@ -293,8 +163,8 @@ export default function SimplePricing() {
                       <span
                         className={
                           plan.popular
-                            ? 'text-foreground'
-                            : 'text-muted-foreground'
+                            ? "text-foreground"
+                            : "text-muted-foreground"
                         }
                       >
                         {feature}
@@ -303,18 +173,34 @@ export default function SimplePricing() {
                   ))}
                 </CardContent>
                 <CardFooter>
-                  <Button
-                    variant={plan.popular ? 'default' : 'outline'}
-                    className={cn(
-                      'w-[80%] font-medium transition-all duration-300 absolute bottom-3 right-0 left-0 mx-auto rounded-lg px-6 py-3',
-                      plan.popular
-                        ? 'bg-primary hover:bg-primary/90 hover:shadow-primary/20 hover:shadow-md '
-                        : 'hover:border-primary/30 hover:bg-primary/5 hover:text-primary',
-                    )}
-                  >
-                    {plan.cta}
-                    <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                  </Button>
+                  {user?.role === plan.id ? (
+                    <Button className="w-full font-medium duration-300 bg-white text-black">
+                      Current Plan
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={() => {
+                        if (user) {
+                          console.log("plan", plan);
+                          // getCheckoutUrl(plan.id);
+                          toast.success("Redirecting to checkout...");
+                        } else {
+                          toast.info("Please sign up or log in to continue");
+                          router.push(plan.link || "upgrade");
+                        }
+                      }}
+                      variant={plan.popular ? "default" : "outline"}
+                      className={cn(
+                        "w-full font-medium transition-all duration-300",
+                        plan.popular
+                          ? "bg-primary hover:bg-primary/90 hover:shadow-primary/20 hover:shadow-md"
+                          : "hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
+                      )}
+                    >
+                      <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                      {plan.cta}
+                    </Button>
+                  )}
                 </CardFooter>
 
                 {/* Subtle gradient effects */}

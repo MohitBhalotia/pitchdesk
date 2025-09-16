@@ -2,10 +2,36 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, ArrowRight, Sparkles } from "lucide-react";
+import {
+  Menu,
+  X,
+  ChevronDown,
+  ChevronsUpDown,
+  Sparkles,
+  BadgeCheck,
+  CreditCard,
+  Bell,
+  LogOut,
+} from "lucide-react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { ModeToggle } from "../theme-toggle";
+import Image from "next/image";
+import { Avatar } from "@radix-ui/react-avatar";
+import { AvatarFallback } from "../ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { signOut, useSession } from "next-auth/react";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { Skeleton } from "../ui/skeleton";
 
 interface NavItem {
   name: string;
@@ -31,225 +57,325 @@ const navItems: NavItem[] = [
         href: "$",
         description: "Get Your Perfect Pitch",
       },
-      { name: "Pitch Analysis",
-        href:"#",
-        description: "Detailed Report of Your Pitch"
+      {
+        name: "Pitch Analysis",
+        href: "#",
+        description: "Detailed Report of Your Pitch",
       },
       {
         name: "Pitch Improvement",
-        href:"#",
-        description:"Improve Your Existing Pitch"
-      }
+        href: "#",
+        description: "Improve Your Existing Pitch",
+      },
     ],
   },
   { name: "CrowdFunding", href: "/pricing" },
   { name: "Pricing", href: "/pricing" },
   { name: "About", href: "/about" },
-{ name: "Meet the VCs", href: "/meet-the-vcs" },
+  { name: "Meet the VCs", href: "/meet-the-vcs" },
 ];
-
 export default function Header1() {
+  const { data: session, status } = useSession();
+  const authLoading = status === "loading";
+  const user = session?.user;
+  const router = useRouter();
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast.success("Logged out successfully");
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const { theme } = useTheme();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const headerVariants = {
-    initial: { y: -100, opacity: 0 },
-    animate: { y: 0, opacity: 1 },
-    scrolled: {
-      backdropFilter: "blur(20px)",
-      backgroundColor:
-        theme === "dark" ? "rgba(0, 0, 0, 0.8)" : "rgba(255, 255, 255, 0.8)",
-      boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
-    },
-  };
-
-  const mobileMenuVariants = {
-    closed: { opacity: 0, height: 0 },
-    open: { opacity: 1, height: "auto" },
-  };
-
-  const dropdownVariants = {
-    hidden: { opacity: 0, y: -10, scale: 0.95 },
-    visible: { opacity: 1, y: 0, scale: 1 },
-  };
-
   return (
-    <motion.header
-      className="fixed top-0 right-0 left-0 z-50 transition-all duration-300"
-      variants={headerVariants}
-      initial="initial"
-      animate={isScrolled ? "scrolled" : "animate"}
-      transition={{ duration: 0.3, ease: "easeInOut" }}
-      style={{
-        backdropFilter: isScrolled ? "blur(20px)" : "none",
-        backgroundColor: isScrolled
+    <header
+      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
+        isScrolled
           ? theme === "dark"
-            ? "rgba(0, 0, 0, 0.8)"
-            : "rgba(255, 255, 255, 0.8)"
-          : "transparent",
-        boxShadow: isScrolled ? "0 8px 32px rgba(0, 0, 0, 0.1)" : "none",
-      }}
+            ? "bg-black/80 backdrop-blur shadow-lg"
+            : "bg-white/80 backdrop-blur shadow-lg"
+          : "bg-transparent"
+      }`}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between lg:h-20">
-          <motion.div
-            className="flex items-center space-x-2"
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: "spring", stiffness: 400, damping: 10 }}
-          >
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-rose-500 to-rose-700">
-                <Sparkles className="h-5 w-5 text-white" />
-              </div>
-              <span className="bg-gradient-to-r from-primary to-purple-700 bg-clip-text text-xl font-bold text-transparent">
-                Pitch Desk
-              </span>
-            </Link>
-          </motion.div>
+        {/* Top row */}
+        <div className="flex h-16 items-center justify-between">
+          {/* Logo */}
+          <Link href="/" className="flex items-center space-x-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-blue-800">
+              <Image src="/logo.svg" alt="Logo" width={20} height={20} />
+            </div>
+            <span className="bg-gradient-to-r from-primary to-blue-800 bg-clip-text text-xl font-bold text-transparent">
+              PitchDesk
+            </span>
+          </Link>
 
-          <nav className="hidden items-center space-x-8 lg:flex">
-            {navItems.map((item) => (
-              <div
-                key={item.name}
-                className="relative"
-                onMouseEnter={() =>
-                  item.hasDropdown && setActiveDropdown(item.name)
-                }
-                onMouseLeave={() => setActiveDropdown(null)}
-              >
-                <Link
-                  href={item.href}
-                  className="text-foreground flex items-center space-x-1 font-medium transition-colors duration-200 hover:text-rose-500"
+          {/* Desktop Nav */}
+          <nav className="hidden lg:flex items-center space-x-8">
+            <ul className="flex items-center space-x-6">
+              {navItems.map((item) => (
+                <li
+                  key={item.name}
+                  className="relative"
+                  onMouseEnter={() =>
+                    item.hasDropdown && setActiveDropdown(item.name)
+                  }
+                  onMouseLeave={() => setActiveDropdown(null)}
                 >
-                  <span>{item.name}</span>
-                  {item.hasDropdown && (
-                    <ChevronDown className="h-4 w-4 transition-transform duration-200" />
-                  )}
-                </Link>
-
-                {item.hasDropdown && (
-                  <AnimatePresence>
-                    {activeDropdown === item.name && (
-                      <motion.div
-                        className="border-border bg-background/95 absolute top-full left-0 mt-2 w-64 overflow-hidden rounded-xl border shadow-xl backdrop-blur-lg"
-                        variants={dropdownVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit="hidden"
-                        transition={{ duration: 0.2 }}
-                      >
-                        {item.dropdownItems?.map((dropdownItem) => (
-                          <Link
-                            key={dropdownItem.name}
-                            href={dropdownItem.href}
-                            className="hover:bg-muted block px-4 py-3 transition-colors duration-200"
-                          >
-                            <div className="text-foreground font-medium">
-                              {dropdownItem.name}
-                            </div>
-                            {dropdownItem.description && (
-                              <div className="text-muted-foreground text-sm">
-                                {dropdownItem.description}
-                              </div>
-                            )}
-                          </Link>
-                        ))}
-                      </motion.div>
+                  <Link
+                    href={item.href}
+                    className="flex items-center space-x-1 font-medium text-foreground hover:text-primary transition"
+                  >
+                    <span>{item.name}</span>
+                    {item.hasDropdown && (
+                      <ChevronDown
+                        className={`h-4 w-4 transition-transform ${
+                          activeDropdown === item.name ? "rotate-180" : ""
+                        }`}
+                      />
                     )}
-                  </AnimatePresence>
-                )}
-              </div>
-            ))}
+                  </Link>
+
+                  {/* Dropdown */}
+                  {item.hasDropdown && (
+                    <AnimatePresence>
+                      {activeDropdown === item.name && (
+                        <motion.ul
+                          className={`absolute top-full left-0 mt-2 w-80 rounded-xl border border-border bg-background shadow-xl z-40 ${
+                            item.name === "Solutions"
+                              ? "w-[600px] grid grid-cols-2 gap-6 p-6"
+                              : "p-2"
+                          }`}
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          {item.dropdownItems?.map((dropdown) => (
+                            <li key={dropdown.name}>
+                              <Link
+                                href={dropdown.href}
+                                className="block px-4 py-2 text-sm hover:bg-muted rounded-lg"
+                              >
+                                {dropdown.name}
+                              </Link>
+                            </li>
+                          ))}
+                        </motion.ul>
+                      )}
+                    </AnimatePresence>
+                  )}
+                </li>
+              ))}
+            </ul>
           </nav>
 
-          <div className="hidden items-center space-x-4 lg:flex">
+          {/* Right Side (Auth + Theme) */}
+          <div className="flex items-center gap-2">
             <ModeToggle />
-            <Link
-              href="/login"
-              className="text-foreground font-medium transition-colors duration-200 hover:text-rose-500"
-            >
-              Sign In
-            </Link>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link
-                href="/signup"
-                className="inline-flex items-center space-x-2 rounded-full bg-gradient-to-r from-primary to-purple-700 px-6 py-2.5 font-medium text-white transition-all duration-200 hover:shadow-lg"
-              >
-                <span>Get Started</span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </motion.div>
-          </div>
-          <div>
-            <div className="hidden">
-              <ModeToggle />
+            <div className="hidden lg:flex">
+              {authLoading || user ? (
+                <div className="flex items-center gap-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      {!authLoading ? (
+                        <div className="flex items-center gap-2 hover:bg-muted p-2 rounded-lg">
+                          <Avatar className="h-8 w-8 rounded-lg ">
+                            {/* <AvatarImage src={user.avatar} alt={user.fullName} /> */}
+                            <AvatarFallback className="rounded-lg bg-primary text-primary-foreground">
+                              {user?.fullName?.[0]?.toUpperCase() ||
+                                user?.email?.[0]?.toUpperCase() ||
+                                "U"}
+                            </AvatarFallback>
+                          </Avatar>
+                          {user && user?.fullName}
+                          <ChevronsUpDown className="ml-auto size-4" />
+                        </div>
+                      ) : (
+                        <Skeleton className="h-8 w-40 rounded-lg" />
+                      )}
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+                      side="bottom"
+                      align="end"
+                      sideOffset={4}
+                    >
+                      <DropdownMenuLabel className="p-0 font-normal">
+                        <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                          <Avatar className="h-8 w-8 rounded-lg">
+                            {/* <AvatarImage src={user.avatar} alt={user.fullName} /> */}
+                            <AvatarFallback className="rounded-lg bg-primary text-primary-foreground">
+                              {user?.fullName?.[0]?.toUpperCase() ||
+                                user?.email?.[0]?.toUpperCase() ||
+                                "U"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="grid flex-1 text-left text-sm leading-tight">
+                            <span className="truncate font-medium">
+                              {user && user?.fullName}
+                            </span>
+                            <span className="truncate text-xs">
+                              {user && user?.email}
+                            </span>
+                          </div>
+                        </div>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem>
+                          <Link
+                            href="/upgrade"
+                            className="flex items-center gap-2"
+                          >
+                            <Sparkles />
+                            Upgrade
+                          </Link>
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuGroup>
+                        <DropdownMenuItem>
+                          <BadgeCheck />
+                          Account
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <CreditCard />
+                          Billing
+                        </DropdownMenuItem>
+                        <DropdownMenuItem>
+                          <Bell />
+                          Notifications
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={handleLogout}>
+                        <LogOut />
+                        Log out
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ) : (
+                <div className="hidden lg:flex items-center space-x-4">
+                  <Link
+                    href="/login"
+                    className="hidden lg:block font-medium hover:text-primary transition"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/register"
+                    className="inline-flex items-center space-x-2 rounded-full px-6 py-2.5 font-medium text-white transition-all duration-200 hover:shadow-lg"
+                    style={{
+                      backgroundImage:
+                        "linear-gradient(to right, var(--primary), #1e40af)",
+                    }}
+                  >
+                    Get Started
+                  </Link>
+                </div>
+              )}
             </div>
-            <motion.button
-              className="hover:bg-muted rounded-lg p-2 transition-colors duration-200 lg:hidden"
+            {/* Mobile Menu Button */}
+            <button
+              className="lg:hidden rounded-lg hover:bg-muted transition"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              whileTap={{ scale: 0.95 }}
             >
               {isMobileMenuOpen ? (
                 <X className="h-6 w-6" />
               ) : (
                 <Menu className="h-6 w-6" />
               )}
-            </motion.button>
+            </button>
           </div>
         </div>
+      </div>
 
-        <AnimatePresence>
-          {isMobileMenuOpen && (
-            <motion.div
-              className="overflow-hidden lg:hidden"
-              variants={mobileMenuVariants}
-              initial="closed"
-              animate="open"
-              exit="closed"
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            >
-              <div className="border-border bg-background/95 mt-4 space-y-2 rounded-xl border py-4 shadow-xl backdrop-blur-lg">
-                {navItems.map((item) => (
+      {/* Mobile Nav */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.nav
+            className="lg:hidden mx-4  mt-2 rounded-xl border border-border bg-background shadow-xl backdrop-blur p-4 space-y-2"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <ul className="space-y-2 h-[300px] overflow-auto">
+              {navItems.map((item) => (
+                <li key={item.name}>
                   <Link
-                    key={item.name}
                     href={item.href}
-                    className="text-foreground hover:bg-muted block px-4 py-3 font-medium transition-colors duration-200"
+                    className="block px-2 py-2 rounded-lg font-medium hover:bg-muted"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {item.name}
                   </Link>
-                ))}
-                <div className="space-y-2 px-4 py-2">
+                  {item.hasDropdown &&
+                    item.dropdownItems?.map((dropdown) => (
+                      <ul key={dropdown.name} className="ml-4 mt-1 space-y-1">
+                        <li>
+                          <Link
+                            href={dropdown.href}
+                            className="block px-5 py-1 text-sm text-foreground hover:bg-muted rounded-lg"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                          >
+                            {dropdown.name}
+                          </Link>
+                        </li>
+                      </ul>
+                    ))}
+                </li>
+              ))}
+            </ul>
+            <div className="pt-4 border-t">
+              {user ? (
+                <div className="flex items-center space-x-2">
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarFallback className="bg-primary text-white rounded-lg">
+                      {user?.fullName?.[0]?.toUpperCase() ||
+                        user?.email?.[0]?.toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm font-medium truncate">
+                    {user.fullName}
+                  </span>
+                </div>
+              ) : (
+                <div className="flex flex-col space-y-2">
                   <Link
                     href="/login"
-                    className="text-foreground hover:bg-muted block w-full rounded-lg py-2.5 text-center font-medium transition-colors duration-200"
+                    className="block w-full rounded-lg py-2 text-center font-medium hover:bg-muted"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Sign In
                   </Link>
                   <Link
-                    href="/signup/step1"
-                    className="block w-full rounded-lg bg-gradient-to-r from-primary to-purple-700 py-2.5 text-center font-medium text-white transition-all duration-200 hover:shadow-lg"
+                    href="/register"
+                    className="block w-full rounded-lg bg-gradient-to-r from-primary to-blue-800 py-2 text-center font-medium text-white hover:shadow-lg transition"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Get Started
                   </Link>
                 </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </motion.header>
+              )}
+            </div>
+          </motion.nav>
+        )}
+      </AnimatePresence>
+    </header>
   );
 }

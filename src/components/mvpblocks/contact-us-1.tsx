@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { useState, useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import Earth from '@/components/ui/globe';
-import { SparklesCore } from '@/components/ui/sparkles';
-import { Label } from '@/components/ui/label';
-import { Check, Loader2 } from 'lucide-react';
+import { useState, useRef } from "react";
+import { motion, useInView } from "framer-motion";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import Earth from "@/components/ui/globe";
+import { SparklesCore } from "@/components/ui/sparkles";
+import { Label } from "@/components/ui/label";
+import { Check, Loader2 } from "lucide-react";
 
 export default function ContactUs1() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [message, setMessage] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -25,35 +25,52 @@ export default function ContactUs1() {
     setIsSubmitting(true);
 
     try {
-      // Perform form submission logic here
-      console.log('Form submitted:', { name, email, message });
+      console.log("Form submitted:", { name, email, message });
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      setName('');
-      setEmail('');
-      setMessage('');
+      setName("");
+      setEmail("");
+      setMessage("");
       setIsSubmitted(true);
       setTimeout(() => {
         setIsSubmitted(false);
       }, 5000);
     } catch (error) {
-      console.error('Error submitting form:', error);
+      console.error("Error submitting form:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <section className="bg-background relative w-full overflow-hidden py-16 md:py-24">
+    <section
+      id="contact-us"
+      className="relative w-full overflow-hidden py-16 md:py-24"
+    >
+      {/* Light mode glows */}
       <div
-        className="absolute top-0 left-0 h-[500px] w-[500px] rounded-full opacity-20 blur-[120px]"
+        className="absolute top-0 left-0 h-[500px] w-[500px] rounded-full opacity-20 blur-[120px] dark:hidden"
         style={{
-          background: `radial-gradient(circle at center, #e60a64, transparent 70%)`,
+          background: `radial-gradient(circle at center, #2563eb, transparent 70%)`,
         }}
       />
       <div
-        className="absolute right-0 bottom-0 h-[300px] w-[300px] rounded-full opacity-10 blur-[100px]"
+        className="absolute right-0 bottom-0 h-[300px] w-[300px] rounded-full opacity-10 blur-[100px] dark:hidden"
         style={{
-          background: `radial-gradient(circle at center, #e60a64, transparent 70%)`,
+          background: `radial-gradient(circle at center, #2563eb, transparent 70%)`,
+        }}
+      />
+
+      {/* Dark mode glows */}
+      <div
+        className="absolute top-0 left-0 h-[500px] w-[500px] rounded-full opacity-20 blur-[120px] hidden dark:block"
+        style={{
+          background: `radial-gradient(circle at center, #8b5cf6, transparent 70%)`,
+        }}
+      />
+      <div
+        className="absolute right-0 bottom-0 h-[300px] w-[300px] rounded-full opacity-10 blur-[100px] hidden dark:block"
+        style={{
+          background: `radial-gradient(circle at center, #8b5cf6, transparent 70%)`,
         }}
       />
 
@@ -67,14 +84,16 @@ export default function ContactUs1() {
                   isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }
                 }
                 transition={{ duration: 0.5, delay: 0.1 }}
-                className="flex w-full gap-2"
+                className="flex items-center w-full gap-2"
               >
-                <h2 className="from-foreground to-foreground/80 mb-2 bg-gradient-to-r bg-clip-text text-4xl font-bold tracking-tight text-transparent md:text-5xl">
-                  Contact
-                </h2>
-                <span className="text-primary relative z-10 w-full text-4xl font-bold tracking-tight italic md:text-5xl">
-                  Us
-                </span>
+                <div className="flex itesms-center gap-2 relative">
+                  <h2 className="from-foreground to-foreground/80 mb-2 bg-gradient-to-r bg-clip-text text-4xl font-bold tracking-tight text-transparent md:text-5xl">
+                    Contact
+                  </h2>
+                  <span className="text-primary relative -mt-3 z-10 w-full text-4xl font-bold md:text-5xl">
+                    Us
+                  </span>
+                </div>
                 <SparklesCore
                   id="tsparticles"
                   background="transparent"
@@ -82,7 +101,7 @@ export default function ContactUs1() {
                   maxSize={1.4}
                   particleDensity={500}
                   className="absolute inset-0 top-0 h-24 w-full"
-                  particleColor="#9B40B7"
+                  particleColor="#2563eb"
                 />
               </motion.div>
 
@@ -155,7 +174,7 @@ export default function ContactUs1() {
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-gradient-to-b from-primary to-purple-700 text-white shadow-[0px_2px_0px_0px_rgba(255,255,255,0.3)_inset]"
+                    className="w-full  text-white shadow-[0px_2px_0px_0px_rgba(255,255,255,0.3)_inset] bg gradient from-purple-500 to-purple-700"
                   >
                     {isSubmitting ? (
                       <span className="flex items-center justify-center">
@@ -179,17 +198,17 @@ export default function ContactUs1() {
               initial={{ opacity: 0, x: 20 }}
               animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: 20 }}
               transition={{ duration: 0.5, delay: 0.5 }}
-              className="relative my-8 flex items-center justify-center overflow-hidden pr-8"
+              className="relative my-8 flex items-center justify-center overflow-hidden px-2"
             >
               <div className="flex flex-col items-center justify-center overflow-hidden">
-                <article className="relative mx-auto h-[350px] min-h-60 max-w-[450px] overflow-hidden rounded-3xl border bg-gradient-to-b from-[#b102f6] to-[#e60a64]/5 p-6 text-3xl tracking-tight text-white md:h-[450px] md:min-h-80 md:p-8 md:text-4xl md:leading-[1.05] lg:text-5xl">
-                  Pitch with Power. Train with AI.
+                <article className="relative mx-auto h-[350px] min-h-60 max-w-[450px] overflow-hidden rounded-3xl border bg-gradient-to-b  p-6 text-3xl tracking-tight text-white from-purple-500 to-purple-100/10 md:h-[450px] md:min-h-80 md:p-8 md:text-4xl md:leading-[1.05] lg:text-5xl">
+                  Cutting-edge technology to transform your business
                   <div className="absolute -right-20 -bottom-20 z-10 mx-auto flex h-full w-full max-w-[300px] items-center justify-center transition-all duration-700 hover:scale-105 md:-right-28 md:-bottom-28 md:max-w-[550px]">
                     <Earth
                       scale={1.1}
-                      baseColor={[0.6, 0.4, 0.8]}
+                      baseColor={[0.15, 0.4, 0.9]} // Blue base
                       markerColor={[0, 0, 0]}
-                      glowColor={[0.7, 0.3, 0.9]}
+                      glowColor={[0.6, 0.3, 1]}
                     />
                   </div>
                 </article>
