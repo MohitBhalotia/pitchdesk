@@ -2,9 +2,8 @@
 import { Command } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TextGenerateEffect from "@/components/ui/typewriter";
-import { BorderBeam } from "@/components/ui/border-beam";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 
 export default function AppHero() {
   const router=useRouter()
@@ -51,29 +50,23 @@ export default function AppHero() {
         </div>
       </div>
 
-      <div className="absolute h-[600px] w-full max-w-7xl mt-6 mb-50 ">
-        <div className="mx-auto mt-20 max-w-5xl overflow-hidden rounded-xl animate-in slide-in-from-bottom-8 duration-700 delay-600">
-          <div className="overflow-hidden rounded-xl">
-            <Image
-              fill
-              src="https://i.postimg.cc/FKKY5fRB/lunexa-db.webp"
-              alt="CryptoTrade Dashboard"
-              className="rounded-xl"
+      <motion.div
+          className="relative"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 }}>
+          
+          <div className="border-2 border-black relative mt-10 z-10 mx-auto max-w-5xl rounded-2xl shadow-[0_0_50px_rgba(155,135,245,0.2)]">
+            <div
+              style={{
+                backgroundImage: "var(--dashboard-src)",
+              }}
+              role="img"
+              aria-label="Quick Voice Dashboard"
+              className="h-full w-full aspect-[20/10.5]  rounded-2xl border border-white/10 bg-cover "
             />
           </div>
-        <BorderBeam
-          duration={6}
-          size={400}
-          className="from-transparent via-red-500 to-transparent"
-        />
-        <BorderBeam
-          duration={6}
-          delay={3}
-          size={400}
-          className="from-transparent via-blue-500 to-transparent"
-        />
-        </div>
-      </div>
-    </section>
+        </motion.div>
+    </section>  
   );
 }

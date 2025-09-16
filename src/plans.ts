@@ -50,7 +50,7 @@ export const plans: Record<string, Plan> = {
     ],
     cta: "Subscribe to Standard",
     minutes: 60,
-    popular: true,
+    popular: false,
   },
   pro: {
     id: "pro",
@@ -69,9 +69,9 @@ export const plans: Record<string, Plan> = {
       "Pitch improvement suggestions",
       "Perrsonalised pitch generation",
     ],
-    cta: "Contact us",
+    cta: "Subscribe to Pro",
     minutes: 200,
-    popular: false,
+    popular: true,
   },
   enterprise: {
     id: "enterprise",
@@ -93,6 +93,6 @@ export const plans: Record<string, Plan> = {
     ],
     minutes: 500,
     popular: false,
-    cta: "Contact us",
+    cta: "Subscribe to Enterprise",
   },
 };

@@ -90,7 +90,7 @@ export default function ContactUs1() {
                   <h2 className="from-foreground to-foreground/80 mb-2 bg-gradient-to-r bg-clip-text text-4xl font-bold tracking-tight text-transparent md:text-5xl">
                     Contact
                   </h2>
-                  <span className="text-primary relative -mt-3 z-10 w-full text-4xl font-bold md:text-5xl">
+                  <span className="text-primary relative -mt-2 sm:-mt-3 z-10 w-full text-4xl font-bold md:text-5xl">
                     Us
                   </span>
                 </div>
@@ -202,7 +202,7 @@ export default function ContactUs1() {
             >
               <div className="flex flex-col items-center justify-center overflow-hidden">
                 <article className="relative mx-auto h-[350px] min-h-60 max-w-[450px] overflow-hidden rounded-3xl border bg-gradient-to-b  p-6 text-3xl tracking-tight text-white from-purple-500 to-purple-100/10 md:h-[450px] md:min-h-80 md:p-8 md:text-4xl md:leading-[1.05] lg:text-5xl">
-                  Cutting-edge technology to transform your business
+                  Pitch with Power Practice with AI!
                   <div className="absolute -right-20 -bottom-20 z-10 mx-auto flex h-full w-full max-w-[300px] items-center justify-center transition-all duration-700 hover:scale-105 md:-right-28 md:-bottom-28 md:max-w-[550px]">
                     <Earth
                       scale={1.1}
