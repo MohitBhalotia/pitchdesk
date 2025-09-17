@@ -3,6 +3,7 @@ import crypto from "crypto"
 import { orderModel } from "@/models/OrderModel"
 import { userPlanModel } from "@/models/UserPlanModel";
 import dbConnect from "@/lib/db";
+import { activateUserPlan } from "@/lib/razorpayUtils";
 
 export async function POST(req: NextRequest){
   await dbConnect()
@@ -27,16 +28,9 @@ export async function POST(req: NextRequest){
       return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
     }
 
-    order.status = "paid";
-    order.razorPaymentId = razorpay_payment_id;
-    await order.save();
+    console.log("verify active")
 
-    await userPlanModel.create({
-      userId: order.userId,
-      planId: order.planId,
-      isActive: true,
-      usage: { pitchNumberUsed: 0, pitchTimeUsed: 0 },
-    });
+    await activateUserPlan(razorpay_order_id, razorpay_payment_id)
 
     return NextResponse.json({ success: true });
 
