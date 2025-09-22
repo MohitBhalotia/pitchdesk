@@ -18,8 +18,8 @@ import { motion } from 'framer-motion';
 
 const plans = [
   {
-    id: 'hobby',
-    name: 'Hobby',
+    id: 'free',
+    name: 'Free',
     icon: Star,
     price: {
       monthly: 'Free forever',
@@ -75,9 +75,9 @@ const plans = [
       'Priority email support',
       'Analysis and improvement of your pitch',
       'Pitch improvement suggestions',
-      'Perrsonalised pitch generation',
+      'Personalised pitch generation',
     ],
-    cta: 'Contact us',
+    cta: 'Subscribe to Pro',
   },
   {
     id: 'enterprise',

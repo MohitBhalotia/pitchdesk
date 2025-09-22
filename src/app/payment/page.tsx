@@ -86,7 +86,7 @@ const TIERS = [
 
 
 const PopularBackground = () => (
-  <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(240,119,119,0.1),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(220,119,118,0.3),rgba(255,255,255,0))]" />
+  <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(240,119,119,0.1),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(220,119,118,0.3),rgba(255,255,255,0))] pointer-events-none" />
 );
 
 const Tab = ({
@@ -292,9 +292,9 @@ export default function PricingSection() {
 
 
   return (
-    <section className="flex flex-col items-center gap-10 py-10">
+    <section className="flex flex-col items-center gap-10 py-10 bg-gray-100 dark:bg-[#111]">
       <div className="space-y-7 text-center">
-        <div className="space-y-4">
+        <div className="space-y-4 ">
           <h1 className="text-4xl font-medium md:text-5xl">
             Plans and Pricing
           </h1>

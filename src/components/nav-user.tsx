@@ -91,7 +91,7 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
+              <DropdownMenuItem className="cursor-pointer flex items-center gap-2" onClick={() => {router.push('/payment-history')}}>
                 <CreditCard />
                 Payment History
               </DropdownMenuItem>

@@ -46,7 +46,7 @@ const userSchema = new Schema<User>(
     },
     userPlan: {
       type: String,
-      enum: ["free", "starter", "professional", "enterprise"],
+      enum: ["free", "standard", "pro", "enterprise"],
       required: true,
     },
     signupStep2Done: {
