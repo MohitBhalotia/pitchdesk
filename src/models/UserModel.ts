@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Model, Schema } from "mongoose";
 //import { boolean } from "zod";
 
 const userSchema = new Schema<User>(
@@ -63,6 +63,6 @@ const userSchema = new Schema<User>(
   { timestamps: true }
 );
 
-const UserModel =mongoose.model<User>("User", userSchema);
+const UserModel:Model<User> =mongoose.models.User || mongoose.model<User>("User", userSchema);
 
 export default UserModel;

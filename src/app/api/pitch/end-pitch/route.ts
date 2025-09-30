@@ -8,19 +8,30 @@ export async function POST(req: Request){
     try{
         const body = await req.json()
         const validatedData = pitchSchema.parse(body)
-
-        await PitchModel.create({
-            userId: validatedData.userId,
-            conversationHistory: validatedData.conversationHistory,
-            duration: validatedData.duration
-        })
-        
+        const pitch = await PitchModel.findById(validatedData.sessionId)
+        if(!pitch) return NextResponse.json({
+            success: false,
+            message: "Pitch not found"
+        }, {status: 404})
+        pitch.endTime = new Date()
+        pitch.conversationHistory = validatedData.conversationHistory
+        .filter((message) => message.type === "ConversationText")
+        .map((message) => ({
+          role: message.role,
+          content: message.content,
+          timestamp: message.timeStamp,
+        }));
+      
+        pitch.duration = (pitch.endTime.getTime() - pitch.startTime.getTime())/1000
+        await pitch.save()
+        // TODO: Deduct agent minutes from user
         return NextResponse.json({
             success: true,
             message: "pitch session stored successfully"
         })
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }catch(error: any){
+        console.error("Error ending pitch", error)
         if(error.errors){
             return NextResponse.json({
                 error: error.errors

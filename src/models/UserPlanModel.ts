@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose"
+import mongoose, { Model, Schema } from "mongoose"
 
 const UserPlanSchema = new Schema<IUserPlan>(
   {
@@ -13,4 +13,4 @@ const UserPlanSchema = new Schema<IUserPlan>(
   { timestamps: true }
 );
 
-export const userPlanModel = mongoose.model<IUserPlan>("UserPlan", UserPlanSchema)
+export const userPlanModel:Model<IUserPlan> =mongoose.models.UserPlan || mongoose.model<IUserPlan>("UserPlan", UserPlanSchema)

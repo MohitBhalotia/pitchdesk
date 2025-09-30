@@ -7,7 +7,11 @@ import { usePathname } from "next/navigation";
 import Transcript from "./Transcript";
 import { useDeepgram } from "../context/DeepgramContextProvider";
 import { useMicrophone } from "../context/MicrophoneContextProvider";
-import { EventType, useVoiceBot, VoiceBotStatus } from "../context/VoiceBotContextProvider";
+import {
+  EventType,
+  useVoiceBot,
+  VoiceBotStatus,
+} from "../context/VoiceBotContextProvider";
 import { createAudioBuffer, playAudioBuffer } from "../utils/audioUtils";
 import { sendSocketMessage, sendMicToSocket } from "../utils/deepgramUtils";
 import { isMobile } from "react-device-detect";
@@ -41,14 +45,22 @@ export const App = ({
     microphoneAudioContext,
     startMicrophone,
   } = useMicrophone();
-  const { socket, connectToDeepgram, socketState, rateLimited } = useDeepgram();
+
+  const {
+    socket,
+    connectToDeepgram,
+    socketState,
+    rateLimited,
+    addTranscriptMessage,
+  } = useDeepgram();
   const audioContext = useRef(null);
   const agentVoiceAnalyser = useRef(null);
   const userVoiceAnalyser = useRef(null);
   const startTimeRef = useRef(-1);
   const [data, setData] = useState();
-  const [isInitialized, setIsInitialized] = useState(requiresUserActionToInitialize ? false : null);
-
+  const [isInitialized, setIsInitialized] = useState(
+    requiresUserActionToInitialize ? false : null
+  );
   const scheduledAudioSources = useRef([]);
   const pathname = usePathname();
 
@@ -58,7 +70,8 @@ export const App = ({
    */
   useEffect(() => {
     if (!audioContext.current) {
-      audioContext.current = new (window.AudioContext || window.webkitAudioContext)({
+      audioContext.current = new (window.AudioContext ||
+        window.webkitAudioContext)({
         latencyHint: "interactive",
         sampleRate: 24000,
       });
@@ -76,7 +89,12 @@ export const App = ({
     const audioBuffer = createAudioBuffer(audioContext.current, data);
     if (!audioBuffer) return;
     scheduledAudioSources.current.push(
-      playAudioBuffer(audioContext.current, audioBuffer, startTimeRef, agentVoiceAnalyser.current),
+      playAudioBuffer(
+        audioContext.current,
+        audioBuffer,
+        startTimeRef,
+        agentVoiceAnalyser.current
+      )
     );
   }, []);
 
@@ -134,7 +152,6 @@ export const App = ({
        */
 
       const onOpen = async () => {
-
         sendSocketMessage(socket, defaultStsConfig);
         startMicrophone();
         startListening(true);
@@ -199,18 +216,22 @@ export const App = ({
   const onMessage = useCallback(
     async (event) => {
       if (event.data instanceof ArrayBuffer) {
-        if (status !== VoiceBotStatus.SLEEPING && !isWaitingForUserVoiceAfterSleep.current) {
+        if (
+          status !== VoiceBotStatus.SLEEPING &&
+          !isWaitingForUserVoiceAfterSleep.current
+        ) {
           bufferAudio(event.data); // Process the ArrayBuffer data to play the audio
         }
       } else {
         console.log(event?.data);
         // Handle other types of messages such as strings
+        addTranscriptMessage(event.data);
         setData(event.data);
         onMessageEvent(event.data);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [bufferAudio, status],
+    [bufferAudio, status]
   );
 
   /**
@@ -221,7 +242,8 @@ export const App = ({
     if (
       microphoneState === 1 &&
       socketState === -1 &&
-      (!requiresUserActionToInitialize || (requiresUserActionToInitialize && isInitialized))
+      (!requiresUserActionToInitialize ||
+        (requiresUserActionToInitialize && isInitialized))
     ) {
       connectToDeepgram();
     }
@@ -245,10 +267,6 @@ export const App = ({
     }
   }, [socket, onMessage]);
 
-  
-
-  
-
   /**
    * Manage responses to incoming data from WebSocket.
    * This useEffect primarily handles string-based data that is expected to represent JSON-encoded messages determining actions based on the nature of the message
@@ -269,7 +287,11 @@ export const App = ({
         /**
          * When the user says something, add it to the conversation queue.
          */
-        if (status !== VoiceBotStatus.SLEEPING && data.type === "History" && userTranscript !== "") {
+        if (
+          status !== VoiceBotStatus.SLEEPING &&
+          data.type === "History" &&
+          userTranscript !== ""
+        ) {
           addVoicebotMessage({ user: userTranscript });
         }
       };
@@ -279,10 +301,13 @@ export const App = ({
        */
       const assistantRole = (data) => {
         console.log(data);
-        if (status !== VoiceBotStatus.SLEEPING &&  !isWaitingForUserVoiceAfterSleep.current) {
+        if (
+          status !== VoiceBotStatus.SLEEPING &&
+          !isWaitingForUserVoiceAfterSleep.current
+        ) {
           startSpeaking();
           const assistantTranscript = data.content;
-          if(data.type === "History" && assistantTranscript !== "") {
+          if (data.type === "History" && assistantTranscript !== "") {
             addVoicebotMessage({ assistant: assistantTranscript });
           }
         }
@@ -411,21 +436,29 @@ export const App = ({
         onOrbClick={handleVoiceBotAction}
       />
       {!microphone ? (
-        <div className="text-base text-gray-25 text-center w-full">Loading microphone...</div>
+        <div className="text-base text-gray-25 text-center w-full">
+          Loading microphone...
+        </div>
       ) : (
         <Fragment>
           {socketState === -1 && requiresUserActionToInitialize && (
-            <button className="text-center w-full" onClick={handleVoiceBotAction}>
+            <button
+              className="text-center w-full"
+              onClick={handleVoiceBotAction}
+            >
               <span className="text-xl">Tap to start!</span>
             </button>
           )}
           {socketState === 0 && (
-            <div className="text-base text-gray-25 text-center w-full">Loading...</div>
+            <div className="text-base text-gray-25 text-center w-full">
+              Loading...
+            </div>
           )}
           {socketState > 0 && status === VoiceBotStatus.SLEEPING && (
             <div className="text-xl flex flex-col items-center justify-center mt-4 mb-10 md:mt-4 md:mb-10">
               <div className="text-gray-450 text-sm">
-                I&apos;ve stopped listening. {isMobile ? "Tap" : "Click"} the orb to resume.
+                I&apos;ve stopped listening. {isMobile ? "Tap" : "Click"} the
+                orb to resume.
               </div>
             </div>
           )}

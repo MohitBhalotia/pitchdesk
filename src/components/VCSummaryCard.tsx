@@ -42,7 +42,7 @@ const VCSummaryCard: React.FC<VCSummaryCardProps> = ({
       <p className="text-muted-foreground text-sm italic flex-grow">
         &ldquo;{tagline}&rdquo;
       </p>
-      <a href={agentLink} target="_blank" >
+      <a href={`/start-pitch?agentId=${agentLink}`} target="_blank" >
         <Button className="mt-4 font-semibold py-4 flex items-center justify-center" variant="default" type="button" size="default">
           <span className="text-base">Start</span>
         <ArrowUpRight className="w-4 h-4 ml-2" />

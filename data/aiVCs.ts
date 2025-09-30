@@ -25,7 +25,7 @@ export const vcs: VC[] = [
       "Offers more than capital — brings strategic value and vision"
     ],
     image: "https://res.cloudinary.com/mohitbhalotia/image/upload/v1755015127/Mark_Cuban_bctoyu.jpg",
-    agentLink: "https://pitchdesk.vercel.app/start-pitch?agentId=689a45f989f40f995de7356b"
+    agentLink: "689a45f989f40f995de7356b"
   },
   {
     id: "kevin-oleary",
@@ -45,7 +45,7 @@ export const vcs: VC[] = [
       "Communicates directly — no sugar-coating"
     ],
     image: "https://res.cloudinary.com/mohitbhalotia/image/upload/v1755015127/Kevin_qd6hox.jpg",
-    agentLink: "https://pitchdesk.vercel.app/start-pitch?agentId=689b10c587ca77bb1ee1e293"
+    agentLink: "689b10c587ca77bb1ee1e293"
   },
   {
     id: "lori-greiner",
@@ -65,7 +65,7 @@ export const vcs: VC[] = [
       "Builds long-term, collaborative relationships"
     ],
     image: "https://res.cloudinary.com/mohitbhalotia/image/upload/v1755015127/Lori_cmumd0.jpg",
-    agentLink: "https://pitchdesk.vercel.app/start-pitch?agentId=689b111c87ca77bb1ee1e295"
+    agentLink: "689b111c87ca77bb1ee1e295"
   },
   {
     id: "barbara-corcoran",
@@ -85,7 +85,7 @@ export const vcs: VC[] = [
       "Builds trust-based relationships with founders"
     ],
     image: "https://res.cloudinary.com/mohitbhalotia/image/upload/v1755015127/Barbara_iaidsx.jpg",
-    agentLink: "https://pitchdesk.vercel.app/start-pitch?agentId=689b116687ca77bb1ee1e297"
+    agentLink: "689b116687ca77bb1ee1e297"
   },
   {
     id: "daymond-john",
@@ -105,7 +105,7 @@ export const vcs: VC[] = [
       "Communicates with empathy, patience, and personal insight"
     ],
     image: "https://res.cloudinary.com/mohitbhalotia/image/upload/v1755015127/Daymond_glmsjl.jpg",
-    agentLink: "https://pitchdesk.vercel.app/start-pitch?agentId=689b0fae87ca77bb1ee1e28f"
+    agentLink: "689b0fae87ca77bb1ee1e28f"
   },
   {
     id: "robert-herjavec",
@@ -125,7 +125,7 @@ export const vcs: VC[] = [
       "Communicates with warmth, professionalism, and clarity"
     ],
     image: "https://res.cloudinary.com/mohitbhalotia/image/upload/v1755015127/Robert_yelk0t.jpg",
-    agentLink: "https://pitchdesk.vercel.app/start-pitch?agentId=689b105987ca77bb1ee1e291"
+    agentLink: "689b105987ca77bb1ee1e291"
   },
   
   

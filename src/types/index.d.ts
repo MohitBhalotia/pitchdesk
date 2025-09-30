@@ -26,9 +26,11 @@ declare global {
 
   export interface Pitch extends Document {
     userId: mongoose.Schema.Types.ObjectId | null;
-    recordingUrl: string | null;
-    duration: number;
-    conversationHistory: Message[];
+    lastUpdated: Date;
+    startTime: Date;
+    endTime: Date | null;
+    duration?: number;
+    conversationHistory?: Message[];
   }
 
   // export interface Conversation {
@@ -40,7 +42,7 @@ declare global {
   export interface Message {
     role: "user" | "bot";
     content: string;
-    timestamp: Date
+    timestamp: string
   }
 
   export interface IPlan extends document {

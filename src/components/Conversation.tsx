@@ -78,7 +78,7 @@ function Conversation() {
     >
       <div className="h-full flex flex-col justify-between">
         
-        <div className="flex justify-center border-b border-gray-800 shadow-xl py-4 mx-8 text-lg font-bold text-gray-450">
+        <div className="flex justify-center border-b text-white border-gray-800 shadow-xl py-4 mx-8 text-lg font-bold text-gray-450">
           Conversation transcript:
         </div>
 

@@ -1,22 +1,28 @@
 import { convertFloat32ToInt16, downsample } from "../utils/audioUtils";
 
 export const getAuthToken = async () => {
-  const result = await (await fetch(("/api/authenticate"), { method: "POST" })).json();
+  const result = await (
+    await fetch("/api/authenticate", { method: "POST" })
+  ).json();
 
   return result.access_token;
 };
 
-export const sendMicToSocket = (socket: WebSocket) => (event: AudioProcessingEvent) => {
-  const inputData = event?.inputBuffer?.getChannelData(0);
-  const downsampledData = downsample(inputData, 48000, 16000);
-  const audioDataToSend = convertFloat32ToInt16(downsampledData);
-  socket.send(audioDataToSend);
-};
-
-
+export const sendMicToSocket =
+  (socket: WebSocket) => (event: AudioProcessingEvent) => {
+    const inputData = event?.inputBuffer?.getChannelData(0);
+    const downsampledData = downsample(inputData, 48000, 16000);
+    const audioDataToSend = convertFloat32ToInt16(downsampledData);
+    
+    if (socket.readyState === WebSocket.OPEN) {
+      socket.send(audioDataToSend);
+    }
+  };
 
 export const sendSocketMessage = (socket: WebSocket, message: DGMessage) => {
-  socket.send(JSON.stringify(message));
+  if (socket.readyState === WebSocket.OPEN) {
+    socket.send(JSON.stringify(message));
+  }
 };
 
 export const sendKeepAliveMessage = (socket: WebSocket) => () => {
@@ -108,5 +114,3 @@ export type DGMessage =
   | { type: "UpdatePrompt"; prompt: string }
   | { type: "UpdateSpeak"; speak: SpeakConfig }
   | { type: "KeepAlive" };
-
-

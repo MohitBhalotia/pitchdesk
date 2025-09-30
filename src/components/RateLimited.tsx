@@ -1,6 +1,7 @@
 "use client";
 import { type FC } from "react";
 import { Refresh } from "./icons/Refresh";
+import { Button } from "./ui/button";
 
 const RateLimited: FC = () => {
   return (
@@ -1304,17 +1305,19 @@ const RateLimited: FC = () => {
           </defs>
         </svg>
       </div>
-      <span>
+      <span className="text-white">
         Looks like everyone’s trying out our voice agent at the same time. Give it a moment and try
         again soon, we’ll be ready!
       </span>
-      <button
+      <Button
         onClick={() => window.location.reload()}
-        className="rounded bg-green-spring text-[#101014] py-3 px-6 font-semibold text-inter capitalize flex gap-1 items-center"
+        variant="outline"
+        size="icon"
+        className="rounded-lg hover:bg-white/80 font-semibold text-inter capitalize flex gap-1 items-center"
       >
         <Refresh />
-        Refresh
-      </button>
+        {/* Refresh */}
+      </Button>
     </div>
   );
 };

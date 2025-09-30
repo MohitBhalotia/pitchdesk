@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose"
+import mongoose, { Model, Schema } from "mongoose"
 
 const PlanSchema = new Schema<IPlan>(
   {
@@ -17,4 +17,4 @@ const PlanSchema = new Schema<IPlan>(
   { timestamps: true }
 );
 
-export const planModel = mongoose.model<IPlan>("Plan", PlanSchema)
+export const planModel:Model<IPlan> =mongoose.models.Plan || mongoose.model<IPlan>("Plan", PlanSchema)
