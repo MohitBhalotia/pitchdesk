@@ -321,8 +321,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Moon, Sun, Download, Loader2 } from "lucide-react"
-import { useTheme } from "next-themes"
+import {  Download, Loader2 } from "lucide-react"
 import jsPDF from "jspdf"
 
 import { Button } from "@/components/ui/button"
@@ -641,21 +640,12 @@ const fields = [
   },
 ]
 
-function ThemeToggle() {
-  const { theme, setTheme } = useTheme()
-
-  return (
-    <Button variant="outline" size="icon" onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
-      <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-      <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-      <span className="sr-only">Toggle theme</span>
-    </Button>
-  )
-}
 
 export default function PitchGenerator() {
   const [pitch, setPitch] = useState("")
   const [loading, setLoading] = useState(false)
+  const [currentStep, setCurrentStep] = useState(0)
+  const [formData, setFormData] = useState<Record<string, string>>({})
 
   // Group fields by category
   const fieldsByCategory = fields.reduce(
@@ -669,15 +659,45 @@ export default function PitchGenerator() {
     {} as Record<string, typeof fields>,
   )
 
+  const categories = Object.keys(fieldsByCategory)
+  const totalSteps = categories.length
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const nextStep = () => {
+    if (currentStep < totalSteps - 1) {
+      setCurrentStep(prev => prev + 1)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
+
+  const prevStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep(prev => prev - 1)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
-    const formData = new FormData(e.currentTarget)
+
+    // Create FormData from our form state
+    const formDataToSubmit = new FormData()
+    Object.entries(formData).forEach(([key, value]) => {
+      formDataToSubmit.append(key, value)
+    })
 
     try {
       const res = await fetch("http://127.0.0.1:8000/generate-pitch", {
         method: "POST",
-        body: formData,
+        body: formDataToSubmit,
       })
       const result = await res.json()
       setPitch(result.pitch || "No pitch generated.")
@@ -724,7 +744,7 @@ export default function PitchGenerator() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-4xl font-bold tracking-tight">Startup Pitch Generator</h1>
@@ -732,104 +752,173 @@ export default function PitchGenerator() {
               Create a compelling pitch for your startup by filling out the form below
             </p>
           </div>
-          <ThemeToggle />
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {Object.entries(fieldsByCategory).map(([category, categoryFields]) => (
-                <Card key={category}>
-                  <CardHeader>
-                    <CardTitle className="text-xl">{category}</CardTitle>
-                    <CardDescription>Fill out the relevant information for this section</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    {categoryFields.map((field) => (
-                      <div key={field.name} className="space-y-2">
-                        <Label htmlFor={field.name} className="text-sm font-medium">
-                          {field.label}
-                          {field.required && (
-                            <Badge variant="destructive" className="ml-2 text-xs">
-                              Required
-                            </Badge>
-                          )}
-                        </Label>
-                        {field.name === "website" ? (
-                          <Input
-                            id={field.name}
-                            name={field.name}
-                            type="url"
-                            placeholder="https://example.com"
-                            required={field.required}
-                            className="w-full"
-                          />
-                        ) : (
-                          <Textarea
-                            id={field.name}
-                            name={field.name}
-                            rows={3}
-                            required={field.required}
-                            className="w-full resize-none"
-                            placeholder={`Enter ${field.label.toLowerCase()}...`}
-                          />
-                        )}
+
+        <div className="mb-8">
+          <div className="relative w-full h-14 bg-gray-800/60 rounded-full shadow-inner overflow-hidden">
+            {/* Filled progress background */}
+            <div
+              className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-purple-600 transition-all duration-500 rounded-full"
+              style={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
+            ></div>
+
+            {/* Steps */}
+            <div className="relative flex justify-between items-center h-full px-4">
+              {categories.map((category, index) => {
+                const isActive = index === currentStep;
+                return (
+                  <div
+                    key={category}
+                    className={`flex-1 text-center text-sm font-medium transition-all duration-300 
+              ${isActive ? "text-white font-semibold" : "text-gray-300"}
+            `}
+                  >
+                    {/* {isActive ? (
+                      <div className="relative">
+                        <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-lg">
+                          {category}
+                        </div>
                       </div>
-                    ))}
-                  </CardContent>
-                </Card>
+                    ) : (
+                      category
+                    )} */}
+                    {category}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+
+
+        <div className={`grid gap-8 ${currentStep === totalSteps - 1 ? 'lg:grid-cols-3' : 'lg:grid-cols-1'}`}>
+          <div className={currentStep === totalSteps - 1 ? 'lg:col-span-2' : ''}>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {Object.entries(fieldsByCategory).map(([category, categoryFields], index) => (
+                <div key={category} className={currentStep !== index ? 'hidden' : ''}>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-xl">{category}</CardTitle>
+                      <CardDescription>Fill out the relevant information for this section</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      {categoryFields.map((field) => (
+                        <div key={field.name} className="space-y-2">
+                          <Label htmlFor={field.name} className="text-sm font-medium">
+                            {field.label}
+                            {field.required && (
+                              <Badge variant="destructive" className="ml-2 text-xs">
+                                Required
+                              </Badge>
+                            )}
+                          </Label>
+                          {field.name === "website" ? (
+                            <Input
+                              id={field.name}
+                              name={field.name}
+                              type="url"
+                              placeholder="https://example.com"
+                              required={field.required}
+                              className="w-full"
+                              value={formData[field.name] || ''}
+                              onChange={handleInputChange}
+                            />
+                          ) : (
+                            <Textarea
+                              id={field.name}
+                              name={field.name}
+                              rows={3}
+                              required={field.required}
+                              className="w-full resize-none"
+                              placeholder={`Enter ${field.label.toLowerCase()}...`}
+                              value={formData[field.name] || ''}
+                              onChange={handleInputChange}
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </div>
               ))}
 
-              <div className="flex justify-center pt-6">
-                <Button type="submit" size="lg" disabled={loading} className="w-full max-w-md">
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generating Pitch...
-                    </>
-                  ) : (
-                    "Generate Pitch"
-                  )}
+              <div className="flex justify-between pt-6">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={prevStep}
+                  disabled={currentStep === 0 || loading}
+                >
+                  Previous
                 </Button>
+
+                {currentStep < totalSteps - 1 ? (
+                  <Button
+                    type="button"
+                    onClick={nextStep}
+                  >
+                    Next
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    size="lg"
+                    disabled={loading}
+                    className="w-full max-w-md"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Generating Pitch...
+                      </>
+                    ) : (
+                      "Generate Pitch"
+                    )}
+                  </Button>
+                )}
               </div>
             </form>
           </div>
 
-          <div className="lg:col-span-1">
-            <div className="sticky top-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    Generated Pitch
-                    {pitch && (
-                      <Button variant="outline" size="sm" onClick={downloadPDF} className="ml-2 bg-transparent">
-                        <Download className="h-4 w-4 mr-2" />
-                        PDF
-                      </Button>
+          {currentStep === totalSteps - 1 && (
+            <div className="lg:col-span-1">
+              <div className="sticky top-8">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      Generated Pitch
+                      {pitch && (
+                        <Button variant="outline" size="sm" onClick={downloadPDF} className="ml-2 bg-transparent">
+                          <Download className="h-4 w-4 mr-2" />
+                          PDF
+                        </Button>
+                      )}
+                    </CardTitle>
+                    <CardDescription>Your generated pitch will appear here</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {loading ? (
+                      <div className="flex items-center justify-center py-8">
+                        <Loader2 className="h-8 w-8 animate-spin" />
+                      </div>
+                    ) : pitch ? (
+                      <div className="prose prose-sm dark:prose-invert max-w-none">
+                        <div className="whitespace-pre-line text-sm leading-relaxed">{pitch}</div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <p>{'Fill out the form and click "Generate Pitch" to see your startup pitch here.'}</p>
+                      </div>
                     )}
-                  </CardTitle>
-                  <CardDescription>Your generated pitch will appear here</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {loading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="h-8 w-8 animate-spin" />
-                    </div>
-                  ) : pitch ? (
-                    <div className="prose prose-sm dark:prose-invert max-w-none">
-                      <div className="whitespace-pre-line text-sm leading-relaxed">{pitch}</div>
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <p>{'Fill out the form and click "Generate Pitch" to see your startup pitch here.'}</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
-    </div>
+    </div >
   )
 }
