@@ -11,6 +11,10 @@ import {
   Crown,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
+import { toast } from "sonner";
+import { useEffect, useState } from "react";
+
 
 
 // interface ActivityItem {
@@ -247,15 +251,38 @@ export default function Index() {
     email: session?.user?.email || "user@email.com",
     avatar: session?.user?.image || "/placeholder.svg",
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    tier: (session?.user as any)?.tier || "Free",
-    sessionsUsed: 3, // Optionally, fetch from API or user object if available
-    sessionsLimit: 10, // Optionally, fetch from API or user object if available
+
   };
+
+  const [userStats, setUserStats] = useState<any>({});
+
+  // Fetch user plan ,no of pitch used and limit etc
+  useEffect(() => {
+    if (!session?.user?._id) return; // wait until session is loaded
+  
+    const fetchUserPlan = async () => {
+      try {
+        const response = await axios.get("/api/users/stats", {
+          params: { userId: session.user._id },
+        });
+        setUserStats(response.data);
+
+        console.log(response.data);
+      } catch (err) {
+        toast.error("Error fetching user stats.");
+        console.error("Error fetching user stats:", err);
+      }
+    };
+  
+    fetchUserPlan();
+  }, [session?.user?._id]); // re-run when user id becomes available
+  
+
 
   const stats = [
     {
       title: "Total Pitches Practiced",
-      value: 24,
+      value: userStats?.usedPitches,
       icon: <Play className="h-6 w-6" />,
       // trend: "+12% this month",
       // trendUp: true
@@ -284,7 +311,7 @@ export default function Index() {
     {
       title: "Remaining Sessions",
       // value: user.sessionsLimit - user.sessionsUsed,
-      value: `${user.sessionsUsed}/${user.sessionsLimit}`,
+      value: `${userStats?.remainingPitches}/${userStats?.totalPitches}`,
       icon: <Zap className="h-6 w-6" />,
       // trend: `${user.sessionsUsed}/${user.sessionsLimit} used`,
       // trendUp: false
@@ -297,7 +324,7 @@ export default function Index() {
       description: "Practice your pitch with our AI VC agents",
       icon: <Play className="h-6 w-6 text-teal-400" />,
       onClick: () => router.push("/start-a-pitch"),
-      disabled: user.sessionsUsed >= user.sessionsLimit && user.tier === "Free",
+      disabled: userStats?.remainingPitches <= 0,
     },
     {
       title: "Generate New Pitch Document",
@@ -316,7 +343,7 @@ export default function Index() {
       description: "Network with actual venture capitalists",
       icon: <Users className="h-6 w-6 text-pink-400" />,
       onClick: () => console.log("Connect with VCs"),
-      disabled: user.tier === "Free",
+      disabled: userStats?.planName === "Free",
       premium: true,
     },
   ];
@@ -362,11 +389,11 @@ export default function Index() {
               Welcome back, {user.name}!
             </h1>
             <p className="text-lg text-muted-foreground mb-2">
-              Ready to perfect your pitch? Your <span className="font-semibold text-teal-500">{user.tier}</span> plan gives you access to powerful AI coaching.
+              Ready to perfect your pitch? Your <span className="font-semibold text-teal-500">{userStats?.planName}</span> plan gives you access to powerful AI coaching.
             </p>
           </div>
           <div className="flex items-center gap-4">
-            {user.tier !== "Premium" && (
+            {userStats?.planName !== "enterprise" && (
               <button onClick={() => router.push('/payment')} className="px-7 py-2 bg-gradient-to-r from-teal-500 to-violet-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-teal-500/30 transition-all">
                 Upgrade Plan
               </button>

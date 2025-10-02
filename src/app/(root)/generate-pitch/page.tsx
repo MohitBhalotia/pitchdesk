@@ -1,335 +1,24 @@
-// "use client"
-
-// import { useState } from "react";
-
-// const fields = [
-//   {
-//     label: "Company Name",
-//     name: "companyName",
-//     required: true,
-//   },
-//   {
-//     label: "Tagline",
-//     name: "tagline",
-//   },
-//   {
-//     label: "Industry",
-//     name: "industry",
-//   },
-//   {
-//     label: "Founded",
-//     name: "founded",
-//   },
-//   {
-//     label: "Headquarters",
-//     name: "headquarters",
-//   },
-//   {
-//     label: "Website",
-//     name: "website",
-//   },
-//   {
-//     label: "Problem Statement",
-//     name: "problemStatement",
-//   },
-//   {
-//     label: "Solution Description",
-//     name: "solutionDescription",
-//   },
-//   {
-//     label: "Unique Value Proposition",
-//     name: "uniqueValueProposition",
-//   },
-//   {
-//     label: "Total Addressable Market",
-//     name: "totalAddressableMarket",
-//   },
-//   {
-//     label: "Serviceable Addressable Market",
-//     name: "serviceableAddressableMarket",
-//   },
-//   {
-//     label: "Serviceable Obtainable Market",
-//     name: "serviceableObtainableMarket",
-//   },
-//   {
-//     label: "Market Growth Rate",
-//     name: "marketGrowthRate",
-//   },
-//   {
-//     label: "Direct Competitors",
-//     name: "directCompetitors",
-//   },
-//   {
-//     label: "Indirect Competitors",
-//     name: "indirectCompetitors",
-//   },
-//   {
-//     label: "Competitive Advantage",
-//     name: "competitiveAdvantage",
-//   },
-//   {
-//     label: "Barrier to Entry",
-//     name: "barrierToEntry",
-//   },
-//   {
-//     label: "Historical Revenue",
-//     name: "historicalRevenue",
-//   },
-//   {
-//     label: "Historical Expenses",
-//     name: "historicalExpenses",
-//   },
-//   {
-//     label: "Profitability Status",
-//     name: "profitabilityStatus",
-//   },
-//   {
-//     label: "Total Customers",
-//     name: "totalCustomers",
-//   },
-//   {
-//     label: "Customer Acquisition Cost",
-//     name: "customerAcquisitionCost",
-//   },
-//   {
-//     label: "Customer Lifetime Value",
-//     name: "customerLifetimeValue",
-//   },
-//   {
-//     label: "Churn Rate",
-//     name: "churnRate",
-//   },
-//   {
-//     label: "Gross Margin",
-//     name: "grossMargin",
-//   },
-//   {
-//     label: "Contribution Margin",
-//     name: "contributionMargin",
-//   },
-//   {
-//     label: "Payback Period",
-//     name: "paybackPeriod",
-//   },
-//   {
-//     label: "Year 1 Revenue",
-//     name: "year1Revenue",
-//   },
-//   {
-//     label: "Year 2 Revenue",
-//     name: "year2Revenue",
-//   },
-//   {
-//     label: "Year 3 Revenue",
-//     name: "year3Revenue",
-//   },
-//   {
-//     label: "Revenue Growth Rate",
-//     name: "revenueGrowthRate",
-//   },
-//   {
-//     label: "Operating Expenses",
-//     name: "operatingExpenses",
-//   },
-//   {
-//     label: "Marketing Budget",
-//     name: "marketingBudget",
-//   },
-//   {
-//     label: "R&D Expenses",
-//     name: "rdExpenses",
-//   },
-//   {
-//     label: "Primary Revenue Streams",
-//     name: "primaryRevenueStreams",
-//   },
-//   {
-//     label: "Pricing Model",
-//     name: "pricingModel",
-//   },
-//   {
-//     label: "Sales Channels",
-//     name: "salesChannels",
-//   },
-//   {
-//     label: "Business Operations",
-//     name: "businessOperations",
-//   },
-//   {
-//     label: "Technology Stack",
-//     name: "technologyStack",
-//   },
-//   {
-//     label: "Key Partnerships",
-//     name: "keyPartnerships",
-//   },
-//   {
-//     label: "Founding Team",
-//     name: "foundingTeam",
-//   },
-//   {
-//     label: "Founder Experience",
-//     name: "founderExperience",
-//   },
-//   {
-//     label: "Key Personnel",
-//     name: "keyPersonnel",
-//   },
-//   {
-//     label: "Advisors",
-//     name: "advisors",
-//   },
-//   {
-//     label: "Product Stage",
-//     name: "productStage",
-//   },
-//   {
-//     label: "Development Milestones",
-//     name: "developmentMilestones",
-//   },
-//   {
-//     label: "Customer Validation",
-//     name: "customerValidation",
-//   },
-//   {
-//     label: "Pilot Programs",
-//     name: "pilotPrograms",
-//   },
-//   {
-//     label: "Business Traction",
-//     name: "businessTraction",
-//   },
-//   {
-//     label: "Partnerships",
-//     name: "partnerships",
-//   },
-//   {
-//     label: "Previous Funding",
-//     name: "previousFunding",
-//   },
-//   {
-//     label: "Current Investors",
-//     name: "currentInvestors",
-//   },
-//   {
-//     label: "Funding Goal",
-//     name: "fundingGoal",
-//   },
-//   {
-//     label: "Use of Funds",
-//     name: "useOfFunds",
-//   },
-//   {
-//     label: "Valuation",
-//     name: "valuation",
-//   },
-//   {
-//     label: "Future Strategy",
-//     name: "futureStrategy",
-//   },
-//   {
-//     label: "Exit Strategy",
-//     name: "exitStrategy",
-//   },
-//   {
-//     label: "Key Metrics",
-//     name: "keyMetrics",
-//   },
-//   {
-//     label: "Risk Factors",
-//     name: "riskFactors",
-//   },
-//   {
-//     label: "Personal Story",
-//     name: "personalStory",
-//   },
-//   {
-//     label: "Supporting Materials",
-//     name: "supportingMaterials",
-//   },
-// ];
-
-// export default function PitchForm() {
-//   const [pitch, setPitch] = useState("");
-//   const [loading, setLoading] = useState(false);
-
-//   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-//     e.preventDefault();
-//     setLoading(true);
-
-//     const formData = new FormData(e.currentTarget);
-
-//     try {
-//       const res = await fetch("http://localhost:8080/generate-pitch", {
-//         method: "POST",
-//         body: formData,
-//       });
-
-//       const result = await res.json();
-//       setPitch(result.pitch || "No pitch generated.");
-//     } catch (err) {
-//       console.error(err);
-//       setPitch("Error generating pitch.");
-//     } finally {
-//       setLoading(false);
-//     }
-//   }
-
-//   return (
-//     <div className="max-w-5xl mx-auto px-4 py-8">
-//       <h1 className="text-3xl font-bold mb-6 text-center">Startup Pitch Generator</h1>
-
-//       <form onSubmit={handleSubmit} className="space-y-6">
-//         {fields.map((field) => (
-//           <div key={field.name}>
-//             <label htmlFor={field.name} className="block font-semibold">
-//               {field.label}
-//               {field.required && <span className="text-red-500 ml-1">*</span>}
-//             </label>
-//             <textarea
-//               id={field.name}
-//               name={field.name}
-//               rows={2}
-//               className="w-full mt-1 p-2 border rounded"
-//               required={field.required}
-//             />
-//           </div>
-//         ))}
-
-//         <button
-//           type="submit"
-//           className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
-//           disabled={loading}
-//         >
-//           {loading ? "Generating..." : "Generate Pitch"}
-//         </button>
-//       </form>
-
-//       {pitch && (
-//         <div className="mt-10 p-4 bg-gray-100 border rounded">
-//           <h2 className="text-xl font-bold mb-2">Generated Pitch</h2>
-//           <p className="whitespace-pre-line">{pitch}</p>
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
 "use client"
 
 import type React from "react"
 
 import { useState } from "react"
-import {  Download, Loader2 } from "lucide-react"
-import jsPDF from "jspdf"
-
+import { Loader2, Download, Lock } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import jsPDF from "jspdf"
+import { useRouter } from "next/navigation"
 
 const fields = [
   {
@@ -646,6 +335,9 @@ export default function PitchGenerator() {
   const [loading, setLoading] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
   const [formData, setFormData] = useState<Record<string, string>>({})
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [userPlan, setUserPlan] = useState<'free' | 'standard' | 'pro' | 'enterprise'>('free')
+  const router = useRouter()
 
   // Group fields by category
   const fieldsByCategory = fields.reduce(
@@ -672,6 +364,11 @@ export default function PitchGenerator() {
 
   const nextStep = () => {
     if (currentStep < totalSteps - 1) {
+      // For free users, only allow navigation to first 4 tabs (0-3 index)
+      if (userPlan === 'free' && currentStep >= 3) {
+        setShowUpgradeModal(true)
+        return
+      }
       setCurrentStep(prev => prev + 1)
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }
@@ -742,8 +439,29 @@ export default function PitchGenerator() {
     doc.save("startup-pitch.pdf")
   }
 
+ 
+
   return (
     <div className="min-h-screen bg-background">
+      {/* Upgrade Modal */}
+      <Dialog open={showUpgradeModal} onOpenChange={setShowUpgradeModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Upgrade to Pro</DialogTitle>
+            <DialogDescription>
+              To access all pitch sections and features, please upgrade to our Pro plan.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4 flex justify-end space-x-2">
+            <Button variant="outline" onClick={() => setShowUpgradeModal(false)}>
+              Maybe Later
+            </Button>
+            <Button onClick={() => router.push('/payment')}>
+              Upgrade Now
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
@@ -756,39 +474,42 @@ export default function PitchGenerator() {
 
 
         <div className="mb-8">
-          <div className="relative w-full h-14 bg-gray-800/60 rounded-full shadow-inner overflow-hidden">
-            {/* Filled progress background */}
-            <div
-              className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-500 to-purple-600 transition-all duration-500 rounded-full"
-              style={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
-            ></div>
-
-            {/* Steps */}
-            <div className="relative flex justify-between items-center h-full px-4">
+          <div className="relative w-full h-14 bg-card border border-border rounded-lg shadow-sm overflow-hidden">
+            <div className="flex justify-between items-center h-full px-2">
               {categories.map((category, index) => {
                 const isActive = index === currentStep;
+                const isRestricted = userPlan === 'free' && index >= 4;
+                
                 return (
                   <div
                     key={category}
-                    className={`flex-1 text-center text-sm font-medium transition-all duration-300 
-              ${isActive ? "text-white font-semibold" : "text-gray-300"}
-            `}
+                    onClick={() => {
+                      if (isRestricted) {
+                        setShowUpgradeModal(true);
+                        return;
+                      }
+                      setCurrentStep(index);
+                    }}
+                    className={`flex-1 flex items-center justify-center h-full text-sm font-medium transition-all duration-300 relative
+                      ${isActive
+                        ? "bg-primary text-primary-foreground font-semibold rounded-lg z-10"
+                        : "text-muted-foreground hover:text-foreground"
+                      }
+                      ${isRestricted ? 'opacity-50' : 'cursor-pointer'}
+                      ${isRestricted ? 'group' : ''}`}
                   >
-                    {/* {isActive ? (
-                      <div className="relative">
-                        <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-lg">
-                          {category}
-                        </div>
-                      </div>
-                    ) : (
-                      category
-                    )} */}
                     {category}
+                    {/* {isRestricted && (
+                      <span className="absolute -top-1 -right-1">
+                        <Lock className="h-3 w-3 text-yellow-400" />
+                      </span>
+                    )} */}
                   </div>
                 );
               })}
             </div>
           </div>
+
         </div>
 
 
@@ -796,7 +517,9 @@ export default function PitchGenerator() {
         <div className={`grid gap-8 ${currentStep === totalSteps - 1 ? 'lg:grid-cols-3' : 'lg:grid-cols-1'}`}>
           <div className={currentStep === totalSteps - 1 ? 'lg:col-span-2' : ''}>
             <form onSubmit={handleSubmit} className="space-y-6">
-              {Object.entries(fieldsByCategory).map(([category, categoryFields], index) => (
+              {Object.entries(fieldsByCategory)
+                .filter(([category], index) => userPlan === 'pro' || index < 4) // Only show first 4 for free users
+                .map(([category, categoryFields], index) => (
                 <div key={category} className={currentStep !== index ? 'hidden' : ''}>
                   <Card>
                     <CardHeader>
@@ -854,7 +577,23 @@ export default function PitchGenerator() {
                   Previous
                 </Button>
 
-                {currentStep < totalSteps - 1 ? (
+                {currentStep === 3 && userPlan === 'free' ? (
+                  <Button
+                    type="submit"
+                    size="lg"
+                    disabled={loading}
+                    className="w-full max-w-md"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Generating Pitch...
+                      </>
+                    ) : (
+                      "Generate Basic Pitch (Free)"
+                    )}
+                  </Button>
+                ) : currentStep < totalSteps - 1 ? (
                   <Button
                     type="button"
                     onClick={nextStep}
@@ -882,7 +621,7 @@ export default function PitchGenerator() {
             </form>
           </div>
 
-          {currentStep === totalSteps - 1 && (
+          {(currentStep === totalSteps - 1 || (userPlan === 'free' && currentStep === 3 && pitch)) && (
             <div className="lg:col-span-1">
               <div className="sticky top-8">
                 <Card>
