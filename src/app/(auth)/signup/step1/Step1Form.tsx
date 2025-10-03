@@ -4,12 +4,10 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { useRouter } from "next/navigation"
-
 import { Button } from "@/components/ui/button"
 import {
   Form,
   FormControl,
-  // FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -18,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input"
 import signupSchemaStep1 from "@/schemas/signUpSchemaStep1"
 import OAuthButtons from "@/components/oauth-button"
+import Link from "next/link"
 
 export default function Step1Form() {
   const router = useRouter()
@@ -32,29 +31,28 @@ export default function Step1Form() {
     },
   })
 
-
   const onSubmit = async (data: z.infer<typeof signupSchemaStep1>) => {
-  localStorage.setItem("step1Data",JSON.stringify(data))
-  router.push("/signup/step2")
+    localStorage.setItem("step1Data", JSON.stringify(data))
+    router.push("/signup/step2")
   }
 
   return (
     <Form {...form}>
-      <div className="min-h-screen w-screen flex items-center justify-center">
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="w-full max-w-2xl bg-gray-800 text-white p-10 rounded-3xl shadow-lg space-y-8"
-        >
-          <h2 className="text-2xl font-bold text-center">Create Account</h2>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4"
+      >
+        <h2 className="text-2xl font-bold text-center lg:text-left">Create Account</h2>
 
+        <div className="space-y-4">
           <FormField
             control={form.control}
             name="fullName"
             render={({ field }) => (
-              <FormItem className="">
+              <FormItem>
                 <FormLabel>Full Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g. Prathamesh" {...field} />
+                  <Input placeholder="John Doe" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -65,10 +63,10 @@ export default function Step1Form() {
             control={form.control}
             name="email"
             render={({ field }) => (
-              <FormItem className="">
+              <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g. you@example.com" type="email" {...field} />
+                  <Input type="email" placeholder="john@example.com" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -79,10 +77,10 @@ export default function Step1Form() {
             control={form.control}
             name="password"
             render={({ field }) => (
-              <FormItem className="">
+              <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input placeholder="••••••••" type="password" {...field} />
+                  <Input type="password" placeholder="••••••••" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -93,23 +91,43 @@ export default function Step1Form() {
             control={form.control}
             name="confirmPassword"
             render={({ field }) => (
-              <FormItem className="">
+              <FormItem>
                 <FormLabel>Confirm Password</FormLabel>
                 <FormControl>
-                  <Input placeholder="••••••••" type="password" {...field} />
+                  <Input type="password" placeholder="••••••••" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <div className="text-center">
-            <Button type="submit" className="w-1/2">Submit</Button>
+        </div>
+
+        <Button type="submit" className="w-full">
+          Continue
+        </Button>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
           </div>
-          <OAuthButtons />
-        </form>
-      </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">
+              Or continue with
+            </span>
+          </div>
+        </div>
+
+        <OAuthButtons />
+
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground">
+            Already have an account?{" "}
+            <Link href="/login" className="text-primary hover:underline">
+              Login
+            </Link>
+          </p>
+        </div>
+      </form>
     </Form>
   )
 }
-
-

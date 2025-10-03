@@ -8,7 +8,7 @@ declare module "next-auth" {
     email?: string;
     isVerified?: boolean;
     role?: "founder" | "vc" | null;
-    userPlan?: "free" | "starter" | "professional" | "enterprise";
+    userPlan?: "free" | "standard" | "pro" | "enterprise";
     provider?: "google" | "credentials";
     signupStep2Done: boolean
   }
@@ -19,7 +19,7 @@ declare module "next-auth" {
       email?: string;
       isVerified?: boolean;
       role?: "founder" | "vc" | null;
-      userPlan?: "free" | "starter" | "professional" | "enterprise";
+      userPlan?: "free" | "standard" | "pro" | "enterprise";
       provider?: "google" | "credentials";
       signupStep2Done?: boolean
     } & DefaultSession["user"];

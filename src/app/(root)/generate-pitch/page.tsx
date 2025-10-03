@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog"
 import jsPDF from "jspdf"
 import { useRouter } from "next/navigation"
+import { useSession } from "next-auth/react"
 
 const fields = [
   {
@@ -336,7 +337,9 @@ export default function PitchGenerator() {
   const [currentStep, setCurrentStep] = useState(0)
   const [formData, setFormData] = useState<Record<string, string>>({})
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
-  const [userPlan, setUserPlan] = useState<'free' | 'standard' | 'pro' | 'enterprise'>('free')
+
+  const {data:session,status} = useSession()
+  console.log(session.user)
   const router = useRouter()
 
   // Group fields by category
@@ -365,7 +368,7 @@ export default function PitchGenerator() {
   const nextStep = () => {
     if (currentStep < totalSteps - 1) {
       // For free users, only allow navigation to first 4 tabs (0-3 index)
-      if (userPlan === 'free' && currentStep >= 3) {
+      if (session?.user?.userPlan === 'free' && currentStep >= 3) {
         setShowUpgradeModal(true)
         return
       }
@@ -475,10 +478,10 @@ export default function PitchGenerator() {
 
         <div className="mb-8">
           <div className="relative w-full h-14 bg-card border border-border rounded-lg shadow-sm overflow-hidden">
-            <div className="flex justify-between items-center h-full px-2">
+            <div className="flex justify-between items-center h-full px-0">
               {categories.map((category, index) => {
                 const isActive = index === currentStep;
-                const isRestricted = userPlan === 'free' && index >= 4;
+                const isRestricted = session?.user?.userPlan === 'free' && index >= 4;
                 
                 return (
                   <div
@@ -490,7 +493,7 @@ export default function PitchGenerator() {
                       }
                       setCurrentStep(index);
                     }}
-                    className={`flex-1 flex items-center justify-center h-full text-sm font-medium transition-all duration-300 relative
+                    className={`flex-1 flex items-center justify-center text-center h-full text-sm font-medium transition-all duration-300 relative
                       ${isActive
                         ? "bg-primary text-primary-foreground font-semibold rounded-lg z-10"
                         : "text-muted-foreground hover:text-foreground"
@@ -499,11 +502,7 @@ export default function PitchGenerator() {
                       ${isRestricted ? 'group' : ''}`}
                   >
                     {category}
-                    {/* {isRestricted && (
-                      <span className="absolute -top-1 -right-1">
-                        <Lock className="h-3 w-3 text-yellow-400" />
-                      </span>
-                    )} */}
+                    
                   </div>
                 );
               })}
@@ -518,7 +517,6 @@ export default function PitchGenerator() {
           <div className={currentStep === totalSteps - 1 ? 'lg:col-span-2' : ''}>
             <form onSubmit={handleSubmit} className="space-y-6">
               {Object.entries(fieldsByCategory)
-                .filter(([category], index) => userPlan === 'pro' || index < 4) // Only show first 4 for free users
                 .map(([category, categoryFields], index) => (
                 <div key={category} className={currentStep !== index ? 'hidden' : ''}>
                   <Card>
@@ -577,7 +575,7 @@ export default function PitchGenerator() {
                   Previous
                 </Button>
 
-                {currentStep === 3 && userPlan === 'free' ? (
+                {currentStep === 3 && session?.user?.userPlan === 'free' ? (
                   <Button
                     type="submit"
                     size="lg"
@@ -621,7 +619,7 @@ export default function PitchGenerator() {
             </form>
           </div>
 
-          {(currentStep === totalSteps - 1 || (userPlan === 'free' && currentStep === 3 && pitch)) && (
+          {(currentStep === totalSteps - 1 || (session?.user?.userPlan === 'free' && currentStep === 3 && pitch)) && (
             <div className="lg:col-span-1">
               <div className="sticky top-8">
                 <Card>
