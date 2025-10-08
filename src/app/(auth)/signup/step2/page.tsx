@@ -19,7 +19,7 @@ export default function Step2Page() {
 
         <div className="flex-1 flex flex-col justify-center">
           <div className="w-full max-w-md mx-auto">
-            <div className="text-center lg:text-left mb-6">
+            <div className="text-center lg:text-left mb-6 ">
               <h2 className="text-center text-2xl md:text-3xl font-bold tracking-tight">
                 Get Started
               </h2>

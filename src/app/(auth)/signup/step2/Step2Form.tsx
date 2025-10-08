@@ -87,7 +87,7 @@ export default function Step2Form() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <h2 className="text-2xl font-bold text-center lg:text-left">Complete Your Profile</h2>
         
-        <div className="space-y-4">
+        <div className="space-y-6">
           <FormField
             control={form.control}
             name="role"
