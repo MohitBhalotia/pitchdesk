@@ -501,7 +501,7 @@ export default function SupportPage() {
                                                 id="file-upload"
                                             />
                                             <Label htmlFor="file-upload" className="cursor-pointer">
-                                                <Button type="button" variant="outline" size="sm">
+                                                <Button type="button" variant="outline" size="sm" onClick={() => document.getElementById('file-upload')?.click()}>
                                                     Choose Files
                                                 </Button>
                                             </Label>
