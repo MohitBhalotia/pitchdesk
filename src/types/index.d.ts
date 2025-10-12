@@ -11,7 +11,7 @@ declare global {
     resetPasswordToken: string | null;
     resetPasswordTokenExpiry: Date | null;
     role: "founder" | "vc" | null;
-    userPlan: "free" | "starter" | "professional" | "enterprise";
+    userPlan: "free" | "standard" | "pro" | "enterprise";
     company: mongoose.Schema.Types.ObjectId | null;
     provider: "credentials" | "google";
     signupStep2Done: boolean;

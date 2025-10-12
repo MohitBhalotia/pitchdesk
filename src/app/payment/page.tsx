@@ -32,7 +32,7 @@ const TIERS = [
       'Perrsonalised pitch generation',
     ],
     cta: 'Buy Now',
-    popular: true,
+    // popular: true,
   },
   {
     id: 'pro',
@@ -55,7 +55,7 @@ const TIERS = [
       'Perrsonalised pitch generation',
     ],
     cta: 'Buy Now',
-    // popular: true,
+    popular: true,
   },
   {
     id: 'enterprise',
