@@ -1,7 +1,5 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
 
-// ---------------------- INTERFACES ----------------------
-
 interface MicroScores {
   [key: string]: number;
   Subtotal?: number;
@@ -18,18 +16,17 @@ interface SectionScores {
 }
 
 export interface IPitchEvaluation extends Document {
-  userId: mongoose.Types.ObjectId;   // reference to the user
-  pitchId: mongoose.Types.ObjectId;  // reference to the pitch
+  userId: mongoose.Types.ObjectId;   
+  pitchId: mongoose.Types.ObjectId;  
   scores: SectionScores;
   summary: string;
   createdAt: Date;
 }
 
-// ---------------------- SCHEMA ----------------------
 
 const MicroScoresSchema = new Schema(
   {},
-  { strict: false, _id: false } // flexible micro-parameters
+  { strict: false, _id: false } 
 );
 
 const SectionScoresSchema = new Schema<SectionScores>(
@@ -55,7 +52,6 @@ const PitchEvaluationSchema = new Schema<IPitchEvaluation>(
   { timestamps: { createdAt: true, updatedAt: false } }
 );
 
-// ---------------------- MODEL ----------------------
 
 export const PitchEval: Model<IPitchEvaluation> =
   mongoose.models.PitchEvaluation ||

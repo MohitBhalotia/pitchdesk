@@ -41,7 +41,8 @@ export default function PitchTranscripts() {
   const router = useRouter()
 
   useEffect(() => {
-    console.log("[PitchTranscripts] Mounted with userId:", userId)
+    // Removed the undefined userId logging
+    console.log("[PitchTranscripts] Component mounted")
 
     if (typeof window !== "undefined") {
       const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
@@ -60,21 +61,29 @@ export default function PitchTranscripts() {
     const fetchPitches = async () => {
       if (status === "loading") return // Still loading session
       
+      // Check if user is authenticated and has an id
       if (!session?.user?._id) {
+        console.log("[PitchTranscripts] No user session or user id found")
         setIsLoading(false)
         return
       }
 
       try {
-        console.log(session.user._id)
+        console.log("[PitchTranscripts] Fetching pitches for user:", session.user.id)
         const response = await fetch(`/api/pitches`)
         if (!response.ok) {
           throw new Error('Failed to fetch pitches')
         }
-        const data: Pitch[] = await response.json()
-        setPitches(data)
+        const data = await response.json()
+        
+        // Handle different response formats
+        const pitchesData = Array.isArray(data) ? data : data.pitches || data.data || []
+        setPitches(pitchesData)
+        
+        console.log("[PitchTranscripts] Fetched pitches:", pitchesData.length)
       } catch (error) {
         console.error('Error fetching pitches:', error)
+        setPitches([]) // Set empty array on error
       } finally {
         setIsLoading(false)
       }
@@ -109,6 +118,12 @@ export default function PitchTranscripts() {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
     return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
+  // Get user display name safely
+  const getUserDisplayName = () => {
+    if (!session?.user) return ""
+    return (session.user as any).fullName || session.user.email || session.user.name || "User"
   }
 
   // Show loading while checking authentication
@@ -161,7 +176,7 @@ export default function PitchTranscripts() {
             <p className="text-muted-foreground">Review your conversation history</p>
             <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
               <User className="h-4 w-4" />
-              <span>Welcome, {session.user.fullName || session.user.email}</span>
+              <span>Welcome, {getUserDisplayName()}</span>
             </div>
           </div>
         </div>
@@ -194,11 +209,9 @@ export default function PitchTranscripts() {
           <div className="space-y-6">
             {pitches.map((pitch, i) => {
               const isExpanded = expandedPitches.has(pitch._id)
-              console.log("[PitchTranscripts] Rendering pitch:", {
-                index: i + 1,
-                id: pitch._id,
-                expanded: isExpanded
-              })
+              
+              // Safely handle conversation history
+              const conversationHistory = pitch.conversationHistory || []
 
               return (
                 <Card key={pitch._id} className="overflow-hidden">
@@ -212,7 +225,7 @@ export default function PitchTranscripts() {
                           <CardTitle className="flex items-center gap-2">
                             Pitch {i + 1}
                             <Badge variant="outline" className="ml-2">
-                              {pitch.conversationHistory.length} messages
+                              {conversationHistory.length} messages
                             </Badge>
                           </CardTitle>
                           <CardDescription className="flex items-center gap-4 mt-2">
@@ -222,7 +235,7 @@ export default function PitchTranscripts() {
                             </span>
                             <span className="flex items-center gap-1">
                               <Clock className="h-4 w-4" />
-                              {formatDuration(pitch.duration)}
+                              {formatDuration(pitch.duration || 0)}
                             </span>
                           </CardDescription>
                         </div>
@@ -254,56 +267,48 @@ export default function PitchTranscripts() {
                         </div>
                         <ScrollArea className="h-[400px] pr-4">
                           <div className="space-y-4">
-                            {pitch.conversationHistory.map((msg, idx) => {
-                              console.log("[PitchTranscripts] Rendering message:", {
-                                pitchId: pitch._id,
-                                idx,
-                                role: msg.role,
-                                timestamp: msg.timestamp
-                              })
-                              return (
+                            {conversationHistory.map((msg, idx) => (
+                              <div
+                                key={idx}
+                                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                              >
                                 <div
-                                  key={idx}
-                                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                                  className={`max-w-lg rounded-xl p-4 relative ${
+                                    msg.role === "user"
+                                      ? "bg-primary text-primary-foreground"
+                                      : "bg-muted"
+                                  }`}
                                 >
-                                  <div
-                                    className={`max-w-lg rounded-xl p-4 relative ${
-                                      msg.role === "user"
-                                        ? "bg-primary text-primary-foreground"
-                                        : "bg-muted"
-                                    }`}
-                                  >
-                                    <div className="flex items-center gap-2 mb-2">
-                                      <div className={`rounded-full p-1 ${
-                                        msg.role === "user" 
-                                          ? "bg-primary-foreground/20" 
-                                          : "bg-muted-foreground/20"
-                                      }`}>
-                                        {msg.role === "user" ? (
-                                          <User className="h-3 w-3" />
-                                        ) : (
-                                          <Bot className="h-3 w-3" />
-                                        )}
-                                      </div>
-                                      <span className="text-xs font-medium capitalize">
-                                        {msg.role}
-                                      </span>
-                                      <span className={`text-xs ml-4 ${
-                                        msg.role === "user" 
-                                          ? "text-primary-foreground/70" 
-                                          : "text-muted-foreground"
-                                      }`}>
-                                        {new Date(msg.timestamp).toLocaleTimeString([], { 
-                                          hour: "2-digit", 
-                                          minute: "2-digit" 
-                                        })}
-                                      </span>
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <div className={`rounded-full p-1 ${
+                                      msg.role === "user" 
+                                        ? "bg-primary-foreground/20" 
+                                        : "bg-muted-foreground/20"
+                                    }`}>
+                                      {msg.role === "user" ? (
+                                        <User className="h-3 w-3" />
+                                      ) : (
+                                        <Bot className="h-3 w-3" />
+                                      )}
                                     </div>
-                                    <p className="text-sm">{msg.content}</p>
+                                    <span className="text-xs font-medium capitalize">
+                                      {msg.role}
+                                    </span>
+                                    <span className={`text-xs ml-4 ${
+                                      msg.role === "user" 
+                                        ? "text-primary-foreground/70" 
+                                        : "text-muted-foreground"
+                                    }`}>
+                                      {new Date(msg.timestamp).toLocaleTimeString([], { 
+                                        hour: "2-digit", 
+                                        minute: "2-digit" 
+                                      })}
+                                    </span>
                                   </div>
+                                  <p className="text-sm">{msg.content}</p>
                                 </div>
-                              )
-                            })}
+                              </div>
+                            ))}
                           </div>
                         </ScrollArea>
                       </div>

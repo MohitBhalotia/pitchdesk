@@ -16,21 +16,6 @@ const MessageSchema = new Schema<Message>({
     },
 })
 
-// const ConversationSchema = new Schema<Conversation>({
-//     conversationDate: {
-//         type: Date,
-//         default: Date.now
-//     },
-//     messages: [
-//         MessageSchema
-//     ],
-//     Duration: {
-//         type: Number,
-//         default: 0
-//     }
-// }, {_id: false})
-
-
 const PitchSchema = new Schema<Pitch>(
     {
         userId: {
