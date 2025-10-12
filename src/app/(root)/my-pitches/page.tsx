@@ -69,7 +69,7 @@ export default function PitchTranscripts() {
       }
 
       try {
-        console.log("[PitchTranscripts] Fetching pitches for user:", session.user.id)
+        console.log("[PitchTranscripts] Fetching pitches for user:", session.user._id)
         const response = await fetch(`/api/pitches`)
         if (!response.ok) {
           throw new Error('Failed to fetch pitches')
