@@ -34,11 +34,13 @@ function HomeContent() {
   useEffect(() => {
     if (started) {
       const interval = setInterval(() => {
-        setDuration(duration + 1);
+        setDuration(prev => prev + 1);
       }, 1000);
+  
       return () => clearInterval(interval);
     }
   }, [started]);
+  
   useEffect(() => {
     if (started) {
       const interval = setInterval(async () => {
