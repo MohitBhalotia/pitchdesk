@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 
 import VCSummaryCard from '@/components/VCSummaryCard';
-import { vcs, VC } from '../../../../data/aiVCs';
+import { vcs, VC } from '../../../../data/vc';
 
 export default function MeetTheVCsPage() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
