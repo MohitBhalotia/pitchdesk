@@ -46,7 +46,7 @@ export const config = {
     "/login",
     "/signup/:path*",
     "/dashboard/:path*",
-    "/start-pitch/:path*",
+    // "/start-pitch/:path*",
     "/start-a-pitch",
     "/generate-pitch/:path*",
     "/verify/:path*",

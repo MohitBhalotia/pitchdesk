@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { MessageSquare, Star, Heart, Lightbulb, Bug, ThumbsUp, Send, Users, Twitter, Linkedin, Github, Mail, Award, TrendingUp } from 'lucide-react';
+import { MessageSquare, Star, Heart, Lightbulb, Bug, ThumbsUp, Send, Users, Twitter, Linkedin, Github, Mail,  } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface FeedbackFormData {
@@ -303,7 +303,7 @@ export default function FeedbackPage() {
                                                 className={errors.email ? 'border-destructive' : ''}
                                             />
                                             <p className="text-xs text-muted-foreground">
-                                                We'll only use this to follow up if you request it
+                                                We&apos;ll only use this to follow up if you request it
                                             </p>
                                             {errors.email && (
                                                 <p className="text-sm text-destructive">{errors.email}</p>
@@ -406,10 +406,10 @@ export default function FeedbackPage() {
                                         />
                                         <div className="grid gap-1.5 leading-none">
                                             <Label htmlFor="contactPreference" className="text-sm font-medium leading-none">
-                                                I'd like to be contacted about this feedback
+                                                I&apos;d like to be contacted about this feedback
                                             </Label>
                                             <p className="text-xs text-muted-foreground">
-                                                We'll reach out if we need clarification or want to discuss your suggestions.
+                                                We&apos;ll reach out if we need clarification or want to discuss your suggestions.
                                             </p>
                                         </div>
                                     </div>
@@ -473,7 +473,7 @@ export default function FeedbackPage() {
                                                     </div>
                                                 )}
                                                 <p className="text-muted-foreground leading-relaxed">
-                                                    "{testimonial.content}"
+                                                    &quot;{testimonial.content}&quot;
                                                 </p>
                                             </div>
                                         </div>

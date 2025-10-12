@@ -25,6 +25,7 @@ declare global {
   }
 
   export interface Pitch extends Document {
+    sessionId: string;
     userId: mongoose.Schema.Types.ObjectId | null;
     lastUpdated: Date;
     startTime: Date;

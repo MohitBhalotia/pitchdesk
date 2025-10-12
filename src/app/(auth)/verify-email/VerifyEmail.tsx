@@ -42,15 +42,16 @@ export default function VerifyEmail() {
 
   const searchParams = useSearchParams()
   const id = searchParams.get("id")
-  const code = searchParams.get("code")
+  let code = searchParams.get("code")
   
-  async function onSubmit(/*data: z.infer<typeof FormSchema>*/) {
+  async function onSubmit(data: z.infer<typeof FormSchema>) {
+    code = data.pin
     try{
         if(!id || !code){
           toast.error("Invalid verification link")
           return 
         }
-        const res = await axios.post("/api/verify", {id, code})
+        const res = await axios.post("/api/auth/verify", {id, code})
         if(res.data.success){
           toast.success("Verification successfull")
           router.push("/login")

@@ -69,11 +69,11 @@ export default function Step2Form() {
         localStorage.removeItem("step1Data")
         const finalPayload = { ...step1Data, ...step2Data }
 
-        const res = await axios.post<ApiResponse>("/api/signup", finalPayload)
-
+        const res = await axios.post<ApiResponse>("/api/auth/signup", finalPayload)
+        console.log(res.data)
         if (res.data.success) {
           toast.success(res.data.message)
-          router.push("/login")
+          router.push("/verify-email?id=" + res.data?.data)
         }
       }
     } catch (error) {
@@ -87,10 +87,10 @@ export default function Step2Form() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 ">
         <h2 className="text-2xl font-bold text-center lg:text-left">Complete Your Profile</h2>
         
-        <div className="space-y-6">
+        <div className="space-y-6 py-10">
           <FormField
             control={form.control}
             name="role"

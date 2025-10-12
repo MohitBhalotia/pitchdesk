@@ -10,9 +10,10 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDeepgram } from "@/context/DeepgramContextProvider";
 import { useMicrophone } from "@/context/MicrophoneContextProvider";
-import axios from "axios";
+import { useSession } from "next-auth/react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 function HomeContent() {
-  const { socket, socketState, sessionIdRef } = useDeepgram();
+  const { socket, socketState, duration } = useDeepgram();
   const { startMicrophone, stopMicrophone, microphoneState, setupMicrophone } =
     useMicrophone();
   const [config, setConfig] = useState<object | null>(null);
@@ -20,7 +21,7 @@ function HomeContent() {
   const [started, setStarted] = useState(false);
   const searchParams = useSearchParams();
   const agentId = searchParams.get("agentId");
-  const [duration, setDuration] = useState(0);
+  const { data: session } = useSession();
   const handleStart = async () => {
     if (microphoneState === null) {
       const result = await setupMicrophone();
@@ -31,29 +32,7 @@ function HomeContent() {
       startMicrophone();
     }
   };
-  useEffect(() => {
-    if (started) {
-      const interval = setInterval(() => {
-        setDuration(prev => prev + 1);
-      }, 1000);
-  
-      return () => clearInterval(interval);
-    }
-  }, [started]);
-  
-  useEffect(() => {
-    if (started) {
-      const interval = setInterval(async () => {
-        console.log("Updating pitch", sessionIdRef.current);
-        if (sessionIdRef.current) {
-          await axios.patch("/api/pitch/update-pitch", {
-            sessionId: sessionIdRef.current,
-          });
-        }
-      }, 30000); // every 30 seconds
-      return () => clearInterval(interval); // cleanup on unmount / state change
-    }
-  }, [socketState, sessionIdRef]);
+
   const handleStop = async () => {
     await stopMicrophone();
   };
@@ -75,14 +54,18 @@ function HomeContent() {
   return (
     <div className="min-h-screen bg-black">
       {/* Header */}
-
       {/* Main Content */}
-      <main className="w-full flex flex-col sm:flex-row justify-center items-center h-full">
+      <div className="w-full flex flex-col sm:flex-row justify-center items-center h-full">
         {/* Left Panel - Voice Interface */}
-        <div className="w-1/2 rounded-xl flex items-center shadow-lg p-8 relative h-screen">
-          {started && <div className="absolute top-2 right-2 bg-red-500 p-2 rounded-full">
-            {duration}
-          </div>}
+        <div className="relative w-full rounded-xl flex flex-col justify-center items-center shadow-lg h-screen">
+          <nav>
+            {started && (
+              <div className="absolute top-2 right-2 bg-red-500 p-2 rounded-full">
+                {duration}
+              </div>
+            )}
+          </nav>
+          
           <div>
             <div className="text-center mb-8 flex flex-col items-center">
               <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
@@ -150,17 +133,24 @@ function HomeContent() {
               </div>
             </div>
           </div>
-
-          {/* Right Panel - Conversation */}
         </div>
-        <div className="overflow-hidden flex-1 relative h-full w-full">
+        {session?.user && (
+              <Avatar className="absolute top-2 right-2">
+                <AvatarImage src={session?.user?.image} />
+                <AvatarFallback className="bg-primary text-primary-foreground">
+                  {session?.user?.fullName?.[0]?.toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            )}
+        {/* Right Panel - Conversation */}
+        <div className="h-full w-full">
           <Suspense
             fallback={<div className="text-white">Loading conversation...</div>}
           >
             <Conversation />
           </Suspense>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

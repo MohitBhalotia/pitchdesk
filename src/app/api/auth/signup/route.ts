@@ -54,6 +54,7 @@ export async function POST(req: NextRequest){
       {
         success: true,
         message: "User created successfully",
+        data: user._id,
       },
       { status: 201 }
     );

@@ -1,23 +1,35 @@
 import { inngest } from "./client";
 import PitchModel from "@/models/PitchModel";
 import dbConnect from "@/lib/db";
-export const helloWorld = inngest.createFunction(
+import axios from "axios";
+export const updatePitch = inngest.createFunction(
   { id: "update-pitch" },
-  { cron: "*/2 * * * *" },
+  { cron: "*/5 * * * *" },
   async () => {
     await dbConnect();
     const pitches = await PitchModel.find({
-      $and: [
-        { endTime: null },
-        { lastUpdated: { $lt: new Date(Date.now() - 0.5 * 60 * 1000) } },
-      ],
+      duration: null,
     });
     for (const pitch of pitches) {
-      pitch.lastUpdated = new Date();
-      pitch.endTime = new Date();
-      pitch.duration =
-        (new Date().getTime() - pitch.startTime.getTime()) / 1000;
-      await pitch.save();
+      const sessionId = pitch.sessionId;
+      try {
+        const res = await axios.get(
+          `https://api.deepgram.com/v1/projects/${process.env.DEEPGRAM_PROJECT_ID}/requests/${sessionId}`,
+          {
+            headers: {
+              Authorization: `Token ${process.env.DEEPGRAM_API_KEY}`,
+            },
+          }
+        );
+        console.log(res.data);
+
+        pitch.duration = Math.ceil(res?.data?.response?.sts_details?.duration);
+        pitch.endTime = new Date();
+        await pitch.save();
+      } catch (error) {
+        console.error("Error getting duration", error);
+        continue;
+      }
     }
     return { message: `Pitches updated successfully` };
   }

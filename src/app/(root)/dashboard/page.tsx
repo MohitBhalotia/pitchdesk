@@ -15,7 +15,6 @@ import axios from "axios";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 
-
 export default function Index() {
   const { data: session /*status*/ } = useSession();
   const router = useRouter();
@@ -25,8 +24,6 @@ export default function Index() {
     name: session?.user?.fullName || "User",
     email: session?.user?.email || "user@email.com",
     avatar: session?.user?.image || "/placeholder.svg",
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-
   };
 
   const [userStats, setUserStats] = useState<any>({});
@@ -52,8 +49,6 @@ export default function Index() {
     fetchUserPlan();
   }, [session?.user?._id]); // re-run when user id becomes available
 
-
-
   const stats = [
     {
       title: "Total Pitches Practiced",
@@ -67,7 +62,6 @@ export default function Index() {
       title: "Pitch Documents Generated",
       value: 7,
       icon: <FileText className="h-6 w-6" />,
-
     },
     {
       title: "Average Success Score",
@@ -112,16 +106,16 @@ export default function Index() {
       icon: <Users className="h-6 w-6 text-pink-400" />,
       onClick: () => {
         if (userStats?.planName !== "enterprise") {
-          toast.error("This feature is only available for Enterprise users. Upgrade your plan to access it.");
+          toast.error(
+            "This feature is only available for Enterprise users. Upgrade your plan to access it."
+          );
           return;
         }
         router.push("/connect-vcs");
       },
       premium: true,
-
     },
   ];
-
 
   return (
     <div className="">
@@ -133,12 +127,19 @@ export default function Index() {
               Welcome back, {user.name}!
             </h1>
             <p className="text-lg text-muted-foreground mb-2">
-              Ready to perfect your pitch? Your <span className="font-semibold text-teal-500">{userStats?.planName}</span> plan gives you access to powerful AI coaching.
+              Ready to perfect your pitch? Your{" "}
+              <span className="font-semibold text-teal-500">
+                {userStats?.planName}
+              </span>{" "}
+              plan gives you access to powerful AI coaching.
             </p>
           </div>
           <div className="flex items-center gap-4">
             {userStats?.planName !== "enterprise" && (
-              <button onClick={() => router.push('/payment')} className="px-7 py-2 bg-gradient-to-r from-teal-500 to-violet-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-teal-500/30 transition-all">
+              <button
+                onClick={() => router.push("/payment")}
+                className="px-7 py-2 bg-gradient-to-r from-teal-500 to-violet-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-teal-500/30 transition-all"
+              >
                 Upgrade Plan
               </button>
             )}
@@ -203,7 +204,6 @@ export default function Index() {
             ))}
           </div>
         </div>
-
       </div>
     </div>
   );

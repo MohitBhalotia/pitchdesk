@@ -1,7 +1,8 @@
 "use client";
 import axios from "axios";
-import { createContext, useContext, useState, useRef } from "react";
+import { createContext, useContext, useState, useRef, useEffect } from "react";
 import { getAuthToken, sendKeepAliveMessage } from "../utils/deepgramUtils";
+import { useSession } from "next-auth/react";
 
 const DeepgramContext = createContext();
 
@@ -12,34 +13,25 @@ const DeepgramContextProvider = ({ children }) => {
   const [rateLimited, setRateLimited] = useState(false);
   const keepAlive = useRef();
   const maxReconnectAttempts = 5;
-  const [transcript, setTranscriptState] = useState([]);
   const transcriptRef = useRef([]);
-  const [sessionId, setSessionId] = useState(null);
   const sessionIdRef = useRef(null);
   const isConnecting = useRef(false);
-
-  // Custom setTranscript that updates both state and ref
-  const setTranscript = (newTranscript) => {
-    if (typeof newTranscript === "function") {
-      // Handle functional updates
-      setTranscriptState((prev) => {
-        const updated = newTranscript(prev);
-        transcriptRef.current = updated;
-        return updated;
-      });
-    } else {
-      // Handle direct value updates
-      setTranscriptState(newTranscript);
-      transcriptRef.current = newTranscript;
-    }
-  };
+  const { data: session } = useSession();
+  const [duration, setDuration] = useState(0);
 
   // Helper function to parse and format transcript messages
   const addTranscriptMessage = (rawMessage) => {
     try {
       const parsedMessage = JSON.parse(rawMessage);
-      // Only add messages that have the required properties
-      if (parsedMessage.type && parsedMessage.role && parsedMessage.content) {
+      if (parsedMessage.type === "Welcome") {
+        sessionIdRef.current = parsedMessage.request_id;
+      }
+      if (
+        parsedMessage.type &&
+        parsedMessage.type === "History" &&
+        parsedMessage.role &&
+        parsedMessage.content
+      ) {
         const formattedMessage = {
           type: parsedMessage.type,
           role: parsedMessage.role === "assistant" ? "bot" : parsedMessage.role, // Convert "assistant" to "bot" for schema
@@ -47,13 +39,43 @@ const DeepgramContextProvider = ({ children }) => {
           timeStamp: new Date(), // Add current timestamp
         };
 
-        setTranscript((prev) => [...prev, formattedMessage]);
+        transcriptRef.current = [...transcriptRef.current, formattedMessage];
         console.log("Added transcript message:", formattedMessage);
       }
     } catch (error) {
       console.error("Failed to parse transcript message:", rawMessage, error);
     }
   };
+
+  useEffect(() => {
+    if (socketState === 1) {
+      const interval = setInterval(() => {
+        setDuration((prev) => prev + 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [socketState, duration]);
+
+  useEffect(() => {
+    const startPitch = async () => {
+      try {
+        if (sessionIdRef.current && session?.user?._id) {
+          const res = await axios.post("/api/start-pitch", {
+            userId: session?.user?._id,
+            sessionId: sessionIdRef.current,
+          });
+          console.log("res", res);
+        }
+      } catch (error) {
+        clearInterval(keepAlive.current);
+        setSocketState(3);
+        setReconnectAttempts((attempts) => attempts + 1);
+        console.error("Error starting pitch", error);
+      }
+    };
+    startPitch();
+  }, [sessionIdRef.current, session?.user?._id]);
+
   const connectToDeepgram = async () => {
     if (reconnectAttempts >= maxReconnectAttempts) {
       console.log("Max reconnect attempts reached.");
@@ -82,22 +104,6 @@ const DeepgramContextProvider = ({ children }) => {
       isConnecting.current = false; // Reset connection flag
       console.log("WebSocket connected.");
 
-      // Only start pitch if we don't already have a sessionId
-      if (!sessionId && !sessionIdRef.current) {
-        try {
-          const res = await axios.post("/api/pitch/start-pitch", {
-            userId: "6886923965ec64a7db9f69a9",
-          });
-          if (res.status === 200) {
-            const newSessionId = res.data.pitch._id;
-            setSessionId(newSessionId);
-            sessionIdRef.current = newSessionId;
-            console.log("New sessionId created:", newSessionId);
-          }
-        } catch (error) {
-          console.error("Error starting pitch", error);
-        }
-      }
       keepAlive.current = setInterval(sendKeepAliveMessage(newSocket), 10000);
     };
 
@@ -109,23 +115,20 @@ const DeepgramContextProvider = ({ children }) => {
 
     const onClose = async () => {
       clearInterval(keepAlive.current);
-      console.log("sending to backend");
-      console.log("sessionId from state:", sessionId);
-      console.log("sessionId from ref:", sessionIdRef.current);
-      console.log("transcript from state:", transcript);
-      console.log("transcript from ref:", transcriptRef.current);
+      console.log("Posting...");
 
       // Use the ref values which have the current data
       if (sessionIdRef.current) {
-        await axios.post("/api/pitch/end-pitch", {
+        await axios.post("/api/end-pitch", {
           sessionId: sessionIdRef.current,
-          userId: "6886923965ec64a7db9f69a9",
+          userId: session?.user?._id,
           conversationHistory: transcriptRef.current,
         });
+        sessionIdRef.current = null;
+        transcriptRef.current = [];
       } else {
         console.warn("No sessionId available to end pitch");
       }
-
       setSocketState(3); // closed
       // console.info("WebSocket closed. Attempting to reconnect...");
 
@@ -153,10 +156,9 @@ const DeepgramContextProvider = ({ children }) => {
         socketState,
         rateLimited,
         connectToDeepgram,
-        transcript,
-        setTranscript,
         addTranscriptMessage,
-        sessionIdRef: sessionIdRef,
+        sessionIdRef,
+        duration,
       }}
     >
       {children}

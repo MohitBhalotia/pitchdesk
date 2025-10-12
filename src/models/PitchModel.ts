@@ -18,13 +18,13 @@ const MessageSchema = new Schema<Message>({
 
 const PitchSchema = new Schema<Pitch>(
     {
+        sessionId: {
+            type: String,
+            required: true
+        },
         userId: {
             type: Schema.Types.ObjectId,
             ref: 'User',
-        },
-        lastUpdated: {
-            type: Date,
-            default: Date.now
         },
         startTime: {
             type: Date,
@@ -36,7 +36,7 @@ const PitchSchema = new Schema<Pitch>(
         },
         duration:{
             type: Number,
-            default: 0
+            default: null
         },
         conversationHistory: [
             MessageSchema
