@@ -124,17 +124,17 @@ export default function ConnectVCsPage() {
                   
                   <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <Button asChild className="gap-2">
-                      <a href="mailto:partnerships@pitchdesk.com">
+                      <a href="mailto:info@pitchdesk.in">
                         <Mail className="h-4 w-4" />
-                        partnerships@pitchdesk.com
+                        info@pitchdesk.in
                       </a>
                     </Button>
-                    <Button variant="outline" asChild className="gap-2">
-                      <a href="mailto:founders@pitchdesk.com">
+                    {/* <Button variant="outline" asChild className="gap-2">
+                      <a href="mailto:founders@pitchdesk.in">
                         <Users className="h-4 w-4" />
-                        founders@pitchdesk.com
+                        founders@pitchdesk.in
                       </a>
-                    </Button>
+                    </Button> */}
                   </div>
                 </div>
               </CardContent>

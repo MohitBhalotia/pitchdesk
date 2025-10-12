@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { promises as fs } from 'fs';
+import path from 'path';
+import dbConnect from '@/lib/db';
+import SupportTicketModel from '@/models/SupportTicketModel';
 
 export async function POST(request: NextRequest) {
   try {
+    // Connect to database
+    await dbConnect();
+
     const formData = await request.formData();
 
     // Extract form data
@@ -12,34 +19,54 @@ export async function POST(request: NextRequest) {
     const description = formData.get('description') as string;
     const consent = formData.get('consent') === 'true';
 
-    // Get uploaded files
-    const files: File[] = [];
-    for (let i = 0; i < 3; i++) {
-      const file = formData.get(`file${i}`) as File | null;
-      if (file && file.size > 0) {
-        files.push(file);
-      }
+    // Validate required fields
+    if (!email || !issueType || !subject || !description || !consent) {
+      return NextResponse.json(
+        { success: false, message: 'Missing required fields' },
+        { status: 400 }
+      );
     }
 
-   //////logic abhi likhna he.....
+    // Validate email format
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid email format' },
+        { status: 400 }
+      );
+    }
 
-    console.log('Support ticket received:', {
+    // Validate description length
+    if (description.trim().length < 20) {
+      return NextResponse.json(
+        { success: false, message: 'Description must be at least 20 characters long' },
+        { status: 400 }
+      );
+    }
+
+   
+    // Create support ticket document
+    const supportTicket = new SupportTicketModel({
       name,
       email,
       issueType,
-      subject,
-      description,
+      subject: subject.trim(),
+      description: description.trim(),
       consent,
-      fileCount: files.length,
     });
 
-    // Generate ticket ID ....abhi ke liye random
-    const ticketId = `PD-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Save to database
+    const savedTicket = await supportTicket.save();
+
+    // console.log('Support ticket created:', {
+    //   id: savedTicket._id,
+    //   email,
+    //   issueType,
+    //   subject,
+    // });
 
     return NextResponse.json({
       success: true,
-      ticketId,
+      ticketId: savedTicket._id,
       message: 'Support ticket created successfully',
     });
   } catch (error) {

@@ -88,48 +88,48 @@ const PopularBackground = () => (
   <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(240,119,119,0.1),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(220,119,118,0.3),rgba(255,255,255,0))] pointer-events-none" />
 );
 
-const Tab = ({
-  text,
-  selected,
-  setSelected,
-  discount = false,
-}: {
-  text: string;
-  selected: boolean;
-  setSelected: (text: string) => void;
-  discount?: boolean;
-}) => {
-  return (
-    <button
-      onClick={() => setSelected(text)}
-      className={cn(
-        'text-foreground relative w-fit px-4 py-2 text-sm font-semibold capitalize transition-colors',
-        discount && 'flex items-center justify-center gap-2.5',
-      )}
-    >
-      <span className="relative z-10">{text}</span>
-      {selected && (
-        <motion.span
-          layoutId="tab"
-          transition={{ type: 'spring', duration: 0.4 }}
-          className="bg-background absolute inset-0 z-0 rounded-full shadow-sm"
-        ></motion.span>
-      )}
-      {discount && (
-        <Badge
-          className={cn(
-            'relative z-10 bg-gray-100 text-xs whitespace-nowrap text-black shadow-none hover:bg-gray-100',
-            selected
-              ? 'bg-[#F3F4F6] hover:bg-[#F3F4F6]'
-              : 'bg-gray-300 hover:bg-gray-300',
-          )}
-        >
-          Save 35%
-        </Badge>
-      )}
-    </button>
-  );
-};
+// const Tab = ({
+//   text,
+//   selected,
+//   setSelected,
+//   discount = false,
+// }: {
+//   text: string;
+//   selected: boolean;
+//   setSelected: (text: string) => void;
+//   discount?: boolean;
+// }) => {
+//   return (
+//     <button
+//       onClick={() => setSelected(text)}
+//       className={cn(
+//         'text-foreground relative w-fit px-4 py-2 text-sm font-semibold capitalize transition-colors',
+//         discount && 'flex items-center justify-center gap-2.5',
+//       )}
+//     >
+//       <span className="relative z-10">{text}</span>
+//       {selected && (
+//         <motion.span
+//           layoutId="tab"
+//           transition={{ type: 'spring', duration: 0.4 }}
+//           className="bg-background absolute inset-0 z-0 rounded-full shadow-sm"
+//         ></motion.span>
+//       )}
+//       {discount && (
+//         <Badge
+//           className={cn(
+//             'relative z-10 bg-gray-100 text-xs whitespace-nowrap text-black shadow-none hover:bg-gray-100',
+//             selected
+//               ? 'bg-[#F3F4F6] hover:bg-[#F3F4F6]'
+//               : 'bg-gray-300 hover:bg-gray-300',
+//           )}
+//         >
+//           Save 35%
+//         </Badge>
+//       )}
+//     </button>
+//   );
+// };
 
 const PricingCard = ({
   tier,
@@ -302,7 +302,7 @@ export default function PricingSection() {
             plan.
           </p>
         </div>
-        <div className="mx-auto flex w-fit rounded-full bg-[#F3F4F6] p-1 dark:bg-[#222]">
+        {/* <div className="mx-auto flex w-fit rounded-full bg-[#F3F4F6] p-1 dark:bg-[#222]">
           {PAYMENT_FREQUENCIES.map((freq) => (
             <Tab
               key={freq}
@@ -314,7 +314,7 @@ export default function PricingSection() {
               discount={freq === 'yearly'}
             />
           ))}
-        </div>
+        </div> */}
       </div>
 
       <div className="  grid w-full max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 ">

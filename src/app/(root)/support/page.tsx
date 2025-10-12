@@ -22,7 +22,7 @@ interface SupportFormData {
     issueType: string;
     subject: string;
     description: string;
-    files: File[];
+    // files: File[];
     consent: boolean;
 }
 
@@ -59,7 +59,7 @@ interface FormErrors {
     issueType?: string;
     subject?: string;
     description?: string;
-    files?: string;
+    // files?: string;
     consent?: string;
 }
 
@@ -72,7 +72,7 @@ export default function SupportPage() {
         issueType: '',
         subject: '',
         description: '',
-        files: [],
+        // files: [],
         consent: false,
     });
     const [errors, setErrors] = useState<FormErrors>({});
@@ -107,19 +107,19 @@ export default function SupportPage() {
         }
 
         // Validate file uploads
-        if (formData.files.length > 0) {
-            for (const file of formData.files) {
-                if (file.size > 5 * 1024 * 1024) { // 5MB
-                    newErrors.files = 'File size must be less than 5MB';
-                    break;
-                }
-                const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg', 'application/pdf'];
-                if (!allowedTypes.includes(file.type)) {
-                    newErrors.files = 'Only PNG, JPG, JPEG, and PDF files are allowed';
-                    break;
-                }
-            }
-        }
+        // if (formData.files.length > 0) {
+        //     for (const file of formData.files) {
+        //         if (file.size > 5 * 1024 * 1024) { // 5MB
+        //             newErrors.files = 'File size must be less than 5MB';
+        //             break;
+        //         }
+        //         const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg', 'application/pdf'];
+        //         if (!allowedTypes.includes(file.type)) {
+        //             newErrors.files = 'Only PNG, JPG, JPEG, and PDF files are allowed';
+        //             break;
+        //         }
+        //     }
+        // }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -132,44 +132,45 @@ export default function SupportPage() {
         }
     };
 
-    const handleFileUpload = (files: FileList | null) => {
-        if (!files) return;
+    // const handleFileUpload = (files: FileList | null) => {
+    //     if (!files) return;
 
-        const fileArray = Array.from(files);
-        const totalFiles = formData.files.length + fileArray.length;
+    //     const fileArray = Array.from(files);
+    //     const totalFiles = formData.files.length + fileArray.length;
 
-        if (totalFiles > 3) {
-            toast.error('Maximum 3 files allowed');
-            return;
-        }
+    //     if (totalFiles > 3) {
+    //         toast.error('Maximum 3 files allowed');
+    //         return;
+    //     }
 
-        // Validate each file
-        for (const file of fileArray) {
-            if (file.size > 5 * 1024 * 1024) {
-                toast.error(`${file.name} is too large. Maximum file size is 5MB.`);
-                return;
-            }
-            const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg', 'application/pdf'];
-            if (!allowedTypes.includes(file.type)) {
-                toast.error(`${file.name} is not a supported file type.`);
-                return;
-            }
-        }
+    //     // Validate each file
+    //     for (const file of fileArray) {
+    //         if (file.size > 5 * 1024 * 1024) {
+    //             toast.error(`${file.name} is too large. Maximum file size is 5MB.`);
+    //             return;
+    //         }
+    //         const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg', 'application/pdf'];
+    //         if (!allowedTypes.includes(file.type)) {
+    //             toast.error(`${file.name} is not a supported file type.`);
+    //             return;
+    //         }
+    //     }
 
-        setFormData(prev => ({
-            ...prev,
-            files: [...prev.files, ...fileArray].slice(0, 3) // Limit to 3 files
-        }));
-    };
+    //     setFormData(prev => ({
+    //         ...prev,
+    //         files: [...prev.files, ...fileArray].slice(0, 3) // Limit to 3 files
+    //     }));
+    // };
 
-    const removeFile = (index: number) => {
-        setFormData(prev => ({
-            ...prev,
-            files: prev.files.filter((_, i) => i !== index)
-        }));
-    };
+    // const removeFile = (index: number) => {
+    //     setFormData(prev => ({
+    //         ...prev,
+    //         files: prev.files.filter((_, i) => i !== index)
+    //     }));
+    // };
 
     const handleSubmit = async (e: React.FormEvent) => {
+        
         e.preventDefault();
 
         if (!validateForm()) {
@@ -190,9 +191,9 @@ export default function SupportPage() {
             submitData.append('consent', formData.consent.toString());
 
             // Add files
-            formData.files.forEach((file, index) => {
-                submitData.append(`file${index}`, file);
-            });
+            // formData.files.forEach((file, index) => {
+            //     submitData.append(`file${index}`, file);
+            // });
 
             // Submit to API
             const response = await axios.post('/api/support', submitData);
@@ -225,7 +226,7 @@ export default function SupportPage() {
                 issueType: '',
                 subject: '',
                 description: '',
-                files: [],
+                // files: [],
                 consent: false,
             });
 
@@ -238,21 +239,21 @@ export default function SupportPage() {
         }
     };
 
-    const handleDragOver = (e: React.DragEvent) => {
-        e.preventDefault();
-        setDragOver(true);
-    };
+    // const handleDragOver = (e: React.DragEvent) => {
+    //     e.preventDefault();
+    //     setDragOver(true);
+    // };
 
-    const handleDragLeave = (e: React.DragEvent) => {
-        e.preventDefault();
-        setDragOver(false);
-    };
+    // const handleDragLeave = (e: React.DragEvent) => {
+    //     e.preventDefault();
+    //     setDragOver(false);
+    // };
 
-    const handleDrop = (e: React.DragEvent) => {
-        e.preventDefault();
-        setDragOver(false);
-        handleFileUpload(e.dataTransfer.files);
-    };
+    // const handleDrop = (e: React.DragEvent) => {
+    //     e.preventDefault();
+    //     setDragOver(false);
+    //     handleFileUpload(e.dataTransfer.files);
+    // };
 
     return (
         <div className="min-h-screen bg-background">
@@ -468,7 +469,7 @@ export default function SupportPage() {
                                     </div>
 
                                     {/* File Upload */}
-                                    <div className="space-y-2">
+                                    {/* <div className="space-y-2">
                                         <Label>Screenshot Upload (Optional)</Label>
                                         <div
                                             className={cn(
@@ -502,10 +503,10 @@ export default function SupportPage() {
                                                     Choose Files
                                                 </Button>
                                             </Label>
-                                        </div>
+                                        </div> */}
 
                                         {/* File Previews */}
-                                        {formData.files.length > 0 && (
+                                        {/* {formData.files.length > 0 && (
                                             <div className="space-y-2">
                                                 {formData.files.map((file, index) => (
                                                     <div
@@ -535,7 +536,7 @@ export default function SupportPage() {
                                         {errors.files && (
                                             <p className="text-sm text-destructive">{errors.files}</p>
                                         )}
-                                    </div>
+                                    </div> */}
 
                                     {/* Consent Checkbox */}
                                     <div className="flex items-start space-x-2">

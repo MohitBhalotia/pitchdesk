@@ -12,6 +12,8 @@ import {
   X,
   Star,
   Check,
+  Clock,
+  Timer,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
@@ -164,9 +166,9 @@ export default function Index() {
       // trendUp: true
     },
     {
-      title: "Average Success Score",
-      value: "8.2/10",
-      icon: <Trophy className="h-6 w-6" />,
+      title: "Remaining Minutes",
+      value: `${userStats?.remainingTime}/${userStats?.totalTime}`,
+      icon: <Clock className="h-6 w-6" />,
       // trend: "+0.5 improvement",
       // trendUp: true
     },
