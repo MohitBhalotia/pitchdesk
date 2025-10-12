@@ -34,7 +34,7 @@ declare module "next-auth/jwt" {
     email?:string
     isVerified?: boolean;
     role?:"founder"|"vc"|null;
-    userPlan?: "free" | "starter" | "professional" | "enterprise";
+    userPlan?: "free" | "standard" | "pro" | "enterprise";
     provider?:"google"|"credentials"
     signupStep2Done?: boolean;
   }

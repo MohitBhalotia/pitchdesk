@@ -62,19 +62,12 @@ export default function Index() {
       // trend: "+12% this month",
       // trendUp: true
     },
-    // {
-    //   title: "AI Feedback Sessions",
-    //   value: 18,
-    //   icon: <Sparkles className="h-6 w-6" />,
-    //   // trend: "+8% this month",
-    //   // trendUp: true
-    // },
+
     {
       title: "Pitch Documents Generated",
       value: 7,
       icon: <FileText className="h-6 w-6" />,
-      // trend: "+3 this week",
-      // trendUp: true
+
     },
     {
       title: "Average Success Score",
@@ -173,12 +166,6 @@ export default function Index() {
                   </p>
                 </div>
               </div>
-              {/* {stat.trend && (
-                <div className={`text-xs font-medium flex items-center gap-1 ${stat.trendUp ? 'text-teal-500' : 'text-red-400'}`}>
-                  <TrendingUp className={`h-3 w-3 ${!stat.trendUp ? 'rotate-180' : ''}`} />
-                  {stat.trend}
-                </div>
-              )} */}
             </div>
           ))}
         </div>
