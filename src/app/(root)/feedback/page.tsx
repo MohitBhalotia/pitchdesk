@@ -10,8 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { MessageSquare, Star, Heart, Lightbulb, Bug, ThumbsUp, Send, Users, Twitter, Linkedin, Github, Mail, Award, TrendingUp } from 'lucide-react';
+import { MessageSquare, Star, Heart, Lightbulb, Bug,  Send, Users, Twitter, Linkedin, Instagram } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import axios from 'axios';
 
 interface FeedbackFormData {
     name: string;
@@ -85,8 +86,8 @@ const TESTIMONIALS: Testimonial[] = [
 const SOCIAL_LINKS = [
     { name: 'Discord', icon: Users, href: 'https://discord.gg/pitchdesk', color: 'text-indigo-600' },
     { name: 'Twitter', icon: Twitter, href: 'https://twitter.com/pitchdesk', color: 'text-blue-500' },
-    { name: 'LinkedIn', icon: Linkedin, href: 'https://linkedin.com/company/pitchdesk', color: 'text-blue-700' },
-    { name: 'Newsletter', icon: Mail, href: '#newsletter', color: 'text-green-600' },
+    { name: 'LinkedIn', icon: Linkedin, href: 'https://www.linkedin.com/company/pitch-desk', color: 'text-blue-700' },
+    { name: 'Instagram', icon: Instagram, href: 'https://www.instagram.com/pitchdesk.in/', color: 'text-pink-500' },
 ];
 
 export default function FeedbackPage() {
@@ -156,14 +157,11 @@ export default function FeedbackPage() {
             submitData.append('contactPreference', formData.contactPreference.toString());
 
             // Submit to API
-            const response = await fetch('/api/feedback', {
-                method: 'POST',
-                body: submitData,
-            });
+            const response = await axios.post('/api/feedback', submitData);
 
-            const result = await response.json();
+            const result = await response.data;
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error(result.message || 'Failed to submit feedback');
             }
 
@@ -216,21 +214,9 @@ export default function FeedbackPage() {
     return (
         <div className="min-h-screen bg-background">
             {/* Hero Section */}
-            <section className="relative py-20 px-4 bg-gradient-to-br from-background via-background to-muted/20">
+            <section className="relative py-8 px-4 ">
                 <div className="max-w-4xl mx-auto text-center">
-                    <div className="flex justify-center mb-6">
-                        <div className="relative">
-                            <div className="flex items-center justify-center w-24 h-24 bg-primary/10 rounded-full mb-4">
-                                <MessageSquare className="w-12 h-12 text-primary" />
-                            </div>
-                            <div className="absolute -top-2 -right-2">
-                                <ThumbsUp className="w-8 h-8 text-green-500" />
-                            </div>
-                            <div className="absolute -bottom-2 -left-2">
-                                <Heart className="w-8 h-8 text-red-500" />
-                            </div>
-                        </div>
-                    </div>
+                    
                     <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                         Your voice drives Pitch Desk forward
                     </h1>
@@ -241,7 +227,7 @@ export default function FeedbackPage() {
             </section>
 
             {/* Quick Poll Section */}
-            <section className="py-16 px-4 bg-muted/30">
+            <section className="py-16 px-4 ">
                 <div className="max-w-2xl mx-auto text-center">
                     <div className="bg-card rounded-2xl p-8 border shadow-sm">
                         <h3 className="text-2xl font-bold mb-4">How satisfied are you with your experience today?</h3>
@@ -251,9 +237,9 @@ export default function FeedbackPage() {
                                 <span className="text-lg font-semibold">4.2/5</span>
                             </div>
                         </div>
-                        <p className="text-muted-foreground mb-6">Based on 247 recent responses</p>
+                        <p className="text-muted-foreground mb-6">Based on 147 recent responses</p>
                         <Button
-                            onClick={() => setShowForm(true)}
+                            onClick={() => setShowForm(!showForm)}
                             className="text-lg px-8 py-3"
                             size="lg"
                         >
@@ -266,7 +252,7 @@ export default function FeedbackPage() {
 
             {/* Feedback Form */}
             {showForm && (
-                <section className="py-16 px-4 bg-muted/30">
+                <section className="py-10 px-4 ">
                     <div className="max-w-2xl mx-auto">
                         <Card>
                             <CardHeader>

@@ -9,11 +9,97 @@ import {
   Zap,
   ArrowUpRight,
   Crown,
+  X,
+  Star,
+  Check,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
+
+
+// Upgrade Modal Component
+const UpgradeModal = ({ isOpen, onClose, currentPlan }) => {
+  if (!isOpen) return null;
+
+  const features = [
+    "Direct access to 500+ VC network",
+    "Personalized introductions",
+    "Pitch deck review by investors",
+    "Priority scheduling with partners",
+    "Deal flow analytics dashboard",
+  ];
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl max-w-md w-full p-6 shadow-xl">
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Crown className="h-6 w-6 text-amber-500" />
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                Upgrade to Enterprise
+              </h2>
+            </div>
+            <p className="text-gray-600 dark:text-gray-300 text-sm">
+              Unlock exclusive VC networking features
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/20 dark:to-yellow-950/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-6">
+          <div className="flex items-center gap-3">
+            <Star className="h-5 w-5 text-amber-500" />
+            <div>
+              <p className="font-semibold text-amber-800 dark:text-amber-300">
+                Exclusive Feature
+              </p>
+              <p className="text-sm text-amber-700 dark:text-amber-400">
+                Connect directly with real venture capitalists
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-3 mb-6">
+          {features.map((feature, index) => (
+            <div key={index} className="flex items-center gap-3">
+              <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
+              <span className="text-sm text-gray-700 dark:text-gray-300">
+                {feature}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          >
+            Maybe Later
+          </button>
+          <button
+            onClick={() => {
+              onClose();
+              window.location.href = "/payment";
+            }}
+            className="flex-1 px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-white rounded-lg font-semibold hover:from-amber-600 hover:to-yellow-600 transition-all shadow-lg"
+          >
+            Upgrade Now
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 
 export default function Index() {
@@ -30,6 +116,7 @@ export default function Index() {
   };
 
   const [userStats, setUserStats] = useState<any>({});
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   // Fetch user plan ,no of pitch used and limit etc
   useEffect(() => {
@@ -117,9 +204,9 @@ export default function Index() {
       title: "Connect with Real VCs",
       description: "Network with actual venture capitalists",
       icon: <Users className="h-6 w-6 text-pink-400" />,
-      onClick: () => {
+       onClick: () => {
         if (userStats?.planName !== "enterprise") {
-          toast.error("This feature is only available for Enterprise users. Upgrade your plan to access it.");
+          setShowUpgradeModal(true);
           return;
         }
         router.push("/connect-vcs");
@@ -218,6 +305,11 @@ export default function Index() {
         </div>
 
       </div>
+       <UpgradeModal 
+        isOpen={showUpgradeModal} 
+        onClose={() => setShowUpgradeModal(false)}
+        currentPlan={userStats?.planName}
+      />
     </div>
   );
 }
