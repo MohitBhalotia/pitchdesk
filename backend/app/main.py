@@ -1,8 +1,6 @@
 import os
 import json
 import logging
-from typing import List
-from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -253,11 +251,15 @@ async def generate_pitch_form(
     return {"pitch": pitch_text}
 
 
-
-# --------------------- Pydantic Models ---------------------
+# --------------------- MODELS ---------------------
 class TranscriptMessage(BaseModel):
-    speaker: str
-    text: str
+    role: str
+    content: str
+    timestamp: str
+    _id: str
+
+    class Config:
+        populate_by_name = True
 
 class PitchRequest(BaseModel):
     transcript: List[TranscriptMessage]
@@ -340,21 +342,34 @@ Micro-parameter maximums:
 
 # --------------------- SCORING HELPERS ---------------------
 def compute_subtotals(scores: dict) -> dict:
+    """Compute subtotals for each section and ensure scores are within bounds"""
     for section, micro in MICRO_MAX_SCORES.items():
+        if section not in scores:
+            scores[section] = {}
+            
         subtotal = 0
         for k, max_val in micro.items():
+            # Get the score, default to 0 if not present
             val = float(scores.get(section, {}).get(k, 0))
+            # Ensure score is within bounds
             val = min(max(val, 0), max_val)
             subtotal += val
             scores[section][k] = val
+        
+        # Add subtotal to the section
         scores[section]["Subtotal"] = round(min(subtotal, SECTION_MAX[section]), 1)
+    
     return scores
 
 def finalize_scores(scores: dict) -> dict:
-    total = sum(scores[s]["Subtotal"] for s in SECTION_MAX.keys())
+    """Calculate total score and business investability confidence"""
+    total = sum(scores.get(s, {}).get("Subtotal", 0) for s in SECTION_MAX.keys())
     scores["Total Score"] = round(min(total, 100), 1)
+    
     bi = scores.get("Business Investability", {}).get("Subtotal", 0)
-    scores["Business Investability Confidence"] = int(min((bi / 25) * 80, 100))
+    # Calculate confidence as percentage of max Business Investability score (25)
+    scores["Business Investability Confidence"] = int(min((bi / 25) * 100, 100))
+    
     return scores
 
 # --------------------- MAIN ENDPOINT ---------------------
@@ -362,9 +377,14 @@ def finalize_scores(scores: dict) -> dict:
 async def evaluate_pitch(req: PitchRequest):
     try:
         logging.info("🎯 Evaluating pitch transcript...")
-        transcript_text = "\n".join([f"{m.speaker}: {m.text}" for m in req.transcript])
+        
+        # Convert transcript to text format - using the correct field names
+        transcript_text = "\n".join([f"{m.role}: {m.content}" for m in req.transcript])
+        logging.info(f"Transcript length: {len(transcript_text)} characters")
+        logging.info(f"Number of messages: {len(req.transcript)}")
+        logging.info(f"Sample message: role={req.transcript[0].role}, content={req.transcript[0].content[:50]}...")
 
-        # --- FIXED PROMPT: includes "JSON" in message ---
+        # Call OpenAI API
         completion = client.chat.completions.create(
             model=MODEL_NAME,
             temperature=TEMPERATURE,
@@ -379,6 +399,8 @@ async def evaluate_pitch(req: PitchRequest):
         )
 
         content = completion.choices[0].message.content.strip()
+        logging.info(f"Raw API response: {content}")
+        
         result = json.loads(content)
 
         if "scores" in result:
@@ -387,6 +409,9 @@ async def evaluate_pitch(req: PitchRequest):
 
         return result
 
+    except json.JSONDecodeError as e:
+        logging.error(f"JSON decode error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to parse AI response: {str(e)}")
     except Exception as e:
         logging.exception("❌ Pitch evaluation failed.")
         raise HTTPException(status_code=500, detail=str(e))
@@ -395,3 +420,8 @@ async def evaluate_pitch(req: PitchRequest):
 @app.get("/")
 def root():
     return {"status": "ok", "message": "Pitch Evaluation API is running 🚀"}
+
+# Health check endpoint
+@app.get("/health")
+def health_check():
+    return {"status": "healthy", "service": "Pitch Evaluation API"}
