@@ -101,23 +101,30 @@ export default function Header1() {
 
   return (
     <header
-      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
-        isScrolled
+      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${isScrolled
           ? theme === "dark"
             ? "bg-black/80 backdrop-blur shadow-lg"
             : "bg-white/80 backdrop-blur shadow-lg"
           : "bg-transparent"
-      }`}
+        }`}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Top row */}
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-blue-800">
-              <Image src="/logo.svg" alt="Logo" width={20} height={20} />
+            <div className="flex h-10 w-10 items-center justify-center rounded-full  ">
+
+              <Image
+                src="/logo.png"
+                alt="PitchDesk Logo"
+                width={40}
+                height={40}
+                className="dark:invert rounded-full"
+              />
+
             </div>
-            <span className="bg-gradient-to-r from-primary to-blue-800 bg-clip-text text-xl font-bold text-transparent">
+            <span className=" text-xl font-bold ">
               PitchDesk
             </span>
           </Link>
@@ -141,9 +148,8 @@ export default function Header1() {
                     <span>{item.name}</span>
                     {item.hasDropdown && (
                       <ChevronDown
-                        className={`h-4 w-4 transition-transform ${
-                          activeDropdown === item.name ? "rotate-180" : ""
-                        }`}
+                        className={`h-4 w-4 transition-transform ${activeDropdown === item.name ? "rotate-180" : ""
+                          }`}
                       />
                     )}
                   </Link>
@@ -153,11 +159,10 @@ export default function Header1() {
                     <AnimatePresence>
                       {activeDropdown === item.name && (
                         <motion.ul
-                          className={`absolute top-full left-0 mt-2 w-80 rounded-xl border border-border bg-background shadow-xl z-40 ${
-                            item.name === "Solutions"
+                          className={`absolute top-full left-0 mt-2 w-80 rounded-xl border border-border bg-background shadow-xl z-40 ${item.name === "Solutions"
                               ? "w-[600px] grid grid-cols-2 gap-6 p-6"
                               : "p-2"
-                          }`}
+                            }`}
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -10 }}

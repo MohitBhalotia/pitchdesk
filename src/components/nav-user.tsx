@@ -99,10 +99,10 @@ export function NavUser({
                 <Lock/>
                 Change Password
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
+              {/* <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
                 <Bell />
                 Notifications
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="cursor-pointer flex items-center gap-2" onClick={() => signOut({ callbackUrl: '/' })}>

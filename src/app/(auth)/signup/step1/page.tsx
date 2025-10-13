@@ -1,5 +1,4 @@
 "use client";
-import { Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import Step1Form from "./Step1Form";
@@ -9,11 +8,21 @@ export default function Step1Page() {
     <div className="flex flex-col lg:flex-row min-h-screen bg-background">
       <div className="w-full lg:w-1/2 flex flex-col p-6 md:p-12">
         <div className="flex justify-center md:justify-start items-center gap-3 mb-8">
-          <Sparkles className="h-5 w-5 text-primary" />
-          <Link href="/" className="hover:opacity-80 transition-opacity">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
-              Pitch Desk
-            </h1>
+          <Link href="/" className="flex items-center space-x-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full ">
+
+              <Image
+                src="/logo.png"
+                alt="PitchDesk Logo"
+                width={40}
+                height={40}
+                className="dark:invert rounded-full"
+              />
+
+            </div>
+            <span className="text-xl font-bold">
+              PitchDesk
+            </span>
           </Link>
         </div>
 
