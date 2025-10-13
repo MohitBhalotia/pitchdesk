@@ -2,7 +2,7 @@ import mongoose, { Model, Schema } from "mongoose"
 
 const PlanSchema = new Schema<IPlan>(
   {
-    name: { type: String, enum: ["standard", "pro", "enterprise"], required: true },
+    name: { type: String, enum: ["free", "standard", "pro", "enterprise"], required: true },
     amount: {type: Number, required: true},
     pitchesNumber: { type: Number, required: true },
     pitchesTime: { type: Number, required: true },

@@ -269,7 +269,7 @@ export default function Index() {
         <div className="backdrop-blur-lg max-w-7xl mx-auto bg-white/70 dark:bg-card/80 rounded-3xl shadow-xl border border-border/30 p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6 w-full">
           <div className="flex-1">
             <h1 className="text-4xl font-extrabold bg-gradient-to-r from-teal-500 to-violet-500 bg-clip-text text-transparent tracking-tight mb-2">
-              Welcome back, {session?.user?.name}!
+              Welcome back, {session?.user?.fullName}!
             </h1>
             <p className="text-lg text-muted-foreground mb-2">
               Ready to perfect your pitch? Your{" "}

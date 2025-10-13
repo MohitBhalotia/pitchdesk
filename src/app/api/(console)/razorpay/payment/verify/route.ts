@@ -29,9 +29,9 @@ export async function POST(req: NextRequest){
 
     console.log("verify active")
 
-    await activateUserPlan(razorpay_order_id, razorpay_payment_id)
+    const planName = await activateUserPlan(razorpay_order_id, razorpay_payment_id)
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, newPlanName: planName });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   }catch(error: any){

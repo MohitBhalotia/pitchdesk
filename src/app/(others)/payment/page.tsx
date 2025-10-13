@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import NumberFlow from '@number-flow/react';
 import { BadgeCheck } from 'lucide-react';
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 const PAYMENT_FREQUENCIES: ('monthly' | 'yearly')[] = ['monthly', 'yearly'];
@@ -219,7 +219,7 @@ export default function PricingSection() {
   >(PAYMENT_FREQUENCIES[0]);
 
   const [loading, setLoading] = useState(false);
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
   const router = useRouter();
   const userId = session?.user?._id;
   const userName = session?.user?.fullName || "User";
@@ -242,7 +242,7 @@ export default function PricingSection() {
         router.push("/login");
         return;
       }
-      
+
       const res = await fetch("/api/razorpay/create-order", {
         method: "POST",
         body: JSON.stringify({ planId, userId }), //i think userId backend me session se leni chahiye..auth se
@@ -262,15 +262,30 @@ export default function PricingSection() {
         order_id: data.orderId,
         name: "PitchDesk",
         description: "Plan Subscription",
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        handler: async function (response: any){
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        handler: async function (response: any) {
           const res = await fetch("/api/razorpay/payment/verify", {
             method: "POST",
             body: JSON.stringify(response),
           });
           const resData = await res.json();
-          console.log(resData)
-          alert("Payment successful!");
+          console.log(resData);
+
+          if (resData.success) {
+            // Update session to reflect new plan
+            await update(
+              {
+                user: {
+                  userPlan: resData.newPlanName,
+                }
+              }
+            );
+
+
+            alert("Payment successful! Your plan has been updated.");
+          } else {
+            alert("Payment verification failed. Please contact support.");
+          }
         },
         prefill: {
           name: userName,
@@ -281,7 +296,7 @@ export default function PricingSection() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const rzp = new (window as any).Razorpay(options);
       rzp.open();
-    } catch  {
+    } catch {
       alert("Payment error");
     } finally {
       setLoading(false);

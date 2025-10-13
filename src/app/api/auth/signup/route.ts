@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs";
 import signupSchema from "@/schemas/signUpSchema";
 import { z } from "zod";
 import resendVerify from "@/lib/resend/resend-verification";
+import { createFreeUserPlan } from "@/lib/razorpayUtils";
 export async function POST(req: NextRequest){
   await dbConnect();
   try {
@@ -48,6 +49,10 @@ export async function POST(req: NextRequest){
       signupStep2Done: true
     });
     await user.save();
+
+    // Create free user plan
+    await createFreeUserPlan(user._id.toString());
+
     await resendVerify(user.verificationCode,user.fullName,user.email, user._id.toString());
 
     return NextResponse.json(

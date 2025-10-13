@@ -5,6 +5,7 @@ import { NextAuthOptions } from "next-auth";
 import dbConnect from "@/lib/db";
 import { nanoid } from "nanoid";
 import bcrypt from "bcryptjs";
+import { createFreeUserPlan } from "@/lib/razorpayUtils";
 
 const salt=await bcrypt.genSalt(10);
 
@@ -98,6 +99,9 @@ const authOptions: NextAuthOptions = {
 
 
           await newUser.save();
+
+          // Create free user plan for new Google users
+          await createFreeUserPlan(newUser._id.toString());
 
           user._id = newUser._id?.toString();
           user.isVerified = true;
