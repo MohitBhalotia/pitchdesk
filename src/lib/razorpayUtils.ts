@@ -7,7 +7,7 @@ import { planModel } from "@/models/PlanModel";
 
 // Utility function to create user plan for free users
 export const createFreeUserPlan = async (userId: string) => {
-    let freePlan = await planModel.findOne({ name: "free" });
+    const freePlan = await planModel.findOne({ name: "free" });
 
     
     

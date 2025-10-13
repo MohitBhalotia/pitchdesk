@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import NumberFlow from '@number-flow/react';
 import { BadgeCheck } from 'lucide-react';
 import { useState, useEffect } from "react";
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 const PAYMENT_FREQUENCIES: ('monthly' | 'yearly')[] = ['monthly', 'yearly'];
