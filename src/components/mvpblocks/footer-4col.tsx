@@ -1,33 +1,36 @@
 import {
-  Dribbble,
-  Facebook,
-  Github,
+  //Dribbble,
+ // Facebook,
+ // Github,
   Instagram,
+  Linkedin,
   Mail,
   MapPin,
   Phone,
-  Twitter,
+  //Twitter,
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
 const data = {
-  facebookLink: 'https://facebook.com/mvpblocks',
-  instaLink: 'https://instagram.com/mvpblocks',
-  twitterLink: 'https://twitter.com/mvpblocks',
-  githubLink: 'https://github.com/mvpblocks',
-  dribbbleLink: 'https://dribbble.com/mvpblocks',
+  //facebookLink: 'https://facebook.com/mvpblocks',
+  instaLink: 'https://www.instagram.com/pitchdesk.in?igsh=OHVqcXgyMTNsamVo',
+  linkedInLink: 'https://www.linkedin.com/company/pitch-desk',
+  //twitterLink: 'https://twitter.com/mvpblocks',
+  //githubLink: 'https://github.com/mvpblocks',
+  //dribbbleLink: 'https://dribbble.com/mvpblocks',
   services: {
-    webdev: '/web-development',
-    webdesign: '/web-design',
-    marketing: '/marketing',
-    googleads: '/google-ads',
+    PitchSession: '/web-development',
+    QnA: '/web-design',
+    pitchGen: '/marketing',
+    //googleads: '/google-ads',
   },
   about: {
-    history: '/company-history',
+    //history: '/company-history',
     team: '/meet-the-team',
-    handbook: '/employee-handbook',
-    careers: '/careers',
+    dream: '/our-dream'
+    //handbook: '/employee-handbook',
+    //careers: '/careers',
   },
   help: {
     faqs: '/faqs',
@@ -35,44 +38,46 @@ const data = {
     livechat: '/live-chat',
   },
   contact: {
-    email: 'hello@mvpblocks.com',
-    phone: '+91 8637373116',
-    address: 'Kolkata, West Bengal, India',
+    email: 'info@pitchdesk.in',
+    phone: '+91 9987105864',
+    address: 'India',
   },
   company: {
-    name: 'Mvpblocks',
+    name: 'Pitch Desk',
     description:
-      'Building beautiful and functional web experiences with modern technologies. We help startups and businesses create their digital presence.',
+      "Fueling founder's growth with AI that listens, challenges, and helps them shine in every pitch.",
     logo: '/logo.webp',
   },
 };
 
 const socialLinks = [
-  { icon: Facebook, label: 'Facebook', href: data.facebookLink },
+  //{ icon: Facebook, label: 'Facebook', href: data.facebookLink },
   { icon: Instagram, label: 'Instagram', href: data.instaLink },
-  { icon: Twitter, label: 'Twitter', href: data.twitterLink },
-  { icon: Github, label: 'GitHub', href: data.githubLink },
-  { icon: Dribbble, label: 'Dribbble', href: data.dribbbleLink },
+  { icon: Linkedin, label: 'LinkedIn', href: data.linkedInLink },
+  //{ icon: Twitter, label: 'Twitter', href: data.twitterLink },
+  //{ icon: Github, label: 'GitHub', href: data.githubLink },
+  //{ icon: Dribbble, label: 'Dribbble', href: data.dribbbleLink },
 ];
 
 const aboutLinks = [
-  { text: 'Company History', href: data.about.history },
+  //{ text: 'Company History', href: data.about.history },
   { text: 'Meet the Team', href: data.about.team },
-  { text: 'Employee Handbook', href: data.about.handbook },
-  { text: 'Careers', href: data.about.careers },
+  { text: 'Our Dream', href: data.about.dream }
+  //{ text: 'Employee Handbook', href: data.about.handbook },
+  //{ text: 'Careers', href: data.about.careers },
 ];
 
 const serviceLinks = [
-  { text: 'Web Development', href: data.services.webdev },
-  { text: 'Web Design', href: data.services.webdesign },
-  { text: 'Marketing', href: data.services.marketing },
-  { text: 'Google Ads', href: data.services.googleads },
+  { text: "pitch session with AI VC's", href: data.services.PitchSession },
+  { text: 'QnA and Negotiation practice', href: data.services.QnA },
+  { text: 'Generate Deal cracking pitch', href: data.services.pitchGen },
+  //{ text: 'Google Ads', href: data.services.googleads },
 ];
 
 const helpfulLinks = [
-  { text: 'FAQs', href: data.help.faqs },
-  { text: 'Support', href: data.help.support },
-  { text: 'Live Chat', href: data.help.livechat, hasIndicator: true },
+  //{ text: 'FAQs', href: data.help.faqs },
+  { text: 'Support', href: data.help.support, hasIndicator: false },
+  //{ text: 'Live Chat', href: data.help.livechat, hasIndicator: true },
 ];
 
 const contactInfo = [

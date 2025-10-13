@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense/*, useEffect*/, useState } from "react";
 import { App } from "../../components/App";
 import Intelligence from "../../components/Intelligence";
 import { stsConfig } from "../../lib/constants";

@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
   dbConnect()
   try {
     const body = await req.json();
-    let { pitchId } = body;
+    const { pitchId } = body;
 
     if (!pitchId) {
       return withCors(

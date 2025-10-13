@@ -33,7 +33,7 @@ export default function PaymentHistoryPage() {
         if (!res.ok) throw new Error(data.message || "Failed to load history");
         setPayments(data.payments);
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any 
+      
       catch (err) {
         setError(err.message || "Unknown error");
       } finally {

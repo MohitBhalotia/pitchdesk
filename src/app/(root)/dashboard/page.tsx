@@ -26,6 +26,7 @@ export default function Index() {
     avatar: session?.user?.image || "/placeholder.svg",
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [userStats, setUserStats] = useState<any>({});
 
   // Fetch user plan ,no of pitch used and limit etc

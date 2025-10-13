@@ -34,28 +34,28 @@ interface Pitch {
 
 export default function PitchTranscripts() {
   const [pitches, setPitches] = useState<Pitch[]>([])
-  const [isDarkMode, setIsDarkMode] = useState(false)
+  //const [isDarkMode, setIsDarkMode] = useState(false)
   const [expandedPitches, setExpandedPitches] = useState<Set<string>>(new Set())
   const [isLoading, setIsLoading] = useState(true)
   const { data: session, status } = useSession()
   const router = useRouter()
 
-  useEffect(() => {
-    // Removed the undefined userId logging
-    console.log("[PitchTranscripts] Component mounted")
+  // useEffect(() => {
+  //   // Removed the undefined userId logging
+  //   //console.log("[PitchTranscripts] Component mounted")
 
-    if (typeof window !== "undefined") {
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
-      setIsDarkMode(prefersDark)
-      console.log("[PitchTranscripts] System prefers dark mode:", prefersDark)
+  //   // if (typeof window !== "undefined") {
+  //   //   const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
+  //   //   setIsDarkMode(prefersDark)
+  //   //   console.log("[PitchTranscripts] System prefers dark mode:", prefersDark)
 
-      if (prefersDark) {
-        document.documentElement.classList.add("dark")
-      } else {
-        document.documentElement.classList.remove("dark")
-      }
-    }
-  }, [])
+  //   //   if (prefersDark) {
+  //   //     document.documentElement.classList.add("dark")
+  //   //   } else {
+  //   //     document.documentElement.classList.remove("dark")
+  //   //   }
+  //   // }
+  // }, [])
 
   useEffect(() => {
     const fetchPitches = async () => {
@@ -92,11 +92,11 @@ export default function PitchTranscripts() {
     fetchPitches()
   }, [session, status])
 
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode)
-    document.documentElement.classList.toggle("dark")
-    console.log("[PitchTranscripts] Theme toggled. Now dark?", !isDarkMode)
-  }
+  // const toggleTheme = () => {
+  //   setIsDarkMode(!isDarkMode)
+  //   document.documentElement.classList.toggle("dark")
+  //   console.log("[PitchTranscripts] Theme toggled. Now dark?", !isDarkMode)
+  // }
 
   const togglePitchExpansion = (pitchId: string) => {
     const newExpanded = new Set(expandedPitches)
@@ -123,6 +123,7 @@ export default function PitchTranscripts() {
   // Get user display name safely
   const getUserDisplayName = () => {
     if (!session?.user) return ""
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (session.user as any).fullName || session.user.email || session.user.name || "User"
   }
 

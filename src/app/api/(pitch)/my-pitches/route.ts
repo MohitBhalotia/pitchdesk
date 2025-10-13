@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { /*NextRequest,*/ NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import PitchModel from "@/models/PitchModel";
 import dbConnect from "@/lib/db";
 import mongoose from "mongoose";
 import  authOptions  from "@/lib/auth";
 
-export async function GET(req: NextRequest) {
+export async function GET(/*req: NextRequest*/) {
   try {
     await dbConnect();
 

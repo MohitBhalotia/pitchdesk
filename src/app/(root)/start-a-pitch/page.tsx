@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React/*, { useState } */from "react";
 import VCSummaryCard from "@/components/VCSummaryCard";
-import { vcs, VC } from "../../../../data/vc";
+import { vcs/*, VC */} from "../../../../data/vc";
 
 export default function MeetTheVCsPage() {
 

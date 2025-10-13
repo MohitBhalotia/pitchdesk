@@ -32,7 +32,8 @@ export async function GET(req: Request) {
         { status: 404 }
       );
     }
-
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const plan: any = userPlan.planId;
 
     // Calculate remaining usage

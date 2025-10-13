@@ -4,11 +4,11 @@ import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
 
 interface EvaluationScores {
-  Introduction: any
-  PitchContent: any
-  QandAHandling: any
-  DeliveryAndStyle: any
-  BusinessInvestability: any
+  Introduction: number
+  PitchContent: number
+  QandAHandling: number
+  DeliveryAndStyle: number
+  BusinessInvestability: number
   TotalScore: number
   BusinessInvestabilityConfidence: number
 }
@@ -26,6 +26,7 @@ const MAX_PER_ITEM = 5
 
 const clamp = (n: number, min: number, max: number) => Math.min(Math.max(n, min), max)
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getNumericCriteria = (section: any): number[] => {
   if (!section || typeof section !== "object") return []
   return Object.entries(section)
@@ -33,6 +34,7 @@ const getNumericCriteria = (section: any): number[] => {
     .map(([, v]) => clamp(v as number, 0, MAX_PER_ITEM))
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const computeSectionSubtotal = (section: any): number => {
   const values = getNumericCriteria(section)
   if (values.length === 0) return 0
@@ -40,6 +42,7 @@ const computeSectionSubtotal = (section: any): number => {
   return Number.parseFloat(sum.toFixed(2))
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getSectionMax = (section: any): number => getNumericCriteria(section).length * MAX_PER_ITEM
 
 const getTotalMax = (scores: EvaluationScores): number =>
@@ -186,11 +189,11 @@ const ScoreBreakdownChart = ({ scores }: { scores: EvaluationScores }) => {
 const ScoreCard = ({
   title,
   data,
-  maxScore = 5,
+  //maxScore = 5,
   color,
 }: {
   title: string
-  data: any
+  data: number
   maxScore?: number
   color: string
 }) => {
@@ -342,7 +345,7 @@ export default function EvaluationPage() {
   const totalScore = evaluation ? calculateTotalScore(evaluation.scores) : 0
   const rawTotal = evaluation ? computeRawTotal(evaluation.scores) : 0
   const totalMax = evaluation ? getTotalMax(evaluation.scores) : 0
-  const performanceLabel = evaluation ? getPerformanceLabel(totalScore) : ""
+  //const performanceLabel = evaluation ? getPerformanceLabel(totalScore) : ""
 
   return (
     <div className="min-h-screen bg-background py-8">
@@ -492,7 +495,7 @@ export default function EvaluationPage() {
                 </div>
               </div>
               <div className="mt-2 text-sm text-muted-foreground">
-                Confidence level in the business's investment potential
+                {"Confidence level in the business's investment potential"}
               </div>
             </div>
 
