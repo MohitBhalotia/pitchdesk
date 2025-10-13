@@ -5,9 +5,10 @@ import Step1Form from "./Step1Form";
 
 export default function LoginPage() {
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-background">
-      <div className="w-full lg:w-1/2 flex flex-col p-6 md:p-12">
-        <div className="flex justify-center md:justify-start items-center gap-3 mb-8">
+    <div className="flex flex-row justify-between min-h-svh lg:grid-cols-2">
+      <div className="flex flex-2/3 flex-col gap-4 p-6  w-full">
+        <div className="flex justify-center items-center gap-4 md:justify-start">
+
           <Link href="/" className="flex items-center space-x-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-full ">
 
@@ -26,7 +27,7 @@ export default function LoginPage() {
           </Link>
         </div>
         <div className="flex items-center justify-center">
-          <div className="w-full max-w-xs mt-10">
+          <div className="w-full max-w-xs mt-3">
             <Step1Form />
           </div>
         </div>

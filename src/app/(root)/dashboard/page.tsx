@@ -105,25 +105,24 @@ const UpgradeModal = ({ isOpen, onClose, currentPlan }) => {
 
 
 export default function Index() {
-  const { data: session /*status*/ } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
 
-  // Fallbacks for demo if session is not loaded
-  const user = {
-    name: session?.user?.fullName || "User",
-    email: session?.user?.email || "user@email.com",
-    avatar: session?.user?.image || "/placeholder.svg",
-  };
+
 
   const [userStats, setUserStats] = useState<any>({});
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const isOverallLoading = isLoading || status === "loading";
 
   // Fetch user plan ,no of pitch used and limit etc
   useEffect(() => {
-    if (!session?.user?._id) return; // wait until session is loaded
+    if (status === "loading" || !session?.user?._id) return; // wait until session is loaded
 
     const fetchUserPlan = async () => {
       try {
+        setIsLoading(true);
         const response = await axios.get("/api/users/stats", {
           params: { userId: session.user._id },
         });
@@ -133,11 +132,13 @@ export default function Index() {
       } catch (err) {
         toast.error("Error fetching user stats.");
         console.error("Error fetching user stats:", err);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchUserPlan();
-  }, [session?.user?._id]); // re-run when user id becomes available
+  }, [session?.user?._id, status]); // re-run when user id becomes available
 
   const stats = [
     {
@@ -194,7 +195,7 @@ export default function Index() {
       title: "Connect with Real VCs",
       description: "Network with actual venture capitalists",
       icon: <Users className="h-6 w-6 text-pink-400" />,
-       onClick: () => {
+      onClick: () => {
         if (userStats?.planName !== "enterprise") {
           setShowUpgradeModal(true);
           return;
@@ -205,6 +206,63 @@ export default function Index() {
     },
   ];
 
+
+  // Full Skeleton Loading State
+  if (isOverallLoading) {
+    return (
+      <div className="flex flex-col gap-8 items-center mx-auto px-2 py-6">
+        {/* Welcome Banner Skeleton */}
+        <div className="max-w-7xl mx-auto w-full bg-white/70 dark:bg-card/80 rounded-3xl shadow-xl border border-border/30 p-8 animate-pulse">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div className="flex-1">
+              <div className="h-8 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mb-4"></div>
+              <div className="h-6 bg-gray-300 dark:bg-gray-700 rounded w-1/2"></div>
+            </div>
+            <div className="h-10 bg-gray-300 dark:bg-gray-700 rounded w-32"></div>
+          </div>
+        </div>
+
+        {/* Stats Grid Skeleton */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-7xl mx-auto">
+          {[...Array(4)].map((_, index) => (
+            <div
+              key={index}
+              className="rounded-xl flex items-center py-4 lg:py-8 shadow bg-white/80 dark:bg-card/90 p-4 lg:p-6 flex-col gap-1 border border-border/20 animate-pulse"
+            >
+              <div className="flex items-center gap-3 lg:gap-4 mb-1 w-full">
+                <div className="p-2 lg:p-4 rounded-lg bg-gray-300 dark:bg-gray-700 h-12 w-12"></div>
+                <div className="flex-1">
+                  <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                  <div className="h-6 bg-gray-300 dark:bg-gray-700 rounded w-1/2"></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Quick Actions Skeleton */}
+        <div className="w-full max-w-7xl mx-auto mt-8">
+          <div className="h-8 bg-gray-300 dark:bg-gray-700 rounded w-48 mb-6"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[...Array(4)].map((_, index) => (
+              <div
+                key={index}
+                className="rounded-xl border border-border/20 bg-white/70 dark:bg-card/90 shadow p-4 flex items-center gap-3 animate-pulse"
+              >
+                <div className="p-2 rounded-lg bg-gray-300 dark:bg-gray-700 h-10 w-10"></div>
+                <div className="flex-1">
+                  <div className="h-5 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-1/2"></div>
+                </div>
+                <div className="h-5 w-5 bg-gray-300 dark:bg-gray-700 rounded"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="">
       <div className="flex flex-col gap-8 items-center mx-auto px-2 py-6">
@@ -212,7 +270,7 @@ export default function Index() {
         <div className="backdrop-blur-lg max-w-7xl mx-auto bg-white/70 dark:bg-card/80 rounded-3xl shadow-xl border border-border/30 p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6 w-full">
           <div className="flex-1">
             <h1 className="text-4xl font-extrabold bg-gradient-to-r from-teal-500 to-violet-500 bg-clip-text text-transparent tracking-tight mb-2">
-              Welcome back, {user.name}!
+              Welcome back, {session?.user?.name}!
             </h1>
             <p className="text-lg text-muted-foreground mb-2">
               Ready to perfect your pitch? Your{" "}
@@ -236,21 +294,21 @@ export default function Index() {
         </div>
 
         {/* Stats Grid */}
-        <div className="flex gap-8 w-full justify-center">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-7xl mx-auto">
           {stats.map((stat, index) => (
             <div
-              className="rounded-xl flex items-center py-8 shadow bg-white/80 dark:bg-card/90 p-6 flex-col gap-1 border border-border/20 hover:shadow-lg transition-shadow"
+              className="rounded-xl flex items-center py-4 lg:py-8 shadow bg-white/80 dark:bg-card/90 p-4 lg:p-6 flex-col gap-1 border border-border/20 hover:shadow-lg transition-shadow"
               key={index}
             >
-              <div className="flex items-center gap-4 mb-1">
-                <div className="p-4 rounded-lg bg-primary text-primary-foreground">
+              <div className="flex items-center gap-3 lg:gap-4 mb-1">
+                <div className="p-2 lg:p-4 rounded-lg bg-primary text-primary-foreground">
                   {stat.icon}
                 </div>
                 <div>
-                  <p className="text-base font-medium text-foreground">
+                  <p className="text-xs lg:text-base font-medium text-foreground">
                     {stat.title}
                   </p>
-                  <p className="text-xl font-bold text-teal-600 dark:text-teal-300">
+                  <p className="text-sm lg:text-xl font-bold text-teal-600 dark:text-teal-300">
                     {stat.value}
                   </p>
                 </div>
@@ -293,8 +351,8 @@ export default function Index() {
           </div>
         </div>
       </div>
-       <UpgradeModal 
-        isOpen={showUpgradeModal} 
+      <UpgradeModal
+        isOpen={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
         currentPlan={userStats?.planName}
       />
