@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import NumberFlow from '@number-flow/react';
 import { BadgeCheck } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -215,7 +214,7 @@ const PricingCard = ({
 };
 
 export default function PricingSection() {
-  const [selectedPaymentFreq, setSelectedPaymentFreq] = useState<
+  const [selectedPaymentFreq] = useState<
     'monthly' | 'yearly'
   >(PAYMENT_FREQUENCIES[0]);
 

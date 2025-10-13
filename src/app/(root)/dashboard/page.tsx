@@ -5,7 +5,6 @@ import {
   FileText,
   BarChart3,
   Play,
-  Trophy,
   Zap,
   ArrowUpRight,
   Crown,
@@ -13,7 +12,6 @@ import {
   Star,
   Check,
   Clock,
-  Timer,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
@@ -22,7 +20,7 @@ import { useEffect, useState } from "react";
 
 
 // Upgrade Modal Component
-const UpgradeModal = ({ isOpen, onClose, currentPlan }) => {
+const UpgradeModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   const features = [
@@ -355,7 +353,6 @@ export default function Index() {
       <UpgradeModal
         isOpen={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}
-        currentPlan={userStats?.planName}
       />
     </div>
   );

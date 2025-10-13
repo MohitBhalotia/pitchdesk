@@ -75,13 +75,13 @@ export default function ConnectVCsPage() {
             </div>
             <CardTitle className="text-2xl">Coming Soon!</CardTitle>
             <CardDescription className="text-base">
-              We're building an exclusive VC network for our Enterprise members
+              We&apos;re building an exclusive VC network for our Enterprise members
             </CardDescription>
           </CardHeader>
           
           <CardContent className="space-y-6">
             <p className="text-muted-foreground text-center">
-              We're currently curating our network of 100+ venture capitalists and building the platform for direct introductions. As an Enterprise member, you'll be the first to get access.
+              We&apos;re currently curating our network of 100+ venture capitalists and building the platform for direct introductions. As an Enterprise member, you&apos;ll be the first to get access.
             </p>
 
             <div className="grid md:grid-cols-2 gap-4">

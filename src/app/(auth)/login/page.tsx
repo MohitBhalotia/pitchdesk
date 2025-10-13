@@ -1,5 +1,4 @@
 "use client";
-import { Sparkles } from "lucide-react";
 
 import { LoginForm } from "@/app/(auth)/login/LoginForm";
 import Image from "next/image";

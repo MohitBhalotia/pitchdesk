@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Upload, FileText, MessageCircle, Phone, Mail, Twitter, Linkedin,  CheckCircle, Loader2, ChevronDown} from 'lucide-react';
+import {  MessageCircle, Phone, Mail, Twitter, Linkedin,  CheckCircle, Loader2, ChevronDown} from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import axios from 'axios';
@@ -76,7 +76,7 @@ export default function SupportPage() {
         consent: false,
     });
     const [errors, setErrors] = useState<FormErrors>({});
-    const [dragOver, setDragOver] = useState(false);
+    // const [dragOver, setDragOver] = useState(false);
     const [ticketSummary, setTicketSummary] = useState<TicketSummary | null>(null);
 
     const validateForm = (): boolean => {

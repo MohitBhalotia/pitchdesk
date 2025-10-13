@@ -1,7 +1,7 @@
 "use client"
 
 import {
-  Bell,
+  
   ChevronsUpDown,
   CreditCard,
   Crown,

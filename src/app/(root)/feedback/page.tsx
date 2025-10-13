@@ -11,7 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 
-import { MessageSquare, Star, Heart, Lightbulb, Bug, Instagram,Send, Users, Twitter, Linkedin, Mail,  } from 'lucide-react';
+import { MessageSquare, Star, Heart, Lightbulb, Bug, Instagram,Send, Users, Twitter, Linkedin,  } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import axios from 'axios';
 
