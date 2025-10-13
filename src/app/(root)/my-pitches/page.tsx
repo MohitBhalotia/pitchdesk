@@ -1,8 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useSession } from "next-auth/react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { 
@@ -11,9 +13,10 @@ import {
   Clock, 
   Calendar,
   User,
-  Bot
+  Bot,
+  BarChart3
 } from "lucide-react"
-import { useParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 
 interface Message {
   role: "user" | "bot"
@@ -34,50 +37,134 @@ export default function PitchTranscripts() {
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [expandedPitches, setExpandedPitches] = useState<Set<string>>(new Set())
   const [isLoading, setIsLoading] = useState(true)
-  const { userId } = useParams<{ userId: string }>();
+  const { data: session, status } = useSession()
+  const router = useRouter()
 
   useEffect(() => {
-    // Check system preference for dark mode
-    if (typeof window !== 'undefined') {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+    // Removed the undefined userId logging
+    console.log("[PitchTranscripts] Component mounted")
+
+    if (typeof window !== "undefined") {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches
       setIsDarkMode(prefersDark)
-      
-      // Apply dark mode to document
+      console.log("[PitchTranscripts] System prefers dark mode:", prefersDark)
+
       if (prefersDark) {
-        document.documentElement.classList.add('dark')
+        document.documentElement.classList.add("dark")
       } else {
-        document.documentElement.classList.remove('dark')
+        document.documentElement.classList.remove("dark")
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    const fetchPitches = async () => {
+      if (status === "loading") return // Still loading session
+      
+      // Check if user is authenticated and has an id
+      if (!session?.user?._id) {
+        console.log("[PitchTranscripts] No user session or user id found")
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        console.log("[PitchTranscripts] Fetching pitches for user:", session.user._id)
+        const response = await fetch(`/api/pitches`)
+        if (!response.ok) {
+          throw new Error('Failed to fetch pitches')
+        }
+        const data = await response.json()
+        
+        // Handle different response formats
+        const pitchesData = Array.isArray(data) ? data : data.pitches || data.data || []
+        setPitches(pitchesData)
+        
+        console.log("[PitchTranscripts] Fetched pitches:", pitchesData.length)
+      } catch (error) {
+        console.error('Error fetching pitches:', error)
+        setPitches([]) // Set empty array on error
+      } finally {
+        setIsLoading(false)
       }
     }
 
-    fetch(`/api/pitches/${userId}`)
-      .then(res => res.json())
-      .then((data: Pitch[]) => {
-        setPitches(data)
-        setIsLoading(false)
-      })
-      .catch(() => setIsLoading(false))
-  }, [userId])
+    fetchPitches()
+  }, [session, status])
 
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode)
-    document.documentElement.classList.toggle('dark')
+    document.documentElement.classList.toggle("dark")
+    console.log("[PitchTranscripts] Theme toggled. Now dark?", !isDarkMode)
   }
 
   const togglePitchExpansion = (pitchId: string) => {
     const newExpanded = new Set(expandedPitches)
     if (newExpanded.has(pitchId)) {
       newExpanded.delete(pitchId)
+      console.log("[PitchTranscripts] Collapsed pitch:", pitchId)
     } else {
       newExpanded.add(pitchId)
+      console.log("[PitchTranscripts] Expanded pitch:", pitchId)
     }
     setExpandedPitches(newExpanded)
+  }
+
+  const handleEvaluatePitch = (pitchId: string) => {
+    router.push(`/evaluation/${pitchId}`)
   }
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
     return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
+  // Get user display name safely
+  const getUserDisplayName = () => {
+    if (!session?.user) return ""
+    return (session.user as any).fullName || session.user.email || session.user.name || "User"
+  }
+
+  // Show loading while checking authentication
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-background transition-colors duration-300">
+        <div className="container mx-auto px-4 py-8">
+          <div className="space-y-6">
+            {[1, 2, 3].map((i) => (
+              <Card key={i}>
+                <CardHeader>
+                  <Skeleton className="h-6 w-1/3" />
+                  <Skeleton className="h-4 w-1/2" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-4 w-full mb-2" />
+                  <Skeleton className="h-4 w-3/4" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show login prompt if not authenticated
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-background transition-colors duration-300">
+        <div className="container mx-auto px-4 py-8">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center py-8">
+                <p className="text-lg text-muted-foreground">Please log in to view your pitch transcripts</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -87,19 +174,11 @@ export default function PitchTranscripts() {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Pitch Transcripts</h1>
             <p className="text-muted-foreground">Review your conversation history</p>
+            <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
+              <User className="h-4 w-4" />
+              <span>Welcome, {getUserDisplayName()}</span>
+            </div>
           </div>
-          {/* <Button 
-            variant="outline" 
-            size="icon" 
-            onClick={toggleTheme}
-            className="rounded-full"
-          >
-            {isDarkMode ? (
-              <Sun className="h-5 w-5" />
-            ) : (
-              <Moon className="h-5 w-5" />
-            )}
-          </Button> */}
         </div>
 
         {isLoading ? (
@@ -122,6 +201,7 @@ export default function PitchTranscripts() {
             <CardContent className="pt-6">
               <div className="text-center py-8">
                 <p className="text-lg text-muted-foreground">No pitch transcripts found</p>
+                <p className="text-sm text-muted-foreground mt-2">Start a new pitch conversation to see it here</p>
               </div>
             </CardContent>
           </Card>
@@ -129,6 +209,10 @@ export default function PitchTranscripts() {
           <div className="space-y-6">
             {pitches.map((pitch, i) => {
               const isExpanded = expandedPitches.has(pitch._id)
+              
+              // Safely handle conversation history
+              const conversationHistory = pitch.conversationHistory || []
+
               return (
                 <Card key={pitch._id} className="overflow-hidden">
                   <button 
@@ -141,7 +225,7 @@ export default function PitchTranscripts() {
                           <CardTitle className="flex items-center gap-2">
                             Pitch {i + 1}
                             <Badge variant="outline" className="ml-2">
-                              {pitch.conversationHistory.length} messages
+                              {conversationHistory.length} messages
                             </Badge>
                           </CardTitle>
                           <CardDescription className="flex items-center gap-4 mt-2">
@@ -151,13 +235,13 @@ export default function PitchTranscripts() {
                             </span>
                             <span className="flex items-center gap-1">
                               <Clock className="h-4 w-4" />
-                              {formatDuration(pitch.duration)}
+                              {formatDuration(pitch.duration || 0)}
                             </span>
                           </CardDescription>
                         </div>
                         <div className="flex items-center">
                           <span className="text-sm text-muted-foreground mr-2">
-                            {isExpanded ? 'Collapse' : 'Expand'}
+                            {isExpanded ? "Collapse" : "Expand"}
                           </span>
                           {isExpanded ? (
                             <ChevronUp className="h-5 w-5 text-muted-foreground" />
@@ -172,9 +256,18 @@ export default function PitchTranscripts() {
                   {isExpanded && (
                     <CardContent className="pt-0">
                       <div className="border-t pt-4">
+                        <div className="flex justify-end mb-4">
+                          <Button 
+                            onClick={() => handleEvaluatePitch(pitch._id)}
+                            className="flex items-center gap-2"
+                          >
+                            <BarChart3 className="h-4 w-4" />
+                            Evaluate Pitch
+                          </Button>
+                        </div>
                         <ScrollArea className="h-[400px] pr-4">
                           <div className="space-y-4">
-                            {pitch.conversationHistory.map((msg, idx) => (
+                            {conversationHistory.map((msg, idx) => (
                               <div
                                 key={idx}
                                 className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
@@ -207,8 +300,8 @@ export default function PitchTranscripts() {
                                         : "text-muted-foreground"
                                     }`}>
                                       {new Date(msg.timestamp).toLocaleTimeString([], { 
-                                        hour: '2-digit', 
-                                        minute: '2-digit' 
+                                        hour: "2-digit", 
+                                        minute: "2-digit" 
                                       })}
                                     </span>
                                   </div>

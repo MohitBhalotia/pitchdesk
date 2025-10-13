@@ -1,10 +1,11 @@
 "use client";
 import { Sparkles } from "lucide-react";
+
 import Image from "next/image";
 import Link from "next/link";
 import Step2Form from "./Step2Form";
 
-export default function Step2Page() {
+export default function LoginPage() {
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-background">
       <div className="w-full lg:w-1/2 flex flex-col p-6 md:p-12">
@@ -26,34 +27,21 @@ export default function Step2Page() {
             </span>
           </Link>
         </div>
-
-        <div className="flex-1 flex flex-col justify-center">
-          <div className="w-full max-w-md mx-auto">
-            <div className="text-center lg:text-left mb-6 ">
-              <h2 className="text-center text-2xl md:text-3xl font-bold tracking-tight">
-                Get Started
-              </h2>
-              <p className="text-center text-muted-foreground mt-2 text-sm md:text-base">
-                Create your account to start crafting the perfect pitch
-              </p>
-            </div>
-
+        <div className="flex items-center justify-center">
+          <div className="w-full max-w-xs mt-10">
             <Step2Form />
           </div>
         </div>
       </div>
-
-      <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-6">
-        <div className="w-full max-w-lg h-auto rounded-xl overflow-hidden">
-          <Image
-            loading="lazy"
-            src="/Shark.jpeg"
-            alt="SignUpBg"
-            width={800}
-            height={800}
-            className="rounded-xl object-cover w-full h-full"
-          />
-        </div>
+      <div className="hidden flex-1/2 lg:block p-4 rounded-lg h-screen">
+        <Image
+          loading="lazy"
+          width={1000}
+          height={1000}
+          src="/Shark.jpeg"
+          alt="LoginBg"
+          className="rounded-lg object-cover h-full w-full"
+        />
       </div>
     </div>
   );

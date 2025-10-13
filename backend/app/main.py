@@ -1,260 +1,25 @@
-# from fastapi import FastAPI
-# from pydantic import BaseModel
-# from typing import Optional
-# from dotenv import load_dotenv
-# from openai import OpenAI
-# import os
-# from fastapi.middleware.cors import CORSMiddleware
-
-# load_dotenv(override=True)
-# client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-# app = FastAPI()
-
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["*"],  # Or ["http://localhost:3000"] for stricter security
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
-
-
-# class BusinessIdeaData(BaseModel):
-#     companyName: str
-#     tagline: Optional[str] = None
-#     industry: Optional[str] = None
-#     founded: Optional[str] = None
-#     headquarters: Optional[str] = None
-#     website: Optional[str] = None
-
-#     problemStatement: Optional[str] = None
-#     solutionDescription: Optional[str] = None
-#     uniqueValueProposition: Optional[str] = None
-
-#     totalAddressableMarket: Optional[str] = None
-#     serviceableAddressableMarket: Optional[str] = None
-#     serviceableObtainableMarket: Optional[str] = None
-#     marketGrowthRate: Optional[str] = None
-
-#     directCompetitors: Optional[str] = None
-#     indirectCompetitors: Optional[str] = None
-#     competitiveAdvantage: Optional[str] = None
-#     barrierToEntry: Optional[str] = None
-
-#     historicalRevenue: Optional[str] = None
-#     historicalExpenses: Optional[str] = None
-#     profitabilityStatus: Optional[str] = None
-
-#     totalCustomers: Optional[str] = None
-#     customerAcquisitionCost: Optional[str] = None
-#     customerLifetimeValue: Optional[str] = None
-#     churnRate: Optional[str] = None
-
-#     grossMargin: Optional[str] = None
-#     contributionMargin: Optional[str] = None
-#     paybackPeriod: Optional[str] = None
-
-#     year1Revenue: Optional[str] = None
-#     year2Revenue: Optional[str] = None
-#     year3Revenue: Optional[str] = None
-#     revenueGrowthRate: Optional[str] = None
-
-#     operatingExpenses: Optional[str] = None
-#     marketingBudget: Optional[str] = None
-#     rdExpenses: Optional[str] = None
-
-#     primaryRevenueStreams: Optional[str] = None
-#     pricingModel: Optional[str] = None
-#     salesChannels: Optional[str] = None
-
-#     businessOperations: Optional[str] = None
-#     technologyStack: Optional[str] = None
-#     keyPartnerships: Optional[str] = None
-
-#     foundingTeam: Optional[str] = None
-#     founderExperience: Optional[str] = None
-#     keyPersonnel: Optional[str] = None
-#     advisors: Optional[str] = None
-
-#     productStage: Optional[str] = None
-#     developmentMilestones: Optional[str] = None
-
-#     customerValidation: Optional[str] = None
-#     pilotPrograms: Optional[str] = None
-#     businessTraction: Optional[str] = None
-#     partnerships: Optional[str] = None
-
-#     previousFunding: Optional[str] = None
-#     currentInvestors: Optional[str] = None
-
-#     fundingGoal: Optional[str] = None
-#     useOfFunds: Optional[str] = None
-#     valuation: Optional[str] = None
-
-#     futureStrategy: Optional[str] = None
-#     exitStrategy: Optional[str] = None
-
-#     keyMetrics: Optional[str] = None
-#     riskFactors: Optional[str] = None
-
-#     personalStory: Optional[str] = None
-#     supportingMaterials: Optional[str] = None
-
-# def generate_prompt(data: dict) -> str:
-#     header = f"""
-# You are a world-class startup pitch strategist trusted by top-tier venture capital firms to help founders craft pitches that are crisp, credible, and investor-ready.
-
-# Your job is to read the detailed information provided by the founder and generate a compelling, structured pitch. The pitch should cover the full spectrum of what VCs want to hear, including: the problem, solution, market, product, traction, business model, team, competition, financials, and future vision.
-
-# **Guidelines:**
-# - Make the pitch persuasive and visionary, yet grounded in logic and realistic strategy.
-# - Use clear section headers (like a pitch deck structure).
-# - Use confident, founder-style language (no passive tone or robotic output).
-# - Focus on clarity, differentiation, and strong narrative.
-# - Avoid generic or vague language—be specific and memorable.
-
-# Some of the best pitches from where you can take references on how to write a pitch: are:
-# these are just refernces. The pitch has to be in First person perspective as if the founder is gonna speak it in front of the VCs.
-# Dont give any sections. just a perfect pitch.
-
-# dont give any html and also no introduction like here is a pitch.
-# just give a deliverable ready pitch.
-
-# Below is the information shared by the founder:
-# """
-
-#     founder_data = ""
-#     for key, value in data.items():
-#         if value:
-#             section_title = key.replace('_', ' ').title()
-#             founder_data += f"\n### {section_title}:\n{value.strip()}\n"
-
-#     closing = "\nNow, using the information above, generate a powerful, investor-grade startup pitch ready to be delivered to VCs.Make sure its atleast a 3 minute speech.\n"
-#     return header.strip() + founder_data + closing
-
-# @app.post("/generate-pitch")
-# async def generate_pitch(data: BusinessIdeaData):
-#     data_dict = data.dict()
-#     prompt = generate_prompt(data_dict)
-
-#     response = client.chat.completions.create(
-#         model="gpt-4o-mini",
-#         messages=[
-#             {"role": "system", "content": "You are a VC pitch expert helping startups write strong, fundable pitches."},
-#             {"role": "user", "content": prompt}
-#         ],
-#         temperature=0.7,
-#     )
-
-#     pitch_text = response.choices[0].message.content.strip()
-#     return {"result": pitch_text}
-
-
-# from fastapi import FastAPI, Request
-# from fastapi.middleware.cors import CORSMiddleware
-# from pydantic import BaseModel
-# from typing import Optional
-# import os
-# from openai import OpenAI
-# from dotenv import load_dotenv
-
-# load_dotenv()
-# client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-# app = FastAPI()
-
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["*"],  # Or ["http://localhost:3000"] for stricter security
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
-
-# class BusinessIdeaData(BaseModel):
-#     problem: str
-#     solution: str
-#     market: str
-#     product: str
-#     traction: str
-#     business_model: str
-#     team: str
-#     competition: str
-#     financials: str
-#     future_vision: str
-
-# class PitchResponse(BaseModel):
-#     success: bool
-#     pitch: Optional[str] = None
-#     error: Optional[str] = None
-
-# @app.post("/generate-pitch")
-# async def generate_pitch():
-#     try:
-#         def generate_prompt(d: dict) -> str:
-#             header = """
-# You are a world-class startup pitch strategist trusted by top-tier venture capital firms to help founders craft pitches that are crisp, credible, and investor-ready.
-
-# Your job is to read the detailed information provided by the founder and generate a compelling, structured pitch. The pitch should cover the full spectrum of what VCs want to hear, including: the problem, solution, market, product, traction, business model, team, competition, financials, and future vision.
-
-# **Guidelines:**
-# - Make the pitch persuasive and visionary, yet grounded in logic and realistic strategy.
-# - Use clear section headers (like a pitch deck structure).
-# - Use confident, founder-style language (no passive tone or robotic output).
-# - Focus on clarity, differentiation, and strong narrative.
-# - Avoid generic or vague language—be specific and memorable.
-
-# Some of the best pitches from where you can take references on how to write a pitch: are:
-# these are just refernces. The pitch has to be in First person perspective as if the founder is gonna speak it in front of the VCs.
-# Dont give any sections. just a perfect pitch.
-
-# dont give any html and also no introduction like here is a pitch.
-# just give a deliverable ready pitch.
-
-# Below is the information shared by the founder:
-# """.strip()
-
-#             founder_data = ""
-#             for key, value in d.items():
-#                 if value:
-#                     section_title = key.replace('_', ' ').title()
-#                     founder_data += f"\n### {section_title}:\n{value.strip()}\n"
-
-#             closing = "\nNow, using the information above, generate a powerful, investor-grade startup pitch ready to be delivered to VCs. Make sure it's at least a 3-minute speech.\n"
-#             return header + founder_data + closing
-
-#         prompt = generate_prompt(data.dict())
-
-#         response = client.chat.completions.create(
-#             model="gpt-4o-mini",
-#             messages=[
-#                 {"role": "system", "content": "You are a VC pitch expert helping startups write strong, fundable pitches."},
-#                 {"role": "user", "content": prompt}
-#             ],
-#             temperature=0.7,
-#         )
-
-#         pitch_text = response.choices[0].message.content.strip()
-#         return {"success": True, "pitch": pitch_text}
-
-#     except Exception as e:
-#         return {"success": False, "error": str(e)}
-
-
 import os
-from fastapi import FastAPI, Form
+import json
+import logging
 from pydantic import BaseModel
-from typing import Optional
 from dotenv import load_dotenv
-#from groq import Groq
 from openai import OpenAI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, HTTPException, Form
+from typing import List, Optional
 
+
+# --------------------- CONFIG ---------------------
 load_dotenv(override=True)
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
-app = FastAPI()
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+MODEL_NAME = "gpt-4o-mini"
+TEMPERATURE = 0.3
+
+# --------------------- FASTAPI APP ---------------------
+app = FastAPI(title="Pitch API", version="2.2")
+
 app.add_middleware(
      CORSMiddleware,
      allow_origins=["*"],  # Or ["http://localhost:3000"] for stricter security
@@ -484,3 +249,179 @@ async def generate_pitch_form(
 
     pitch_text = response.choices[0].message.content.strip()
     return {"pitch": pitch_text}
+
+
+# --------------------- MODELS ---------------------
+class TranscriptMessage(BaseModel):
+    role: str
+    content: str
+    timestamp: str
+    _id: str
+
+    class Config:
+        populate_by_name = True
+
+class PitchRequest(BaseModel):
+    transcript: List[TranscriptMessage]
+
+# --------------------- MAX SCORES ---------------------
+MICRO_MAX_SCORES = {
+    "Introduction": {
+        "Clarity of Speech": 2,
+        "Confidence & Presence": 2,
+        "Hook / Attention Grabber": 2,
+        "Relevance to Audience": 2,
+        "Personal Branding / Credibility": 2
+    },
+    "Pitch Content": {
+        "Structure & Flow": 5,
+        "Clarity & Conciseness": 5,
+        "Value Proposition": 5,
+        "Supporting Evidence": 5,
+        "Audience Engagement": 4,
+        "Storytelling / Narrative": 3,
+        "Persuasiveness": 4,
+        "Creativity / Originality": 4
+    },
+    "Q&A Handling": {
+        "Comprehension of Questions": 5,
+        "Clarity of Answers": 5,
+        "Accuracy / Knowledge Depth": 5,
+        "Problem-Solving Ability": 5,
+        "Handling Challenging Questions": 5
+    },
+    "Delivery & Style": {
+        "Voice Modulation": 2,
+        "Energy & Enthusiasm": 2,
+        "Language Fluency": 1
+    },
+    "Business Investability": {
+        "Market Opportunity & TAM/SAM/SOM": 5,
+        "Unit Economics & Profitability": 4,
+        "Revenue Model & Scalability": 4,
+        "Competitive Advantage / Moat": 3,
+        "Traction & KPIs": 3,
+        "Team & Execution Capability": 4,
+        "Funding Ask & Use of Proceeds": 1,
+        "Risk Mitigation & Barriers": 1
+    }
+}
+
+SECTION_MAX = {s: sum(m.values()) for s, m in MICRO_MAX_SCORES.items()}
+
+# --------------------- SYSTEM PROMPT ---------------------
+SYSTEM_PROMPT = f"""
+You are a strict AI startup pitch evaluator.
+
+You will receive a pitch transcript and must output a **strict JSON object only** following this structure:
+{{
+  "scores": {{
+    "Introduction": {{ ... , "Subtotal": 0-10 }},
+    "Pitch Content": {{ ... , "Subtotal": 0-35 }},
+    "Q&A Handling": {{ ... , "Subtotal": 0-25 }},
+    "Delivery & Style": {{ ... , "Subtotal": 0-5 }},
+    "Business Investability": {{ ... , "Subtotal": 0-25 }},
+    "Total Score": 0-100,
+    "Business Investability Confidence": 0-100
+  }},
+  "summary": "Brief summary of strengths, weaknesses, and investment factors."
+}}
+
+Rules:
+- Never include non-JSON text before or after the object.
+- Strictly stay within each micro-parameter's maximum.
+- Penalize vague, generic, or incomplete answers.
+- Round all subtotals to 1 decimal place.
+- Total Score = sum of all subtotals (max 100).
+- Business Investability Confidence = (Business Investability Subtotal / 25) * 80.
+- Give lower scores to encourage improvement.
+
+Micro-parameter maximums:
+{json.dumps(MICRO_MAX_SCORES, indent=2)}
+"""
+
+# --------------------- SCORING HELPERS ---------------------
+def compute_subtotals(scores: dict) -> dict:
+    """Compute subtotals for each section and ensure scores are within bounds"""
+    for section, micro in MICRO_MAX_SCORES.items():
+        if section not in scores:
+            scores[section] = {}
+            
+        subtotal = 0
+        for k, max_val in micro.items():
+            # Get the score, default to 0 if not present
+            val = float(scores.get(section, {}).get(k, 0))
+            # Ensure score is within bounds
+            val = min(max(val, 0), max_val)
+            subtotal += val
+            scores[section][k] = val
+        
+        # Add subtotal to the section
+        scores[section]["Subtotal"] = round(min(subtotal, SECTION_MAX[section]), 1)
+    
+    return scores
+
+def finalize_scores(scores: dict) -> dict:
+    """Calculate total score and business investability confidence"""
+    total = sum(scores.get(s, {}).get("Subtotal", 0) for s in SECTION_MAX.keys())
+    scores["Total Score"] = round(min(total, 100), 1)
+    
+    bi = scores.get("Business Investability", {}).get("Subtotal", 0)
+    # Calculate confidence as percentage of max Business Investability score (25)
+    scores["Business Investability Confidence"] = int(min((bi / 25) * 100, 100))
+    
+    return scores
+
+# --------------------- MAIN ENDPOINT ---------------------
+@app.post("/evaluate")
+async def evaluate_pitch(req: PitchRequest):
+    try:
+        logging.info("🎯 Evaluating pitch transcript...")
+        
+        # Convert transcript to text format - using the correct field names
+        transcript_text = "\n".join([f"{m.role}: {m.content}" for m in req.transcript])
+        logging.info(f"Transcript length: {len(transcript_text)} characters")
+        logging.info(f"Number of messages: {len(req.transcript)}")
+        logging.info(f"Sample message: role={req.transcript[0].role}, content={req.transcript[0].content[:50]}...")
+
+        # Call OpenAI API
+        completion = client.chat.completions.create(
+            model=MODEL_NAME,
+            temperature=TEMPERATURE,
+            response_format={"type": "json_object"},
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {
+                    "role": "user",
+                    "content": f"Analyze the following transcript and return a strict JSON object as defined above:\n\n{transcript_text}",
+                },
+            ],
+        )
+
+        content = completion.choices[0].message.content.strip()
+        logging.info(f"Raw API response: {content}")
+        
+        result = json.loads(content)
+
+        if "scores" in result:
+            result["scores"] = compute_subtotals(result["scores"])
+            result["scores"] = finalize_scores(result["scores"])
+
+        return result
+
+    except json.JSONDecodeError as e:
+        logging.error(f"JSON decode error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to parse AI response: {str(e)}")
+    except Exception as e:
+        logging.exception("❌ Pitch evaluation failed.")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# --------------------- ROOT ---------------------
+@app.get("/")
+def root():
+    return {"status": "ok", "message": "Pitch Evaluation API is running 🚀"}
+
+# Health check endpoint
+@app.get("/health")
+def health_check():
+    return {"status": "healthy", "service": "Pitch Evaluation API"}

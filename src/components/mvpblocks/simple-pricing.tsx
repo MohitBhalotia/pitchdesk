@@ -16,7 +16,7 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { ArrowRight, Check, IndianRupee, Sparkles } from "lucide-react";
-import { plans } from "@/plans";
+import { plans } from "data/plans";
 import { useSession } from "next-auth/react";
 
 

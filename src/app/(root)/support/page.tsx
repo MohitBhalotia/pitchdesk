@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Upload, FileText, MessageCircle, Phone, Mail, Twitter, Linkedin, Github, CheckCircle, Loader2, ChevronDown, HelpCircle } from 'lucide-react';
+import { Upload, FileText, MessageCircle, Phone, Mail, Twitter, Linkedin,  CheckCircle, Loader2, ChevronDown} from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import axios from 'axios';
@@ -261,7 +261,7 @@ export default function SupportPage() {
             <section className="relative pb-4 pt-0 px-4 ">
                 <div className="max-w-4xl mx-auto text-center">
                     <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                        We're here to help
+                        We&apos;re here to help
                     </h1>
                     <p className="text-xl text-muted-foreground mb-6 max-w-2xl mx-auto">
                         Find quick answers or get in touch with our support team anytime.
@@ -369,7 +369,7 @@ export default function SupportPage() {
                                     Contact Support
                                 </CardTitle>
                                 <CardDescription>
-                                    Tell us about your issue and we'll get back to you as soon as possible.
+                                    Tell us about your issue and we&apos;ll get back to you as soon as possible.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
@@ -551,7 +551,7 @@ export default function SupportPage() {
                                                 I agree to be contacted about this issue *
                                             </Label>
                                             <p className="text-xs text-muted-foreground">
-                                                We'll use your email to follow up on your support request.
+                                                We&apos;ll use your email to follow up on your support request.
                                             </p>
                                         </div>
                                     </div>
@@ -635,7 +635,7 @@ export default function SupportPage() {
 
                                     <div className="pt-4 border-t">
                                         <p className="text-sm text-muted-foreground">
-                                            📧 We'll reply to your email within 24 hours with updates on your ticket.
+                                            📧 We&apos;ll reply to your email within 24 hours with updates on your ticket.
                                         </p>
                                     </div>
                                 </div>

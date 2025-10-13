@@ -25,6 +25,7 @@ declare global {
   }
 
   export interface Pitch extends Document {
+    sessionId: string;
     userId: mongoose.Schema.Types.ObjectId | null;
     lastUpdated: Date;
     startTime: Date;
@@ -45,7 +46,7 @@ declare global {
     timestamp: string
   }
 
-  export interface IPlan extends document {
+  export interface Plan extends document {
     name: "standard" | "pro" | "enterprise"
     amount: number
     pitchesNumber: number
@@ -59,7 +60,7 @@ declare global {
     personalisedPitch: boolean
   }
 
-  export interface IUserPlan extends document {
+  export interface UserPlan extends document {
     userId: mongoose.Schema.Types.ObjectId 
     planId: mongoose.Schema.Types.ObjectId
     
@@ -71,7 +72,7 @@ declare global {
     }
   }
 
-  export interface IOrder extends document {
+  export interface Order extends document {
     userId: mongoose.Schema.Types.ObjectId
     planId: mongoose.Schema.Types.ObjectId
 

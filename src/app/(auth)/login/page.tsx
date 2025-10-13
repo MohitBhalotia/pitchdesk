@@ -1,14 +1,14 @@
 "use client";
 import { Sparkles } from "lucide-react";
 
-import { LoginForm } from "@/components/login-form";
+import { LoginForm } from "@/app/(auth)/login/LoginForm";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function LoginPage() {
   return (
     <div className="flex flex-row justify-between min-h-svh lg:grid-cols-2">
-      <div className="flex flex-2/3 flex-col gap-4 p-6 md:p-10 w-full">
+      <div className="flex flex-2/3 flex-col gap-4 p-6  w-full">
         <div className="flex justify-center items-center gap-4 md:justify-start">
           {/* <Sparkles className="h-5 w-5 text-white" />
           <Link href="/">

@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Loader2, Download, Lock } from "lucide-react"
+import { Loader2, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
@@ -338,7 +338,7 @@ export default function PitchGenerator() {
   const [formData, setFormData] = useState<Record<string, string>>({})
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
-  const {data:session,status} = useSession()
+  const {data:session} = useSession()
   console.log(session.user)
   const router = useRouter()
 

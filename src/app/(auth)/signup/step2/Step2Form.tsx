@@ -44,39 +44,42 @@ export default function Step2Form() {
   const [isGoogleUser, setIsGoogleUser] = useState(false)
 
   useEffect(() => {
-    if (status === 'authenticated' && session?.user?.email) {
-      setIsGoogleUser(session.user.email.endsWith('@gmail.com')) // Simple check for Google users
+    // Check if Google user is logged in - using the original logic
+    if (status === "authenticated" && session?.user?.email) {
+      setIsGoogleUser(true)
     }
   }, [status, session])
 
   const onSubmit = async (data: SignupStep2Type) => {
     setIsSubmitting(true)
+    const step2Data = data
+
     try {
-      const step1Data = localStorage.getItem("step1Data")
-      if (!step1Data) {
-        toast.error("Session expired. Please start over.")
-        router.push("/signup/step1")
-        return
-      }
-
-      const formData = {
-        ...JSON.parse(step1Data),
-        ...data,
-        isGoogleUser
-      }
-
-      const response = await axios.post<ApiResponse>("/api/auth/signup", formData)
-      
-      if (response.data.success) {
-        toast.success("Account created successfully!")
-        localStorage.removeItem("step1Data")
-        router.push("/dashboard")
+      console.log(isGoogleUser)
+      if (isGoogleUser) {
+        // Google sign-in user → just update (original logic)
+        const res = await axios.post("/api/users/update", step2Data)
+        if (res.status === 200) {
+          toast.success("User details updated successfully")
+          router.push("/login")
+        }
       } else {
-        toast.error(response.data.message || "Failed to create account")
+        // Step1 user (stored in localStorage) - original logic
+        const step1Data = JSON.parse(localStorage.getItem("step1Data") || "{}")
+        localStorage.removeItem("step1Data")
+        const finalPayload = { ...step1Data, ...step2Data }
+
+        const res = await axios.post<ApiResponse>("/api/auth/signup", finalPayload)
+        console.log(res.data)
+        if (res.data.success) {
+          toast.success(res.data.message)
+          router.push("/verify-email?id=" + res.data?.data)
+        }
       }
     } catch (error) {
       const axiosError = error as AxiosError<ApiResponse>
-      toast.error(axiosError.response?.data.message || "Something went wrong")
+      toast.error(axiosError.response?.data.message || "an error occured while submitting details")
+      console.error(error)
     } finally {
       setIsSubmitting(false)
     }
@@ -84,10 +87,10 @@ export default function Step2Form() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 ">
         <h2 className="text-2xl font-bold text-center lg:text-left">Complete Your Profile</h2>
         
-        <div className="space-y-6">
+        <div className="space-y-6 py-10">
           <FormField
             control={form.control}
             name="role"
@@ -147,10 +150,9 @@ export default function Step2Form() {
           className="w-full" 
           disabled={isSubmitting}
         >
-          {isSubmitting ? "Creating Account..." : "Create Account"}
+          {isSubmitting ? "Processing..." : "Submit"}
         </Button>
 
-        
         <p className="text-sm text-muted-foreground text-center">
           By continuing, you agree to our Terms of Service and Privacy Policy
         </p>

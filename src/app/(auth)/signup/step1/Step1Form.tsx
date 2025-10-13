@@ -42,8 +42,9 @@ export default function Step1Form() {
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4"
       >
-        <h2 className="text-2xl font-bold text-center lg:text-left">Create Account</h2>
-
+        <div className="flex flex-col items-center gap-2 text-center my-10">
+        <h1 className="text-3xl font-bold">Create Account</h1>
+      </div>
         <div className="space-y-4">
           <FormField
             control={form.control}
@@ -120,9 +121,9 @@ export default function Step1Form() {
         <OAuthButtons />
 
         <div className="text-center">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm ">
             Already have an account?{" "}
-            <Link href="/login" className="text-primary hover:underline">
+            <Link href="/login" className="hover:underline">
               Login
             </Link>
           </p>

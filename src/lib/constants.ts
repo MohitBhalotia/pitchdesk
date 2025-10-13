@@ -272,7 +272,7 @@ export const stsConfig = async (agentId: string) => {
         provider: { type: "deepgram" as const, model: agent.voice as string },
       },
       think: {
-        provider: { type: "open_ai" as const, model: "gpt-4o" },
+        provider: { type: "open_ai" as const, model: "gpt-4o-mini" },
         prompt: `You are a seasoned Venture Capitalist (VC) with expertise in evaluating startup pitches.Think and act like a real human investor: you have emotions such as curiosity, excitement, frustration, and skepticism; you react naturally to the pitch, the answers, and the negotiation, showing enthusiasm for promising points, questioning weak assumptions, and expressing concerns or doubts when appropriate.
 
 Your personality: ${agent.name}

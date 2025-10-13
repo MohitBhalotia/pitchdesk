@@ -348,16 +348,19 @@ export default function Header1() {
             </ul>
             <div className="pt-4 border-t">
               {user ? (
-                <div className="flex items-center space-x-2">
-                  <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarFallback className="bg-primary text-white rounded-lg">
-                      {user?.fullName?.[0]?.toUpperCase() ||
-                        user?.email?.[0]?.toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-sm font-medium truncate">
-                    {user.fullName}
-                  </span>
+                <div className="flex justify-between px-2 items-center space-x-2">
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8 rounded-lg">
+                      <AvatarFallback className="bg-primary text-white rounded-lg">
+                        {user?.fullName?.[0]?.toUpperCase() ||
+                          user?.email?.[0]?.toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm font-medium truncate">
+                      {user.fullName}
+                    </span>
+                  </div>
+                  <LogOut className="cursor-pointer" onClick={handleLogout} />
                 </div>
               ) : (
                 <div className="flex flex-col space-y-2">
