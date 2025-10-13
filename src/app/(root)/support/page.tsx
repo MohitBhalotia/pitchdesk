@@ -14,6 +14,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Upload, FileText, MessageCircle, Phone, Mail, Twitter, Linkedin,  CheckCircle, Loader2, ChevronDown} from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
+import axios from 'axios';
 
 interface SupportFormData {
     name: string;
@@ -21,7 +22,7 @@ interface SupportFormData {
     issueType: string;
     subject: string;
     description: string;
-    files: File[];
+    // files: File[];
     consent: boolean;
 }
 
@@ -44,12 +45,11 @@ const ISSUE_TYPES = [
 ];
 
 const CONTACT_DETAILS = {
-    email: 'support@pitchdesk.com',
+    email: 'info@pitchdesk.in',
     phone: '+91 1234567890',
     social: {
         twitter: 'https://twitter.com/pitchdesk',
-        linkedin: 'https://linkedin.com/company/pitchdesk',
-        github: 'https://github.com/pitchdesk',
+        linkedin: 'https://www.linkedin.com/company/pitch-desk',
     },
 };
 
@@ -59,7 +59,7 @@ interface FormErrors {
     issueType?: string;
     subject?: string;
     description?: string;
-    files?: string;
+    // files?: string;
     consent?: string;
 }
 
@@ -72,7 +72,7 @@ export default function SupportPage() {
         issueType: '',
         subject: '',
         description: '',
-        files: [],
+        // files: [],
         consent: false,
     });
     const [errors, setErrors] = useState<FormErrors>({});
@@ -107,19 +107,19 @@ export default function SupportPage() {
         }
 
         // Validate file uploads
-        if (formData.files.length > 0) {
-            for (const file of formData.files) {
-                if (file.size > 5 * 1024 * 1024) { // 5MB
-                    newErrors.files = 'File size must be less than 5MB';
-                    break;
-                }
-                const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg', 'application/pdf'];
-                if (!allowedTypes.includes(file.type)) {
-                    newErrors.files = 'Only PNG, JPG, JPEG, and PDF files are allowed';
-                    break;
-                }
-            }
-        }
+        // if (formData.files.length > 0) {
+        //     for (const file of formData.files) {
+        //         if (file.size > 5 * 1024 * 1024) { // 5MB
+        //             newErrors.files = 'File size must be less than 5MB';
+        //             break;
+        //         }
+        //         const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg', 'application/pdf'];
+        //         if (!allowedTypes.includes(file.type)) {
+        //             newErrors.files = 'Only PNG, JPG, JPEG, and PDF files are allowed';
+        //             break;
+        //         }
+        //     }
+        // }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -132,44 +132,45 @@ export default function SupportPage() {
         }
     };
 
-    const handleFileUpload = (files: FileList | null) => {
-        if (!files) return;
+    // const handleFileUpload = (files: FileList | null) => {
+    //     if (!files) return;
 
-        const fileArray = Array.from(files);
-        const totalFiles = formData.files.length + fileArray.length;
+    //     const fileArray = Array.from(files);
+    //     const totalFiles = formData.files.length + fileArray.length;
 
-        if (totalFiles > 3) {
-            toast.error('Maximum 3 files allowed');
-            return;
-        }
+    //     if (totalFiles > 3) {
+    //         toast.error('Maximum 3 files allowed');
+    //         return;
+    //     }
 
-        // Validate each file
-        for (const file of fileArray) {
-            if (file.size > 5 * 1024 * 1024) {
-                toast.error(`${file.name} is too large. Maximum file size is 5MB.`);
-                return;
-            }
-            const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg', 'application/pdf'];
-            if (!allowedTypes.includes(file.type)) {
-                toast.error(`${file.name} is not a supported file type.`);
-                return;
-            }
-        }
+    //     // Validate each file
+    //     for (const file of fileArray) {
+    //         if (file.size > 5 * 1024 * 1024) {
+    //             toast.error(`${file.name} is too large. Maximum file size is 5MB.`);
+    //             return;
+    //         }
+    //         const allowedTypes = ['image/png', 'image/jpg', 'image/jpeg', 'application/pdf'];
+    //         if (!allowedTypes.includes(file.type)) {
+    //             toast.error(`${file.name} is not a supported file type.`);
+    //             return;
+    //         }
+    //     }
 
-        setFormData(prev => ({
-            ...prev,
-            files: [...prev.files, ...fileArray].slice(0, 3) // Limit to 3 files
-        }));
-    };
+    //     setFormData(prev => ({
+    //         ...prev,
+    //         files: [...prev.files, ...fileArray].slice(0, 3) // Limit to 3 files
+    //     }));
+    // };
 
-    const removeFile = (index: number) => {
-        setFormData(prev => ({
-            ...prev,
-            files: prev.files.filter((_, i) => i !== index)
-        }));
-    };
+    // const removeFile = (index: number) => {
+    //     setFormData(prev => ({
+    //         ...prev,
+    //         files: prev.files.filter((_, i) => i !== index)
+    //     }));
+    // };
 
     const handleSubmit = async (e: React.FormEvent) => {
+        
         e.preventDefault();
 
         if (!validateForm()) {
@@ -190,19 +191,16 @@ export default function SupportPage() {
             submitData.append('consent', formData.consent.toString());
 
             // Add files
-            formData.files.forEach((file, index) => {
-                submitData.append(`file${index}`, file);
-            });
+            // formData.files.forEach((file, index) => {
+            //     submitData.append(`file${index}`, file);
+            // });
 
             // Submit to API
-            const response = await fetch('/api/support', {
-                method: 'POST',
-                body: submitData,
-            });
+            const response = await axios.post('/api/support', submitData);
 
-            const result = await response.json();
+            const result = await response.data;
 
-            if (!response.ok) {
+            if (response.status !== 200) {
                 throw new Error(result.message || 'Failed to submit ticket');
             }
 
@@ -228,7 +226,7 @@ export default function SupportPage() {
                 issueType: '',
                 subject: '',
                 description: '',
-                files: [],
+                // files: [],
                 consent: false,
             });
 
@@ -241,38 +239,38 @@ export default function SupportPage() {
         }
     };
 
-    const handleDragOver = (e: React.DragEvent) => {
-        e.preventDefault();
-        setDragOver(true);
-    };
+    // const handleDragOver = (e: React.DragEvent) => {
+    //     e.preventDefault();
+    //     setDragOver(true);
+    // };
 
-    const handleDragLeave = (e: React.DragEvent) => {
-        e.preventDefault();
-        setDragOver(false);
-    };
+    // const handleDragLeave = (e: React.DragEvent) => {
+    //     e.preventDefault();
+    //     setDragOver(false);
+    // };
 
-    const handleDrop = (e: React.DragEvent) => {
-        e.preventDefault();
-        setDragOver(false);
-        handleFileUpload(e.dataTransfer.files);
-    };
+    // const handleDrop = (e: React.DragEvent) => {
+    //     e.preventDefault();
+    //     setDragOver(false);
+    //     handleFileUpload(e.dataTransfer.files);
+    // };
 
     return (
         <div className="min-h-screen bg-background">
             {/* Hero Section */}
-            <section className="relative py-20 px-4 bg-gradient-to-br from-background via-background to-muted/20">
+            <section className="relative pb-4 pt-0 px-4 ">
                 <div className="max-w-4xl mx-auto text-center">
                     <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                         We&apos;re here to help
                     </h1>
-                    <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+                    <p className="text-xl text-muted-foreground mb-6 max-w-2xl mx-auto">
                         Find quick answers or get in touch with our support team anytime.
                     </p>
                 </div>
             </section>
 
             {/* FAQ Section */}
-            <section className="py-16 px-4 bg-muted/30">
+            <section className="py-14 px-4 ">
                 <div className="max-w-4xl mx-auto">
                     <div className="text-center mb-12">
                         <h2 className="text-3xl font-bold mb-4">Frequently Asked Questions</h2>
@@ -324,7 +322,7 @@ export default function SupportPage() {
                         ].map((faq, index) => (
                             <Card key={index} className="overflow-hidden">
                                 <Collapsible>
-                                    <CollapsibleTrigger className="w-full px-6  text-left hover:bg-muted/50 transition-colors">
+                                    <CollapsibleTrigger className="w-full px-6  text-left  transition-colors">
                                         <div className="flex items-center justify-between">
                                             <h3 className="text-lg font-semibold">{faq.question}</h3>
                                             <ChevronDown className="h-5 w-5 text-muted-foreground transition-transform duration-200 data-[state=open]:rotate-180" />
@@ -343,7 +341,7 @@ export default function SupportPage() {
             </section>
 
             {/* Need Help Section */}
-            <section className="py-16 px-4 bg-muted/30">
+            <section className="py-14 px-4 bg-muted/30">
                 <div className="max-w-2xl mx-auto text-center">
                     <h2 className="text-3xl font-bold mb-6">Still need assistance?</h2>
                     <p className="text-muted-foreground mb-8">
@@ -471,7 +469,7 @@ export default function SupportPage() {
                                     </div>
 
                                     {/* File Upload */}
-                                    <div className="space-y-2">
+                                    {/* <div className="space-y-2">
                                         <Label>Screenshot Upload (Optional)</Label>
                                         <div
                                             className={cn(
@@ -505,10 +503,10 @@ export default function SupportPage() {
                                                     Choose Files
                                                 </Button>
                                             </Label>
-                                        </div>
+                                        </div> */}
 
                                         {/* File Previews */}
-                                        {formData.files.length > 0 && (
+                                        {/* {formData.files.length > 0 && (
                                             <div className="space-y-2">
                                                 {formData.files.map((file, index) => (
                                                     <div
@@ -538,7 +536,7 @@ export default function SupportPage() {
                                         {errors.files && (
                                             <p className="text-sm text-destructive">{errors.files}</p>
                                         )}
-                                    </div>
+                                    </div> */}
 
                                     {/* Consent Checkbox */}
                                     <div className="flex items-start space-x-2">
@@ -647,10 +645,10 @@ export default function SupportPage() {
                 </section>
             )}
 
-            <Separator className="my-16" />
+            <Separator className="my-12" />
 
             {/* Contact Details Section */}
-            <section className="py-10 px-4">
+            <section className="py-8 px-4">
                 <div className="max-w-4xl mx-auto">
                     <h2 className="text-3xl font-bold text-center mb-12">Get in Touch</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -660,7 +658,13 @@ export default function SupportPage() {
                                 <CardTitle className="text-lg">Email</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <p className="text-muted-foreground">{CONTACT_DETAILS.email}</p>
+                                <a
+                                    href={`mailto:${CONTACT_DETAILS.email}`}
+                                    className="text-muted-foreground hover:text-primary transition-colors break-all"
+                                >
+                                    {CONTACT_DETAILS.email}
+
+                                </a>
                             </CardContent>
                         </Card>
 
@@ -670,7 +674,12 @@ export default function SupportPage() {
                                 <CardTitle className="text-lg">Phone</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <p className="text-muted-foreground">{CONTACT_DETAILS.phone}</p>
+                                <a
+                                    href={`tel:${CONTACT_DETAILS.phone}`}
+                                    className="text-muted-foreground hover:text-primary transition-colors"
+                                >
+                                    {CONTACT_DETAILS.phone}
+                                </a>
                             </CardContent>
                         </Card>
 

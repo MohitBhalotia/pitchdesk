@@ -339,7 +339,6 @@ export default function PitchGenerator() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
   const {data:session} = useSession()
-  //console.log(session.user)
   const router = useRouter()
 
   // Group fields by category
@@ -475,43 +474,119 @@ export default function PitchGenerator() {
           </div>
         </div>
 
-
+        {/* New Progress Bar */}
         <div className="mb-8">
-          <div className="relative w-full h-14 bg-card border border-border rounded-lg shadow-sm overflow-hidden">
-            <div className="flex justify-between items-center h-full px-0">
-              {categories.map((category, index) => {
-                const isActive = index === currentStep;
-                const isRestricted = session?.user?.userPlan === 'free' && index >= 4;
-                
-                return (
-                  <div
-                    key={category}
-                    onClick={() => {
-                      if (isRestricted) {
-                        setShowUpgradeModal(true);
-                        return;
-                      }
-                      setCurrentStep(index);
-                    }}
-                    className={`flex-1 flex items-center justify-center text-center h-full text-sm font-medium transition-all duration-300 relative
-                      ${isActive
-                        ? "bg-primary text-primary-foreground font-semibold rounded-lg z-10"
-                        : "text-muted-foreground hover:text-foreground"
-                      }
-                      ${isRestricted ? 'opacity-50' : 'cursor-pointer'}
-                      ${isRestricted ? 'group' : ''}`}
-                  >
-                    {category}
-                    
-                  </div>
-                );
-              })}
-            </div>
+          {/* Progress bar */}
+          <div className="relative w-full h-1 sm:h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mb-4 sm:mb-6">
+            <div
+              className="absolute top-0 left-0 h-full bg-blue-500 transition-all duration-700 ease-out rounded-full"
+              style={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
+            />
           </div>
 
+          {/* Mobile: Simplified step indicators */}
+          <div className="sm:hidden flex justify-between items-center mb-3">
+            <span className="text-xs text-gray-600 dark:text-gray-400">
+              Step {currentStep + 1} of {totalSteps}
+            </span>
+            <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
+              {categories[currentStep]}
+            </span>
+          </div>
+
+          {/* Step indicators - Different layouts for mobile vs desktop */}
+          <div className="hidden sm:flex justify-between items-start relative">
+            {categories.map((category, index) => {
+              const isActive = index === currentStep;
+              const isCompleted = index < currentStep;
+              const isRestricted = session?.user?.userPlan === 'free' && index >= 4;
+              
+              return (
+                <div 
+                  key={category} 
+                  className="flex flex-col items-center flex-1 cursor-pointer"
+                  onClick={() => {
+                    if (isRestricted) {
+                      setShowUpgradeModal(true);
+                      return;
+                    }
+                    setCurrentStep(index);
+                  }}
+                >
+                  <div className="flex items-center w-full mb-3">
+                    {index > 0 && (
+                      <div className={`flex-1 h-0.5 transition-colors duration-500 ${
+                        isCompleted ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+                      }`} />
+                    )}
+                    
+                    <div className={`relative flex-shrink-0 w-4 h-4 rounded-full border-2 transition-all duration-500 ${
+                      isActive
+                        ? 'bg-white border-blue-500   scale-125'
+                        : isCompleted
+                        ? 'bg-blue-500 border-blue-500'
+                        : 'bg-white border-gray-300 dark:border-gray-500'
+                    } ${isRestricted ? 'opacity-50' : ''}`}>
+                      {isCompleted && (
+                        <svg className="w-2 h-2 mx-auto mt-0.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </div>
+                    
+                    {index < categories.length - 1 && (
+                      <div className={`flex-1 h-0.5 transition-colors duration-500 ${
+                        index < currentStep ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+                      }`} />
+                    )}
+                  </div>
+
+                  <div className="text-center px-1">
+                    <span className={`text-xs font-medium transition-colors duration-300 line-clamp-2 ${
+                      isActive
+                        ? 'text-blue-600 dark:text-blue-400 font-semibold'
+                        : isCompleted
+                        ? 'text-gray-700 dark:text-gray-300'
+                        : 'text-gray-500 dark:text-gray-500'
+                    } ${isRestricted ? 'opacity-50' : ''}`}>
+                      {category}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Mobile: Dot indicators only */}
+          <div className="sm:hidden flex justify-between items-center px-2">
+            {categories.map((category, index) => {
+              const isActive = index === currentStep;
+              const isCompleted = index < currentStep;
+              const isRestricted = session?.user?.userPlan === 'free' && index >= 4;
+              
+              return (
+                <div
+                  key={category}
+                  className={`flex-1 h-1 mx-1 rounded-full transition-all duration-300 ${
+                    isActive
+                      ? 'bg-blue-500'
+                      : isCompleted
+                      ? 'bg-blue-400'
+                      : 'bg-gray-300 dark:bg-gray-600'
+                  } ${isRestricted ? 'opacity-50' : ''}`}
+                  title={category}
+                  onClick={() => {
+                    if (isRestricted) {
+                      setShowUpgradeModal(true);
+                      return;
+                    }
+                    setCurrentStep(index);
+                  }}
+                />
+              );
+            })}
+          </div>
         </div>
-
-
 
         <div className={`grid gap-8 ${currentStep === totalSteps - 1 ? 'lg:grid-cols-3' : 'lg:grid-cols-1'}`}>
           <div className={currentStep === totalSteps - 1 ? 'lg:col-span-2' : ''}>
