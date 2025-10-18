@@ -1,3 +1,5 @@
+
+
 "use client"
 
 import type React from "react"
@@ -394,8 +396,6 @@ export default function PitchGenerator() {
         },
         body: JSON.stringify({
           pitch: pitchContent,
-          //companyName: formData.companyName || 'Untitled Pitch',
-          //formData: formData, // Store all form data for reference
         }),
       })
 
@@ -439,7 +439,6 @@ export default function PitchGenerator() {
         console.log('Pitch successfully stored in database')
       } catch (storeError) {
         console.error('Failed to store pitch in database, but pitch was generated:', storeError)
-        // Don't throw here - we still want to show the generated pitch even if storage fails
       }
 
     } catch (err) {
@@ -449,6 +448,22 @@ export default function PitchGenerator() {
       setLoading(false)
     }
   }
+
+  // SIMPLE FIX: Remove the complex form submission handler and use the original
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    // Only prevent default if we're not on a submission step
+    const isFreeUserOnStep3 = session?.user?.userPlan === 'free' && currentStep === 3;
+    const isProUserOnFinalStep = currentStep === totalSteps - 1;
+    
+    // If we're NOT on a submission step, prevent the form submission
+    if (!isFreeUserOnStep3 && !isProUserOnFinalStep) {
+      e.preventDefault();
+      return;
+    }
+    
+    // Otherwise, proceed with normal submission
+    handleSubmit(e);
+  };
 
   function downloadPDF() {
     if (!pitch) return
@@ -514,9 +529,8 @@ export default function PitchGenerator() {
           </div>
         </div>
 
-        {/* New Progress Bar */}
+        {/* Progress Bar - unchanged */}
         <div className="mb-8">
-          {/* Progress bar */}
           <div className="relative w-full h-1 sm:h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mb-4 sm:mb-6">
             <div
               className="absolute top-0 left-0 h-full bg-blue-500 transition-all duration-700 ease-out rounded-full"
@@ -524,7 +538,6 @@ export default function PitchGenerator() {
             />
           </div>
 
-          {/* Mobile: Simplified step indicators */}
           <div className="sm:hidden flex justify-between items-center mb-3">
             <span className="text-xs text-gray-600 dark:text-gray-400">
               Step {currentStep + 1} of {totalSteps}
@@ -534,7 +547,6 @@ export default function PitchGenerator() {
             </span>
           </div>
 
-          {/* Step indicators - Different layouts for mobile vs desktop */}
           <div className="hidden sm:flex justify-between items-start relative">
             {categories.map((category, index) => {
               const isActive = index === currentStep;
@@ -597,7 +609,6 @@ export default function PitchGenerator() {
             })}
           </div>
 
-          {/* Mobile: Dot indicators only */}
           <div className="sm:hidden flex justify-between items-center px-2">
             {categories.map((category, index) => {
               const isActive = index === currentStep;
@@ -630,7 +641,8 @@ export default function PitchGenerator() {
 
         <div className={`grid gap-8 ${currentStep === totalSteps - 1 ? 'lg:grid-cols-3' : 'lg:grid-cols-1'}`}>
           <div className={currentStep === totalSteps - 1 ? 'lg:col-span-2' : ''}>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            {/* REMOVED all the onKeyDown handlers - they were causing the issue */}
+            <form onSubmit={handleFormSubmit} className="space-y-6">
               {Object.entries(fieldsByCategory)
                 .map(([category, categoryFields], index) => (
                 <div key={category} className={currentStep !== index ? 'hidden' : ''}>
@@ -660,6 +672,7 @@ export default function PitchGenerator() {
                               className="w-full"
                               value={formData[field.name] || ''}
                               onChange={handleInputChange}
+                              // REMOVED the onKeyDown handler
                             />
                           ) : (
                             <Textarea
@@ -671,6 +684,7 @@ export default function PitchGenerator() {
                               placeholder={`Enter ${field.label.toLowerCase()}...`}
                               value={formData[field.name] || ''}
                               onChange={handleInputChange}
+                              // REMOVED the onKeyDown handler
                             />
                           )}
                         </div>
