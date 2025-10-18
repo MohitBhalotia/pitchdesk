@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { MessageCircle, Phone, Mail, Twitter, Linkedin, CheckCircle, Loader2, ChevronDown } from 'lucide-react';
+import { MessageCircle, Mail, Linkedin, CheckCircle, Loader2, ChevronDown, Instagram } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import axios from 'axios';
@@ -50,6 +50,7 @@ const CONTACT_DETAILS = {
     social: {
         twitter: 'https://twitter.com/pitchdesk',
         linkedin: 'https://www.linkedin.com/company/pitch-desk',
+        instagram: 'https://www.instagram.com/pitchdesk.in'
     },
 };
 
@@ -64,86 +65,86 @@ interface FormErrors {
 }
 
 const FAQS = [
-  {
-    question: "What is PitchDesk?",
-    answer:
-      "PitchDesk is an AI-powered platform designed to help entrepreneurs and startup founders practice and perfect their investment pitches through realistic simulations with AI venture capitalists.",
-  },
-  {
-    question: "How does PitchDesk work?",
-    answer:
-      "You can choose from over 10 VC personalities that mimic different investor types, deliver your pitch in real-time, interact in a structured Q&A session, and then receive instant analysis and actionable feedback from our AI-driven Pitch Analyzer.",
-  },
-  {
-    question: "What VC personalities are available?",
-    answer:
-      "PitchDesk offers a variety of AI VC personalities, each designed to simulate real-world investors with unique questioning styles and sector expertise. This diversity prepares you to handle a wide range of potential funders.",
-  },
-  {
-    question: "What languages does PitchDesk support?",
-    answer:
-      "Currently, PitchDesk operates in English. Hindi support is coming soon and will enable users to practice their pitches in their preferred language.",
-  },
-  {
-    question: "What type of feedback do I receive?",
-    answer:
-      "After each session, you get comprehensive insights, including evaluations of your pitch structure, clarity, response quality, and specific suggestions for improvement. The AI Pitch Analyzer delivers focused advice for refining your pitch.",
-  },
-  {
-    question: "Can I practice multiple times with different scenarios?",
-    answer:
-      "Yes, users can practice repeatedly, switching between VC personalities and scenarios for a well-rounded preparation experience.",
-  },
-  {
-    question: "Can PitchDesk generate personalized pitches?",
-    answer:
-      "PitchDesk includes an AI agent trained to help you generate a personalized pitch tailored to your venture, business model, and industry needs, providing a starting point for further refinement.",
-  },
-  {
-    question: "Is there a crowdfunding platform included?",
-    answer:
-      "A crowdfunding platform, enabling engagement with partnered VCs and real investors, is under development and will launch soon. This feature will connect users’ refined pitches to actual funding opportunities.",
-  },
-  {
-    question: "How realistic are the AI VC interactions?",
-    answer:
-      "AI VC personalities at PitchDesk are trained to reflect actual investor questioning, decision-making, and topical expertise—from market sizing to financial projections.",
-  },
-  {
-    question: "What makes PitchDesk different?",
-    answer:
-      "PitchDesk stands out for its selection of simulated VC personalities, real-time interactive sessions, comprehensive automated feedback, and its upcoming integration with a crowdfunding and VC network.",
-  },
-  {
-    question: "Can I use PitchDesk for different stages of fundraising?",
-    answer:
-      "Yes, practice with personalities suited to angel, seed, and growth-stage fundraising, adapting your pitch to various investment situations.",
-  },
-  {
-    question: "How long is each pitch practice session?",
-    answer:
-      "Sessions are typically 15–30 minutes, balancing realism and efficiency for busy founders.",
-  },
-  {
-    question: "Is my information confidential?",
-    answer:
-      "Yes, all your pitch content and business information is securely stored and kept confidential, in line with best industry standards.",
-  },
-  {
-    question: "Do I need a ready pitch deck?",
-    answer:
-      "PitchDesk adapts to your stage of preparation—whether you have a full deck, notes, or just an idea, you’ll get valuable feedback.",
-  },
-  {
-    question: "Can I get sector-specific pitch feedback?",
-    answer:
-      "PitchDesk VC personalities include a range of industry specialists to ensure feedback and Q&A reflect your target market’s unique demands.",
-  },
-  {
-    question: "How do I get started?",
-    answer:
-      "Visit pitchdesk.in, select a VC personality, and start your session right away—no complex prerequisites or setup required.",
-  },
+    {
+        question: "What is PitchDesk?",
+        answer:
+            "PitchDesk is an AI-powered platform designed to help entrepreneurs and startup founders practice and perfect their investment pitches through realistic simulations with AI venture capitalists.",
+    },
+    {
+        question: "How does PitchDesk work?",
+        answer:
+            "You can choose from over 10 VC personalities that mimic different investor types, deliver your pitch in real-time, interact in a structured Q&A session, and then receive instant analysis and actionable feedback from our AI-driven Pitch Analyzer.",
+    },
+    {
+        question: "What VC personalities are available?",
+        answer:
+            "PitchDesk offers a variety of AI VC personalities, each designed to simulate real-world investors with unique questioning styles and sector expertise. This diversity prepares you to handle a wide range of potential funders.",
+    },
+    {
+        question: "What languages does PitchDesk support?",
+        answer:
+            "Currently, PitchDesk operates in English. Hindi support is coming soon and will enable users to practice their pitches in their preferred language.",
+    },
+    {
+        question: "What type of feedback do I receive?",
+        answer:
+            "After each session, you get comprehensive insights, including evaluations of your pitch structure, clarity, response quality, and specific suggestions for improvement. The AI Pitch Analyzer delivers focused advice for refining your pitch.",
+    },
+    {
+        question: "Can I practice multiple times with different scenarios?",
+        answer:
+            "Yes, users can practice repeatedly, switching between VC personalities and scenarios for a well-rounded preparation experience.",
+    },
+    {
+        question: "Can PitchDesk generate personalized pitches?",
+        answer:
+            "PitchDesk includes an AI agent trained to help you generate a personalized pitch tailored to your venture, business model, and industry needs, providing a starting point for further refinement.",
+    },
+    {
+        question: "Is there a crowdfunding platform included?",
+        answer:
+            "A crowdfunding platform, enabling engagement with partnered VCs and real investors, is under development and will launch soon. This feature will connect users’ refined pitches to actual funding opportunities.",
+    },
+    {
+        question: "How realistic are the AI VC interactions?",
+        answer:
+            "AI VC personalities at PitchDesk are trained to reflect actual investor questioning, decision-making, and topical expertise—from market sizing to financial projections.",
+    },
+    {
+        question: "What makes PitchDesk different?",
+        answer:
+            "PitchDesk stands out for its selection of simulated VC personalities, real-time interactive sessions, comprehensive automated feedback, and its upcoming integration with a crowdfunding and VC network.",
+    },
+    {
+        question: "Can I use PitchDesk for different stages of fundraising?",
+        answer:
+            "Yes, practice with personalities suited to angel, seed, and growth-stage fundraising, adapting your pitch to various investment situations.",
+    },
+    {
+        question: "How long is each pitch practice session?",
+        answer:
+            "Sessions are typically 15–30 minutes, balancing realism and efficiency for busy founders.",
+    },
+    {
+        question: "Is my information confidential?",
+        answer:
+            "Yes, all your pitch content and business information is securely stored and kept confidential, in line with best industry standards.",
+    },
+    {
+        question: "Do I need a ready pitch deck?",
+        answer:
+            "PitchDesk adapts to your stage of preparation—whether you have a full deck, notes, or just an idea, you’ll get valuable feedback.",
+    },
+    {
+        question: "Can I get sector-specific pitch feedback?",
+        answer:
+            "PitchDesk VC personalities include a range of industry specialists to ensure feedback and Q&A reflect your target market’s unique demands.",
+    },
+    {
+        question: "How do I get started?",
+        answer:
+            "Visit pitchdesk.in, select a VC personality, and start your session right away—no complex prerequisites or setup required.",
+    },
 ];
 
 export default function SupportPage() {
@@ -687,53 +688,36 @@ export default function SupportPage() {
                 </section>
             )}
 
-            <Separator className="my-12" />
 
             {/* Contact Details Section */}
             <section className="py-8 px-4">
                 <div className="max-w-4xl mx-auto">
                     <h2 className="text-3xl font-bold text-center mb-12">Get in Touch</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        <Card className="text-center">
-                            <CardHeader>
+                    <div className="flex flex-wrap justify-center gap-6">
+                        <Card className="text-center w-50 min-h-[180px] flex flex-col">
+                            <CardHeader className="flex-grow-0">
                                 <Mail className="h-8 w-8 mx-auto mb-2 text-primary" />
                                 <CardTitle className="text-lg">Email</CardTitle>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className="flex-grow flex items-center justify-center">
                                 <a
                                     href={`mailto:${CONTACT_DETAILS.email}`}
-                                    className="text-muted-foreground hover:text-primary transition-colors break-all"
+                                    className="text-muted-foreground hover:text-primary transition-colors break-all text-sm"
                                 >
                                     {CONTACT_DETAILS.email}
-
                                 </a>
                             </CardContent>
                         </Card>
 
-                        <Card className="text-center">
-                            <CardHeader>
-                                <Phone className="h-8 w-8 mx-auto mb-2 text-primary" />
-                                <CardTitle className="text-lg">Phone</CardTitle>
+                        <Card className="text-center w-50 min-h-[180px] flex flex-col">
+                            <CardHeader className="flex-grow-0">
+                                <Instagram className="h-8 w-8 mx-auto mb-2 text-primary" />
+                                <CardTitle className="text-lg">Instagram</CardTitle>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className="flex-grow flex items-center justify-center">
                                 <a
-                                    href={`tel:${CONTACT_DETAILS.phone}`}
-                                    className="text-muted-foreground hover:text-primary transition-colors"
-                                >
-                                    {CONTACT_DETAILS.phone}
-                                </a>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="text-center">
-                            <CardHeader>
-                                <Twitter className="h-8 w-8 mx-auto mb-2 text-primary" />
-                                <CardTitle className="text-lg">Twitter</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <a
-                                    href={CONTACT_DETAILS.social.twitter}
-                                    className="text-muted-foreground hover:text-primary transition-colors"
+                                    href={CONTACT_DETAILS.social.instagram}
+                                    className="text-muted-foreground hover:text-primary transition-colors text-sm"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
@@ -742,15 +726,15 @@ export default function SupportPage() {
                             </CardContent>
                         </Card>
 
-                        <Card className="text-center">
-                            <CardHeader>
+                        <Card className="text-center w-50 min-h-[180px] flex flex-col">
+                            <CardHeader className="flex-grow-0">
                                 <Linkedin className="h-8 w-8 mx-auto mb-2 text-primary" />
                                 <CardTitle className="text-lg">LinkedIn</CardTitle>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className="flex-grow flex items-center justify-center">
                                 <a
                                     href={CONTACT_DETAILS.social.linkedin}
-                                    className="text-muted-foreground hover:text-primary transition-colors"
+                                    className="text-muted-foreground hover:text-primary transition-colors text-sm"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >

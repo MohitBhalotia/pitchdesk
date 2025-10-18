@@ -45,8 +45,8 @@ const FEEDBACK_TYPES = [
 
 
 const SOCIAL_LINKS = [
-    { name: 'Discord', icon: Users, href: 'https://discord.gg/pitchdesk', color: 'text-indigo-600' },
-    { name: 'Twitter', icon: Twitter, href: 'https://twitter.com/pitchdesk', color: 'text-blue-500' },
+    // { name: 'Discord', icon: Users, href: 'https://discord.gg/pitchdesk', color: 'text-indigo-600' },
+    // { name: 'Twitter', icon: Twitter, href: 'https://twitter.com/pitchdesk', color: 'text-blue-500' },
     { name: 'LinkedIn', icon: Linkedin, href: 'https://www.linkedin.com/company/pitch-desk', color: 'text-blue-700' },
     { name: 'Instagram', icon: Instagram, href: 'https://www.instagram.com/pitchdesk.in/', color: 'text-pink-500' },
 ];
@@ -402,7 +402,8 @@ export default function FeedbackPage() {
                         Stay updated with the latest features, get early access to new tools, and connect with other PitchDesk users.
                     </p>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-6"> */}
+                    {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                         {SOCIAL_LINKS.map((social) => {
                             const IconComponent = social.icon;
                             return (
@@ -414,6 +415,27 @@ export default function FeedbackPage() {
                                     rel="noopener noreferrer"
                                 >
                                     <Card className="p-6 hover:shadow-lg transition-all duration-200 hover:-translate-y-1">
+                                        <div className="flex flex-col items-center gap-3">
+                                            <IconComponent className={cn('w-8 h-8 transition-colors', social.color, 'group-hover:scale-110')} />
+                                            <span className="font-medium">{social.name}</span>
+                                        </div>
+                                    </Card>
+                                </a>
+                            );
+                        })}
+                    </div> */}
+                    <div className="flex flex-wrap justify-center gap-6">
+                        {SOCIAL_LINKS.map((social) => {
+                            const IconComponent = social.icon;
+                            return (
+                                <a
+                                    key={social.name}
+                                    href={social.href}
+                                    className="group"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <Card className="p-6 hover:shadow-lg transition-all duration-200 hover:-translate-y-1 w-32"> {/* Fixed width */}
                                         <div className="flex flex-col items-center gap-3">
                                             <IconComponent className={cn('w-8 h-8 transition-colors', social.color, 'group-hover:scale-110')} />
                                             <span className="font-medium">{social.name}</span>
