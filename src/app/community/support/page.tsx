@@ -6,11 +6,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { MessageCircle, Mail, Linkedin, CheckCircle, Loader2, ChevronDown, Instagram,Phone } from 'lucide-react';
+import { MessageCircle, Mail, Linkedin, CheckCircle, Loader2, ChevronDown, Instagram, Phone } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import axios from 'axios';
@@ -700,7 +701,7 @@ export default function SupportPage() {
                             </CardHeader>
                             <CardContent className="flex-grow flex items-center justify-center">
                                 <a
-                                    href={`tel:${CONTACT_DETAILS.phone}`}
+                                     href={`tel:${CONTACT_DETAILS.phone}`}
                                     className="text-muted-foreground hover:text-primary transition-colors break-all text-sm"
                                 >
                                     {CONTACT_DETAILS.phone}

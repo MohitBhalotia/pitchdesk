@@ -172,7 +172,7 @@ export default function SimplePricing() {
                     </motion.div>
                   ))}
                 </CardContent>
-                <CardFooter>
+                <CardFooter className={cn(plan.popular && "pointer-events-auto relative z-10")}>
                   {user?.role === plan.id ? (
                     <Button className="w-full font-medium duration-300 bg-white text-black">
                       Current Plan
@@ -185,8 +185,8 @@ export default function SimplePricing() {
                           // getCheckoutUrl(plan.id);
                           toast.success("Redirecting to checkout...");
                         } else {
-                          toast.info("Please sign up or log in to continue");
-                          router.push(plan.link || "upgrade");
+                          toast.info("Please log in to continue");
+                          router.push("/login");
                         }
                       }}
                       variant={plan.popular ? "default" : "outline"}

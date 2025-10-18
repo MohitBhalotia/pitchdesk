@@ -44,35 +44,35 @@ const navItems: NavItem[] = [
   { name: "Home", href: "/" },
   {
     name: "Features",
-    href: "/features",
-    hasDropdown: true,
-    dropdownItems: [
-      {
-        name: "AI Powered VC's",
-        href: "#",
-        description: "Talk with different Real Persona VC's",
-      },
-      {
-        name: "Personalised Pitches",
-        href: "$",
-        description: "Get Your Perfect Pitch",
-      },
-      {
-        name: "Pitch Analysis",
-        href: "#",
-        description: "Detailed Report of Your Pitch",
-      },
-      {
-        name: "Pitch Improvement",
-        href: "#",
-        description: "Improve Your Existing Pitch",
-      },
-    ],
+    href: "#features",
+    // hasDropdown: true,
+    // dropdownItems: [
+    //   {
+    //     name: "AI Powered VC's",
+    //     href: "#",
+    //     description: "Talk with different Real Persona VC's",
+    //   },
+    //   {
+    //     name: "Personalised Pitches",
+    //     href: "$",
+    //     description: "Get Your Perfect Pitch",
+    //   },
+    //   {
+    //     name: "Pitch Analysis",
+    //     href: "#",
+    //     description: "Detailed Report of Your Pitch",
+    //   },
+    //   {
+    //     name: "Pitch Improvement",
+    //     href: "#",
+    //     description: "Improve Your Existing Pitch",
+    //   },
+    // ],
   },
-  { name: "CrowdFunding", href: "/pricing" },
-  { name: "Pricing", href: "/pricing" },
+  { name: "CrowdFunding", href: "/community/crowdfunding" },
+  { name: "Pricing", href: "#pricing" },
   { name: "About", href: "/about" },
-  { name: "Meet the VCs", href: "/meet-the-vcs" },
+  { name: "Meet the VCs", href: "/login" },
 ];
 export default function Header1() {
   const { data: session, status } = useSession();
@@ -93,6 +93,21 @@ export default function Header1() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const { theme } = useTheme();
 
+  
+
+  const handleSmoothScroll = (href: string) => {
+    if (href.startsWith('#')) {
+      const sectionId = href.replace('#', '');
+      const section = document.getElementById(sectionId);
+      if (section) {
+        section.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    }
+  };
+
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
@@ -102,10 +117,10 @@ export default function Header1() {
   return (
     <header
       className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${isScrolled
-          ? theme === "dark"
-            ? "bg-black/80 backdrop-blur shadow-lg"
-            : "bg-white/80 backdrop-blur shadow-lg"
-          : "bg-transparent"
+        ? theme === "dark"
+          ? "bg-black/80 backdrop-blur shadow-lg"
+          : "bg-white/80 backdrop-blur shadow-lg"
+        : "bg-transparent"
         }`}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -143,6 +158,12 @@ export default function Header1() {
                 >
                   <Link
                     href={item.href}
+                    onClick={(e) => {
+                      if (item.href.startsWith('#')) {
+                        e.preventDefault();
+                        handleSmoothScroll(item.href);
+                      }
+                    }}
                     className="flex items-center space-x-1 font-medium text-foreground hover:text-primary transition"
                   >
                     <span>{item.name}</span>
@@ -154,14 +175,13 @@ export default function Header1() {
                     )}
                   </Link>
 
-                  {/* Dropdown */}
                   {item.hasDropdown && (
                     <AnimatePresence>
                       {activeDropdown === item.name && (
                         <motion.ul
                           className={`absolute top-full left-0 mt-2 w-80 rounded-xl border border-border bg-background shadow-xl z-40 ${item.name === "Solutions"
-                              ? "w-[600px] grid grid-cols-2 gap-6 p-6"
-                              : "p-2"
+                            ? "w-[600px] grid grid-cols-2 gap-6 p-6"
+                            : "p-2"
                             }`}
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -322,13 +342,25 @@ export default function Header1() {
             <ul className="space-y-2 h-[300px] overflow-auto">
               {navItems.map((item) => (
                 <li key={item.name}>
+
                   <Link
                     href={item.href}
                     className="block px-2 py-2 rounded-lg font-medium hover:bg-muted"
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    onClick={(e) => {
+                      if (item.href.startsWith('#')) {
+                        e.preventDefault();
+                        setIsMobileMenuOpen(false);
+                        setTimeout(() => {
+                          handleSmoothScroll(item.href);
+                        }, 300);
+                      } else {
+                        setIsMobileMenuOpen(false);
+                      }
+                    }}
                   >
                     {item.name}
                   </Link>
+
                   {item.hasDropdown &&
                     item.dropdownItems?.map((dropdown) => (
                       <ul key={dropdown.name} className="ml-4 mt-1 space-y-1">
