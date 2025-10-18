@@ -4,7 +4,6 @@ import PitchModel from "@/models/PitchModel";
 import dbConnect from "@/lib/db";
 import mongoose from "mongoose";
 import  authOptions  from "@/lib/auth";
-import { NextApiRequest } from "next";
 
 export async function GET(/*req: NextRequest*/) {
   try {
@@ -76,6 +75,7 @@ export async function DELETE(req: NextRequest){
     return NextResponse.json({message:"Pitch deleted successfully"})
 
   }catch(error){
+    console.log(error)
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

@@ -190,6 +190,7 @@ export default function PitchTranscripts() {
 
   const getUserDisplayName = () => {
     if (!session?.user) return ""
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (session.user as any).fullName || session.user.email || session.user.name || "User"
   }
 
@@ -309,7 +310,7 @@ export default function PitchTranscripts() {
           </Card>
         ) : (
           <div className="space-y-6">
-            {filteredPitches.map((pitch, i) => {
+            {filteredPitches.map((pitch/*, i*/) => {
               const isExpanded = expandedPitches.has(pitch._id)
               const conversationHistory = pitch.conversationHistory || []
               const isEditing = editingPitchId === pitch._id
