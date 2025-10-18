@@ -330,15 +330,15 @@ const fields = [
   },
 ]
 
-
 export default function PitchGenerator() {
   const [pitch, setPitch] = useState("")
   const [loading, setLoading] = useState(false)
+  const [storingPitch, setStoringPitch] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
   const [formData, setFormData] = useState<Record<string, string>>({})
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
-  const {data:session} = useSession()
+  const { data: session } = useSession()
   const router = useRouter()
 
   // Group fields by category
@@ -383,6 +383,37 @@ export default function PitchGenerator() {
     }
   }
 
+  // Function to store pitch in the database
+  const storePitchInDatabase = async (pitchContent: string) => {
+    try {
+      setStoringPitch(true)
+      const response = await fetch('/api/store-pitch', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          pitch: pitchContent,
+          //companyName: formData.companyName || 'Untitled Pitch',
+          //formData: formData, // Store all form data for reference
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to store pitch')
+      }
+
+      const result = await response.json()
+      console.log('Pitch stored successfully:', result)
+      return result
+    } catch (error) {
+      console.error('Error storing pitch:', error)
+      throw error
+    } finally {
+      setStoringPitch(false)
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
@@ -399,7 +430,18 @@ export default function PitchGenerator() {
         body: formDataToSubmit,
       })
       const result = await res.json()
-      setPitch(result.pitch || "No pitch generated.")
+      const generatedPitch = result.pitch || "No pitch generated."
+      setPitch(generatedPitch)
+
+      // Store the generated pitch in the database
+      try {
+        await storePitchInDatabase(generatedPitch)
+        console.log('Pitch successfully stored in database')
+      } catch (storeError) {
+        console.error('Failed to store pitch in database, but pitch was generated:', storeError)
+        // Don't throw here - we still want to show the generated pitch even if storage fails
+      }
+
     } catch (err) {
       console.error(err)
       setPitch("Error generating pitch.")
@@ -440,8 +482,6 @@ export default function PitchGenerator() {
 
     doc.save("startup-pitch.pdf")
   }
-
- 
 
   return (
     <div className="min-h-screen bg-background">
@@ -522,7 +562,7 @@ export default function PitchGenerator() {
                     
                     <div className={`relative flex-shrink-0 w-4 h-4 rounded-full border-2 transition-all duration-500 ${
                       isActive
-                        ? 'bg-white border-blue-500   scale-125'
+                        ? 'bg-white border-blue-500 scale-125'
                         : isCompleted
                         ? 'bg-blue-500 border-blue-500'
                         : 'bg-white border-gray-300 dark:border-gray-500'
@@ -702,13 +742,21 @@ export default function PitchGenerator() {
                     <CardTitle className="flex items-center justify-between">
                       Generated Pitch
                       {pitch && (
-                        <Button variant="outline" size="sm" onClick={downloadPDF} className="ml-2 bg-transparent">
-                          <Download className="h-4 w-4 mr-2" />
-                          PDF
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          {storingPitch && (
+                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                          )}
+                          <Button variant="outline" size="sm" onClick={downloadPDF} className="ml-2 bg-transparent">
+                            <Download className="h-4 w-4 mr-2" />
+                            PDF
+                          </Button>
+                        </div>
                       )}
                     </CardTitle>
-                    <CardDescription>Your generated pitch will appear here</CardDescription>
+                    <CardDescription>
+                      Your generated pitch will appear here
+                      {storingPitch && " (Saving pitch...)"}
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     {loading ? (
@@ -731,6 +779,6 @@ export default function PitchGenerator() {
           )}
         </div>
       </div>
-    </div >
+    </div>
   )
 }

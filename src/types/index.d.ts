@@ -46,10 +46,9 @@ declare global {
     timestamp: string
   }
 
-  export interface IPlan extends document {
+  export interface IPlan extends Document {
     name: "free" | "standard" | "pro" | "enterprise"
     amount: number
-    pitchesNumber: number
     pitchesTime: number // in minutes
     englishVCs: number
     hindiVCs: number
@@ -60,19 +59,14 @@ declare global {
     personalisedPitch: boolean
   }
 
-  export interface IUserPlan extends document {
+  export interface IUserPlan extends Document {
     userId: mongoose.Schema.Types.ObjectId 
     planId: mongoose.Schema.Types.ObjectId
-    
     isActive: boolean
-
-    usage: {
-      pitchNumberUsed: number
-      pitchTimeRemaining: number
-    }
+    pitchTimeRemaining: number
   }
 
-  export interface IOrder extends document {
+  export interface IOrder extends Document {
     userId: mongoose.Schema.Types.ObjectId
     planId: mongoose.Schema.Types.ObjectId
 
@@ -89,6 +83,13 @@ declare global {
     updatedAt: Date
   }
 
+  export interface IGeneratedPitchSchema extends Document {
+    userId: mongoose.Schema.Types.ObjectId
+    title: string
+    pitch: string
+    createdAt: Date
+    updatedAt: Date
+  }
 
 
 }
