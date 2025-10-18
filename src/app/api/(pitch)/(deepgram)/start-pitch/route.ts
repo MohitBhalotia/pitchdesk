@@ -14,8 +14,10 @@ export async function POST(req: NextRequest) {
       },
       { status: 400 }
     );
+  const count = await PitchModel.countDocuments({userId})
   const pitch = await PitchModel.create({
     userId,
+    title: `Pitch ${count + 1}`,
     sessionId,
     lastUpdated: Date.now(),
     startTime: Date.now(),
