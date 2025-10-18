@@ -34,7 +34,7 @@ export async function GET(req: Request) {
       );
     }
 
-    const plan: any = userPlan.planId;
+    const plan = userPlan.planId;
 
     // Calculate remaining usage
     const remainingTime = userPlan.pitchTimeRemaining;
