@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
-import {userPlanModel} from "@/models/UserPlanModel";
-import  "@/models/PlanModel";
-
+import { userPlanModel } from "@/models/UserPlanModel";
+import "@/models/PlanModel";
+import PitchModel from "@/models/PitchModel";
+import generatedPitchModel from "@/models/generatedPitch";
+import {PitchEval} from "@/models/PitchEvalModel";
 
 // GET /api/user-stats?userId=...
 export async function GET(req: Request) {
   try {
-    await dbConnect(); 
+    await dbConnect();
 
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId");
@@ -19,10 +21,9 @@ export async function GET(req: Request) {
       );
     }
 
-
-
     // Find the user's active plan
-    const userPlan = await userPlanModel.findOne({ userId, isActive: true })
+    const userPlan = await userPlanModel
+      .findOne({ userId, isActive: true })
       .populate("planId") // populate the plan details
       .lean();
 
@@ -32,22 +33,31 @@ export async function GET(req: Request) {
         { status: 404 }
       );
     }
-    
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const plan: any = userPlan.planId;
 
     // Calculate remaining usage
-    // const remainingPitches = plan.pitchesNumber - userPlan.usage.pitchNumberUsed;
     const remainingTime = userPlan.pitchTimeRemaining;
+    
+    // Total pitches practiced
+    const pitches = await PitchModel.find({ userId: userId });
+    const totalPitches = pitches.length;
+    
+    // Total pitches generated
+    const generatedPitches = await generatedPitchModel.find({ userId: userId });
+    const totalPitchGenerated = generatedPitches.length;
+
+    //total pitches evaluated
+    const evaluatedPitches = await PitchEval.find({ userId: userId });
+    const totalPitchEvaluated = evaluatedPitches.length;
 
     return NextResponse.json({
       planName: plan.name,
-      totalPitches: plan.pitchesNumber,
-      //usedPitches: userPlan.usage.pitchNumberUsed,
-      //remainingPitches,
-      totalTime: plan.pitchesTime,
-      //usedTime: userPlan.usage.pitchTimeUsed,
+      totalPitches: totalPitches,
+      totalPitchGenerated: totalPitchGenerated,
+      totalTime:plan.pitchesTime,
       remainingTime,
+      totalPitchEvaluated,
     });
   } catch (err) {
     console.error("Error fetching user stats:", err);

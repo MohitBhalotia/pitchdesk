@@ -12,7 +12,6 @@ export const createFreeUserPlan = async (userId: string) => {
             userId: userId,
             planId: freePlan._id,
             isActive: true,
-            //pitchNumberUsed: 0,
             pitchTimeRemaining: freePlan.pitchesTime
         });
     

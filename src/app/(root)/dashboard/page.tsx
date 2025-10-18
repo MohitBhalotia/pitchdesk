@@ -5,13 +5,13 @@ import {
   FileText,
   BarChart3,
   Play,
-  Zap,
   ArrowUpRight,
   Crown,
   X,
   Star,
   Check,
   Clock,
+  SearchCheck
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
@@ -142,23 +142,27 @@ export default function Index() {
   const stats = [
     {
       title: "Total Pitches Practiced",
-      value: userStats?.usedPitches,
+      value: userStats?.totalPitches,
       icon: <Play className="h-6 w-6" />,
-      // trend: "+12% this month",
-      // trendUp: true
+      
+    },
+    {
+      title: "Total Pitches Evaluated",
+      value: userStats?.totalPitchEvaluated,
+      icon: <SearchCheck className="h-6 w-6" />,
+      
     },
 
     {
       title: "Pitch Documents Generated",
-      value: 7,
+      value: userStats?.totalPitchGenerated,
       icon: <FileText className="h-6 w-6" />,
     },
     {
       title: "Remaining Minutes",
       value: `${userStats?.remainingTime}/${userStats?.totalTime}`,
       icon: <Clock className="h-6 w-6" />,
-      // trend: "+0.5 improvement",
-      // trendUp: true
+     
     },
     // {
     //   title: "Remaining Sessions",
@@ -176,7 +180,6 @@ export default function Index() {
       description: "Practice your pitch with our AI VC agents",
       icon: <Play className="h-6 w-6 text-teal-400" />,
       onClick: () => router.push("/start-a-pitch"),
-      disabled: userStats?.remainingPitches <= 0,
     },
     {
       title: "Generate New Pitch Document",
@@ -264,11 +267,11 @@ export default function Index() {
 
   return (
     <div className="">
-      <div className="flex flex-col gap-8 items-center mx-auto px-2 py-6">
+      <div className="flex flex-col gap-8 items-center mx-auto px-2 py-5">
         {/* Welcome Banner */}
         <div className="backdrop-blur-lg max-w-7xl mx-auto bg-white/70 dark:bg-card/80 rounded-3xl shadow-xl border border-border/30 p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6 w-full">
           <div className="flex-1">
-            <h1 className="text-4xl font-extrabold bg-gradient-to-r from-teal-500 to-violet-500 bg-clip-text text-transparent tracking-tight mb-2">
+            <h1 className="text-4xl font-extrabold bg-gradient-to-r from-teal-500 to-violet-500 bg-clip-text text-transparent tracking-tight mb-2 p-1">
               Welcome back, {session?.user?.fullName}!
             </h1>
             <p className="text-lg text-muted-foreground mb-2">
@@ -325,8 +328,8 @@ export default function Index() {
             {quickActions.map((action, index) => (
               <div
                 key={index}
-                className={`rounded-xl border border-border/20 bg-white/70 dark:bg-card/90 shadow p-4 flex items-center gap-3 hover:shadow-lg transition-shadow group ${action.disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
-                onClick={!action.disabled ? action.onClick : undefined}
+                className={`rounded-xl border border-border/20 bg-white/70 dark:bg-card/90 shadow p-4 flex items-center gap-3 hover:shadow-lg transition-shadow group cursor-pointer"}`}
+                onClick={action.onClick}
               >
                 <div
                   className={`p-2 rounded-lg ${action.premium ? "bg-gradient-to-r from-violet-100 to-teal-100 dark:from-violet-900 dark:to-teal-900" : "bg-muted/40 dark:bg-muted/10"}`}
