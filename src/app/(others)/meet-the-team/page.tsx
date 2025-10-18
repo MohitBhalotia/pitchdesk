@@ -1,5 +1,5 @@
 // app/team/page.tsx
-import { Linkedin, Mail, Github, Sparkles, Users, Target } from 'lucide-react';
+import { /*Linkedin, Mail, Github,*/ Sparkles, Users, Target } from 'lucide-react';
 import TeamCard from '@/components/TeamCard'; // We'll create this as a separate client component
 
 interface TeamMember {
@@ -87,9 +87,9 @@ export default function TeamPage() {
             Our Amazing Team
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            We're a passionate group of innovators, creators, and problem-solvers 
+            {`We're a passionate group of innovators, creators, and problem-solvers 
             dedicated to building amazing experiences for our users. Together, we turn 
-            ideas into reality.
+            ideas into reality.`}
           </p>
         </div>
 

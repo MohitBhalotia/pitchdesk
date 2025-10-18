@@ -12,10 +12,8 @@ export const createFreeUserPlan = async (userId: string) => {
             userId: userId,
             planId: freePlan._id,
             isActive: true,
-            usage: {
-                pitchNumberUsed: 0,
-                pitchTimeRemaining: freePlan.pitchesTime
-            }
+            //pitchNumberUsed: 0,
+            pitchTimeRemaining: freePlan.pitchesTime
         });
     
 
@@ -57,14 +55,12 @@ export const activateUserPlan = async (orderId: string, paymentId: string) => {
                 userId: order.userId,
                 planId: order.planId,
                 isActive: true,
-                usage: {
-                    pitchNumberUsed: 0,
-                    pitchTimeRemaining: 20 + plan.pitchesTime
-                }
+                //pitchNumberUsed: 0,
+                pitchTimeRemaining: 20 + plan.pitchesTime
             });
         }else if(existingPlan){
             existingPlan.planId = plan._id
-            existingPlan.usage.pitchTimeRemaining += plan.pitchesTime
+            existingPlan.pitchTimeRemaining += plan.pitchesTime
             console.log(existingPlan)
             existingPlan.save()
         }
