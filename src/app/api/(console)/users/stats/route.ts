@@ -37,16 +37,16 @@ export async function GET(req: Request) {
     const plan: any = userPlan.planId;
 
     // Calculate remaining usage
-    const remainingPitches = plan.pitchesNumber - userPlan.usage.pitchNumberUsed;
-    const remainingTime = plan.pitchesTime - userPlan.usage.pitchTimeUsed;
+    // const remainingPitches = plan.pitchesNumber - userPlan.usage.pitchNumberUsed;
+    const remainingTime = userPlan.pitchTimeRemaining;
 
     return NextResponse.json({
       planName: plan.name,
       totalPitches: plan.pitchesNumber,
-      usedPitches: userPlan.usage.pitchNumberUsed,
-      remainingPitches,
+      //usedPitches: userPlan.usage.pitchNumberUsed,
+      //remainingPitches,
       totalTime: plan.pitchesTime,
-      usedTime: userPlan.usage.pitchTimeUsed,
+      //usedTime: userPlan.usage.pitchTimeUsed,
       remainingTime,
     });
   } catch (err) {

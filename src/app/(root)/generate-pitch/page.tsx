@@ -1,3 +1,5 @@
+
+
 "use client"
 
 import type React from "react"
@@ -330,15 +332,15 @@ const fields = [
   },
 ]
 
-
 export default function PitchGenerator() {
   const [pitch, setPitch] = useState("")
   const [loading, setLoading] = useState(false)
+  const [storingPitch, setStoringPitch] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
   const [formData, setFormData] = useState<Record<string, string>>({})
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
-  const {data:session} = useSession()
+  const { data: session } = useSession()
   const router = useRouter()
 
   // Group fields by category
@@ -383,6 +385,35 @@ export default function PitchGenerator() {
     }
   }
 
+  // Function to store pitch in the database
+  const storePitchInDatabase = async (pitchContent: string) => {
+    try {
+      setStoringPitch(true)
+      const response = await fetch('/api/store-pitch', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          pitch: pitchContent,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to store pitch')
+      }
+
+      const result = await response.json()
+      console.log('Pitch stored successfully:', result)
+      return result
+    } catch (error) {
+      console.error('Error storing pitch:', error)
+      throw error
+    } finally {
+      setStoringPitch(false)
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
@@ -399,7 +430,17 @@ export default function PitchGenerator() {
         body: formDataToSubmit,
       })
       const result = await res.json()
-      setPitch(result.pitch || "No pitch generated.")
+      const generatedPitch = result.pitch || "No pitch generated."
+      setPitch(generatedPitch)
+
+      // Store the generated pitch in the database
+      try {
+        await storePitchInDatabase(generatedPitch)
+        console.log('Pitch successfully stored in database')
+      } catch (storeError) {
+        console.error('Failed to store pitch in database, but pitch was generated:', storeError)
+      }
+
     } catch (err) {
       console.error(err)
       setPitch("Error generating pitch.")
@@ -407,6 +448,22 @@ export default function PitchGenerator() {
       setLoading(false)
     }
   }
+
+  // SIMPLE FIX: Remove the complex form submission handler and use the original
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    // Only prevent default if we're not on a submission step
+    const isFreeUserOnStep3 = session?.user?.userPlan === 'free' && currentStep === 3;
+    const isProUserOnFinalStep = currentStep === totalSteps - 1;
+    
+    // If we're NOT on a submission step, prevent the form submission
+    if (!isFreeUserOnStep3 && !isProUserOnFinalStep) {
+      e.preventDefault();
+      return;
+    }
+    
+    // Otherwise, proceed with normal submission
+    handleSubmit(e);
+  };
 
   function downloadPDF() {
     if (!pitch) return
@@ -441,8 +498,6 @@ export default function PitchGenerator() {
     doc.save("startup-pitch.pdf")
   }
 
- 
-
   return (
     <div className="min-h-screen bg-background">
       {/* Upgrade Modal */}
@@ -474,9 +529,8 @@ export default function PitchGenerator() {
           </div>
         </div>
 
-        {/* New Progress Bar */}
+        {/* Progress Bar - unchanged */}
         <div className="mb-8">
-          {/* Progress bar */}
           <div className="relative w-full h-1 sm:h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mb-4 sm:mb-6">
             <div
               className="absolute top-0 left-0 h-full bg-blue-500 transition-all duration-700 ease-out rounded-full"
@@ -484,7 +538,6 @@ export default function PitchGenerator() {
             />
           </div>
 
-          {/* Mobile: Simplified step indicators */}
           <div className="sm:hidden flex justify-between items-center mb-3">
             <span className="text-xs text-gray-600 dark:text-gray-400">
               Step {currentStep + 1} of {totalSteps}
@@ -494,7 +547,6 @@ export default function PitchGenerator() {
             </span>
           </div>
 
-          {/* Step indicators - Different layouts for mobile vs desktop */}
           <div className="hidden sm:flex justify-between items-start relative">
             {categories.map((category, index) => {
               const isActive = index === currentStep;
@@ -522,7 +574,7 @@ export default function PitchGenerator() {
                     
                     <div className={`relative flex-shrink-0 w-4 h-4 rounded-full border-2 transition-all duration-500 ${
                       isActive
-                        ? 'bg-white border-blue-500   scale-125'
+                        ? 'bg-white border-blue-500 scale-125'
                         : isCompleted
                         ? 'bg-blue-500 border-blue-500'
                         : 'bg-white border-gray-300 dark:border-gray-500'
@@ -557,7 +609,6 @@ export default function PitchGenerator() {
             })}
           </div>
 
-          {/* Mobile: Dot indicators only */}
           <div className="sm:hidden flex justify-between items-center px-2">
             {categories.map((category, index) => {
               const isActive = index === currentStep;
@@ -590,7 +641,8 @@ export default function PitchGenerator() {
 
         <div className={`grid gap-8 ${currentStep === totalSteps - 1 ? 'lg:grid-cols-3' : 'lg:grid-cols-1'}`}>
           <div className={currentStep === totalSteps - 1 ? 'lg:col-span-2' : ''}>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            {/* REMOVED all the onKeyDown handlers - they were causing the issue */}
+            <form onSubmit={handleFormSubmit} className="space-y-6">
               {Object.entries(fieldsByCategory)
                 .map(([category, categoryFields], index) => (
                 <div key={category} className={currentStep !== index ? 'hidden' : ''}>
@@ -620,6 +672,7 @@ export default function PitchGenerator() {
                               className="w-full"
                               value={formData[field.name] || ''}
                               onChange={handleInputChange}
+                              // REMOVED the onKeyDown handler
                             />
                           ) : (
                             <Textarea
@@ -631,6 +684,7 @@ export default function PitchGenerator() {
                               placeholder={`Enter ${field.label.toLowerCase()}...`}
                               value={formData[field.name] || ''}
                               onChange={handleInputChange}
+                              // REMOVED the onKeyDown handler
                             />
                           )}
                         </div>
@@ -702,13 +756,21 @@ export default function PitchGenerator() {
                     <CardTitle className="flex items-center justify-between">
                       Generated Pitch
                       {pitch && (
-                        <Button variant="outline" size="sm" onClick={downloadPDF} className="ml-2 bg-transparent">
-                          <Download className="h-4 w-4 mr-2" />
-                          PDF
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          {storingPitch && (
+                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                          )}
+                          <Button variant="outline" size="sm" onClick={downloadPDF} className="ml-2 bg-transparent">
+                            <Download className="h-4 w-4 mr-2" />
+                            PDF
+                          </Button>
+                        </div>
                       )}
                     </CardTitle>
-                    <CardDescription>Your generated pitch will appear here</CardDescription>
+                    <CardDescription>
+                      Your generated pitch will appear here
+                      {storingPitch && " (Saving pitch...)"}
+                    </CardDescription>
                   </CardHeader>
                   <CardContent>
                     {loading ? (
@@ -731,6 +793,6 @@ export default function PitchGenerator() {
           )}
         </div>
       </div>
-    </div >
+    </div>
   )
 }
