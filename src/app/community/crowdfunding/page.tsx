@@ -5,9 +5,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import {
   Users,
-  Rocket,
   Target,
-  Mail,
   Sparkles,
   TrendingUp,
   DollarSign,
@@ -17,7 +15,7 @@ import {
 import Link from "next/link";
 
 export default function CrowdfundingPage() {
-  const [email, setEmail] = useState("");
+  // const [email, setEmail] = useState("");
   // const [isSubscribed, setIsSubscribed] = useState(false);
 
   // const handleSubscribe = (e: React.FormEvent) => {
@@ -128,7 +126,7 @@ export default function CrowdfundingPage() {
               Why Choose Our CrowdFunding Platform?
             </h2>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              We're creating the most startup-friendly funding platform with features designed for your success.
+              We are creating the most startup-friendly funding platform with features designed for your success.
             </p>
           </div>
 

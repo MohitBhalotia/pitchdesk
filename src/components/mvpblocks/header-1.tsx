@@ -72,7 +72,7 @@ const navItems: NavItem[] = [
   { name: "CrowdFunding", href: "/community/crowdfunding" },
   { name: "Pricing", href: "#pricing" },
   { name: "About", href: "/about" },
-  { name: "Meet the VCs", href: "/login" },
+  // { name: "Meet the VCs", href: "/login" },
 ];
 export default function Header1() {
   const { data: session, status } = useSession();

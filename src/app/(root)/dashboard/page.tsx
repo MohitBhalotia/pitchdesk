@@ -160,14 +160,14 @@ export default function Index() {
       // trend: "+0.5 improvement",
       // trendUp: true
     },
-    {
-      title: "Remaining Sessions",
-      // value: user.sessionsLimit - user.sessionsUsed,
-      value: `${userStats?.remainingPitches}/${userStats?.totalPitches}`,
-      icon: <Zap className="h-6 w-6" />,
-      // trend: `${user.sessionsUsed}/${user.sessionsLimit} used`,
-      // trendUp: false
-    },
+    // {
+    //   title: "Remaining Sessions",
+    //   // value: user.sessionsLimit - user.sessionsUsed,
+    //   value: `${userStats?.remainingPitches}/${userStats?.totalPitches}`,
+    //   icon: <Zap className="h-6 w-6" />,
+    //   // trend: `${user.sessionsUsed}/${user.sessionsLimit} used`,
+    //   // trendUp: false
+    // },
   ];
 
   const quickActions = [

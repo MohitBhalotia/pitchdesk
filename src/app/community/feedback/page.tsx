@@ -8,11 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import TestimonialsCarousel from '@/components/mvpblocks/testimonials-carousel';
 
-import { MessageSquare, Star, Heart, Lightbulb, Bug, Instagram, Send, Users, Twitter, Linkedin, } from 'lucide-react';
+import { MessageSquare, Star, Heart, Lightbulb, Bug, Instagram, Send, Linkedin, } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import axios from 'axios';
 

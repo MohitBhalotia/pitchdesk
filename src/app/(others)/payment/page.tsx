@@ -9,26 +9,26 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
-const PAYMENT_FREQUENCIES: ('monthly' | 'yearly')[] = ['monthly', 'yearly'];
 const TIERS = [
   {
     id: 'standard',
     name: 'Standard',
     planId: "68aa8cbf5958f9468e59ca14",
-    price: {
-      monthly: 699,
-      yearly: 6000,
-    },
-    description: 'Everything you need to build and scale your business.',
+    // price: {
+    //   monthly: 399,
+    //   yearly: 3000,
+    // },
+    price: 399,
+    description: "Everything you need to refine and perfect your pitch",
     features: [
-      '3 Pitches of 20 minutes each',
-      'Includes a deeper and longer qna session',
-      'Single-user account',
-      '1 English + 1 Hindi general AI VC',
-      'Priority email support',
-      'Analysis and improvement of your pitch',
-      'Pitch improvement suggestions',
-      'Perrsonalised pitch generation',
+      "100 minutes of comprehensive pitch practice",
+      "Extended Q&A sessions with detailed feedback",
+      "Access to all AI Venture Capitalists",
+      "Advanced pitch analysis with actionable insights",
+      "AI-powered improvement suggestions",
+      "Personalized pitch generation with advanced metrics",
+      "Priority email support",
+      // "Single-user account",
     ],
     cta: 'Buy Now',
     // popular: true,
@@ -37,21 +37,18 @@ const TIERS = [
     id: 'pro',
     name: 'Pro',
     planId: "68aa8cbf5958f9468e59ca15",
-    price: {
-      monthly: 1999,
-      yearly: 15000,
-    },
-    description: 'Critical security, performance, observability and support.',
+    price: 699,
+    description: "Advanced tools for serious fundraising preparation",
     features: [
-      '10 Pitches of 20 minutes each',
-      'Includes a deeper and longer qna session',
-      'Single-user account',
-      '6 English + 6 Hindi AI VC',
-      'All 12 having different personalities',
-      'Priority email support',
-      'Analysis and improvement of your pitch',
-      'Pitch improvement suggestions',
-      'Perrsonalised pitch generation',
+      "300 minutes of unlimited pitch mastery",
+      "Deep-dive Q&A sessions with expert AI VCs",
+      "Premium access to all AI Venture Capitalists",
+      "Comprehensive pitch analysis with competitor benchmarking",
+      "Advanced personalized pitch generation with more metrics",
+      "Access to crowdfunding platform (coming soon)",
+      "Progress tracking and performance analytics",
+      "Dedicated support within 12 hours",
+      // "Single-user account",
     ],
     cta: 'Buy Now',
     popular: true,
@@ -60,22 +57,20 @@ const TIERS = [
     id: 'enterprise',
     name: 'Enterprise',
     planId: "68aa8cbf5958f9468e59ca16",
-    price: {
-      monthly: 4999,
-      yearly: 35000,
-    },
-    description: 'Critical security, performance, observability and support.',
+    price: 1499,
+    description: "Complete fundraising ecosystem for scaling startups",
     features: [
-      '25 Pitches of 20 minutes each',
-      'Includes a deeper and longer qna session',
-      'Single-user account',
-      '6 English + 6 Hindi AI VC',
-      'All 12 having different personalities',
-      'Real time venture capitalists connections',
-      'Priority email support',
-      'Analysis and improvement of your pitch',
-      'Pitch improvement suggestions',
-      'Personalised pitch generation',
+      "600 minutes of comprehensive pitch training",
+      "Strategic Q&A sessions with expert AI VCs",
+      "Premium access to all AI Venture Capitalists",
+      "Comprehensive pitch analysis with competitor benchmarking",
+      "Advanced personalized pitch generation with more metrics",
+      "Access to crowdfunding platform & promotion (Coming soon)",
+      "Connect with real VCs (Coming soon)",
+      "Custom pitch templates and frameworks",
+      "Progress tracking and performance analytics",
+      "Premium customer support",
+      // "Single-user account",
     ],
     cta: 'Buy Now',
   },
@@ -132,16 +127,14 @@ const PopularBackground = () => (
 
 const PricingCard = ({
   tier,
-  paymentFrequency,
   submitPayment,
   loading
 }: {
   tier: (typeof TIERS)[0];
-  paymentFrequency: keyof typeof tier.price;
   submitPayment: (planId: string) => void;
   loading: boolean;
 }) => {
-  const price = tier.price[paymentFrequency];
+  const price = tier.price;
   const isPopular = tier.popular;
 
   return (
@@ -214,9 +207,7 @@ const PricingCard = ({
 };
 
 export default function PricingSection() {
-  const [selectedPaymentFreq] = useState<
-    'monthly' | 'yearly'
-  >(PAYMENT_FREQUENCIES[0]);
+  
 
   const [loading, setLoading] = useState(false);
   const { data: session, update } = useSession();
@@ -245,7 +236,7 @@ export default function PricingSection() {
 
       const res = await fetch("/api/razorpay/create-order", {
         method: "POST",
-        body: JSON.stringify({ planId, userId }), //i think userId backend me session se leni chahiye..auth se
+        body: JSON.stringify({ planId, userId }), 
       });
       const data = await res.json();
 
@@ -316,19 +307,7 @@ export default function PricingSection() {
             plan.
           </p>
         </div>
-        {/* <div className="mx-auto flex w-fit rounded-full bg-[#F3F4F6] p-1 dark:bg-[#222]">
-          {PAYMENT_FREQUENCIES.map((freq) => (
-            <Tab
-              key={freq}
-              text={freq}
-              selected={selectedPaymentFreq === freq}
-              setSelected={(text) =>
-                setSelectedPaymentFreq(text as 'monthly' | 'yearly')
-              }
-              discount={freq === 'yearly'}
-            />
-          ))}
-        </div> */}
+       
       </div>
 
       <div className="  grid w-full max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 ">
@@ -336,7 +315,6 @@ export default function PricingSection() {
           <PricingCard
             key={i}
             tier={tier}
-            paymentFrequency={selectedPaymentFreq}
             submitPayment={handlePayment}
             loading={loading}
           />
