@@ -10,8 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import TestimonialsCarousel from '@/components/mvpblocks/testimonials-carousel';
 
-import { MessageSquare, Star, Heart, Lightbulb, Bug, Instagram,Send, Users, Twitter, Linkedin,  } from 'lucide-react';
+import { MessageSquare, Star, Heart, Lightbulb, Bug, Instagram, Send, Users, Twitter, Linkedin, } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import axios from 'axios';
 
@@ -33,14 +34,7 @@ interface FeedbackErrors {
     contactPreference?: string;
 }
 
-interface Testimonial {
-    id: string;
-    name: string;
-    role: string;
-    content: string;
-    type: 'testimonial' | 'suggestion' | 'praise' | 'feature';
-    rating?: number;
-}
+
 
 const FEEDBACK_TYPES = [
     { value: 'bug', label: 'Bug Report', icon: Bug },
@@ -49,40 +43,6 @@ const FEEDBACK_TYPES = [
     { value: 'praise', label: 'Praise / Appreciation', icon: Heart },
 ];
 
-const TESTIMONIALS: Testimonial[] = [
-    {
-        id: '1',
-        name: 'Aditi',
-        role: 'Startup Founder',
-        content: 'The AI judges feature really helped me refine my pitch. Great product!',
-        type: 'testimonial',
-        rating: 5,
-    },
-    {
-        id: '2',
-        name: 'Raj',
-        role: 'Early User',
-        content: 'Would love to see integration with Notion soon!',
-        type: 'suggestion',
-        rating: 4,
-    },
-    {
-        id: '3',
-        name: 'Priya',
-        role: 'Tech Entrepreneur',
-        content: 'The pitch analysis is incredibly accurate and helpful for improving my presentation skills.',
-        type: 'praise',
-        rating: 5,
-    },
-    {
-        id: '4',
-        name: 'Vikram',
-        role: 'Product Manager',
-        content: 'Feature request: Add export to PDF option for pitch decks.',
-        type: 'feature',
-        rating: 4,
-    },
-];
 
 const SOCIAL_LINKS = [
     { name: 'Discord', icon: Users, href: 'https://discord.gg/pitchdesk', color: 'text-indigo-600' },
@@ -217,7 +177,7 @@ export default function FeedbackPage() {
             {/* Hero Section */}
             <section className="relative py-8 px-4 ">
                 <div className="max-w-4xl mx-auto text-center">
-                    
+
                     <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                         Your voice drives Pitch Desk forward
                     </h1>
@@ -426,52 +386,14 @@ export default function FeedbackPage() {
                     </div>
                 </section>
             )}
-            
-            {/* Testimonials Section */}
-            <section className="py-16 px-4">
-                <div className="max-w-6xl mx-auto">
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl font-bold mb-4">What Our Community Says</h2>
-                        <p className="text-muted-foreground">Real feedback from real users helping us build a better product</p>
-                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {TESTIMONIALS.map((testimonial) => {
-                            const IconComponent = FEEDBACK_TYPES.find(type => type.value === testimonial.type)?.icon || MessageSquare;
-                            return (
-                                <Card key={testimonial.id} className="relative overflow-hidden">
-                                    <CardContent className="p-6">
-                                        <div className="flex items-start gap-4">
-                                            <div className="flex-shrink-0">
-                                                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-                                                    <IconComponent className="w-5 h-5 text-primary" />
-                                                </div>
-                                            </div>
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-2 mb-2">
-                                                    <h4 className="font-semibold">{testimonial.name}</h4>
-                                                    <Badge variant="secondary" className="text-xs">
-                                                        {testimonial.role}
-                                                    </Badge>
-                                                </div>
-                                                {testimonial.rating && (
-                                                    <div className="mb-3">
-                                                        {renderStars(testimonial.rating, false, 'w-4 h-4')}
-                                                    </div>
-                                                )}
-                                                <p className="text-muted-foreground leading-relaxed">
-                                                    &quot;{testimonial.content}&quot;
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            );
-                        })}
-                    </div>
+            {/* Testimonials Section */}
+            <section className="w-full py-16">
+                <div className="w-full max-w-7xl mx-auto px-4">
+                    <TestimonialsCarousel />
                 </div>
             </section>
-            
+
             {/* Community Section */}
             <section className="py-16 px-4">
                 <div className="max-w-4xl mx-auto text-center">

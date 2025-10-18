@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import {  MessageCircle, Phone, Mail, Twitter, Linkedin,  CheckCircle, Loader2, ChevronDown} from 'lucide-react';
+import { MessageCircle, Phone, Mail, Twitter, Linkedin, CheckCircle, Loader2, ChevronDown } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import axios from 'axios';
@@ -62,6 +62,89 @@ interface FormErrors {
     // files?: string;
     consent?: string;
 }
+
+const FAQS = [
+  {
+    question: "What is PitchDesk?",
+    answer:
+      "PitchDesk is an AI-powered platform designed to help entrepreneurs and startup founders practice and perfect their investment pitches through realistic simulations with AI venture capitalists.",
+  },
+  {
+    question: "How does PitchDesk work?",
+    answer:
+      "You can choose from over 10 VC personalities that mimic different investor types, deliver your pitch in real-time, interact in a structured Q&A session, and then receive instant analysis and actionable feedback from our AI-driven Pitch Analyzer.",
+  },
+  {
+    question: "What VC personalities are available?",
+    answer:
+      "PitchDesk offers a variety of AI VC personalities, each designed to simulate real-world investors with unique questioning styles and sector expertise. This diversity prepares you to handle a wide range of potential funders.",
+  },
+  {
+    question: "What languages does PitchDesk support?",
+    answer:
+      "Currently, PitchDesk operates in English. Hindi support is coming soon and will enable users to practice their pitches in their preferred language.",
+  },
+  {
+    question: "What type of feedback do I receive?",
+    answer:
+      "After each session, you get comprehensive insights, including evaluations of your pitch structure, clarity, response quality, and specific suggestions for improvement. The AI Pitch Analyzer delivers focused advice for refining your pitch.",
+  },
+  {
+    question: "Can I practice multiple times with different scenarios?",
+    answer:
+      "Yes, users can practice repeatedly, switching between VC personalities and scenarios for a well-rounded preparation experience.",
+  },
+  {
+    question: "Can PitchDesk generate personalized pitches?",
+    answer:
+      "PitchDesk includes an AI agent trained to help you generate a personalized pitch tailored to your venture, business model, and industry needs, providing a starting point for further refinement.",
+  },
+  {
+    question: "Is there a crowdfunding platform included?",
+    answer:
+      "A crowdfunding platform, enabling engagement with partnered VCs and real investors, is under development and will launch soon. This feature will connect users’ refined pitches to actual funding opportunities.",
+  },
+  {
+    question: "How realistic are the AI VC interactions?",
+    answer:
+      "AI VC personalities at PitchDesk are trained to reflect actual investor questioning, decision-making, and topical expertise—from market sizing to financial projections.",
+  },
+  {
+    question: "What makes PitchDesk different?",
+    answer:
+      "PitchDesk stands out for its selection of simulated VC personalities, real-time interactive sessions, comprehensive automated feedback, and its upcoming integration with a crowdfunding and VC network.",
+  },
+  {
+    question: "Can I use PitchDesk for different stages of fundraising?",
+    answer:
+      "Yes, practice with personalities suited to angel, seed, and growth-stage fundraising, adapting your pitch to various investment situations.",
+  },
+  {
+    question: "How long is each pitch practice session?",
+    answer:
+      "Sessions are typically 15–30 minutes, balancing realism and efficiency for busy founders.",
+  },
+  {
+    question: "Is my information confidential?",
+    answer:
+      "Yes, all your pitch content and business information is securely stored and kept confidential, in line with best industry standards.",
+  },
+  {
+    question: "Do I need a ready pitch deck?",
+    answer:
+      "PitchDesk adapts to your stage of preparation—whether you have a full deck, notes, or just an idea, you’ll get valuable feedback.",
+  },
+  {
+    question: "Can I get sector-specific pitch feedback?",
+    answer:
+      "PitchDesk VC personalities include a range of industry specialists to ensure feedback and Q&A reflect your target market’s unique demands.",
+  },
+  {
+    question: "How do I get started?",
+    answer:
+      "Visit pitchdesk.in, select a VC personality, and start your session right away—no complex prerequisites or setup required.",
+  },
+];
 
 export default function SupportPage() {
     const [showForm, setShowForm] = useState(false);
@@ -170,7 +253,7 @@ export default function SupportPage() {
     // };
 
     const handleSubmit = async (e: React.FormEvent) => {
-        
+
         e.preventDefault();
 
         if (!validateForm()) {
@@ -278,48 +361,7 @@ export default function SupportPage() {
                     </div>
 
                     <div className="space-y-4">
-                        {[
-                            {
-                                question: "What is PitchDesk?",
-                                answer: "PitchDesk is an AI-powered platform that helps startups create professional pitch presentations and connect with venture capitalists. Our platform analyzes your business idea and generates personalized pitch decks with AI-powered insights."
-                            },
-                            {
-                                question: "How does the AI pitch generation work?",
-                                answer: "Our AI analyzes your business description, target market, and unique value proposition to generate a comprehensive pitch deck. It includes market analysis, competitive landscape, financial projections, and personalized recommendations tailored to your startup."
-                            },
-                            {
-                                question: "What pricing plans are available?",
-                                answer: "We offer three plans: Standard (₹699/month - 3 pitches), Pro (₹1999/month - 10 pitches with 12 AI personalities), and Enterprise (₹4999/month - 25 pitches with real-time VC connections). All plans include priority support and personalized pitch generation."
-                            },
-                            {
-                                question: "Can I cancel my subscription anytime?",
-                                answer: "Yes, you can cancel your subscription at any time. You'll retain access to your account until the end of your current billing period. No long-term contracts or cancellation fees."
-                            },
-                            {
-                                question: "How long does it take to generate a pitch?",
-                                answer: "Pitch generation typically takes 2-5 minutes depending on the complexity of your business description and the plan you're using. Pro and Enterprise users get faster processing times."
-                            },
-                            {
-                                question: "Is my data secure and private?",
-                                answer: "Absolutely. We use enterprise-grade encryption and never share your business data with third parties. Your pitch content and business information remain completely confidential and secure."
-                            },
-                            {
-                                question: "What file formats can I upload?",
-                                answer: "For support tickets, you can upload PNG, JPG, JPEG, and PDF files up to 5MB each. For pitch materials, we recommend PDF format for documents and common image formats for logos and visuals."
-                            },
-                            {
-                                question: "Do you offer refunds?",
-                                answer: "We offer a 30-day money-back guarantee for all paid plans. If you're not satisfied with our service within the first 30 days, we'll provide a full refund, no questions asked."
-                            },
-                            {
-                                question: "How do I contact support?",
-                                answer: "You can reach our support team through this support form, email us at support@pitchdesk.com, or call us at +91 1234567890. Our team typically responds within 24 hours."
-                            },
-                            {
-                                question: "Can I upgrade or downgrade my plan?",
-                                answer: "Yes, you can upgrade or downgrade your plan at any time. When upgrading, you'll only pay the prorated difference. When downgrading, the change takes effect at your next billing cycle."
-                            }
-                        ].map((faq, index) => (
+                        {FAQS.map((faq, index) => (
                             <Card key={index} className="overflow-hidden">
                                 <Collapsible>
                                     <CollapsibleTrigger className="w-full px-6  text-left  transition-colors">
@@ -505,8 +547,8 @@ export default function SupportPage() {
                                             </Label>
                                         </div> */}
 
-                                        {/* File Previews */}
-                                        {/* {formData.files.length > 0 && (
+                                    {/* File Previews */}
+                                    {/* {formData.files.length > 0 && (
                                             <div className="space-y-2">
                                                 {formData.files.map((file, index) => (
                                                     <div
