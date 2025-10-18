@@ -68,7 +68,7 @@ declare global {
 
     usage: {
       pitchNumberUsed: number
-      pitchTimeUsed: number
+      pitchTimeRemaining: number
     }
   }
 

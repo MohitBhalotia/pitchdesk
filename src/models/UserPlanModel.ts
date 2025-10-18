@@ -7,7 +7,7 @@ const UserPlanSchema = new Schema<IUserPlan>(
     isActive: { type: Boolean, default: true },
     usage: {
       pitchNumberUsed: { type: Number, default: 0 },
-      pitchTimeUsed: { type: Number, default: 0 },
+      pitchTimeRemaining: { type: Number, default: 0 },
     },
   },
   { timestamps: true }

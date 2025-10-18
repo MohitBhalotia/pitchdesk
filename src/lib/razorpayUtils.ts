@@ -4,20 +4,17 @@ import { userPlanModel } from "@/models/UserPlanModel";
 import { planModel } from "@/models/PlanModel";
 
 
-
-// Utility function to create user plan for free users
+//creating free user plans
 export const createFreeUserPlan = async (userId: string) => {
     const freePlan = await planModel.findOne({ name: "free" });
 
-    
-    
         await userPlanModel.create({
             userId: userId,
             planId: freePlan._id,
             isActive: true,
             usage: {
                 pitchNumberUsed: 0,
-                pitchTimeUsed: 0
+                pitchTimeRemaining: freePlan.pitchesTime
             }
         });
     
@@ -40,24 +37,38 @@ export const activateUserPlan = async (orderId: string, paymentId: string) => {
         order.razorPaymentId = paymentId
         await order.save()
 
-        // Deactivate all existing active plans for this user
-        await userPlanModel.updateMany(
-            { userId: order.userId },
-            { isActive: false }
-        );
+        const freePlan = await planModel.findOne({name: "free"})
 
-        // Create new active plan
-        await userPlanModel.create({
-            userId: order.userId,
-            planId: order.planId,
-            isActive: true,
-            usage: {
-                pitchNumberUsed: 0,
-                pitchTimeUsed: 0
-            }
-        });
+        const existingPlan = await userPlanModel.findOne({
+            userId: order.userId
+        })
+
+        console.log(existingPlan)
 
         const plan = await planModel.findById(order.planId);
+        console.log(plan)
+
+        if(existingPlan?.planId === freePlan._id){
+            console.log(existingPlan?.planId)
+            await userPlanModel.deleteOne({
+                userId: existingPlan.userId
+            })
+            await userPlanModel.create({
+                userId: order.userId,
+                planId: order.planId,
+                isActive: true,
+                usage: {
+                    pitchNumberUsed: 0,
+                    pitchTimeRemaining: 20 + plan.pitchesTime
+                }
+            });
+        }else if(existingPlan){
+            existingPlan.planId = plan._id
+            existingPlan.usage.pitchTimeRemaining += plan.pitchesTime
+            console.log(existingPlan)
+            existingPlan.save()
+        }
+
         const user = await UserModel.findById(order.userId);
         user.userPlan = plan.name;
         await user.save();
