@@ -159,7 +159,7 @@ const ScoreBreakdownChart = ({ scores }: { scores: EvaluationScores }) => {
       color: "var(--color-chart-4)",
     },
     {
-      label: "Business & Investibility",
+      label: "Business & Investability",
       score: computeSectionSubtotal(scores.BusinessInvestability),
       maxScore: getSectionMax(scores.BusinessInvestability),
       color: "var(--color-chart-5)",
