@@ -13,29 +13,23 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 const data = {
-  //facebookLink: 'https://facebook.com/mvpblocks',
-  instaLink: 'https://www.instagram.com/pitchdesk.in?igsh=OHVqcXgyMTNsamVo',
+  instaLink: 'https://www.instagram.com/pitchdesk.in',
   linkedInLink: 'https://www.linkedin.com/company/pitch-desk',
   //twitterLink: 'https://twitter.com/mvpblocks',
   //githubLink: 'https://github.com/mvpblocks',
-  //dribbbleLink: 'https://dribbble.com/mvpblocks',
   services: {
     PitchSession: '/web-development',
     QnA: '/web-design',
     pitchGen: '/marketing',
-    //googleads: '/google-ads',
   },
   about: {
-    //history: '/company-history',
     team: '/meet-the-team',
     dream: '/our-dream'
-    //handbook: '/employee-handbook',
-    //careers: '/careers',
   },
   help: {
-    faqs: '/faqs',
-    support: '/support',
-    livechat: '/live-chat',
+    faqs: '/community/support',
+    support: '/community/support',
+    feedback: '/community/feedback',
   },
   contact: {
     email: 'info@pitchdesk.in',
@@ -56,7 +50,6 @@ const socialLinks = [
   { icon: Linkedin, label: 'LinkedIn', href: data.linkedInLink },
   //{ icon: Twitter, label: 'Twitter', href: data.twitterLink },
   //{ icon: Github, label: 'GitHub', href: data.githubLink },
-  //{ icon: Dribbble, label: 'Dribbble', href: data.dribbbleLink },
 ];
 
 const aboutLinks = [
@@ -75,9 +68,9 @@ const serviceLinks = [
 ];
 
 const helpfulLinks = [
-  //{ text: 'FAQs', href: data.help.faqs },
-  { text: 'Support', href: data.help.support, hasIndicator: false },
-  //{ text: 'Live Chat', href: data.help.livechat, hasIndicator: true },
+  { text: 'FAQs', href: data.help.faqs },
+  { text: 'Support', href: data.help.support},
+  { text: 'Feedback', href: data.help.feedback },
 ];
 
 const contactInfo = [
@@ -159,25 +152,15 @@ export default function Footer4Col() {
             <div className="text-center sm:text-left">
               <p className="text-lg font-medium">Helpful Links</p>
               <ul className="mt-8 space-y-4 text-sm">
-                {helpfulLinks.map(({ text, href, hasIndicator }) => (
+                {helpfulLinks.map(({ text, href }) => (
                   <li key={text}>
                     <a
                       href={href}
-                      className={`${
-                        hasIndicator
-                          ? 'group flex justify-center gap-1.5 sm:justify-start'
-                          : 'text-secondary-foreground/70 transition'
-                      }`}
+                      className="text-secondary-foreground/70 transition"
                     >
                       <span className="text-secondary-foreground/70 transition">
                         {text}
                       </span>
-                      {hasIndicator && (
-                        <span className="relative flex size-2">
-                          <span className="bg-primary absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
-                          <span className="bg-primary relative inline-flex size-2 rounded-full" />
-                        </span>
-                      )}
                     </a>
                   </li>
                 ))}

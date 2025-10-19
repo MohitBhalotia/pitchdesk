@@ -11,7 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import TestimonialsCarousel from '@/components/mvpblocks/testimonials-carousel';
 
-import { MessageSquare, Star, Heart, Lightbulb, Bug, Instagram, Send,  Linkedin, } from 'lucide-react';
+import { MessageSquare, Star, Heart, Lightbulb, Bug, Instagram, Send, Linkedin, } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import axios from 'axios';
 

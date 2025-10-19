@@ -12,6 +12,7 @@ import {
   Star,
   Zap,
   Crown,
+  MessageSquare
 } from "lucide-react"
 import Link from "next/link";
 import Image from "next/image";
@@ -54,7 +55,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       },
       {
-        title: "My pitches",
+        title: "Pitch Evaluation",
         url: "/my-pitches",
         icon: History,
       },
@@ -68,6 +69,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: "/generate-pitch",
         icon: FileText,
       },
+      {
+        title: "My Pitches",
+        url: "/generated-pitches",
+        icon: MessageSquare
+      }
 
     ],
     navSecondary: [

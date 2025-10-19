@@ -63,7 +63,7 @@ export default function FeatureSteps() {
   }, [progress]);
 
   return (
-      <div className="mx-auto w-full max-w-7xl mt-10 px-4">
+      <div id='features' className="mx-auto w-full max-w-7xl mt-10 px-4">
         <div className="mx-auto mb-12 max-w-2xl sm:text-center">
           <div className="relative z-10">
           <h1 className="my-6 from-foreground to-foreground/40 mb-4 bg-gradient-to-b bg-clip-text text-3xl font-bold text-transparent md:text-5xl lg:text-6xl">

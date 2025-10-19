@@ -26,6 +26,9 @@ const PitchSchema = new Schema<Pitch>(
             type: Schema.Types.ObjectId,
             ref: 'User',
         },
+        title:{
+            type: String
+        },
         startTime: {
             type: Date,
             default: Date.now
