@@ -13,7 +13,7 @@ import { useMicrophone } from "@/context/MicrophoneContextProvider";
 import { useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 function HomeContent() {
-  const { socket, socketState, duration } = useDeepgram();
+  const { socket, socketState, duration, setUserId } = useDeepgram();
   const { startMicrophone, stopMicrophone, microphoneState, setupMicrophone } =
     useMicrophone();
   const [config, setConfig] = useState<object | null>(null);
@@ -23,6 +23,7 @@ function HomeContent() {
   const agentId = searchParams.get("agentId");
   const { data: session } = useSession();
   const handleStart = async () => {
+    setUserId(session?.user?._id);
     if (microphoneState === null) {
       const result = await setupMicrophone();
       if (result) {

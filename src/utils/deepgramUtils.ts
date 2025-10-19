@@ -1,10 +1,13 @@
 import { convertFloat32ToInt16, downsample } from "../utils/audioUtils";
 
-export const getAuthToken = async () => {
+export const getAuthToken = async (userId: string) => {
   const result = await (
-    await fetch("/api/authenticate", { method: "POST" })
+    await fetch("/api/authenticate", { method: "POST", body: JSON.stringify({ userId }) })
   ).json();
-
+  console.log("result", result);
+  if(result?.success === false) {
+    throw new Error(result.message);
+  }
   return result.access_token;
 };
 
