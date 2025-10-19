@@ -71,7 +71,7 @@ const navItems: NavItem[] = [
   },
   { name: "CrowdFunding", href: "/community/crowdfunding" },
   { name: "Pricing", href: "#pricing" },
-  { name: "About", href: "/about" },
+  { name: "About", href: "/meet-the-team" },
   // { name: "Meet the VCs", href: "/login" },
 ];
 export default function Header1() {

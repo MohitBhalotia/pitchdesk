@@ -160,7 +160,8 @@ export default function Index() {
     },
     {
       title: "Remaining Minutes",
-      value: `${userStats?.remainingTime}/${userStats?.totalTime}`,
+      // value: `${userStats?.remainingTime}/${userStats?.totalTime}`,
+      value: `${userStats?.remainingTime}`,
       icon: <Clock className="h-6 w-6" />,
      
     },

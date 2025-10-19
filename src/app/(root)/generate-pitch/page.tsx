@@ -33,21 +33,25 @@ const fields = [
   {
     label: "Tagline",
     name: "tagline",
+    required: true,
     category: "Basic Information",
   },
   {
     label: "Industry",
     name: "industry",
+    required: true,
     category: "Basic Information",
   },
   {
     label: "Founded",
     name: "founded",
+    required: true,
     category: "Basic Information",
   },
   {
     label: "Headquarters",
     name: "headquarters",
+    required: true,
     category: "Basic Information",
   },
   {
@@ -58,16 +62,19 @@ const fields = [
   {
     label: "Problem Statement",
     name: "problemStatement",
+    required: true,
     category: "Business Model",
   },
   {
     label: "Solution Description",
     name: "solutionDescription",
+    required: true,
     category: "Business Model",
   },
   {
     label: "Unique Value Proposition",
     name: "uniqueValueProposition",
+    required: true,
     category: "Business Model",
   },
   {
@@ -366,6 +373,23 @@ export default function PitchGenerator() {
     }))
   }
 
+
+  const validateAllRequiredFields = () => {
+    const missingFields = [];
+
+    // Check ALL required fields across all steps
+    for (const field of fields) {
+      if (field.required && (!formData[field.name] || !formData[field.name].trim())) {
+        missingFields.push(field.label);
+      }
+    }
+
+    if (missingFields.length > 0) {
+      return false;
+    }
+    return true;
+  };
+
   const nextStep = () => {
     if (currentStep < totalSteps - 1) {
       // For free users, only allow navigation to first 4 tabs (0-3 index)
@@ -416,6 +440,11 @@ export default function PitchGenerator() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+
+    if (!validateAllRequiredFields()) {
+      alert(`Please fill in all required fields.`);
+      return;
+    }
     setLoading(true)
 
     // Create FormData from our form state
@@ -449,20 +478,18 @@ export default function PitchGenerator() {
     }
   }
 
-  // SIMPLE FIX: Remove the complex form submission handler and use the original
+  // Form submit
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    // Only prevent default if we're not on a submission step
     const isFreeUserOnStep3 = session?.user?.userPlan === 'free' && currentStep === 3;
     const isProUserOnFinalStep = currentStep === totalSteps - 1;
-    
-    // If we're NOT on a submission step, prevent the form submission
-    if (!isFreeUserOnStep3 && !isProUserOnFinalStep) {
+
+    // If we're on a submission step, proceed with validation and submission
+    if (isFreeUserOnStep3 || isProUserOnFinalStep) {
+      handleSubmit(e);
+    } else {
+      // For non-submission steps, just prevent default and allow navigation
       e.preventDefault();
-      return;
     }
-    
-    // Otherwise, proceed with normal submission
-    handleSubmit(e);
   };
 
   function downloadPDF() {
@@ -552,10 +579,10 @@ export default function PitchGenerator() {
               const isActive = index === currentStep;
               const isCompleted = index < currentStep;
               const isRestricted = session?.user?.userPlan === 'free' && index >= 4;
-              
+
               return (
-                <div 
-                  key={category} 
+                <div
+                  key={category}
                   className="flex flex-col items-center flex-1 cursor-pointer"
                   onClick={() => {
                     if (isRestricted) {
@@ -567,40 +594,36 @@ export default function PitchGenerator() {
                 >
                   <div className="flex items-center w-full mb-3">
                     {index > 0 && (
-                      <div className={`flex-1 h-0.5 transition-colors duration-500 ${
-                        isCompleted ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
-                      }`} />
+                      <div className={`flex-1 h-0.5 transition-colors duration-500 ${isCompleted ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+                        }`} />
                     )}
-                    
-                    <div className={`relative flex-shrink-0 w-4 h-4 rounded-full border-2 transition-all duration-500 ${
-                      isActive
-                        ? 'bg-white border-blue-500 scale-125'
-                        : isCompleted
+
+                    <div className={`relative flex-shrink-0 w-4 h-4 rounded-full border-2 transition-all duration-500 ${isActive
+                      ? 'bg-white border-blue-500 scale-125'
+                      : isCompleted
                         ? 'bg-blue-500 border-blue-500'
                         : 'bg-white border-gray-300 dark:border-gray-500'
-                    } ${isRestricted ? 'opacity-50' : ''}`}>
+                      } ${isRestricted ? 'opacity-50' : ''}`}>
                       {isCompleted && (
                         <svg className="w-2 h-2 mx-auto mt-0.5 text-white" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                         </svg>
                       )}
                     </div>
-                    
+
                     {index < categories.length - 1 && (
-                      <div className={`flex-1 h-0.5 transition-colors duration-500 ${
-                        index < currentStep ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
-                      }`} />
+                      <div className={`flex-1 h-0.5 transition-colors duration-500 ${index < currentStep ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+                        }`} />
                     )}
                   </div>
 
                   <div className="text-center px-1">
-                    <span className={`text-xs font-medium transition-colors duration-300 line-clamp-2 ${
-                      isActive
-                        ? 'text-blue-600 dark:text-blue-400 font-semibold'
-                        : isCompleted
+                    <span className={`text-xs font-medium transition-colors duration-300 line-clamp-2 ${isActive
+                      ? 'text-blue-600 dark:text-blue-400 font-semibold'
+                      : isCompleted
                         ? 'text-gray-700 dark:text-gray-300'
                         : 'text-gray-500 dark:text-gray-500'
-                    } ${isRestricted ? 'opacity-50' : ''}`}>
+                      } ${isRestricted ? 'opacity-50' : ''}`}>
                       {category}
                     </span>
                   </div>
@@ -614,17 +637,16 @@ export default function PitchGenerator() {
               const isActive = index === currentStep;
               const isCompleted = index < currentStep;
               const isRestricted = session?.user?.userPlan === 'free' && index >= 4;
-              
+
               return (
                 <div
                   key={category}
-                  className={`flex-1 h-1 mx-1 rounded-full transition-all duration-300 ${
-                    isActive
-                      ? 'bg-blue-500'
-                      : isCompleted
+                  className={`flex-1 h-1 mx-1 rounded-full transition-all duration-300 ${isActive
+                    ? 'bg-blue-500'
+                    : isCompleted
                       ? 'bg-blue-400'
                       : 'bg-gray-300 dark:bg-gray-600'
-                  } ${isRestricted ? 'opacity-50' : ''}`}
+                    } ${isRestricted ? 'opacity-50' : ''}`}
                   title={category}
                   onClick={() => {
                     if (isRestricted) {
@@ -642,57 +664,55 @@ export default function PitchGenerator() {
         <div className={`grid gap-8 ${currentStep === totalSteps - 1 ? 'lg:grid-cols-3' : 'lg:grid-cols-1'}`}>
           <div className={currentStep === totalSteps - 1 ? 'lg:col-span-2' : ''}>
             {/* REMOVED all the onKeyDown handlers - they were causing the issue */}
-            <form onSubmit={handleFormSubmit} className="space-y-6">
+            <form onSubmit={handleFormSubmit} className="space-y-6" noValidate>
               {Object.entries(fieldsByCategory)
                 .map(([category, categoryFields], index) => (
-                <div key={category} className={currentStep !== index ? 'hidden' : ''}>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-xl">{category}</CardTitle>
-                      <CardDescription>Fill out the relevant information for this section</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                      {categoryFields.map((field) => (
-                        <div key={field.name} className="space-y-2">
-                          <Label htmlFor={field.name} className="text-sm font-medium">
-                            {field.label}
-                            {field.required && (
-                              <Badge variant="destructive" className="ml-2 text-xs">
-                                Required
-                              </Badge>
+                  <div key={category} className={currentStep !== index ? 'hidden' : ''}>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-xl">{category}</CardTitle>
+                        <CardDescription>Fill out the relevant information for this section</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        {categoryFields.map((field) => (
+                          <div key={field.name} className="space-y-2">
+                            <Label htmlFor={field.name} className="text-sm font-medium">
+                              {field.label}
+                              {field.required && (
+                                <span className="text-red-500 ml-1">*</span>
+                              )}
+                            </Label>
+                            {field.name === "website" ? (
+                              <Input
+                                id={field.name}
+                                name={field.name}
+                                type="url"
+                                placeholder="https://example.com"
+                                required={field.required}
+                                className="w-full"
+                                value={formData[field.name] || ''}
+                                onChange={handleInputChange}
+                              // REMOVED the onKeyDown handler
+                              />
+                            ) : (
+                              <Textarea
+                                id={field.name}
+                                name={field.name}
+                                rows={3}
+                                required={field.required}
+                                className="w-full resize-none"
+                                placeholder={`Enter ${field.label.toLowerCase()}...`}
+                                value={formData[field.name] || ''}
+                                onChange={handleInputChange}
+                              // REMOVED the onKeyDown handler
+                              />
                             )}
-                          </Label>
-                          {field.name === "website" ? (
-                            <Input
-                              id={field.name}
-                              name={field.name}
-                              type="url"
-                              placeholder="https://example.com"
-                              required={field.required}
-                              className="w-full"
-                              value={formData[field.name] || ''}
-                              onChange={handleInputChange}
-                              // REMOVED the onKeyDown handler
-                            />
-                          ) : (
-                            <Textarea
-                              id={field.name}
-                              name={field.name}
-                              rows={3}
-                              required={field.required}
-                              className="w-full resize-none"
-                              placeholder={`Enter ${field.label.toLowerCase()}...`}
-                              value={formData[field.name] || ''}
-                              onChange={handleInputChange}
-                              // REMOVED the onKeyDown handler
-                            />
-                          )}
-                        </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-                </div>
-              ))}
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </div>
+                ))}
 
               <div className="flex justify-between pt-6">
                 <Button

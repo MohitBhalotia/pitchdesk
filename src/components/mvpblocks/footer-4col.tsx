@@ -55,7 +55,7 @@ const socialLinks = [
 const aboutLinks = [
   //{ text: 'Company History', href: data.about.history },
   { text: 'Meet the Team', href: data.about.team },
-  { text: 'Our Dream', href: data.about.dream }
+  // { text: 'Our Dream', href: data.about.dream }
   //{ text: 'Employee Handbook', href: data.about.handbook },
   //{ text: 'Careers', href: data.about.careers },
 ];

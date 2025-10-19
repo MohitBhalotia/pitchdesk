@@ -21,7 +21,7 @@ const teamMembers: TeamMember[] = [
     name: "Ayush Ajgaonkar",
     role: "Founder",
     bio: "Visionary leader with 10+ years in tech entrepreneurship. Passionate about building products that make a difference.",
-    image: "/Ayush.jpg",
+    image: "/aayush.jpg",
     social: {
       linkedin: "https://linkedin.com/in/sarahchen",
       email: "sarah@company.com"
@@ -29,10 +29,10 @@ const teamMembers: TeamMember[] = [
   },
   {
     id: 2,
-    name: "Marcus Rodriguez",
-    role: "CTO",
+    name: "Daksh Mehta",
+    role: "Founder",
     bio: "Full-stack developer and system architect. Loves solving complex technical challenges and mentoring engineering teams.",
-    image: "/team/marcus.jpg",
+    image: "/daksh.jpg",
     social: {
       linkedin: "https://linkedin.com/in/marcusrodriguez",
       github: "https://github.com/marcusrodriguez"
@@ -40,10 +40,10 @@ const teamMembers: TeamMember[] = [
   },
   {
     id: 3,
-    name: "Emily Watson",
-    role: "Lead Designer",
+    name: "Mohit Bhalotia",
+    role: "Senior Developer",
     bio: "Creative designer focused on user experience and beautiful interfaces. Believes good design should be accessible to everyone.",
-    image: "/team/emily.jpg",
+    image: "/mohit.jpg",
     social: {
       linkedin: "https://linkedin.com/in/emilywatson",
       github: "https://github.com/emilywatson"
@@ -51,10 +51,10 @@ const teamMembers: TeamMember[] = [
   },
   {
     id: 4,
-    name: "Alex Thompson",
+    name: "Naresh Mahiya",
     role: "Senior Developer",
     bio: "Backend specialist and database wizard. Enjoys optimizing performance and building scalable systems.",
-    image: "/team/alex.jpg",
+    image: "/naresh.jpg",
     social: {
       linkedin: "https://linkedin.com/in/alexthompson",
       github: "https://github.com/alexthompson"
@@ -62,10 +62,10 @@ const teamMembers: TeamMember[] = [
   },
   {
     id: 5,
-    name: "Priya Patel",
-    role: "Product Manager",
+    name: "Prathmesh Ghoremore",
+    role: "Senior Developer",
     bio: "Bridge between users and developers. Passionate about creating products that solve real problems and delight users.",
-    image: "/team/priya.jpg",
+    image: "/prathmesh.jpg",
     social: {
       linkedin: "https://linkedin.com/in/priyapatel",
       email: "priya@company.com"

@@ -200,7 +200,8 @@ const PricingCard = ({
         onClick={() => submitPayment(tier.planId)}
         disabled={loading}
       >
-        {loading ? 'Processing...' : tier.cta}
+        {/* {loading ? 'Processing...' : tier.cta} */}
+        {tier.cta}
       </Button>
     </div>
   );
@@ -296,7 +297,7 @@ export default function PricingSection() {
 
 
   return (
-    <section className="flex flex-col items-center gap-10 py-10 bg-gray-100 dark:bg-[#111]">
+    <section className="flex flex-col items-center gap-10 py-10 bg-card dark:bg-background">
       <div className="space-y-7 text-center">
         <div className="space-y-4 ">
           <h1 className="text-4xl font-medium md:text-5xl">
