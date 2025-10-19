@@ -11,7 +11,7 @@ const features = [
     step: 'Step 1',
     title: 'Present Your Pitch',
     content:
-      'Select one from 10+ available VC personalities supporting both English and Hindi languages to Present your pitch and have a structured QnA session. ',
+      'Select your preferred VC personality and pitch in English. Navigate through negotiation rounds and receive final verdicts on your presentation. ',
     icon: <Rocket className="text-primary h-6 w-6" />,
     image:
       'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?q=80&w=2070&auto=format&fit=crop',
@@ -23,7 +23,7 @@ const features = [
       'A detailed analysis of your pitch and the QnA session by our AI Powered Pitch Analyzer. Get suggestions and changes to make it better.',
     icon: <Paintbrush className="text-primary h-6 w-6" />,
     image:
-      'https://images.unsplash.com/photo-1618761714954-0b8cd0026356?q=80&w=2070&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?q=80&w=2070&auto=format&fit=crop',
   },
   {
     step: 'Step 3',
@@ -32,7 +32,7 @@ const features = [
       'Create your presence among our partnered Venture Capitalists and list yourself on our crowdfunding platform.',
     icon: <Code className="text-primary h-6 w-6" />,
     image:
-      'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop',
+      'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?q=80&w=2070&auto=format&fit=crop',
   },
   {
     step: 'Step 4',

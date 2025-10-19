@@ -12,7 +12,8 @@ import {
   Star,
   Zap,
   Crown,
-  MessageSquare
+  MessageSquare,
+  HelpCircle,
 } from "lucide-react"
 import Link from "next/link";
 import Image from "next/image";
@@ -78,6 +79,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
     ],
     navSecondary: [
+      {
+        title: "User guide",
+        url: "/how-to-use",
+        icon: HelpCircle,
+      },
       {
         title: "Support",
         url: "/support",

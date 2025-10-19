@@ -20,55 +20,55 @@ const teamMembers: TeamMember[] = [
     id: 1,
     name: "Ayush Ajgaonkar",
     role: "Founder",
-    bio: "Visionary leader with 10+ years in tech entrepreneurship. Passionate about building products that make a difference.",
+    bio: "Leads technical development and platform architecture. Passionate about building scalable Solutions.",
     image: "/aayush.jpg",
     social: {
       linkedin: "https://linkedin.com/in/sarahchen",
-      email: "sarah@company.com"
+      // email: "sarah@company.com"
     }
   },
   {
     id: 2,
     name: "Daksh Mehta",
     role: "Founder",
-    bio: "Full-stack developer and system architect. Loves solving complex technical challenges and mentoring engineering teams.",
+    bio: "Turning innovative ideas into scalable products.",
     image: "/daksh.jpg",
     social: {
       linkedin: "https://linkedin.com/in/marcusrodriguez",
-      github: "https://github.com/marcusrodriguez"
+      // github: "https://github.com/marcusrodriguez"
     }
   },
   {
     id: 3,
     name: "Mohit Bhalotia",
-    role: "Senior Developer",
-    bio: "Creative designer focused on user experience and beautiful interfaces. Believes good design should be accessible to everyone.",
+    role: "Software Engineer",
+    bio: "Specializes in  AI-powered features and integration.",
     image: "/mohit.jpg",
     social: {
       linkedin: "https://linkedin.com/in/emilywatson",
-      github: "https://github.com/emilywatson"
+      github: "https://github.com/MohitBhalotia"
     }
   },
   {
     id: 4,
     name: "Naresh Mahiya",
-    role: "Senior Developer",
-    bio: "Backend specialist and database wizard. Enjoys optimizing performance and building scalable systems.",
+    role: "Backend Engineer",
+    bio: "Builds robust server infrastructure & Ensures system reliability and performance.",
     image: "/naresh.jpg",
     social: {
-      linkedin: "https://linkedin.com/in/alexthompson",
-      github: "https://github.com/alexthompson"
+      linkedin: "https://www.linkedin.com/in/naresh-mahiya-1ba039254",
+      github: "https://github.com/naresh-mahiya"
     }
   },
   {
     id: 5,
     name: "Prathmesh Ghoremore",
-    role: "Senior Developer",
-    bio: "Bridge between users and developers. Passionate about creating products that solve real problems and delight users.",
+    role: "Fullstack Developer",
+    bio: "Creates seamless user experiences across frontend and backend. Focused on product excellence.",
     image: "/prathmesh.jpg",
     social: {
       linkedin: "https://linkedin.com/in/priyapatel",
-      email: "priya@company.com"
+      github: "https://github.com/Prathamesh0415"
     }
   }
 ];

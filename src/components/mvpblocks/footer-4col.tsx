@@ -18,9 +18,9 @@ const data = {
   //twitterLink: 'https://twitter.com/mvpblocks',
   //githubLink: 'https://github.com/mvpblocks',
   services: {
-    PitchSession: '/web-development',
-    QnA: '/web-design',
-    pitchGen: '/marketing',
+    PitchSession: '#',
+    QnA: '#',
+    pitchGen: '#',
   },
   about: {
     team: '/meet-the-team',
@@ -61,15 +61,15 @@ const aboutLinks = [
 ];
 
 const serviceLinks = [
-  { text: "pitch session with AI VC's", href: data.services.PitchSession },
+  { text: "Pitch session with AI VC's", href: data.services.PitchSession },
   { text: 'QnA and Negotiation practice', href: data.services.QnA },
   { text: 'Generate Deal cracking pitch', href: data.services.pitchGen },
   //{ text: 'Google Ads', href: data.services.googleads },
 ];
 
 const helpfulLinks = [
-  { text: 'FAQs', href: data.help.faqs },
-  { text: 'Support', href: data.help.support},
+  // { text: 'FAQs', href: data.help.faqs },
+  { text: 'Support & FAQs', href: data.help.support},
   { text: 'Feedback', href: data.help.feedback },
 ];
 
