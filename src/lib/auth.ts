@@ -7,7 +7,7 @@ import { nanoid } from "nanoid";
 import bcrypt from "bcryptjs";
 import { createFreeUserPlan } from "@/lib/razorpayUtils";
 
-const salt=await bcrypt.genSalt(10);
+const salt = await bcrypt.genSalt(10);
 
 const authOptions: NextAuthOptions = {
   providers: [
@@ -21,7 +21,7 @@ const authOptions: NextAuthOptions = {
           email: profile.email || "",
           isVerified: true,
           provider: "google",
-          signupStep2Done: false
+          signupStep2Done: false,
         };
       },
     }),
@@ -97,7 +97,6 @@ const authOptions: NextAuthOptions = {
             provider: "google",
           });
 
-
           await newUser.save();
 
           // Create free user plan for new Google users
@@ -122,7 +121,7 @@ const authOptions: NextAuthOptions = {
       }
       return true;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token._id = user._id?.toString();
         token.isVerified = user.isVerified;
@@ -132,6 +131,13 @@ const authOptions: NextAuthOptions = {
         token.userPlan = user.userPlan;
         token.provider = user.provider;
         token.signupStep2Done = user.signupStep2Done;
+      }
+
+      if (trigger === "update") {
+        const user=await UserModel.findById(token._id);
+        if (user) {
+          token.userPlan = user.userPlan;
+        }
       }
       return token;
     },
@@ -151,4 +157,4 @@ const authOptions: NextAuthOptions = {
   },
 };
 
-export default authOptions
+export default authOptions;

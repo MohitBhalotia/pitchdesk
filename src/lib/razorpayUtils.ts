@@ -40,10 +40,8 @@ export const activateUserPlan = async (orderId: string, paymentId: string) => {
             userId: order.userId
         })
 
-        console.log(existingPlan)
 
         const plan = await planModel.findById(order.planId);
-        console.log(plan)
 
         if(existingPlan?.planId === freePlan._id){
             console.log(existingPlan?.planId)

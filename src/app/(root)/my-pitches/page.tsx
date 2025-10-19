@@ -8,10 +8,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { 
-  ChevronDown, 
-  ChevronUp, 
-  Clock, 
+import {
+  ChevronDown,
+  ChevronUp,
+  Clock,
   Calendar,
   User,
   Bot,
@@ -54,27 +54,21 @@ export default function PitchTranscripts() {
   useEffect(() => {
     const fetchPitches = async () => {
       if (status === "loading") return
-      
+
       if (!session?.user?._id) {
-        console.log("[PitchTranscripts] No user session or user id found")
         setIsLoading(false)
         return
       }
 
       try {
-        console.log("[PitchTranscripts] Fetching pitches for user:", session.user._id)
         const response = await fetch(`/api/my-pitches`)
-        if (!response.ok) {
-          throw new Error('Failed to fetch pitches')
-        }
+        if (!response.ok) throw new Error("Failed to fetch pitches")
+
         const data = await response.json()
-        
         const pitchesData = Array.isArray(data) ? data : data.pitches || data.data || []
         setPitches(pitchesData)
-        
-        console.log("[PitchTranscripts] Fetched pitches:", pitchesData.length)
       } catch (error) {
-        console.error('Error fetching pitches:', error)
+        console.error("Error fetching pitches:", error)
         setPitches([])
       } finally {
         setIsLoading(false)
@@ -86,11 +80,7 @@ export default function PitchTranscripts() {
 
   const togglePitchExpansion = (pitchId: string) => {
     const newExpanded = new Set(expandedPitches)
-    if (newExpanded.has(pitchId)) {
-      newExpanded.delete(pitchId)
-    } else {
-      newExpanded.add(pitchId)
-    }
+    newExpanded.has(pitchId) ? newExpanded.delete(pitchId) : newExpanded.add(pitchId)
     setExpandedPitches(newExpanded)
   }
 
@@ -98,15 +88,14 @@ export default function PitchTranscripts() {
     router.push(`/evaluation/${pitchId}`)
   }
 
-  // Search functionality
-  const filteredPitches = pitches.filter(pitch =>
-    pitch.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    pitch.conversationHistory.some(msg => 
-      msg.content.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+  const filteredPitches = pitches.filter(
+    (pitch) =>
+      pitch.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      pitch.conversationHistory.some((msg) =>
+        msg.content.toLowerCase().includes(searchTerm.toLowerCase())
+      )
   )
 
-  // Edit title functionality
   const startEditing = (pitch: Pitch) => {
     setEditingPitchId(pitch._id)
     setEditTitle(pitch.title)
@@ -121,62 +110,46 @@ export default function PitchTranscripts() {
     try {
       setUpdatingTitle(true)
       const response = await fetch(`/api/my-pitches`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          pitchId, 
-          title: newTitle 
-        }),
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pitchId, title: newTitle })
       })
 
       if (response.ok) {
-        setPitches(pitches.map(pitch => 
-          pitch._id === pitchId 
-            ? { ...pitch, title: newTitle }
-            : pitch
-        ))
+        setPitches(
+          pitches.map((pitch) =>
+            pitch._id === pitchId ? { ...pitch, title: newTitle } : pitch
+          )
+        )
         setEditingPitchId(null)
         setEditTitle("")
-      } else {
-        console.error('Failed to update pitch title')
       }
     } catch (error) {
-      console.error('Error updating pitch title:', error)
+      console.error("Error updating pitch title:", error)
     } finally {
       setUpdatingTitle(false)
     }
   }
 
   const saveTitle = (pitchId: string) => {
-    if (editTitle.trim()) {
-      updatePitchTitle(pitchId, editTitle.trim())
-    } else {
-      cancelEditing()
-    }
+    if (editTitle.trim()) updatePitchTitle(pitchId, editTitle.trim())
+    else cancelEditing()
   }
 
-  // Delete functionality
   const deletePitch = async (pitchId: string) => {
     try {
       setDeletingPitchId(pitchId)
       const response = await fetch(`/api/my-pitches`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ pitchId }),
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pitchId })
       })
 
       if (response.ok) {
-        setPitches(pitches.filter(p => p._id !== pitchId))
-        setDeletingPitchId(null)
-      } else {
-        console.error('Failed to delete pitch')
+        setPitches(pitches.filter((p) => p._id !== pitchId))
       }
     } catch (error) {
-      console.error('Error deleting pitch:', error)
+      console.error("Error deleting pitch:", error)
     } finally {
       setDeletingPitchId(null)
     }
@@ -185,18 +158,12 @@ export default function PitchTranscripts() {
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
-  }
-
-  const getUserDisplayName = () => {
-    if (!session?.user) return ""
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (session.user as any).fullName || session.user.email || session.user.name || "User"
+    return `${mins}:${secs.toString().padStart(2, "0")}`
   }
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen bg-background transition-colors duration-300">
+      <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">
           <div className="space-y-6">
             {[1, 2, 3].map((i) => (
@@ -219,12 +186,14 @@ export default function PitchTranscripts() {
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-background transition-colors duration-300">
+      <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">
           <Card>
             <CardContent className="pt-6">
               <div className="text-center py-8">
-                <p className="text-lg text-muted-foreground">Please log in to view your pitch transcripts</p>
+                <p className="text-lg text-muted-foreground">
+                  Please log in to view your pitch transcripts
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -234,23 +203,21 @@ export default function PitchTranscripts() {
   }
 
   return (
-    <div className="min-h-screen bg-background transition-colors duration-300">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Pitch Transcripts</h1>
-            <p className="text-muted-foreground">Review your conversation history</p>
-            <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-              <User className="h-4 w-4" />
-              <span>Welcome, {getUserDisplayName()}</span>
-            </div>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Pitch Transcripts</h1>
+            <p className="text-muted-foreground text-sm sm:text-base">
+              Review your conversation history
+            </p>
           </div>
         </div>
 
         {/* Search Bar */}
         <div className="mb-6">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <div className="relative max-w-md w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
               placeholder="Search by title or conversation content..."
               value={searchTerm}
@@ -261,17 +228,12 @@ export default function PitchTranscripts() {
         </div>
 
         {/* Stats */}
-        <div className="mb-6">
+        <div className="mb-6 flex flex-wrap items-center gap-2">
           <Badge variant="secondary" className="px-4 py-2">
-            {filteredPitches.length} {filteredPitches.length === 1 ? 'Pitch' : 'Pitches'}
+            {filteredPitches.length} {filteredPitches.length === 1 ? "Pitch" : "Pitches"}
           </Badge>
           {searchTerm && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSearchTerm('')}
-              className="ml-2"
-            >
+            <Button variant="outline" size="sm" onClick={() => setSearchTerm("")}>
               Clear Search
             </Button>
           )}
@@ -297,20 +259,19 @@ export default function PitchTranscripts() {
             <CardContent className="pt-6">
               <div className="text-center py-8">
                 <p className="text-lg text-muted-foreground">
-                  {searchTerm ? 'No matching pitches found' : 'No pitch transcripts found'}
+                  {searchTerm ? "No matching pitches found" : "No pitch transcripts found"}
                 </p>
                 <p className="text-sm text-muted-foreground mt-2">
-                  {searchTerm 
-                    ? 'Try adjusting your search terms' 
-                    : 'Start a new pitch conversation to see it here'
-                  }
+                  {searchTerm
+                    ? "Try adjusting your search terms"
+                    : "Start a new pitch conversation to see it here"}
                 </p>
               </div>
             </CardContent>
           </Card>
         ) : (
           <div className="space-y-6">
-            {filteredPitches.map((pitch/*, i*/) => {
+            {filteredPitches.map((pitch) => {
               const isExpanded = expandedPitches.has(pitch._id)
               const conversationHistory = pitch.conversationHistory || []
               const isEditing = editingPitchId === pitch._id
@@ -319,23 +280,24 @@ export default function PitchTranscripts() {
               return (
                 <Card key={pitch._id} className="overflow-hidden group">
                   <CardHeader className="pb-3">
-                    <div className="flex justify-between items-start">
+                    <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+                      {/* Title + meta */}
                       <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
+                        <div className="flex items-center gap-3 mb-2 flex-wrap">
                           {isEditing ? (
-                            <div className="flex items-center gap-2 flex-1">
+                            <div className="flex items-center gap-2 flex-1 flex-wrap">
                               <Input
                                 value={editTitle}
                                 onChange={(e) => setEditTitle(e.target.value)}
                                 placeholder="Enter pitch title..."
-                                className="text-lg font-semibold h-8 flex-1 max-w-md"
+                                className="text-lg font-semibold h-8 flex-1 min-w-[150px]"
                                 autoFocus
                                 onKeyDown={(e) => {
-                                  if (e.key === 'Enter') saveTitle(pitch._id)
-                                  if (e.key === 'Escape') cancelEditing()
+                                  if (e.key === "Enter") saveTitle(pitch._id)
+                                  if (e.key === "Escape") cancelEditing()
                                 }}
                               />
-                              <div className="flex gap-1">
+                              <div className="flex gap-2 flex-wrap">
                                 <Button
                                   size="sm"
                                   onClick={() => saveTitle(pitch._id)}
@@ -346,8 +308,7 @@ export default function PitchTranscripts() {
                                     <div className="animate-spin h-3 w-3 border border-white border-t-transparent rounded-full" />
                                   ) : (
                                     <>
-                                      <Save className="h-3 w-3 mr-1" />
-                                      Save
+                                      <Save className="h-3 w-3 mr-1" /> Save
                                     </>
                                   )}
                                 </Button>
@@ -357,33 +318,30 @@ export default function PitchTranscripts() {
                                   onClick={cancelEditing}
                                   className="h-8 px-2"
                                 >
-                                  <X className="h-3 w-3 mr-1" />
-                                  Cancel
+                                  <X className="h-3 w-3 mr-1" /> Cancel
                                 </Button>
                               </div>
                             </div>
                           ) : (
-                            <>
-                              <CardTitle className="text-xl flex items-center gap-2">
-                                {pitch.title}
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => startEditing(pitch)}
-                                  className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                                  title="Edit title"
-                                >
-                                  <Edit className="h-3 w-3" />
-                                </Button>
-                              </CardTitle>
-                            </>
+                            <CardTitle className="text-lg sm:text-xl flex items-center gap-2 flex-wrap">
+                              {pitch.title}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => startEditing(pitch)}
+                                className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
+                                title="Edit title"
+                              >
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </CardTitle>
                           )}
                         </div>
-                        
-                        <CardDescription className="flex items-center gap-4">
+
+                        <CardDescription className="flex flex-wrap gap-3 text-sm">
                           <span className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
-                            {new Date(pitch.startTime).getMonth() + 1}/{new Date(pitch.startTime).getDate()}/{new Date(pitch.startTime).getFullYear()}
+                            {new Date(pitch.startTime).toLocaleDateString()}
                           </span>
                           <span className="flex items-center gap-1">
                             <Clock className="h-4 w-4" />
@@ -394,37 +352,33 @@ export default function PitchTranscripts() {
                           </Badge>
                         </CardDescription>
                       </div>
-                      
-                      <div className="flex items-center gap-2">
-                        {/* Action Buttons */}
+
+                      {/* Action Buttons */}
+                      <div className="flex flex-wrap gap-2">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleEvaluatePitch(pitch._id)}
-                          className="flex items-center gap-2"
+                          className="flex items-center gap-1"
                         >
-                          <BarChart3 className="h-4 w-4" />
-                          Evaluate
+                          <BarChart3 className="h-4 w-4" /> Evaluate
                         </Button>
-                        
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => deletePitch(pitch._id)}
                           disabled={isDeleting}
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10 flex items-center gap-1"
+                          className="text-destructive hover:text-destructive flex items-center gap-1"
                         >
                           {isDeleting ? (
                             <div className="animate-spin h-3 w-3 border border-destructive border-t-transparent rounded-full" />
                           ) : (
                             <>
-                              <Trash2 className="h-4 w-4" />
-                              Delete
+                              <Trash2 className="h-4 w-4" /> Delete
                             </>
                           )}
                         </Button>
-
-                        <Button 
+                        <Button
                           variant="outline"
                           size="sm"
                           onClick={() => togglePitchExpansion(pitch._id)}
@@ -432,43 +386,45 @@ export default function PitchTranscripts() {
                         >
                           {isExpanded ? (
                             <>
-                              <ChevronUp className="h-4 w-4" />
-                              Collapse
+                              <ChevronUp className="h-4 w-4" /> Collapse
                             </>
                           ) : (
                             <>
-                              <ChevronDown className="h-4 w-4" />
-                              Expand
+                              <ChevronDown className="h-4 w-4" /> Expand
                             </>
                           )}
                         </Button>
                       </div>
                     </div>
                   </CardHeader>
-                  
+
                   {isExpanded && (
                     <CardContent className="pt-0">
                       <div className="border-t pt-4">
-                        <ScrollArea className="h-[400px] pr-4">
+                        <ScrollArea className="h-[300px] sm:h-[400px] pr-2 sm:pr-4">
                           <div className="space-y-4">
                             {conversationHistory.map((msg, idx) => (
                               <div
                                 key={idx}
-                                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                                className={`flex ${
+                                  msg.role === "user" ? "justify-end" : "justify-start"
+                                }`}
                               >
                                 <div
-                                  className={`max-w-lg rounded-xl p-4 relative ${
+                                  className={`max-w-full sm:max-w-lg rounded-xl p-3 sm:p-4 ${
                                     msg.role === "user"
                                       ? "bg-primary text-primary-foreground"
                                       : "bg-muted"
                                   }`}
                                 >
                                   <div className="flex items-center gap-2 mb-2">
-                                    <div className={`rounded-full p-1 ${
-                                      msg.role === "user" 
-                                        ? "bg-primary-foreground/20" 
-                                        : "bg-muted-foreground/20"
-                                    }`}>
+                                    <div
+                                      className={`rounded-full p-1 ${
+                                        msg.role === "user"
+                                          ? "bg-primary-foreground/20"
+                                          : "bg-muted-foreground/20"
+                                      }`}
+                                    >
                                       {msg.role === "user" ? (
                                         <User className="h-3 w-3" />
                                       ) : (
@@ -478,18 +434,20 @@ export default function PitchTranscripts() {
                                     <span className="text-xs font-medium capitalize">
                                       {msg.role}
                                     </span>
-                                    <span className={`text-xs ml-4 ${
-                                      msg.role === "user" 
-                                        ? "text-primary-foreground/70" 
-                                        : "text-muted-foreground"
-                                    }`}>
-                                      {new Date(msg.timestamp).toLocaleTimeString([], { 
-                                        hour: "2-digit", 
-                                        minute: "2-digit" 
+                                    <span
+                                      className={`text-xs ml-4 ${
+                                        msg.role === "user"
+                                          ? "text-primary-foreground/70"
+                                          : "text-muted-foreground"
+                                      }`}
+                                    >
+                                      {new Date(msg.timestamp).toLocaleTimeString([], {
+                                        hour: "2-digit",
+                                        minute: "2-digit"
                                       })}
                                     </span>
                                   </div>
-                                  <p className="text-sm">{msg.content}</p>
+                                  <p className="text-sm break-words">{msg.content}</p>
                                 </div>
                               </div>
                             ))}

@@ -1,5 +1,5 @@
 "use client";
-import { Suspense/*, useEffect*/, useState } from "react";
+import { Suspense /*, useEffect*/, useState } from "react";
 import { App } from "../../components/App";
 import Intelligence from "../../components/Intelligence";
 import { stsConfig } from "../../lib/constants";
@@ -12,6 +12,7 @@ import { useDeepgram } from "@/context/DeepgramContextProvider";
 import { useMicrophone } from "@/context/MicrophoneContextProvider";
 import { useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Image from "next/image";
 function HomeContent() {
   const { socket, socketState, duration, setUserId } = useDeepgram();
   const { startMicrophone, stopMicrophone, microphoneState, setupMicrophone } =
@@ -61,21 +62,30 @@ function HomeContent() {
         <div className="relative w-full rounded-xl flex flex-col justify-center items-center shadow-lg h-screen">
           <nav>
             {started && (
-              <div className="absolute top-2 right-2 bg-red-500 p-2 rounded-full">
+              <div className="absolute top-2 left-2 sm:right-2 bg-red-500 p-2 rounded-full">
                 {duration}
               </div>
             )}
           </nav>
-          
+
           <div>
-            <div className="text-center mb-8 flex flex-col items-center">
+            <div className="text-center mb-4 flex flex-col items-center">
+              <div className="rounded-full overflow-hidden mb-4">
+                <Image
+                  className="w-20 h-20 "
+                  src="/logo.png"
+                  alt="PitchDesk"
+                  width={100}
+                  height={100}
+                />
+              </div>
               <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
                 Pitch Desk
               </h1>
               <p className="text-gray-600">Interact with your AI Shark</p>
             </div>
 
-            <div className="flex flex-col items-center space-y-8">
+            <div className="flex flex-col items-center space-y-2">
               <div className="w-full max-w-md">
                 <Suspense
                   fallback={<div className="text-white">Loading...</div>}
@@ -96,7 +106,7 @@ function HomeContent() {
                           requiresUserActionToInitialize={isMobile}
                         />
                       )}
-                      <div className="flex justify-center mt-20">
+                      <div className="flex justify-center mt-10">
                         {!started ? (
                           <Button
                             type="button"
@@ -136,13 +146,13 @@ function HomeContent() {
           </div>
         </div>
         {session?.user && (
-              <Avatar className="absolute top-2 right-2">
-                <AvatarImage src={session?.user?.image} />
-                <AvatarFallback className="bg-primary text-primary-foreground">
-                  {session?.user?.fullName?.[0]?.toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-            )}
+          <Avatar className="absolute top-2 right-2">
+            <AvatarImage src={session?.user?.image} />
+            <AvatarFallback className="bg-primary text-primary-foreground">
+              {session?.user?.fullName?.[0]?.toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+        )}
         {/* Right Panel - Conversation */}
         <div className="h-full w-full">
           <Suspense

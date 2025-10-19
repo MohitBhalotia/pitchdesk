@@ -30,13 +30,13 @@ export const metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
   ),
-  title: "Voice Agent",
-  description: "Voice Agent",
+  title: "PITCH || PitchDesk",
+  description: "PitchDesk",
   openGraph: sharedOpenGraphMetadata,
   twitter: {
     card: "summary_large_image",
-    site: "@VoiceAgent",
-    creator: "@VoiceAgent",
+    site: "@PitchDesk",
+    creator: "@PitchDesk",
   },
 };
 

@@ -43,6 +43,7 @@ const getUserFromSession = (session: Session) => ({
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: session } = useSession();
+  console.log("session", session);
   const user = getUserFromSession(session!);
 
   const data = {

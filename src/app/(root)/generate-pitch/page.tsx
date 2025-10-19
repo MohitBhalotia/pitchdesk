@@ -1,27 +1,31 @@
+"use client";
 
+import type React from "react";
 
-"use client"
-
-import type React from "react"
-
-import { useState } from "react"
-import { Loader2, Download } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { useState } from "react";
+import { Loader2, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import jsPDF from "jspdf"
-import { useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
+} from "@/components/ui/dialog";
+import jsPDF from "jspdf";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 const fields = [
   {
@@ -337,49 +341,53 @@ const fields = [
     name: "supportingMaterials",
     category: "Additional Information",
   },
-]
+];
 
 export default function PitchGenerator() {
-  const [pitch, setPitch] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [storingPitch, setStoringPitch] = useState(false)
-  const [currentStep, setCurrentStep] = useState(0)
-  const [formData, setFormData] = useState<Record<string, string>>({})
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [pitch, setPitch] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [storingPitch, setStoringPitch] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [formData, setFormData] = useState<Record<string, string>>({});
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
-  const { data: session } = useSession()
-  const router = useRouter()
+  const { data: session } = useSession();
+  const router = useRouter();
 
   // Group fields by category
   const fieldsByCategory = fields.reduce(
     (acc, field) => {
       if (!acc[field.category]) {
-        acc[field.category] = []
+        acc[field.category] = [];
       }
-      acc[field.category].push(field)
-      return acc
+      acc[field.category].push(field);
+      return acc;
     },
-    {} as Record<string, typeof fields>,
-  )
+    {} as Record<string, typeof fields>
+  );
 
-  const categories = Object.keys(fieldsByCategory)
-  const totalSteps = categories.length
+  const categories = Object.keys(fieldsByCategory);
+  const totalSteps = categories.length;
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
-    }))
-  }
-
+      [name]: value,
+    }));
+  };
 
   const validateAllRequiredFields = () => {
     const missingFields = [];
 
     // Check ALL required fields across all steps
     for (const field of fields) {
-      if (field.required && (!formData[field.name] || !formData[field.name].trim())) {
+      if (
+        field.required &&
+        (!formData[field.name] || !formData[field.name].trim())
+      ) {
         missingFields.push(field.label);
       }
     }
@@ -393,94 +401,100 @@ export default function PitchGenerator() {
   const nextStep = () => {
     if (currentStep < totalSteps - 1) {
       // For free users, only allow navigation to first 4 tabs (0-3 index)
-      if (session?.user?.userPlan === 'free' && currentStep >= 3) {
-        setShowUpgradeModal(true)
-        return
+      if (session?.user?.userPlan === "free" && currentStep >= 3) {
+        setShowUpgradeModal(true);
+        return;
       }
-      setCurrentStep(prev => prev + 1)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      setCurrentStep((prev) => prev + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
-  }
+  };
 
   const prevStep = () => {
     if (currentStep > 0) {
-      setCurrentStep(prev => prev - 1)
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      setCurrentStep((prev) => prev - 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
-  }
+  };
 
   // Function to store pitch in the database
   const storePitchInDatabase = async (pitchContent: string) => {
     try {
-      setStoringPitch(true)
-      const response = await fetch('/api/store-pitch', {
-        method: 'POST',
+      setStoringPitch(true);
+      const response = await fetch("/api/store-pitch", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           pitch: pitchContent,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error('Failed to store pitch')
+        throw new Error("Failed to store pitch");
       }
 
-      const result = await response.json()
-      console.log('Pitch stored successfully:', result)
-      return result
+      const result = await response.json();
+      console.log("Pitch stored successfully:", result);
+      return result;
     } catch (error) {
-      console.error('Error storing pitch:', error)
-      throw error
+      console.error("Error storing pitch:", error);
+      throw error;
     } finally {
-      setStoringPitch(false)
+      setStoringPitch(false);
     }
-  }
+  };
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!validateAllRequiredFields()) {
       alert(`Please fill in all required fields.`);
       return;
     }
-    setLoading(true)
+    setLoading(true);
 
     // Create FormData from our form state
-    const formDataToSubmit = new FormData()
+    const formDataToSubmit = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
-      formDataToSubmit.append(key, value)
-    })
+      formDataToSubmit.append(key, value);
+    });
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_FASTAPI_BACKEND}/generate-pitch`, {
-        method: "POST",
-        body: formDataToSubmit,
-      })
-      const result = await res.json()
-      const generatedPitch = result.pitch || "No pitch generated."
-      setPitch(generatedPitch)
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_FASTAPI_BACKEND}/generate-pitch`,
+        {
+          method: "POST",
+          body: formDataToSubmit,
+        }
+      );
+      const result = await res.json();
+      const generatedPitch = result.pitch || "No pitch generated.";
+      setPitch(generatedPitch);
 
       // Store the generated pitch in the database
       try {
-        await storePitchInDatabase(generatedPitch)
-        console.log('Pitch successfully stored in database')
+        await storePitchInDatabase(generatedPitch);
+        console.log("Pitch successfully stored in database");
       } catch (storeError) {
-        console.error('Failed to store pitch in database, but pitch was generated:', storeError)
+        console.error(
+          "Failed to store pitch in database, but pitch was generated:",
+          storeError
+        );
       }
-
     } catch (err) {
-      console.error(err)
-      setPitch("Error generating pitch.")
+      console.error(err);
+      setPitch("Error generating pitch.");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   // Form submit
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    const isFreeUserOnStep3 = session?.user?.userPlan === 'free' && currentStep === 3;
+    const isFreeUserOnStep3 =
+      session?.user?.userPlan === "free" && currentStep === 3;
     const isProUserOnFinalStep = currentStep === totalSteps - 1;
 
     // If we're on a submission step, proceed with validation and submission
@@ -493,36 +507,36 @@ export default function PitchGenerator() {
   };
 
   function downloadPDF() {
-    if (!pitch) return
+    if (!pitch) return;
 
-    const doc = new jsPDF()
-    const pageWidth = doc.internal.pageSize.width
-    const pageHeight = doc.internal.pageSize.height
-    const margin = 20
-    const maxWidth = pageWidth - 2 * margin
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.width;
+    const pageHeight = doc.internal.pageSize.height;
+    const margin = 20;
+    const maxWidth = pageWidth - 2 * margin;
 
     // Title
-    doc.setFontSize(20)
-    doc.setFont("helvetica", "bold")
-    doc.text("Startup Pitch", margin, 30)
+    doc.setFontSize(20);
+    doc.setFont("helvetica", "bold");
+    doc.text("Startup Pitch", margin, 30);
 
     // Content
-    doc.setFontSize(12)
-    doc.setFont("helvetica", "normal")
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
 
-    const lines = doc.splitTextToSize(pitch, maxWidth)
-    let yPosition = 50
+    const lines = doc.splitTextToSize(pitch, maxWidth);
+    let yPosition = 50;
 
     lines.forEach((line: string) => {
       if (yPosition > pageHeight - margin) {
-        doc.addPage()
-        yPosition = margin
+        doc.addPage();
+        yPosition = margin;
       }
-      doc.text(line, margin, yPosition)
-      yPosition += 7
-    })
+      doc.text(line, margin, yPosition);
+      yPosition += 7;
+    });
 
-    doc.save("startup-pitch.pdf")
+    doc.save("startup-pitch.pdf");
   }
 
   return (
@@ -533,25 +547,30 @@ export default function PitchGenerator() {
           <DialogHeader>
             <DialogTitle>Upgrade to Pro</DialogTitle>
             <DialogDescription>
-              To access all pitch sections and features, please upgrade to our Pro plan.
+              To access all pitch sections and features, please upgrade to our
+              Pro plan.
             </DialogDescription>
           </DialogHeader>
           <div className="mt-4 flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setShowUpgradeModal(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setShowUpgradeModal(false)}
+            >
               Maybe Later
             </Button>
-            <Button onClick={() => router.push('/payment')}>
-              Upgrade Now
-            </Button>
+            <Button onClick={() => router.push("/payment")}>Upgrade Now</Button>
           </div>
         </DialogContent>
       </Dialog>
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-4xl font-bold tracking-tight">Startup Pitch Generator</h1>
+            <h1 className="text-4xl font-bold tracking-tight">
+              Startup Pitch Generator
+            </h1>
             <p className="text-muted-foreground mt-2">
-              Create a compelling pitch for your startup by filling out the form below
+              Create a compelling pitch for your startup by filling out the form
+              below
             </p>
           </div>
         </div>
@@ -560,25 +579,26 @@ export default function PitchGenerator() {
         <div className="mb-8">
           <div className="relative w-full h-1 sm:h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mb-4 sm:mb-6">
             <div
-              className="absolute top-0 left-0 h-full bg-blue-500 transition-all duration-700 ease-out rounded-full"
+              className="absolute top-0 left-0 h-full bg-primary/80 transition-all duration-700 ease-out rounded-full"
               style={{ width: `${((currentStep + 1) / totalSteps) * 100}%` }}
             />
           </div>
 
-          <div className="sm:hidden flex justify-between items-center mb-3">
+          <div className="lg:hidden flex justify-between items-center mb-3">
             <span className="text-xs text-gray-600 dark:text-gray-400">
               Step {currentStep + 1} of {totalSteps}
             </span>
-            <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">
+            <span className="text-xs font-semibold text-primary dark:text-primary">
               {categories[currentStep]}
             </span>
           </div>
 
-          <div className="hidden sm:flex justify-between items-start relative">
+          <div className="hidden lg:flex justify-between items-start relative">
             {categories.map((category, index) => {
               const isActive = index === currentStep;
               const isCompleted = index < currentStep;
-              const isRestricted = session?.user?.userPlan === 'free' && index >= 4;
+              const isRestricted =
+                session?.user?.userPlan === "free" && index >= 4;
 
               return (
                 <div
@@ -594,36 +614,60 @@ export default function PitchGenerator() {
                 >
                   <div className="flex items-center w-full mb-3">
                     {index > 0 && (
-                      <div className={`flex-1 h-0.5 transition-colors duration-500 ${isCompleted ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
-                        }`} />
+                      <div
+                        className={`flex-1 h-0.5 transition-colors duration-500 ${
+                          isCompleted
+                            ? "bg-primary"
+                            : "bg-gray-300 dark:bg-gray-600"
+                        }`}
+                      />
                     )}
 
-                    <div className={`relative flex-shrink-0 w-4 h-4 rounded-full border-2 transition-all duration-500 ${isActive
-                      ? 'bg-white border-blue-500 scale-125'
-                      : isCompleted
-                        ? 'bg-blue-500 border-blue-500'
-                        : 'bg-white border-gray-300 dark:border-gray-500'
-                      } ${isRestricted ? 'opacity-50' : ''}`}>
+                    <div
+                      className={`relative flex-shrink-0 w-4 h-4 rounded-full border-2 transition-all duration-500 ${
+                        isActive
+                          ? "bg-white border-primary scale-125"
+                          : isCompleted
+                            ? "bg-primary border-primary"
+                            : "bg-white border-gray-300 dark:border-gray-500"
+                      } ${isRestricted ? "opacity-50" : ""}`}
+                    >
                       {isCompleted && (
-                        <svg className="w-2 h-2 mx-auto mt-0.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        <svg
+                          className="w-2 h-2 mx-auto mt-0.5 text-white"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
                         </svg>
                       )}
                     </div>
 
                     {index < categories.length - 1 && (
-                      <div className={`flex-1 h-0.5 transition-colors duration-500 ${index < currentStep ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
-                        }`} />
+                      <div
+                        className={`flex-1 h-0.5 transition-colors duration-500 ${
+                          index < currentStep
+                            ? "bg-primary"
+                            : "bg-gray-300 dark:bg-gray-600"
+                        }`}
+                      />
                     )}
                   </div>
 
                   <div className="text-center px-1">
-                    <span className={`text-xs font-medium transition-colors duration-300 line-clamp-2 ${isActive
-                      ? 'text-blue-600 dark:text-blue-400 font-semibold'
-                      : isCompleted
-                        ? 'text-gray-700 dark:text-gray-300'
-                        : 'text-gray-500 dark:text-gray-500'
-                      } ${isRestricted ? 'opacity-50' : ''}`}>
+                    <span
+                      className={`text-xs font-medium transition-colors duration-300 line-clamp-2 ${
+                        isActive
+                          ? "text-primary font-bold dark:text-primary "
+                          : isCompleted
+                            ? "text-gray-700 dark:text-gray-300"
+                            : "text-gray-500 dark:text-gray-500"
+                      } ${isRestricted ? "opacity-50" : ""}`}
+                    >
                       {category}
                     </span>
                   </div>
@@ -632,21 +676,23 @@ export default function PitchGenerator() {
             })}
           </div>
 
-          <div className="sm:hidden flex justify-between items-center px-2">
+          <div className="lg:hidden flex justify-between items-center px-2 cursor-pointer">
             {categories.map((category, index) => {
               const isActive = index === currentStep;
               const isCompleted = index < currentStep;
-              const isRestricted = session?.user?.userPlan === 'free' && index >= 4;
+              const isRestricted =
+                session?.user?.userPlan === "free" && index >= 4;
 
               return (
                 <div
                   key={category}
-                  className={`flex-1 h-1 mx-1 rounded-full transition-all duration-300 ${isActive
-                    ? 'bg-blue-500'
-                    : isCompleted
-                      ? 'bg-blue-400'
-                      : 'bg-gray-300 dark:bg-gray-600'
-                    } ${isRestricted ? 'opacity-50' : ''}`}
+                  className={`flex-1 h-1 mx-1 rounded-full transition-all duration-300 ${
+                    isActive
+                      ? "bg-primary/60"
+                      : isCompleted
+                        ? "bg-primary/40"
+                        : "bg-gray-300 dark:bg-gray-600"
+                  } ${isRestricted ? "opacity-50" : ""}`}
                   title={category}
                   onClick={() => {
                     if (isRestricted) {
@@ -661,22 +707,34 @@ export default function PitchGenerator() {
           </div>
         </div>
 
-        <div className={`grid gap-8 ${currentStep === totalSteps - 1 ? 'lg:grid-cols-3' : 'lg:grid-cols-1'}`}>
-          <div className={currentStep === totalSteps - 1 ? 'lg:col-span-2' : ''}>
+        <div
+          className={`grid gap-8 ${currentStep === totalSteps - 1 ? "lg:grid-cols-3" : "lg:grid-cols-1"}`}
+        >
+          <div
+            className={currentStep === totalSteps - 1 ? "lg:col-span-2" : ""}
+          >
             {/* REMOVED all the onKeyDown handlers - they were causing the issue */}
             <form onSubmit={handleFormSubmit} className="space-y-6" noValidate>
-              {Object.entries(fieldsByCategory)
-                .map(([category, categoryFields], index) => (
-                  <div key={category} className={currentStep !== index ? 'hidden' : ''}>
-                    <Card>
+              {Object.entries(fieldsByCategory).map(
+                ([category, categoryFields], index) => (
+                  <div
+                    key={category}
+                    className={currentStep !== index ? "hidden" : ""}
+                  >
+                    <Card className="bg-card">
                       <CardHeader>
                         <CardTitle className="text-xl">{category}</CardTitle>
-                        <CardDescription>Fill out the relevant information for this section</CardDescription>
+                        <CardDescription>
+                          Fill out the relevant information for this section
+                        </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">
                         {categoryFields.map((field) => (
                           <div key={field.name} className="space-y-2">
-                            <Label htmlFor={field.name} className="text-sm font-medium">
+                            <Label
+                              htmlFor={field.name}
+                              className="text-sm font-medium "
+                            >
                               {field.label}
                               {field.required && (
                                 <span className="text-red-500 ml-1">*</span>
@@ -689,10 +747,10 @@ export default function PitchGenerator() {
                                 type="url"
                                 placeholder="https://example.com"
                                 required={field.required}
-                                className="w-full"
-                                value={formData[field.name] || ''}
+                                className="w-full "
+                                value={formData[field.name] || ""}
                                 onChange={handleInputChange}
-                              // REMOVED the onKeyDown handler
+                                // REMOVED the onKeyDown handler
                               />
                             ) : (
                               <Textarea
@@ -702,9 +760,9 @@ export default function PitchGenerator() {
                                 required={field.required}
                                 className="w-full resize-none"
                                 placeholder={`Enter ${field.label.toLowerCase()}...`}
-                                value={formData[field.name] || ''}
+                                value={formData[field.name] || ""}
                                 onChange={handleInputChange}
-                              // REMOVED the onKeyDown handler
+                                // REMOVED the onKeyDown handler
                               />
                             )}
                           </div>
@@ -712,7 +770,8 @@ export default function PitchGenerator() {
                       </CardContent>
                     </Card>
                   </div>
-                ))}
+                )
+              )}
 
               <div className="flex justify-between pt-6">
                 <Button
@@ -724,7 +783,7 @@ export default function PitchGenerator() {
                   Previous
                 </Button>
 
-                {currentStep === 3 && session?.user?.userPlan === 'free' ? (
+                {currentStep === 3 && session?.user?.userPlan === "free" ? (
                   <Button
                     type="submit"
                     size="lg"
@@ -741,10 +800,7 @@ export default function PitchGenerator() {
                     )}
                   </Button>
                 ) : currentStep < totalSteps - 1 ? (
-                  <Button
-                    type="button"
-                    onClick={nextStep}
-                  >
+                  <Button type="button" onClick={nextStep}>
                     Next
                   </Button>
                 ) : (
@@ -768,7 +824,10 @@ export default function PitchGenerator() {
             </form>
           </div>
 
-          {(currentStep === totalSteps - 1 || (session?.user?.userPlan === 'free' && currentStep === 3 && pitch)) && (
+          {(currentStep === totalSteps - 1 ||
+            (session?.user?.userPlan === "free" &&
+              currentStep === 3 &&
+              pitch)) && (
             <div className="lg:col-span-1">
               <div className="sticky top-8">
                 <Card>
@@ -780,7 +839,12 @@ export default function PitchGenerator() {
                           {storingPitch && (
                             <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                           )}
-                          <Button variant="outline" size="sm" onClick={downloadPDF} className="ml-2 bg-transparent">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={downloadPDF}
+                            className="ml-2 bg-transparent"
+                          >
                             <Download className="h-4 w-4 mr-2" />
                             PDF
                           </Button>
@@ -799,11 +863,17 @@ export default function PitchGenerator() {
                       </div>
                     ) : pitch ? (
                       <div className="prose prose-sm dark:prose-invert max-w-none">
-                        <div className="whitespace-pre-line text-sm leading-relaxed">{pitch}</div>
+                        <div className="whitespace-pre-line text-sm leading-relaxed">
+                          {pitch}
+                        </div>
                       </div>
                     ) : (
                       <div className="text-center py-8 text-muted-foreground">
-                        <p>{'Fill out the form and click "Generate Pitch" to see your startup pitch here.'}</p>
+                        <p>
+                          {
+                            'Fill out the form and click "Generate Pitch" to see your startup pitch here.'
+                          }
+                        </p>
                       </div>
                     )}
                   </CardContent>
@@ -814,5 +884,5 @@ export default function PitchGenerator() {
         </div>
       </div>
     </div>
-  )
+  );
 }

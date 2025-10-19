@@ -1,18 +1,19 @@
-'use client';
+"use client";
 
-import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import NumberFlow from '@number-flow/react';
-import { BadgeCheck } from 'lucide-react';
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import NumberFlow from "@number-flow/react";
+import { BadgeCheck } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const TIERS = [
   {
-    id: 'standard',
-    name: 'Standard',
+    id: "standard",
+    name: "Standard",
     planId: "68aa8cbf5958f9468e59ca14",
     // price: {
     //   monthly: 399,
@@ -30,12 +31,12 @@ const TIERS = [
       "Priority email support",
       // "Single-user account",
     ],
-    cta: 'Buy Now',
+    cta: "Buy Now",
     // popular: true,
   },
   {
-    id: 'pro',
-    name: 'Pro',
+    id: "pro",
+    name: "Pro",
     planId: "68aa8cbf5958f9468e59ca15",
     price: 699,
     description: "Advanced tools for serious fundraising preparation",
@@ -50,12 +51,12 @@ const TIERS = [
       "Dedicated support within 12 hours",
       // "Single-user account",
     ],
-    cta: 'Buy Now',
+    cta: "Buy Now",
     popular: true,
   },
   {
-    id: 'enterprise',
-    name: 'Enterprise',
+    id: "enterprise",
+    name: "Enterprise",
     planId: "68aa8cbf5958f9468e59ca16",
     price: 1499,
     description: "Complete fundraising ecosystem for scaling startups",
@@ -72,11 +73,9 @@ const TIERS = [
       "Premium customer support",
       // "Single-user account",
     ],
-    cta: 'Buy Now',
+    cta: "Buy Now",
   },
-
 ];
-
 
 const PopularBackground = () => (
   <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(240,119,119,0.1),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(220,119,118,0.3),rgba(255,255,255,0))] pointer-events-none" />
@@ -128,7 +127,7 @@ const PopularBackground = () => (
 const PricingCard = ({
   tier,
   submitPayment,
-  loading
+  loading,
 }: {
   tier: (typeof TIERS)[0];
   submitPayment: (planId: string) => void;
@@ -140,8 +139,8 @@ const PricingCard = ({
   return (
     <div
       className={cn(
-        'relative flex flex-col gap-8 overflow-hidden rounded-2xl border p-6 shadow',
-        'bg-background text-foreground',
+        "relative flex flex-col gap-8 overflow-hidden rounded-2xl border p-6 shadow",
+        "bg-background text-foreground"
         // isPopular && 'outline outline-[#eb638a]',
       )}
     >
@@ -157,13 +156,13 @@ const PricingCard = ({
       </h2>
 
       <div className="relative h-12">
-        {typeof price === 'number' ? (
+        {typeof price === "number" ? (
           <>
             <NumberFlow
               format={{
-                style: 'currency',
-                currency: 'INR',
-                trailingZeroDisplay: 'stripIfInteger',
+                style: "currency",
+                currency: "INR",
+                trailingZeroDisplay: "stripIfInteger",
               }}
               value={price}
               className="text-4xl font-medium"
@@ -182,8 +181,8 @@ const PricingCard = ({
             <li
               key={index}
               className={cn(
-                'flex items-center gap-2 text-sm font-medium',
-                'text-foreground/60',
+                "flex items-center gap-2 text-sm font-medium",
+                "text-foreground/60"
               )}
             >
               <BadgeCheck strokeWidth={1} size={16} />
@@ -194,9 +193,7 @@ const PricingCard = ({
       </div>
 
       <Button
-        className={cn(
-          'h-fit w-full rounded-lg',
-        )}
+        className={cn("h-fit w-full rounded-lg")}
         onClick={() => submitPayment(tier.planId)}
         disabled={loading}
       >
@@ -208,8 +205,6 @@ const PricingCard = ({
 };
 
 export default function PricingSection() {
-  
-
   const [loading, setLoading] = useState(false);
   const { data: session, update } = useSession();
   const router = useRouter();
@@ -237,7 +232,7 @@ export default function PricingSection() {
 
       const res = await fetch("/api/razorpay/create-order", {
         method: "POST",
-        body: JSON.stringify({ planId, userId }), 
+        body: JSON.stringify({ planId, userId }),
       });
       const data = await res.json();
 
@@ -264,19 +259,16 @@ export default function PricingSection() {
           console.log(resData);
 
           if (resData.success) {
+            console.log("Payment successful! Your plan has been updated.");
+            console.log("session", session);
+            
             // Update session to reflect new plan
-            await update(
-              {
-                user: {
-                  userPlan: resData.newPlanName,
-                }
-              }
-            );
-
-
-            alert("Payment successful! Your plan has been updated.");
+            await update();
+            console.log("session after update", session);
+            router.replace("/dashboard");
+            toast.success("Payment successful! Your plan has been updated.");
           } else {
-            alert("Payment verification failed. Please contact support.");
+            toast.error("Payment verification failed. Please contact support.");
           }
         },
         prefill: {
@@ -295,7 +287,6 @@ export default function PricingSection() {
     }
   };
 
-
   return (
     <section className="flex flex-col items-center gap-10 py-10 bg-card dark:bg-background">
       <div className="space-y-7 text-center">
@@ -308,7 +299,6 @@ export default function PricingSection() {
             plan.
           </p>
         </div>
-       
       </div>
 
       <div className="  grid w-full max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 ">
@@ -324,4 +314,3 @@ export default function PricingSection() {
     </section>
   );
 }
-
