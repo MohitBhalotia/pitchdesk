@@ -16,7 +16,7 @@ import {
 interface VerifyProps {
   verificationCode: string;
   fullName: string;
-  userId: string
+  userId: string;
 }
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
@@ -24,7 +24,7 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
 export default function VerifyEmail({
   verificationCode,
   fullName,
-  userId
+  userId,
 }: VerifyProps) {
   return (
     <Html>
@@ -35,11 +35,23 @@ export default function VerifyEmail({
           <Section style={coverSection}>
             {/* Logo Section */}
             <Section style={imageSection}>
+              {/* 
+                - Set a fixed height (for consistent bar height)
+                - Constrain the image with height + maxWidth so it won't overflow
+                - display:block + margin auto keeps it centered in most email clients
+              */}
               <Img
                 src={`${baseUrl}/logo1.png`}
-                width="75"
-                height="45"
                 alt="Pitch Desk Logo"
+                height={60} // helps email clients render correctly
+                style={{
+                  height: "60px",
+                  width: "auto",
+                  maxWidth: "160px", // won't grow beyond this
+                  display: "block",
+                  objectFit: "contain",
+                  margin: "0 auto",
+                }}
               />
             </Section>
 
@@ -59,9 +71,7 @@ export default function VerifyEmail({
               <Section style={verificationSection}>
                 <Text style={verifyText}>Verification Code</Text>
                 <Text style={codeText}>{verificationCode}</Text>
-                <Text style={validityText}>
-                  (This code is valid for 1 hour)
-                </Text>
+                <Text style={validityText}>(This code is valid for 1 hour)</Text>
               </Section>
 
               {/* Call to Action */}
@@ -120,7 +130,7 @@ const container = {
   margin: "0 auto",
   backgroundColor: "#ffffff",
   borderRadius: "8px",
-  overflow: "hidden",
+  overflow: "hidden", // <-- clips any overflow from top image on most clients
   boxShadow: "0 2px 10px rgba(0, 0, 0, 0.06)",
 };
 
@@ -146,10 +156,15 @@ const text = {
 
 const imageSection = {
   backgroundColor: "#1a202c",
+  width: "100%",
+  height: "80px", // fixed bar height
   display: "flex",
-  padding: "20px 0",
   alignItems: "center",
   justifyContent: "center",
+  padding: "8px 20px",
+  overflow: "hidden", // clip anything too tall
+  boxSizing: "border-box" as const,
+  lineHeight: 0, // avoid extra inline gap in some clients
 };
 
 const coverSection = { backgroundColor: "#ffffff" };

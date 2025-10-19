@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 import { z } from "zod"
 import axios from "axios"
-
+import { REGEXP_ONLY_DIGITS } from "input-otp"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -32,20 +32,21 @@ const FormSchema = z.object({
 export default function VerifyEmail() {
 
   const router = useRouter()
-
+  const searchParams = useSearchParams()
+  const id = searchParams.get("id")
+  const code = searchParams.get("code")
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      pin: "",
+      pin: code||"",
     },
   })
 
-  const searchParams = useSearchParams()
-  const id = searchParams.get("id")
-  let code = searchParams.get("code")
+  
+  
   
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    code = data.pin
+    const code = data.pin
     try{
         if(!id || !code){
           toast.error("Invalid verification link")
@@ -65,26 +66,26 @@ export default function VerifyEmail() {
   return (
     <Form {...form} >
       <div className="min-h-screen w-screen flex items-center justify-center">
-        <form onSubmit={form.handleSubmit(onSubmit)} className="w-full p-6 bg-gray-900 rounded-4xl max-w-md space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="w-full p-6 bg-card border rounded-4xl max-w-md space-y-6">
           <FormField
             control={form.control}
             name="pin"
             render={({ field }) => (
               <FormItem className="flex-col items-center justify-center">
-                <FormLabel className="m-auto">Verification code</FormLabel>
+                <FormLabel className="mx-auto mb-10 text-2xl font-bold">Verification code</FormLabel>
                 <FormControl>
-                  <InputOTP maxLength={6} {...field}>
+                  <InputOTP maxLength={6} pattern={REGEXP_ONLY_DIGITS} {...field} className="mx-auto ">
                     <InputOTPGroup className="m-auto">
-                      <InputOTPSlot index={0} />
-                      <InputOTPSlot index={1} />
-                      <InputOTPSlot index={2} />
-                      <InputOTPSlot index={3} />
-                      <InputOTPSlot index={4} />
-                      <InputOTPSlot index={5} />
+                      <InputOTPSlot index={0} className="h-11"/>
+                      <InputOTPSlot index={1} className="h-11"/>
+                      <InputOTPSlot index={2} className="h-11"/>
+                      <InputOTPSlot index={3} className="h-11"/>
+                      <InputOTPSlot index={4} className="h-11"/>
+                      <InputOTPSlot index={5} className="h-11"/>
                     </InputOTPGroup>
                   </InputOTP>
                 </FormControl>
-                <FormDescription className="m-auto">
+                <FormDescription className="mx-auto my-4">
                   Please enter the verification code sent on your registered email.
                 </FormDescription>
                 <FormMessage />

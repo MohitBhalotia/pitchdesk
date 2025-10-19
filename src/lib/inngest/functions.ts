@@ -4,7 +4,7 @@ import dbConnect from "@/lib/db";
 import axios from "axios";
 export const updatePitch = inngest.createFunction(
   { id: "update-pitch" },
-  { cron: "*/5 * * * *" },
+  { cron: "*/10 * * * *" },
   async () => {
     await dbConnect();
     const pitches = await PitchModel.find({

@@ -68,7 +68,7 @@ const VCSummaryCard: React.FC<VCSummaryCardProps> = ({
         <Dialog>
           <DialogTrigger asChild>
             <Button variant="outline" type="button" size="icon">
-              <Info className="text-white" />
+              <Info className="text-accent-foreground" />
             </Button>
           </DialogTrigger>
           <DialogContent>
