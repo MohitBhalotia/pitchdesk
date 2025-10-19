@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardHeader,
@@ -863,7 +862,7 @@ export default function PitchGenerator() {
                       </div>
                     ) : pitch ? (
                       <div className="prose prose-sm dark:prose-invert max-w-none">
-                        <div className="whitespace-pre-line text-sm leading-relaxed">
+                        <div className="whitespace-pre-line text-sm leading-relaxed h-[300px] overflow-y-auto">
                           {pitch}
                         </div>
                       </div>

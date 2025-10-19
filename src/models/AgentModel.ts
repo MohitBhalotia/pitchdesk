@@ -24,6 +24,10 @@ const agentSchema = new Schema({
     type: String,
     required: true,
   },
+  image: {
+    type: String,
+    required: true,
+  },
 });
 
 const Agent:Model<IAgent> =mongoose.models.Agent || mongoose.model<IAgent>("Agent", agentSchema);

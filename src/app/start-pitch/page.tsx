@@ -1,5 +1,5 @@
 "use client";
-import { Suspense /*, useEffect*/, useState } from "react";
+import { Suspense /*, useEffect*/, useEffect, useState } from "react";
 import { App } from "../../components/App";
 import Intelligence from "../../components/Intelligence";
 import { stsConfig } from "../../lib/constants";
@@ -12,16 +12,27 @@ import { useDeepgram } from "@/context/DeepgramContextProvider";
 import { useMicrophone } from "@/context/MicrophoneContextProvider";
 import { useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getAgentConfig } from "@/lib/constants";
 import Image from "next/image";
 function HomeContent() {
   const { socket, socketState, duration, setUserId } = useDeepgram();
   const { startMicrophone, stopMicrophone, microphoneState, setupMicrophone } =
     useMicrophone();
+    
   const [config, setConfig] = useState<object | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [started, setStarted] = useState(false);
   const searchParams = useSearchParams();
   const agentId = searchParams.get("agentId");
+  const [agent, setAgent] = useState<object | null>(null);
+  useEffect(() => {
+    if (agentId) {
+      getAgentConfig(agentId as string).then((agent) => {
+        setAgent(agent);
+      });
+    }
+  }, [agentId]);
+  const [loading, setLoading] = useState(false);
+  const [started, setStarted] = useState(false);
+  
   const { data: session } = useSession();
   const handleStart = async () => {
     setUserId(session?.user?._id);
@@ -62,7 +73,7 @@ function HomeContent() {
         <div className="relative w-full rounded-xl flex flex-col justify-center items-center shadow-lg h-screen">
           <nav>
             {started && (
-              <div className="absolute top-2 left-2 sm:right-2 bg-red-500 p-2 rounded-full">
+              <div className="absolute top-2 left-2 bg-red-500 p-2 rounded-full">
                 {duration}
               </div>
             )}
@@ -106,7 +117,7 @@ function HomeContent() {
                           requiresUserActionToInitialize={isMobile}
                         />
                       )}
-                      <div className="flex justify-center mt-10">
+                      <div className="flex justify-center mt-2">
                         {!started ? (
                           <Button
                             type="button"
@@ -121,17 +132,47 @@ function HomeContent() {
                             Start your Pitch!
                           </Button>
                         ) : (
-                          <Button
-                            type="button"
-                            onClick={async () => {
-                              setStarted(false);
-                              socket?.close();
-                              await handleStop();
-                            }}
-                            disabled={!started}
-                          >
-                            End pitch!
-                          </Button>
+                          <div className="flex flex-col gap-2">
+                            <div className="flex gap-2">
+                              <Button
+                                className="bg-amber-300 text-black hover:bg-amber-600"
+                                onClick={() =>
+                                  socket.send(JSON.stringify({
+                                    type: "InjectUserMessage",
+                                    content: "Negotiate",
+                                  }))
+                                }
+                              >
+                                Negotiate
+                              </Button>
+                              <Button
+                                className="bg-green-300 text-black hover:bg-green-600"
+                                onClick={() =>
+                                  socket.send(JSON.stringify({
+                                    type: "InjectUserMessage",
+                                    content: "Get Verdict",
+                                  }))
+                                }
+                              >
+                                Get Verdict
+                              </Button>
+                            </div>
+                            <Button
+                              className="w-full bg-red-600 hover:bg-red-800"
+                              type="button"
+                              onClick={async () => {
+                                setStarted(false);
+                                socket?.close();
+                                await handleStop();
+                                setTimeout(() => {
+                                  window.close();
+                                }, 5000);
+                              }}
+                              disabled={!started}
+                            >
+                              End pitch!
+                            </Button>
+                          </div>
                         )}
                       </div>
                     </>
@@ -158,7 +199,7 @@ function HomeContent() {
           <Suspense
             fallback={<div className="text-white">Loading conversation...</div>}
           >
-            <Conversation />
+            <Conversation agent={agent as Agent} />
           </Suspense>
         </div>
       </div>

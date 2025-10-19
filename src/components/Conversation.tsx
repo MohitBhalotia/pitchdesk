@@ -11,11 +11,13 @@ import { AssistantIcon } from "./icons/AssistantIcon";
 import Latency from "./Latency";
 import { useSearchParams } from "next/navigation";
 import { latencyMeasurementQueryParam } from "../lib/constants";
+import Image from "next/image";
 
 const ConversationMessageDisplay: FC<{
   message: ConversationMessage;
   firstInSequence: boolean;
-}> = ({ message, firstInSequence }) => (
+  agent: Agent;
+}> = ({ message, firstInSequence, agent }) => (
   <div
     className={`flex flex-col ${
       isUserMessage(message)
@@ -31,7 +33,19 @@ const ConversationMessageDisplay: FC<{
         className={`flex-shrink-0 ${firstInSequence ? "" : "opacity-0"}`}
         aria-hidden={!firstInSequence}
       >
-        {isUserMessage(message) ? <UserIcon /> : <AssistantIcon />}
+        {isUserMessage(message) ? (
+          <UserIcon />
+        ) : agent.image ? (
+          <Image
+            src={agent.image}
+            alt={agent.name}
+            width={40}
+            height={40}
+            className="rounded-full"
+          />
+        ) : (
+          <AssistantIcon />
+        )}
       </span>
       <p
         className={`text-gray-200 border py-3 px-6 rounded-2xl ${
@@ -65,7 +79,7 @@ const isFirstMessageInSpeakerSequence = (
   return isUserMessage(message) !== isUserMessage(previousMessage);
 };
 
-function Conversation() {
+function Conversation({ agent }: { agent: Agent }) {
   const { displayOrder } = useVoiceBot();
   const scrollRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
@@ -79,8 +93,9 @@ function Conversation() {
   return (
     <div className="bg-gray-900 shadow-lg overflow-auto h-screen">
       <div className="h-full flex flex-col justify-between">
-        <div className="flex justify-center border-b text-white border-gray-800 shadow-xl py-4 mx-8 text-lg font-bold text-gray-450">
-          Conversation transcript:
+        <div className="flex gap-2 justify-center border-b text-white border-gray-800 shadow-xl py-4 mx-8 text-lg font-bold text-gray-450">
+          <p className="md:block hidden">Conversation</p>
+          <p>Transcript :</p>
         </div>
 
         <div
@@ -97,6 +112,7 @@ function Conversation() {
                     displayOrder.filter(isConversationMessage)
                   )}
                   key={index}
+                  agent={agent}
                 />
               ) : (
                 searchParams.get(latencyMeasurementQueryParam) && (

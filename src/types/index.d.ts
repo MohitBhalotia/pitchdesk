@@ -35,6 +35,14 @@ declare global {
     conversationHistory?: Message[];
   }
 
+  interface Agent {
+    name: string;
+    voice: string;
+    firstMessage: string;
+    systemPrompt: string;
+    image: string;
+  }
+
   // export interface Conversation {
   //   conversationDate: Date;
   //   messages: Message[];

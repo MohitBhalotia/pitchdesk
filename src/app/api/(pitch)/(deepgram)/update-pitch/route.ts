@@ -4,7 +4,7 @@ import PitchModel from "@/models/PitchModel";
 import axios from "axios";
 import { userPlanModel } from "@/models/UserPlanModel";
 
-export async function PATCH(req: NextRequest) {
+export async function PATCH() {
   try {
     await dbConnect();
 
