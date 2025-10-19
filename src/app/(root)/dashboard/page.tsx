@@ -348,7 +348,7 @@ export default function Index() {
                     {action.description}
                   </p>
                 </div>
-                <ArrowUpRight className="h-5 w-5 text-muted-foreground group-hover:text-teal-400 transition-colors" />
+                <ArrowUpRight className="h-5 w-5 text-muted-foreground cursor-pointer group-hover:text-teal-400 transition-colors" />
               </div>
             ))}
           </div>

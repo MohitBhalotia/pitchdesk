@@ -262,7 +262,7 @@ export default function Header1() {
                       <DropdownMenuGroup>
                         <DropdownMenuItem>
                           <Link
-                            href="/upgrade"
+                            href="/payment"
                             className="flex items-center gap-2"
                           >
                             <Sparkles />
@@ -270,24 +270,9 @@ export default function Header1() {
                           </Link>
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuGroup>
-                        <DropdownMenuItem>
-                          <BadgeCheck />
-                          Account
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <CreditCard />
-                          Billing
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Bell />
-                          Notifications
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                      <DropdownMenuSeparator />
+                     
                       <DropdownMenuItem onClick={handleLogout}>
-                        <LogOut />
+                        <LogOut className="mr-2"/>
                         Log out
                       </DropdownMenuItem>
                     </DropdownMenuContent>

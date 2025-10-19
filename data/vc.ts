@@ -11,12 +11,12 @@ export interface VC {
 
 export const vcs: VC[] = [
   {
-    id: "mark-cuban",
-    name: "Mark Cuban",
+    id: "rohan-oberoi",
+    name: "Rohan Oberoi",
     title: "The Tech-Savvy Disruptor",
     tagline: "He’s not just looking for a good pitch — he wants proof that your business can grow and win.",
     shortDescription:
-      "Mark Cuban is a sharp, logical investor who thrives on data, disruption, and execution. Known for his direct style and quick decisions, he supports founders who are deeply informed and ready to scale.",
+      "Rohan Oberoi is a sharp, logical investor who thrives on data, disruption, and execution. Known for his direct style and quick decisions, he supports founders who are deeply informed and ready to scale.",
     highlights: [
       "Believes in data-driven, scalable business models",
       "Demands founders who know their numbers inside-out",
@@ -28,12 +28,12 @@ export const vcs: VC[] = [
     agentLink: "689a45f989f40f995de7356b"
   },
   {
-    id: "kevin-oleary",
-    name: "Kevin O’Leary",
+    id: "vikram-desai",
+    name: "Vikram Desai",
     title: "Mr. Wonderful",
     tagline: "I’m here to make money, not friends.",
     shortDescription:
-      "Kevin O’Leary is a brutally honest investor who prioritizes profit, cash flow, and return on investment. Behind his tough persona lies a strategic mind that values structure, control, and proven models.",
+      "Vikram Desai is a brutally honest investor who prioritizes profit, cash flow, and return on investment. Behind his tough persona lies a strategic mind that values structure, control, and proven models.",
     highlights: [
       "Demands businesses with immediate cash flow or dividends",
       "Insists on clear, conservative valuations based on current performance",
@@ -48,12 +48,12 @@ export const vcs: VC[] = [
     agentLink: "689b10c587ca77bb1ee1e293"
   },
   {
-    id: "lori-greiner",
-    name: "Lori Greiner",
-    title: "The Queen of QVC",
+    id: "diya-nair",
+    name: "Diya Nair",
+    title: "The Queen of VCs",
     tagline: "I turn ideas into household names.",
     shortDescription:
-      "Lori Greiner blends retail savvy with deep empathy for founders. With a knack for spotting everyday products that win mass appeal, she leverages her QVC empire and retail relationships to launch consumer brands.",
+      "Diya Nair blends retail savvy with deep empathy for founders. With a knack for spotting everyday products that win mass appeal, she leverages her QVC empire and retail relationships to launch consumer brands.",
     highlights: [
       "Specializes in single-product companies with mass retail appeal",
       "Looks for practical products that solve real-world problems",
@@ -68,12 +68,12 @@ export const vcs: VC[] = [
     agentLink: "689b111c87ca77bb1ee1e295"
   },
   {
-    id: "barbara-corcoran",
-    name: "Barbara Corcoran",
+    id: "aanya-kapoor",
+    name: "Aanya Kapoor",
     title: "The People-Person Powerhouse",
     tagline: "I bet on people, not products.",
     shortDescription:
-      "Barbara Corcoran is a street-smart investor who backs bold, resilient founders. She believes emotional intelligence, storytelling, and personal character matter more than perfect business plans.",
+      "Aanya Kapoor is a street-smart investor who backs bold, resilient founders. She believes emotional intelligence, storytelling, and personal character matter more than perfect business plans.",
     highlights: [
       "Invests based on the entrepreneur's character and grit",
       "Values street smarts and emotional intelligence over polish",
@@ -88,12 +88,12 @@ export const vcs: VC[] = [
     agentLink: "689b116687ca77bb1ee1e297"
   },
   {
-    id: "daymond-john",
-    name: "Daymond John",
+    id: "karan-bhatia",
+    name: "Karan Bhatia",
     title: "The People’s Shark",
     tagline: "Hustle, heart, and smart branding win the game.",
     shortDescription:
-      "Daymond John invests in founders who reflect his own story—gritty, driven, and grounded. With a focus on branding, fashion, and consumer goods, he looks for people-first partnerships built for the long haul.",
+      "Karan Bhatia invests in founders who reflect his own story—gritty, driven, and grounded. With a focus on branding, fashion, and consumer goods, he looks for people-first partnerships built for the long haul.",
     highlights: [
       "Invests in people, not just products",
       "Values hustle, work ethic, and resilience",
@@ -108,12 +108,12 @@ export const vcs: VC[] = [
     agentLink: "689b0fae87ca77bb1ee1e28f"
   },
   {
-    id: "robert-herjavec",
-    name: "Robert Herjavec",
+    id: "arjun-mehta",
+    name: "Arjun Mehta",
     title: "The Technology Optimist",
     tagline: "Solve real problems with integrity, precision, and purpose.",
     shortDescription:
-      "Robert Herjavec invests in hardworking, authentic founders who blend passion with precision. With deep roots in cybersecurity and entrepreneurship, he values real-world solutions, strong fundamentals, and people willing to push through challenges.",
+      "Arjun Mehta invests in hardworking, authentic founders who blend passion with precision. With deep roots in cybersecurity and entrepreneurship, he values real-world solutions, strong fundamentals, and people willing to push through challenges.",
     highlights: [
       "Invests in businesses solving real market problems",
       "Prioritizes authenticity, passion, and work ethic in founders",

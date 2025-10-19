@@ -340,7 +340,7 @@ export default function SupportPage() {
     // };
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background mt-25">
             {/* Hero Section */}
             <section className="relative pb-4 pt-0 px-4 ">
                 <div className="max-w-4xl mx-auto text-center">
@@ -396,7 +396,7 @@ export default function SupportPage() {
                         size="lg"
                     >
                         <MessageCircle className="h-5 w-5 mr-2" />
-                        fill out the form to get support
+                        Fill out the form to get support
                     </Button>
                 </div>
             </section>
@@ -697,7 +697,7 @@ export default function SupportPage() {
                         <Card className="text-center w-50 min-h-[180px] flex flex-col">
                             <CardHeader className="flex-grow-0">
                                 <Phone className="h-8 w-8 mx-auto mb-2 text-primary" />
-                                <CardTitle className="text-lg">Email</CardTitle>
+                                <CardTitle className="text-lg">Phone</CardTitle>
                             </CardHeader>
                             <CardContent className="flex-grow flex items-center justify-center">
                                 <a
