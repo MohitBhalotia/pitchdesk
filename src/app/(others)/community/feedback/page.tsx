@@ -172,7 +172,7 @@ export default function FeedbackPage() {
     };
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background mt-20">
             {/* Hero Section */}
             <section className="relative py-8 px-4 ">
                 <div className="max-w-4xl mx-auto text-center">

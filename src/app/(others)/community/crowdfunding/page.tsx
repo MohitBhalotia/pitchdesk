@@ -60,34 +60,9 @@ export default function CrowdfundingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground mt-20">
       {/* Header */}
-      <header className="container mx-auto px-4 sm:px-6 py-6">
-        <nav className="flex justify-between items-center">
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full  ">
 
-              <Image
-                src="/logo.png"
-                alt="PitchDesk Logo"
-                width={40}
-                height={40}
-                className="dark:invert rounded-full"
-              />
-
-            </div>
-            <span className=" text-xl font-bold ">
-              PitchDesk
-            </span>
-          </Link>
-          {/* <Link
-            href="/"
-            className="px-4 py-2 rounded-lg border border-border hover:bg-accent transition-colors text-sm sm:text-base"
-          >
-            Back to Home
-          </Link> */}
-        </nav>
-      </header>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 sm:px-6 py-12">

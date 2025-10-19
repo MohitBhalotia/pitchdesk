@@ -25,6 +25,7 @@ import {
 import jsPDF from "jspdf";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 const fields = [
   {
@@ -449,7 +450,7 @@ export default function PitchGenerator() {
     e.preventDefault();
 
     if (!validateAllRequiredFields()) {
-      alert(`Please fill in all required fields.`);
+      toast.error(`Please fill in all required fields.`);
       return;
     }
     setLoading(true);

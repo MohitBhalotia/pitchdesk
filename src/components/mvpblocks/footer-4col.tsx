@@ -27,8 +27,7 @@ const data = {
     dream: '/our-dream'
   },
   help: {
-    faqs: '/community/support',
-    support: '/community/support',
+    faqsAndSupport: '/community/support',
     feedback: '/community/feedback',
   },
   contact: {
@@ -40,7 +39,7 @@ const data = {
     name: 'Pitch Desk',
     description:
       "Fueling founder's growth with AI that listens, challenges, and helps them shine in every pitch.",
-    logo: '/logo.webp',
+    logo: '/logo.png',
   },
 };
 
@@ -68,8 +67,7 @@ const serviceLinks = [
 ];
 
 const helpfulLinks = [
-  // { text: 'FAQs', href: data.help.faqs },
-  { text: 'Support & FAQs', href: data.help.support},
+  { text: 'FAQs & Support', href: data.help.faqsAndSupport },
   { text: 'Feedback', href: data.help.feedback },
 ];
 
@@ -85,16 +83,15 @@ export default function Footer4Col() {
       <div className="mx-auto max-w-screen-xl px-4 pt-16 pb-6 sm:px-6 lg:px-8 lg:pt-24">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           <div>
-            <div className="text-primary flex justify-center gap-2 sm:justify-start">
+            <div className="text-primary  flex justify-center gap-2 sm:justify-start">
               <Image
-                fill
                 src={data.company.logo || '/placeholder.svg'}
                 alt="logo"
-                className="h-8 w-8 rounded-full"
+                width={40}
+                height={40}
+                className="dark:invert rounded-full"  
               />
-              <span className="text-2xl font-semibold">
-                {data.company.name}
-              </span>
+              <span className="text-2xl font-bold text-accent-foreground"> PitchDesk</span>
             </div>
 
             <p className="text-foreground/50 mt-6 max-w-md text-center leading-relaxed sm:max-w-xs sm:text-left">

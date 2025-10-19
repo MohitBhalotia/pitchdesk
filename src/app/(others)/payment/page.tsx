@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import NumberFlow from "@number-flow/react";
-import { BadgeCheck } from "lucide-react";
+import { BadgeCheck, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -78,7 +78,7 @@ const TIERS = [
 ];
 
 const PopularBackground = () => (
-  <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(240,119,119,0.1),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(220,119,118,0.3),rgba(255,255,255,0))] pointer-events-none" />
+  <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,119,0.3),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(45,30,220,0.4),rgba(255,255,255,0))] pointer-events-none" />
 );
 
 // const Tab = ({
@@ -149,8 +149,8 @@ const PricingCard = ({
       <h2 className="flex items-center gap-3 text-xl font-medium capitalize">
         {tier.name}
         {isPopular && (
-          <Badge className="mt-1 bg-orange-900 px-1 py-0 text-white hover:bg-orange-900">
-            🔥 Most Popular
+          <Badge className="mt-1 bg-violet-700 px-2 py-1 text-white hover:bg-primary">
+            <Sparkles className="mr-2" /> Most Popular
           </Badge>
         )}
       </h2>
@@ -167,7 +167,6 @@ const PricingCard = ({
               value={price}
               className="text-4xl font-medium"
             />
-            <p className="-mt-2 text-xs font-medium">Per month/user</p>
           </>
         ) : (
           <h1 className="text-4xl font-medium">{price}</h1>
@@ -185,7 +184,7 @@ const PricingCard = ({
                 "text-foreground/60"
               )}
             >
-              <BadgeCheck strokeWidth={1} size={16} />
+              <BadgeCheck size={16} />
               {feature}
             </li>
           ))}
@@ -224,7 +223,7 @@ export default function PricingSection() {
     try {
       //check for user logg in
       if (!userId) {
-        alert("User not logged in. Please sign in to continue.");
+        toast.error("User not logged in. Please sign in to continue.");
         setLoading(false);
         router.push("/login");
         return;
@@ -237,7 +236,7 @@ export default function PricingSection() {
       const data = await res.json();
 
       if (!data.key) {
-        alert("Error creating order");
+        toast.error("Error creating order");
         setLoading(false);
         return;
       }
@@ -261,7 +260,7 @@ export default function PricingSection() {
           if (resData.success) {
             console.log("Payment successful! Your plan has been updated.");
             console.log("session", session);
-            
+
             // Update session to reflect new plan
             await update();
             console.log("session after update", session);
@@ -281,22 +280,22 @@ export default function PricingSection() {
       const rzp = new (window as any).Razorpay(options);
       rzp.open();
     } catch {
-      alert("Payment error");
+      toast.error("Payment error");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <section className="flex flex-col items-center gap-10 py-10 bg-card dark:bg-background">
+    <section className="flex flex-col items-center mt-20 gap-10 py-10 bg-card dark:bg-background">
       <div className="space-y-7 text-center">
         <div className="space-y-4 ">
           <h1 className="text-4xl font-medium md:text-5xl">
             Plans and Pricing
           </h1>
           <p>
-            Receive unlimited credits when you pay yearly, and save on your
-            plan.
+            Choose the plan that best suits your needs and start refining your
+            pitch today.
           </p>
         </div>
       </div>

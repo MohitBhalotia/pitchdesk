@@ -510,7 +510,7 @@ export default function PitchesPage() {
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-destructive">
                 <Trash2 className="h-5 w-5" />
-                Delete Pitch
+                <span className="text-xl">Delete Pitch</span>
               </DialogTitle>
               <DialogDescription>
                 Are you sure you want to delete this pitch? This action cannot be undone and the pitch will be permanently removed.
