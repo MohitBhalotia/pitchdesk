@@ -34,7 +34,7 @@ export default function ResetPasswordEmail({
             {/* Logo Section */}
             <Section style={imageSection}>
               <Img
-                src={`${baseUrl}/logo.svg`}
+                src={`${baseUrl}/logo1.png`}
                 width="75"
                 height="45"
                 alt="Pitch Desk Logo"
@@ -77,7 +77,7 @@ export default function ResetPasswordEmail({
             This message was produced and distributed by Pitch Desk, IIIT Nagpur Campus. © {new Date().getFullYear()}, Pitch Desk. All rights
             reserved. View our{" "}
             <Link
-              href="https://yourdomain.com/privacy"
+              href="https://pitchdesk.in/privacy"
               target="_blank"
               style={link}
             >
