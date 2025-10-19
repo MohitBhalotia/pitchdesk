@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Send transcript to FastAPI
-    const fastAPIResponse = await fetch(`${process.env.FASTAPI_BACKEND}/evaluate`, {
+    const fastAPIResponse = await fetch(`${process.env.NEXT_PUBLIC_FASTAPI_BACKEND}/evaluate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ transcript: conversationHistory }),
