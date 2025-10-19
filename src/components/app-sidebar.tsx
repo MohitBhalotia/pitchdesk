@@ -187,7 +187,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </div>
               <div>
                 <p className={`text-sm font-medium ${planConfig.textClass}`}>
-                  {user.plan} plan
+                  {user.plan[0].toUpperCase() + user.plan.slice(1)} Plan
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {user.plan.toLowerCase() === 'free' ? 'Basic features' :

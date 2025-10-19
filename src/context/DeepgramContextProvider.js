@@ -13,6 +13,7 @@ const DeepgramContextProvider = ({ children }) => {
   const [rateLimited, setRateLimited] = useState(false);
   const keepAlive = useRef();
   const maxReconnectAttempts = 5;
+  const [userId, setUserId] = useState(null);
   const transcriptRef = useRef([]);
   const sessionIdRef = useRef(null);
   const isConnecting = useRef(false);
@@ -77,6 +78,7 @@ const DeepgramContextProvider = ({ children }) => {
   }, [sessionIdRef.current, session?.user?._id]);
 
   const connectToDeepgram = async () => {
+    console.log("userId", userId);
     if (reconnectAttempts >= maxReconnectAttempts) {
       console.log("Max reconnect attempts reached.");
       // we don't actually know this is a rate limit, but want to show this anyways
@@ -95,7 +97,7 @@ const DeepgramContextProvider = ({ children }) => {
 
     const newSocket = new WebSocket(
       "wss://agent.deepgram.com/v1/agent/converse",
-      ["bearer", await getAuthToken()]
+      ["bearer", await getAuthToken(userId)]
     );
 
     const onOpen = async () => {
@@ -159,6 +161,7 @@ const DeepgramContextProvider = ({ children }) => {
         addTranscriptMessage,
         sessionIdRef,
         duration,
+        setUserId,
       }}
     >
       {children}

@@ -3,7 +3,7 @@ import dbConnect from "@/lib/db";
 import PitchModel from "@/models/PitchModel";
 import pitchSchema from "@/schemas/pitchSchema";
 import axios from "axios";
-
+import { userPlanModel } from "@/models/UserPlanModel";
 export async function POST(req: Request) {
   await dbConnect();
   try {
@@ -44,30 +44,38 @@ export async function POST(req: Request) {
     pitch.duration = Math.ceil(res?.data?.response?.sts_details?.duration);
     pitch.endTime = new Date();
     await pitch.save();
-    // TODO: Deduct agent minutes from user
-    return NextResponse.json({
-      success: true,
-      message: "pitch session stored successfully",
+    
+    const user = await userPlanModel.findOne({
+      userId: pitch.userId,
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    console.error("Error ending pitch", error);
-    if (error.errors) {
+    if (!user) {
       return NextResponse.json(
         {
-          error: error.errors,
+          success: false,
+          message: "User plan not found",
         },
-        {
-          status: 400,
-        }
+        { status: 404 }
       );
     }
+
+    user.pitchTimeRemaining -= Math.ceil(pitch.duration/60);
+    await user.save();
+    
     return NextResponse.json(
       {
-        success: false,
-        message: "Internal Server Error",
+        success: true,
+        message: "Pitch session stored successfully",
       },
-      { status: 500 }
+      { status: 200 }
     );
+  } catch (error) {
+    console.error("Error ending pitch", error);
+    return NextResponse.json(
+      {
+          success: false,
+          message: "Error ending pitch",
+        },
+        { status: 500 }
+      );
+    }
   }
-}

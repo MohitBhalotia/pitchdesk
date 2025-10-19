@@ -35,7 +35,7 @@ interface Pitch {
   title: string
   duration: number
   conversationHistory: Message[]
-  createdAt: string
+  startTime: string
   updatedAt: string
 }
 
@@ -383,7 +383,7 @@ export default function PitchTranscripts() {
                         <CardDescription className="flex items-center gap-4">
                           <span className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
-                            {new Date(pitch.createdAt).toLocaleDateString()}
+                            {new Date(pitch.startTime).getMonth() + 1}/{new Date(pitch.startTime).getDate()}/{new Date(pitch.startTime).getFullYear()}
                           </span>
                           <span className="flex items-center gap-1">
                             <Clock className="h-4 w-4" />
