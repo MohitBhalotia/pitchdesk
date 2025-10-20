@@ -63,7 +63,7 @@ export default function AppHero() {
               }}
               role="img"
               aria-label="Quick Voice Dashboard"
-              className="h-full w-full aspect-[20/10.5]  rounded-2xl border border-white/10 bg-cover "
+              className="h-full w-full aspect-[22.5/11]  rounded-2xl border border-white/10 bg-cover "
             />
           </div>
         </motion.div>

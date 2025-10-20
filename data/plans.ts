@@ -23,7 +23,7 @@ export const plans: Record<string, Plan> = {
     features: [
       "10 minutes of AI pitch practice",
       "Includes Q&A & negotiation sessions",
-      "Access to only one AI VC",
+      "Access to all AI VCs",
       "Personalized pitch generation with basic metrics",
       "Fundamental pitch analysis and improvements",
       "Basic email support",

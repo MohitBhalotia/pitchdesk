@@ -21,7 +21,7 @@ export async function POST(req: Request) {
 
     const companyDoc = await CompanyModel.create({
         companyName: company,
-        websiteUrl: websiteUrl
+        websiteUrl: websiteUrl || ""
     })
 
     await UserModel.findByIdAndUpdate(user._id, {

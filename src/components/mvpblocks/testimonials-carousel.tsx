@@ -136,7 +136,7 @@ export default function TestimonialsCarousel({
           viewport={{ once: true }}
           className="relative mb-12 text-center md:mb-16"
         >
-          <h1 className="from-foreground to-foreground/40 mb-4 bg-gradient-to-b bg-clip-text text-3xl font-bold text-transparent md:text-5xl lg:text-6xl">
+          <h1 className="from-foreground py-4 to-foreground/40 mb-4 bg-gradient-to-b bg-clip-text text-3xl font-bold text-transparent md:text-5xl lg:text-6xl">
             {title}
           </h1>
 

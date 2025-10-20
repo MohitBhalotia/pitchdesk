@@ -7,7 +7,6 @@ const companySchema = new Schema<Company>({
     },
     websiteUrl: {
         type: String,
-        required: true,
     },
 },{timestamps:true});
 
