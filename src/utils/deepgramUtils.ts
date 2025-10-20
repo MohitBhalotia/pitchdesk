@@ -8,7 +8,7 @@ export const getAuthToken = async (userId: string) => {
   if(result?.success === false) {
     return result;
   }
-  return result.access_token;
+  return result;
 };
 
 export const sendMicToSocket =

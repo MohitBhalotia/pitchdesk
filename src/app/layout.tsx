@@ -27,6 +27,11 @@ export const metadata: Metadata = {
   },
 };
 
+if (process.env.NODE_ENV !== "development") {
+  console.log = () => {}
+}
+
+
 export default function RootLayout({
   children,
 }: Readonly<{
