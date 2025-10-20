@@ -23,8 +23,8 @@ const teamMembers: TeamMember[] = [
     bio: "Leads technical development and platform architecture. Passionate about building scalable Solutions.",
     image: "/aayush.jpg",
     social: {
-      linkedin: "https://linkedin.com/in/sarahchen",
-      // email: "sarah@company.com"
+      linkedin: "https://www.linkedin.com/in/ayush080105?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app",
+      github: "https://github.com/Ayush080105"
     }
   },
   {
@@ -34,8 +34,8 @@ const teamMembers: TeamMember[] = [
     bio: "Turning innovative ideas into scalable products.",
     image: "/daksh.jpg",
     social: {
-      linkedin: "https://linkedin.com/in/marcusrodriguez",
-      // github: "https://github.com/marcusrodriguez"
+      linkedin: "https://www.linkedin.com/in/daksh-mehta-35a5832b8?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app",
+      github: "https://github.com/duckhhh"
     }
   },
   {
@@ -45,7 +45,7 @@ const teamMembers: TeamMember[] = [
     bio: "Specializes in  AI-powered features and integration.",
     image: "/mohit.jpg",
     social: {
-      linkedin: "https://linkedin.com/in/emilywatson",
+      linkedin: "https://www.linkedin.com/in/mohit-bhalotia/",
       github: "https://github.com/MohitBhalotia"
     }
   },
@@ -67,7 +67,7 @@ const teamMembers: TeamMember[] = [
     bio: "Creates seamless user experiences across frontend and backend. Focused on product excellence.",
     image: "/prathmesh.jpg",
     social: {
-      linkedin: "https://linkedin.com/in/priyapatel",
+      linkedin: "https://www.linkedin.com/in/prathamesh-ghormare-64a601339/",
       github: "https://github.com/Prathamesh0415"
     }
   }
