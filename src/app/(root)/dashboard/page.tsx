@@ -161,7 +161,7 @@ export default function Index() {
     {
       title: "Remaining Minutes",
       // value: `${userStats?.remainingTime}/${userStats?.totalTime}`,
-      value: `${userStats?.remainingTime}`,
+      value: `${Math.max(0,userStats?.remainingTime)}`,
       icon: <Clock className="h-6 w-6" />,
      
     },

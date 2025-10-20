@@ -62,7 +62,7 @@ const teamMembers: TeamMember[] = [
   },
   {
     id: 5,
-    name: "Prathmesh Ghoremore",
+    name: "Prathamesh Ghormare",
     role: "Fullstack Developer",
     bio: "Creates seamless user experiences across frontend and backend. Focused on product excellence.",
     image: "/prathmesh.jpg",

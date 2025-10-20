@@ -5,8 +5,8 @@ import Intelligence from "../../components/Intelligence";
 import { stsConfig } from "../../lib/constants";
 import Conversation from "../../components/Conversation";
 import { isMobile } from "react-device-detect";
-import { useSearchParams } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowBigUp, Link, Loader2, MoveUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDeepgram } from "@/context/DeepgramContextProvider";
 import { useMicrophone } from "@/context/MicrophoneContextProvider";
@@ -14,11 +14,13 @@ import { useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getAgentConfig } from "@/lib/constants";
 import Image from "next/image";
+import axios from "axios";
+import { toast } from "sonner";
 function HomeContent() {
   const { socket, socketState, duration, setUserId } = useDeepgram();
   const { startMicrophone, stopMicrophone, microphoneState, setupMicrophone } =
     useMicrophone();
-    
+
   const [config, setConfig] = useState<object | null>(null);
   const searchParams = useSearchParams();
   const agentId = searchParams.get("agentId");
@@ -32,10 +34,27 @@ function HomeContent() {
   }, [agentId]);
   const [loading, setLoading] = useState(false);
   const [started, setStarted] = useState(false);
-  
+  const [remainingTime, setRemainingTime] = useState<number | null>(null);
+  const router = useRouter();
   const { data: session } = useSession();
+  console.log("session", session);
   const handleStart = async () => {
     setUserId(session?.user?._id);
+    const res = await axios.get(
+      `/api/users/stats?userId=${session?.user?._id}`
+    );
+    const data = res.data;
+    console.log(data);
+
+    setRemainingTime(data?.remainingTime ?? 0);
+
+    if (data?.remainingTime <= 0) {
+      console.log("Expired");
+      setStarted(false);
+      toast.error("You have no remaining time. Please Upgrade your plan! ");
+      return;
+    }
+
     if (microphoneState === null) {
       const result = await setupMicrophone();
       if (result) {
@@ -72,7 +91,7 @@ function HomeContent() {
         {/* Left Panel - Voice Interface */}
         <div className="relative w-full rounded-xl flex flex-col justify-center items-center shadow-lg h-screen">
           <nav>
-            {started && (
+            {started && remainingTime !== null && remainingTime > 0 && (
               <div className="absolute top-2 left-2 bg-red-500 p-2 rounded-full">
                 {duration}
               </div>
@@ -111,18 +130,20 @@ function HomeContent() {
                     <Loader2 className="animate-spin " size={24} />
                   ) : agentId ? (
                     <>
-                      {started && (
-                        <App
-                          defaultStsConfig={config}
-                          requiresUserActionToInitialize={isMobile}
-                        />
-                      )}
+                      {started &&
+                        remainingTime !== null &&
+                        remainingTime > 0 && (
+                          <App
+                            defaultStsConfig={config}
+                            requiresUserActionToInitialize={isMobile}
+                          />
+                        )}
                       <div className="flex justify-center mt-2">
-                        {!started ? (
+                        {!started && (
                           <Button
                             type="button"
-                            onClick={() => {
-                              handleStart();
+                            onClick={async () => {
+                              await handleStart();
                               if (socketState === -1) {
                                 socket?.open();
                               }
@@ -131,49 +152,72 @@ function HomeContent() {
                           >
                             Start your Pitch!
                           </Button>
-                        ) : (
-                          <div className="flex flex-col gap-2">
-                            <div className="flex gap-2">
+                        )}
+                        {started &&
+                          remainingTime !== null &&
+                          remainingTime > 0 && (
+                            <div className="flex flex-col gap-2">
+                              <div className="flex gap-2">
+                                <Button
+                                  className="bg-amber-300 text-black hover:bg-amber-600"
+                                  onClick={() =>
+                                    socket.send(
+                                      JSON.stringify({
+                                        type: "InjectUserMessage",
+                                        content: "Negotiate",
+                                      })
+                                    )
+                                  }
+                                >
+                                  Negotiate
+                                </Button>
+                                <Button
+                                  className="bg-green-300 text-black hover:bg-green-600"
+                                  onClick={() =>
+                                    socket.send(
+                                      JSON.stringify({
+                                        type: "InjectUserMessage",
+                                        content: "Get Verdict",
+                                      })
+                                    )
+                                  }
+                                >
+                                  Get Verdict
+                                </Button>
+                              </div>
                               <Button
-                                className="bg-amber-300 text-black hover:bg-amber-600"
-                                onClick={() =>
-                                  socket.send(JSON.stringify({
-                                    type: "InjectUserMessage",
-                                    content: "Negotiate",
-                                  }))
-                                }
+                                className="w-full bg-red-600 hover:bg-red-800"
+                                type="button"
+                                onClick={async () => {
+                                  setStarted(false);
+                                  socket?.close();
+                                  await handleStop();
+                                  setTimeout(() => {
+                                    window.close();
+                                  }, 5000);
+                                }}
+                                disabled={!started}
                               >
-                                Negotiate
-                              </Button>
-                              <Button
-                                className="bg-green-300 text-black hover:bg-green-600"
-                                onClick={() =>
-                                  socket.send(JSON.stringify({
-                                    type: "InjectUserMessage",
-                                    content: "Get Verdict",
-                                  }))
-                                }
-                              >
-                                Get Verdict
+                                End pitch!
                               </Button>
                             </div>
-                            <Button
-                              className="w-full bg-red-600 hover:bg-red-800"
-                              type="button"
-                              onClick={async () => {
-                                setStarted(false);
-                                socket?.close();
-                                await handleStop();
-                                setTimeout(() => {
-                                  window.close();
-                                }, 5000);
-                              }}
-                              disabled={!started}
-                            >
-                              End pitch!
-                            </Button>
-                          </div>
-                        )}
+                          )}
+                        {started &&
+                          (remainingTime == null || remainingTime <= 0) && (
+                            <div className="flex flex-col items-center gap-4 text-center text-2xl font-bold text-red-500">
+                              <p>Please Upgrade your plan!</p>
+                              <Button
+                                variant="outline"
+                                className="text-accent-foreground"
+                                onClick={() => {
+                                  router.push("/payment");
+                                }}
+                              >
+                                <p>Upgrade now!</p>
+                                <MoveUpRight />
+                              </Button>
+                            </div>
+                          )}
                       </div>
                     </>
                   ) : (

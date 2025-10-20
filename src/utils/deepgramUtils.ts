@@ -6,7 +6,7 @@ export const getAuthToken = async (userId: string) => {
   ).json();
   console.log("result", result);
   if(result?.success === false) {
-    throw new Error(result.message);
+    return result;
   }
   return result.access_token;
 };

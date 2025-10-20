@@ -3,6 +3,7 @@ import axios from "axios";
 import { createContext, useContext, useState, useRef, useEffect } from "react";
 import { getAuthToken, sendKeepAliveMessage } from "../utils/deepgramUtils";
 import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 const DeepgramContext = createContext();
 
@@ -94,10 +95,18 @@ const DeepgramContextProvider = ({ children }) => {
 
     isConnecting.current = true;
     setSocketState(0); // connecting
-
+    const result = await getAuthToken(userId);
+    console.log("result", result);
+    if(result.success === false) {
+      toast.error(result.message||  "Error getting token");
+      console.error("Error getting token", result.message);
+      return;
+    }
+    const token = result.access_token;
+    console.log("token", token);
     const newSocket = new WebSocket(
       "wss://agent.deepgram.com/v1/agent/converse",
-      ["bearer", await getAuthToken(userId)]
+      ["bearer", token]
     );
 
     const onOpen = async () => {
