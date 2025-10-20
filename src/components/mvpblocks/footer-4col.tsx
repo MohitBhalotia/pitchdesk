@@ -1,74 +1,74 @@
 import {
   //Dribbble,
- // Facebook,
- // Github,
+  // Facebook,
+  // Github,
   Instagram,
   Linkedin,
   Mail,
   MapPin,
   Phone,
   //Twitter,
-} from 'lucide-react';
-import Link from 'next/link';
-import Image from 'next/image';
+} from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
 
 const data = {
-  instaLink: 'https://www.instagram.com/pitchdesk.in',
-  linkedInLink: 'https://www.linkedin.com/company/pitch-desk',
+  instaLink: "https://www.instagram.com/pitchdesk.in",
+  linkedInLink: "https://www.linkedin.com/company/pitch-desk",
   //twitterLink: 'https://twitter.com/mvpblocks',
   //githubLink: 'https://github.com/mvpblocks',
   services: {
-    PitchSession: '#',
-    QnA: '#',
-    pitchGen: '#',
+    PitchSession: "#",
+    QnA: "#",
+    pitchGen: "#",
   },
   about: {
-    team: '/meet-the-team',
-    dream: '/our-dream'
+    team: "/meet-the-team",
+    dream: "/our-dream",
   },
   help: {
-    faqsAndSupport: '/community/support',
-    feedback: '/community/feedback',
+    faqsAndSupport: "/community/support",
+    feedback: "/community/feedback",
   },
   contact: {
-    email: 'info@pitchdesk.in',
-    phone: '+91 9987105864',
-    address: 'India',
+    email: "info@pitchdesk.in",
+    phone: "+91 9987105864",
+    address: "India",
   },
   company: {
-    name: 'Pitch Desk',
+    name: "Pitch Desk",
     description:
       "Fueling founder's growth with AI that listens, challenges, and helps them shine in every pitch.",
-    logo: '/logo.png',
+    logo: "/logo.png",
   },
 };
 
 const socialLinks = [
   //{ icon: Facebook, label: 'Facebook', href: data.facebookLink },
-  { icon: Instagram, label: 'Instagram', href: data.instaLink },
-  { icon: Linkedin, label: 'LinkedIn', href: data.linkedInLink },
+  { icon: Instagram, label: "Instagram", href: data.instaLink },
+  { icon: Linkedin, label: "LinkedIn", href: data.linkedInLink },
   //{ icon: Twitter, label: 'Twitter', href: data.twitterLink },
   //{ icon: Github, label: 'GitHub', href: data.githubLink },
 ];
 
 const aboutLinks = [
   //{ text: 'Company History', href: data.about.history },
-  { text: 'Meet the Team', href: data.about.team },
+  { text: "Meet the Team", href: data.about.team },
   // { text: 'Our Dream', href: data.about.dream }
   //{ text: 'Employee Handbook', href: data.about.handbook },
   //{ text: 'Careers', href: data.about.careers },
 ];
 
 const serviceLinks = [
-  { text: "Pitch session with AI VC's", href: data.services.PitchSession },
-  { text: 'QnA and Negotiation practice', href: data.services.QnA },
-  { text: 'Generate Deal cracking pitch', href: data.services.pitchGen },
+  { text: "Pitch session with AI VC's" },
+  { text: "QnA and Negotiation practice" },
+  { text: "Generate Deal cracking pitch" },
   //{ text: 'Google Ads', href: data.services.googleads },
 ];
 
 const helpfulLinks = [
-  { text: 'FAQs & Support', href: data.help.faqsAndSupport },
-  { text: 'Feedback', href: data.help.feedback },
+  { text: "FAQs & Support", href: data.help.faqsAndSupport },
+  { text: "Feedback", href: data.help.feedback },
 ];
 
 const contactInfo = [
@@ -85,13 +85,16 @@ export default function Footer4Col() {
           <div>
             <div className="text-primary  flex justify-center gap-2 sm:justify-start">
               <Image
-                src={data.company.logo || '/placeholder.svg'}
+                src={data.company.logo || "/placeholder.svg"}
                 alt="logo"
                 width={40}
                 height={40}
-                className="dark:invert rounded-full"  
+                className="dark:invert rounded-full"
               />
-              <span className="text-2xl font-bold text-accent-foreground"> PitchDesk</span>
+              <span className="text-2xl font-bold text-accent-foreground">
+                {" "}
+                PitchDesk
+              </span>
             </div>
 
             <p className="text-foreground/50 mt-6 max-w-md text-center leading-relaxed sm:max-w-xs sm:text-left">
@@ -133,14 +136,9 @@ export default function Footer4Col() {
             <div className="text-center sm:text-left">
               <p className="text-lg font-medium">Our Services</p>
               <ul className="mt-8 space-y-4 text-sm">
-                {serviceLinks.map(({ text, href }) => (
+                {serviceLinks.map(({ text }) => (
                   <li key={text}>
-                    <a
-                      className="text-secondary-foreground/70 transition"
-                      href={href}
-                    >
                       {text}
-                    </a>
                   </li>
                 ))}
               </ul>

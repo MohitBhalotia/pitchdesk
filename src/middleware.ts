@@ -9,6 +9,7 @@ const protectedRoutes = [
   "/generate-pitch",
   "/start-pitch/:path*",
   "/my-pitches",
+  "/payment",
 ];
 // This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
@@ -44,6 +45,7 @@ export const config = {
   matcher: [
     "/",
     "/login",
+    "/payment",
     "/signup/:path*",
     "/dashboard/:path*",
     "/start-pitch/:path*",
@@ -51,5 +53,14 @@ export const config = {
     "/generate-pitch/:path*",
     "/verify/:path*",
     "/my-pitches",
+    "/evaluation/:path*",
+    "/connect-vcs",
+    "/feedback",
+    "/generated-pitches",
+    "/how-to-use",
+    "/support",
+    "/community/support",
+    "/community/feedback",
+    "/meet-the-team",
   ],
 };

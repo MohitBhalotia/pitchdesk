@@ -72,7 +72,7 @@ const FAQS = [
     {
         question: "How does PitchDesk work?",
         answer:
-            "You can choose from over 10 VC personalities that mimic different investor types, deliver your pitch in real-time, interact in a structured Q&A session, and then receive instant analysis and actionable feedback from our AI-driven Pitch Analyzer.",
+            "You can choose from over 6 VC personalities that mimic different investor types, deliver your pitch in real-time, interact in a structured Q&A session, and then receive instant analysis and actionable feedback from our AI-driven Pitch Analyzer.",
     },
     {
         question: "What VC personalities are available?",
