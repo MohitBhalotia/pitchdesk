@@ -44,7 +44,7 @@ const navItems: NavItem[] = [
   { name: "Home", href: "/" },
   {
     name: "Features",
-    href: "#features",
+    href: "/#features",
     // hasDropdown: true,
     // dropdownItems: [
     //   {
@@ -70,7 +70,7 @@ const navItems: NavItem[] = [
     // ],
   },
   { name: "CrowdFunding", href: "/community/crowdfunding" },
-  { name: "Pricing", href: "#pricing" },
+  { name: "Pricing", href: "/#pricing" },
   { name: "About", href: "/meet-the-team" },
   // { name: "Meet the VCs", href: "/login" },
 ];

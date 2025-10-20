@@ -72,9 +72,13 @@ const helpfulLinks = [
 ];
 
 const contactInfo = [
-  { icon: Mail, text: data.contact.email },
-  { icon: Phone, text: data.contact.phone },
-  { icon: MapPin, text: data.contact.address, isAddress: true },
+  {
+    icon: Mail,
+    text: data.contact.email,
+    href: `mailto:${data.contact.email}`,
+  },
+  { icon: Phone, text: data.contact.phone, href: `tel:${data.contact.phone}` },
+  { icon: MapPin, text: data.contact.address, isAddress: true, href: "#" },
 ];
 
 export default function Footer4Col() {
@@ -137,9 +141,7 @@ export default function Footer4Col() {
               <p className="text-lg font-medium">Our Services</p>
               <ul className="mt-8 space-y-4 text-sm">
                 {serviceLinks.map(({ text }) => (
-                  <li key={text}>
-                      {text}
-                  </li>
+                  <li key={text}>{text}</li>
                 ))}
               </ul>
             </div>
@@ -165,11 +167,11 @@ export default function Footer4Col() {
             <div className="text-center sm:text-left">
               <p className="text-lg font-medium">Contact Us</p>
               <ul className="mt-8 space-y-4 text-sm">
-                {contactInfo.map(({ icon: Icon, text, isAddress }) => (
+                {contactInfo.map(({ icon: Icon, text, isAddress, href }) => (
                   <li key={text}>
                     <a
                       className="flex items-center justify-center gap-1.5 sm:justify-start"
-                      href="#"
+                      href={href}
                     >
                       <Icon className="text-primary size-5 shrink-0 shadow-sm" />
                       {isAddress ? (
