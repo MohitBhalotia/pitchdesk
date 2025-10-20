@@ -9,6 +9,7 @@ import Earth from "@/components/ui/globe";
 import { SparklesCore } from "@/components/ui/sparkles";
 import { Label } from "@/components/ui/label";
 import { Check, Loader2 } from "lucide-react";
+import { useMemo } from "react";
 
 export default function ContactUs1() {
   const [name, setName] = useState("");
@@ -20,13 +21,32 @@ export default function ContactUs1() {
   const formRef = useRef(null);
   const isInView = useInView(formRef, { once: true, amount: 0.3 });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
       console.log("Form submitted:", { name, email, message });
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      
+      const response = await fetch('/api/contactUs', { // Fixed route path
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          message
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
+
+      const result = await response.json();
+      console.log("Backend response:", result);
+
       setName("");
       setEmail("");
       setMessage("");
@@ -94,7 +114,7 @@ export default function ContactUs1() {
                     Us
                   </span>
                 </div>
-                <SparklesCore
+                {useMemo(() => (<SparklesCore
                   id="tsparticles"
                   background="transparent"
                   minSize={0.6}
@@ -102,7 +122,7 @@ export default function ContactUs1() {
                   particleDensity={500}
                   className="absolute inset-0 top-0 h-24 w-full"
                   particleColor="#2563eb"
-                />
+                />), [])}
               </motion.div>
 
               <motion.form
@@ -204,12 +224,14 @@ export default function ContactUs1() {
                 <article className="relative mx-auto h-[350px] min-h-60 max-w-[450px] overflow-hidden rounded-3xl border bg-gradient-to-b  p-6 text-3xl tracking-tight text-white from-purple-500 to-purple-100/10 md:h-[450px] md:min-h-80 md:p-8 md:text-4xl md:leading-[1.05] lg:text-5xl">
                   Pitch with Power Practice with AI!
                   <div className="absolute -right-20 -bottom-20 z-10 mx-auto flex h-full w-full max-w-[300px] items-center justify-center transition-all duration-700 hover:scale-105 md:-right-28 md:-bottom-28 md:max-w-[550px]">
-                    <Earth
+                    {useMemo(() => (
+                      <Earth
                       scale={1.1}
                       baseColor={[0.15, 0.4, 0.9]} // Blue base
                       markerColor={[0, 0, 0]}
                       glowColor={[0.6, 0.3, 1]}
                     />
+                    ), [])}
                   </div>
                 </article>
               </div>
