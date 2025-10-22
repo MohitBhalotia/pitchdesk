@@ -41,10 +41,11 @@ export async function POST(req: Request) {
     );
     console.log(res.data);
 
-    pitch.duration = Math.ceil(res?.data?.response?.sts_details?.duration);
+    pitch.duration =
+      Math.ceil(res?.data?.response?.sts_details?.duration) ?? null;
     pitch.endTime = new Date();
     await pitch.save();
-    
+
     const user = await userPlanModel.findOne({
       userId: pitch.userId,
     });
@@ -58,9 +59,9 @@ export async function POST(req: Request) {
       );
     }
 
-    user.pitchTimeRemaining -= Math.ceil(pitch.duration/60);
+    user.pitchTimeRemaining -= Math.ceil(pitch.duration / 60);
     await user.save();
-    
+
     return NextResponse.json(
       {
         success: true,
@@ -72,10 +73,10 @@ export async function POST(req: Request) {
     console.error("Error ending pitch", error);
     return NextResponse.json(
       {
-          success: false,
-          message: "Error ending pitch",
-        },
-        { status: 500 }
-      );
-    }
+        success: false,
+        message: "Error ending pitch",
+      },
+      { status: 500 }
+    );
   }
+}

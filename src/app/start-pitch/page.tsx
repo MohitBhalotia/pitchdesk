@@ -1,5 +1,10 @@
 "use client";
-import { Suspense /*, useEffect*/, useEffect, useState } from "react";
+import {
+  Suspense /*, useEffect*/,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import { App } from "../../components/App";
 import Intelligence from "../../components/Intelligence";
 import { stsConfig } from "../../lib/constants";
@@ -17,7 +22,8 @@ import Image from "next/image";
 import axios from "axios";
 import { toast } from "sonner";
 function HomeContent() {
-  const { socket, socketState, duration, setUserId } = useDeepgram();
+  const { socket, socketState, duration, setUserId, closeSocket } =
+    useDeepgram();
   const { startMicrophone, stopMicrophone, microphoneState, setupMicrophone } =
     useMicrophone();
 
@@ -37,8 +43,12 @@ function HomeContent() {
   const [remainingTime, setRemainingTime] = useState<number | null>(null);
   const router = useRouter();
   const { data: session } = useSession();
-  console.log("session", session);
+
   const handleStart = async () => {
+    setLoading(true);
+    if (socketState === -1) {
+      socket?.open();
+    }
     setUserId(session?.user?._id);
     const res = await axios.get(
       `/api/users/stats?userId=${session?.user?._id}`
@@ -46,7 +56,7 @@ function HomeContent() {
     const data = res.data;
     console.log(data);
 
-    setRemainingTime(data?.remainingTime ?? 0);
+    setRemainingTime((data?.remainingTime ?? 0) * 60);
 
     if (data?.remainingTime <= 0) {
       console.log("Expired");
@@ -54,6 +64,7 @@ function HomeContent() {
       toast.error("You have no remaining time. Please Upgrade your plan! ");
       return;
     }
+    await fetchConfig();
 
     if (microphoneState === null) {
       const result = await setupMicrophone();
@@ -63,13 +74,58 @@ function HomeContent() {
     } else {
       startMicrophone();
     }
+    setLoading(false);
   };
 
-  const handleStop = async () => {
+  const handleStop = useCallback(async () => {
+    setStarted(false);
+    const result = await closeSocket();
+    console.log("result", result);
     await stopMicrophone();
-  };
+    if (result.success) {
+      toast.success("Pitch ended successfully!");
+      setTimeout(() => {
+        window.close();
+      }, 3000);
+    } else {
+      toast.error("Failed to end pitch properly");
+    }
+  }, [closeSocket, stopMicrophone]);
+
+  // Automatically end session when duration exceeds remaining time
+  useEffect(() => {
+    if (
+      started &&
+      remainingTime !== null &&
+      duration > 0 &&
+      duration >= remainingTime
+    ) {
+      toast.warning("Time limit reached! Ending your pitch session.");
+      handleStop();
+    }
+  }, [duration, remainingTime, started, handleStop]);
+
+  // Warn user when time is running low
+  useEffect(() => {
+    if (started && remainingTime !== null && duration > 0) {
+      const timeLeft = remainingTime - duration;
+
+      // Warning at 60 seconds
+      if (timeLeft === 60) {
+        toast.warning("⏰ 1 minute remaining in your pitch session!");
+      }
+      // Warning at 30 seconds
+      else if (timeLeft === 30) {
+        toast.warning("⏰ 30 seconds remaining!");
+      }
+      // Warning at 10 seconds
+      else if (timeLeft === 10) {
+        toast.error("⏰ 10 seconds remaining!");
+      }
+    }
+  }, [duration, remainingTime, started]);
+
   const fetchConfig = async () => {
-    setLoading(true);
     try {
       const agentConfig = await stsConfig(agentId as string);
       console.log("Fetched Agent Config:", agentConfig);
@@ -78,8 +134,6 @@ function HomeContent() {
     } catch (error) {
       console.error("Error fetching agent config:", error);
       setConfig(null);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -92,8 +146,35 @@ function HomeContent() {
         <div className="relative w-full rounded-xl flex flex-col justify-center items-center shadow-lg h-screen">
           <nav>
             {started && remainingTime !== null && remainingTime > 0 && (
-              <div className="absolute top-2 left-2 bg-red-500 p-2 rounded-full">
-                {duration}
+              <div className="absolute top-2 left-2 flex gap-2">
+                {/* Elapsed Time */}
+                <div className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg">
+                  <div className="text-xs font-semibold">Elapsed</div>
+                  <div className="text-lg font-bold">
+                    {Math.floor(duration / 60)}:
+                    {String(duration % 60).padStart(2, "0")}
+                  </div>
+                </div>
+                {/* Remaining Time */}
+                <div
+                  className={`text-white px-4 py-2 rounded-lg shadow-lg transition-colors ${
+                    remainingTime - duration <= 10
+                      ? "bg-red-600 animate-pulse"
+                      : remainingTime - duration <= 30
+                        ? "bg-red-500"
+                        : remainingTime - duration <= 60
+                          ? "bg-orange-500"
+                          : "bg-green-500"
+                  }`}
+                >
+                  <div className="text-xs font-semibold">Remaining</div>
+                  <div className="text-lg font-bold">
+                    {Math.floor(Math.max(0, remainingTime - duration) / 60)}:
+                    {String(
+                      Math.max(0, remainingTime - duration) % 60
+                    ).padStart(2, "0")}
+                  </div>
+                </div>
               </div>
             )}
           </nav>
@@ -144,10 +225,6 @@ function HomeContent() {
                             type="button"
                             onClick={async () => {
                               await handleStart();
-                              if (socketState === -1) {
-                                socket?.open();
-                              }
-                              fetchConfig();
                             }}
                           >
                             Start your Pitch!
@@ -189,12 +266,7 @@ function HomeContent() {
                                 className="w-full bg-red-600 hover:bg-red-800"
                                 type="button"
                                 onClick={async () => {
-                                  setStarted(false);
-                                  socket?.close();
                                   await handleStop();
-                                  setTimeout(() => {
-                                    window.close();
-                                  }, 5000);
                                 }}
                                 disabled={!started}
                               >

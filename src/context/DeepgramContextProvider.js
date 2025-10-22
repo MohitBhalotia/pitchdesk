@@ -20,6 +20,7 @@ const DeepgramContextProvider = ({ children }) => {
   const isConnecting = useRef(false);
   const { data: session } = useSession();
   const [duration, setDuration] = useState(0);
+  const closePromiseResolveRef = useRef(null);
 
   // Helper function to parse and format transcript messages
   const addTranscriptMessage = (rawMessage) => {
@@ -97,8 +98,8 @@ const DeepgramContextProvider = ({ children }) => {
     setSocketState(0); // connecting
     const result = await getAuthToken(userId);
     console.log("result", result);
-    if(result.success === false) {
-      toast.error(result.message||  "Error getting token");
+    if (result.success === false) {
+      toast.error(result.message || "Error getting token");
       console.error("Error getting token", result.message);
       return;
     }
@@ -127,24 +128,37 @@ const DeepgramContextProvider = ({ children }) => {
     const onClose = async () => {
       clearInterval(keepAlive.current);
       console.log("Posting...");
+      let res;
+      let resultData = { success: false };
 
       // Use the ref values which have the current data
       if (sessionIdRef.current) {
-        await axios.post("/api/end-pitch", {
-          sessionId: sessionIdRef.current,
-          userId: session?.user?._id,
-          conversationHistory: transcriptRef.current,
-        });
+        try {
+          res = await axios.post("/api/end-pitch", {
+            sessionId: sessionIdRef.current,
+            userId: session?.user?._id,
+            conversationHistory: transcriptRef.current,
+          });
+          console.log(res);
+          resultData = { success: true, data: res.data };
+        } catch (error) {
+          console.error("Error ending pitch:", error);
+          resultData = { success: false, error };
+        }
         sessionIdRef.current = null;
         transcriptRef.current = [];
       } else {
         console.warn("No sessionId available to end pitch");
       }
-      setSocketState(3); // closed
-      // console.info("WebSocket closed. Attempting to reconnect...");
 
-      // setTimeout(connectToDeepgram, 3000); // reconnect after 3 seconds
+      setSocketState(3); // closed
       setReconnectAttempts((attempts) => attempts + 1);
+
+      // Resolve the promise if there's a resolver waiting
+      if (closePromiseResolveRef.current) {
+        closePromiseResolveRef.current(resultData);
+        closePromiseResolveRef.current = null;
+      }
     };
 
     const onMessage = () => {
@@ -160,6 +174,21 @@ const DeepgramContextProvider = ({ children }) => {
     setSocket(newSocket);
   };
 
+  const closeSocket = () => {
+    return new Promise((resolve) => {
+      if (!socket || socketState !== 1) {
+        resolve({ success: false, error: "Socket not connected" });
+        return;
+      }
+
+      // Store the resolve function to be called when onClose fires
+      closePromiseResolveRef.current = resolve;
+
+      // Close the socket (this will trigger onClose event)
+      socket.close();
+    });
+  };
+
   return (
     <DeepgramContext.Provider
       value={{
@@ -167,6 +196,7 @@ const DeepgramContextProvider = ({ children }) => {
         socketState,
         rateLimited,
         connectToDeepgram,
+        closeSocket,
         addTranscriptMessage,
         sessionIdRef,
         duration,
