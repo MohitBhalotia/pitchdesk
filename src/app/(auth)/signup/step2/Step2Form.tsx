@@ -57,14 +57,19 @@ export default function Step2Form() {
     try {
       console.log(isGoogleUser)
       if (isGoogleUser) {
-        // Google sign-in user → just update (original logic)
         const res = await axios.post("/api/users/update", step2Data)
         if (res.status === 200) {
-          toast.success("User details updated successfully")
-          router.push("/login")
+          if (data.role === 'founder') {
+            router.push("/login")
+            toast.success("User details updated successfully")
+          }
+          else if (data.role === 'vc') {
+            router.push("/verification-pending")
+            toast.success("Thank you for registering as a Venture Capitalist! Our team will verify your VC account and contact you soon.")
+          }
         }
       } else {
-        // Step1 user (stored in localStorage) - original logic
+        // Step1 user (stored in localStorage)
         const step1Data = JSON.parse(localStorage.getItem("step1Data") || "{}")
         localStorage.removeItem("step1Data")
         const finalPayload = { ...step1Data, ...step2Data }
@@ -72,8 +77,13 @@ export default function Step2Form() {
         const res = await axios.post<ApiResponse>("/api/auth/signup", finalPayload)
         console.log(res.data)
         if (res.data.success) {
-          toast.success(res.data.message)
-          router.push("/verify-email?id=" + res.data?.data)
+          if (data.role === "vc") {
+            router.push("/verification-pending")
+            toast.success("Thank you for registering as a Venture Capitalist! Our team will verify your VC account and contact you soon.")
+          } else {
+            router.push("/verify-email?id=" + res.data?.data)
+            toast.success(res.data.message)
+          }
         }
       }
     } catch (error) {
@@ -89,7 +99,7 @@ export default function Step2Form() {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 ">
         <h2 className="text-2xl font-bold text-center lg:text-left">Complete Your Profile</h2>
-        
+
         <div className="space-y-6 py-10">
           <FormField
             control={form.control}
@@ -105,7 +115,9 @@ export default function Step2Form() {
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="founder">Founder</SelectItem>
+                    <SelectItem value="vc">VC</SelectItem>
                   </SelectContent>
+
                 </Select>
                 <FormMessage />
               </FormItem>
@@ -133,20 +145,25 @@ export default function Step2Form() {
               <FormItem>
                 <FormLabel>Website URL</FormLabel>
                 <FormControl>
-                  <Input 
-                    placeholder="https://example.com" 
-                    {...field} 
+                  <Input
+                    placeholder="https://example.com"
+                    {...field}
                   />
                 </FormControl>
+                {/* {form.watch("role") === "vc" && (
+                  <p className="text-sm text-blue-600 bg-blue-50 p-2 rounded-md mt-2">
+                    VC accounts require manual verification. Our team will review your application within 24-48 hours.
+                  </p>
+                )} */}
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
 
-        <Button 
-          type="submit" 
-          className="w-full" 
+        <Button
+          type="submit"
+          className="w-full"
           disabled={isSubmitting}
         >
           {isSubmitting ? "Processing..." : "Submit"}

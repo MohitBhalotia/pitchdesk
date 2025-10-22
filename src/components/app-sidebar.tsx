@@ -40,6 +40,7 @@ const getUserFromSession = (session: Session) => ({
   email: session?.user?.email || "user@email.com",
   avatar: session?.user?.image,
   plan: session?.user?.userPlan || "userplan",
+  role: session?.user?.role || "founder",
 });
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -47,8 +48,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   console.log("session", session);
   const user = getUserFromSession(session!);
 
-  const data = {
-    user,
+  const founderSidebar = {
     navMain: [
       {
         title: "Dashboard",
@@ -97,6 +97,26 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ],
 
   };
+
+  const vcSidebar = {
+    navMain: [{
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      title: "Browse pitches",
+      url: "/my-pitches",
+      icon: History,
+    }],
+    navSecondary: [
+      {
+        title: "Feedback",
+        url: "/feedback",
+        icon: Send,
+      }
+    ]
+  }
 
   // Plan configuration with colors and icons
   const getPlanConfig = (plan: string) => {
@@ -148,74 +168,101 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild> 
-            
-            <div className="flex justify-between items-center">
-              <Link href="/dashboard" className="flex items-center gap-3 flex-1">
-                
-                <div className="relative h-10 w-10 ">
-                  <Image
-                    src="/logo.png" 
-                    alt="PitchDesk Logo"
-                    width={40}
-                    height={40}
-                    className="dark:invert rounded-full" 
-                  />
+            <SidebarMenuButton size="lg" asChild>
+
+              <div className="flex justify-between items-center">
+                <Link href="/dashboard" className="flex items-center gap-3 flex-1">
+
+                  <div className="relative h-10 w-10 ">
+                    <Image
+                      src="/logo.png"
+                      alt="PitchDesk Logo"
+                      width={40}
+                      height={40}
+                      className="dark:invert rounded-full"
+                    />
+                  </div>
+
+
+                  <div className="text-left">
+                    <span className="text-2xl font-bold truncate">PitchDesk</span>
+                  </div>
+                </Link>
+
+
+                <div className="flex justify-center">
+                  <ModeToggle />
                 </div>
-                
-                
-                <div className="text-left">
-                  <span className="text-2xl font-bold truncate">PitchDesk</span>
-                </div>
-              </Link>
-              
-              
-              <div className="flex justify-center">
-                <ModeToggle />
               </div>
-            </div>
-            </SidebarMenuButton> 
-            
+            </SidebarMenuButton>
+
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        {user.role === "founder" ? (
+          <>
+            <NavMain items={founderSidebar.navMain} />
+            <NavSecondary items={founderSidebar.navSecondary} className="mt-auto" />
+          </>
+        ) : (
+          <>
+            <NavMain items={vcSidebar.navMain} />
+            <NavSecondary items={vcSidebar.navSecondary} className="mt-auto" />
+          </>
+        )}
       </SidebarContent>
 
       {/* Plan Section - Dark Mode Compatible */}
       <SidebarFooter>
         <div className="flex flex-col gap-3">
-          <div className={`flex items-center justify-between px-3 py-2 rounded-lg border ${planConfig.containerClass}`}>
-            <div className="flex items-center gap-2">
-              <div className={planConfig.iconClass}>
-                {planConfig.icon}
+          {user.role === 'founder' ? (
+            <div className={`flex items-center justify-between px-3 py-2 rounded-lg border ${planConfig.containerClass}`}>
+              <div className="flex items-center gap-2">
+                <div className={planConfig.iconClass}>
+                  {planConfig.icon}
+                </div>
+                <div>
+                  <p className={`text-sm font-medium ${planConfig.textClass}`}>
+                    {user.plan[0].toUpperCase() + user.plan.slice(1)} Plan
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {user.plan.toLowerCase() === 'free' ? 'Basic features' :
+                      user.plan.toLowerCase() === 'standard' ? 'Enhanced features' :
+                        user.plan.toLowerCase() === 'pro' ? 'Advanced features' :
+                          user.plan.toLowerCase() === 'enterprise' ? 'Maximum features' :
+                            ''}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className={`text-sm font-medium ${planConfig.textClass}`}>
-                  {user.plan[0].toUpperCase() + user.plan.slice(1)} Plan
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {user.plan.toLowerCase() === 'free' ? 'Basic features' :
-                    user.plan.toLowerCase() === 'standard' ? 'Enhanced features' :
-                      user.plan.toLowerCase() === 'pro' ? 'Advanced features' :
-                        user.plan.toLowerCase() === 'enterprise' ? 'Maximum features' :
-                          ''}
-                </p>
+            </div>) : (
+            <div className={`flex items-center justify-between px-3 py-2 rounded-lg border bg-gradient-to-r from-blue-50 to-blue-100/30 dark:from-blue-950/20 dark:to-blue-900/10 border-blue-200 dark:border-blue-800`}>
+              <div className="flex items-center gap-2">
+                <div className="text-blue-600 dark:text-blue-400">
+                  <Zap className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className={`text-sm font-medium text-blue-700 dark:text-blue-300`}>
+                    Verified VC
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    exclusive access
+                  </p>
+                </div>
               </div>
             </div>
+          )}
 
-          </div>
+
         </div>
       </SidebarFooter>
 
       {/* User Section */}
       <SidebarFooter>
         <div className="flex flex-col gap-2">
-          <NavUser user={data.user} />
+          <NavUser user={user} />
         </div>
       </SidebarFooter>
-    </Sidebar>
+    </Sidebar >
   );
 }

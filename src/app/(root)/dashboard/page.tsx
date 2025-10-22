@@ -102,55 +102,77 @@ const UpgradeModal = ({ isOpen, onClose }) => {
 };
 
 
-export default function Index() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
+// VC Dashboard Component
+const VCDashboard = ({ userStats, session, router }) => {
+
+
+  return (
+    <div className="flex flex-col gap-8 items-center mx-auto px-2 py-5">
+      {/* Welcome Banner for VC */}
+      <div className="backdrop-blur-lg max-w-7xl mx-auto bg-white/70 dark:bg-card/80 rounded-3xl shadow-xl border border-border/30 p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6 w-full">
+        <div className="flex-1">
+          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-teal-500 to-violet-500 bg-clip-text text-transparent tracking-tight mb-2 p-1">
+            Welcome back, {session?.user?.fullName}!
+          </h1>
+          <p className="text-lg text-muted-foreground mb-2">
+            Ready to discover the next unicorn? Your{" "}
+            <span className="font-semibold text-teal-500">
+              Venture Capital
+            </span>{" "}
+            dashboard is here to help you find great deals.
+          </p>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="px-7 py-2 bg-gradient-to-r from-teal-500 to-violet-500 text-white rounded-xl font-semibold shadow-lg  transition-all">
+            VC Partner
+          </div>
+        </div>
+      </div>
 
 
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [userStats, setUserStats] = useState<any>({});
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+      {/* Quick Actions for VC */}
+      <div className="w-full max-w-7xl mx-auto mt-8">
+        <h2 className="text-2xl font-bold mb-6 text-foreground text-left">
+          Quick Actions
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div
+            className="rounded-xl border border-border/20 bg-white/70 dark:bg-card/90 shadow p-4 flex items-center gap-3 hover:shadow-lg transition-shadow group cursor-pointer"
+            onClick={() => router.push("/my-pitches")}
+          >
+            <div className="p-2 rounded-lg bg-muted/40 dark:bg-muted/10">
+              <Play className="h-6 w-6 text-teal-400" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-base">Browse top pitches</h3>
+              <p className="text-muted-foreground text-xs mt-0.5">
+                Discover promising startup pitches
+              </p>
+            </div>
+            <ArrowUpRight className="h-5 w-5 text-muted-foreground cursor-pointer group-hover:text-blue-400 transition-colors" />
+          </div>
 
-  const isOverallLoading = isLoading || status === "loading";
+        </div>
+      </div>
+    </div>
+  );
+};
 
-  // Fetch user plan ,no of pitch used and limit etc
-  useEffect(() => {
-    if (status === "loading" || !session?.user?._id) return; // wait until session is loaded
-
-    const fetchUserPlan = async () => {
-      try {
-        setIsLoading(true);
-        const response = await axios.get("/api/users/stats", {
-          params: { userId: session.user._id },
-        });
-        setUserStats(response.data);
-
-        console.log(response.data);
-      } catch (err) {
-        toast.error("Error fetching user stats.");
-        console.error("Error fetching user stats:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchUserPlan();
-  }, [session?.user?._id, status]); // re-run when user id becomes available
-
+//founder dashboard
+const FounderDashboard = ({ userStats, session, router, setShowUpgradeModal }) => {
   const stats = [
     {
       title: "Total Pitches Practiced",
       value: userStats?.totalPitches,
       icon: <Play className="h-6 w-6" />,
-      
+
     },
     {
       title: "Total Pitches Evaluated",
       value: userStats?.totalPitchEvaluated,
       icon: <SearchCheck className="h-6 w-6" />,
-      
+
     },
 
     {
@@ -161,18 +183,11 @@ export default function Index() {
     {
       title: "Remaining Minutes",
       // value: `${userStats?.remainingTime}/${userStats?.totalTime}`,
-      value: `${Math.max(0,userStats?.remainingTime)}`,
+      value: `${Math.max(0, userStats?.remainingTime)}`,
       icon: <Clock className="h-6 w-6" />,
-     
+
     },
-    // {
-    //   title: "Remaining Sessions",
-    //   // value: user.sessionsLimit - user.sessionsUsed,
-    //   value: `${userStats?.remainingPitches}/${userStats?.totalPitches}`,
-    //   icon: <Zap className="h-6 w-6" />,
-    //   // trend: `${user.sessionsUsed}/${user.sessionsLimit} used`,
-    //   // trendUp: false
-    // },
+
   ];
 
   const quickActions = [
@@ -208,6 +223,142 @@ export default function Index() {
       premium: true,
     },
   ];
+
+  return (
+    <div className="flex flex-col gap-8 items-center mx-auto px-2 py-5">
+      {/* Welcome Banner */}
+      <div className="backdrop-blur-lg max-w-7xl mx-auto bg-white/70 dark:bg-card/80 rounded-3xl shadow-xl border border-border/30 p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6 w-full">
+        <div className="flex-1">
+          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-teal-500 to-violet-500 bg-clip-text text-transparent tracking-tight mb-2 p-1">
+            Welcome back, {session?.user?.fullName}!
+          </h1>
+          <p className="text-lg text-muted-foreground mb-2">
+            Ready to perfect your pitch? Your{" "}
+            <span className="font-semibold text-teal-500">
+              {userStats?.planName}
+            </span>{" "}
+            plan gives you access to powerful AI coaching.
+          </p>
+        </div>
+        <div className="flex items-center gap-4">
+          {userStats?.planName !== "enterprise" && (
+            <button
+              onClick={() => router.push("/payment")}
+              className="px-7 py-2 bg-gradient-to-r from-teal-500 to-violet-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-teal-500/30 transition-all"
+            >
+              Upgrade Plan
+            </button>
+          )}
+          {/* <ProfileDropdown user={user} /> */}
+        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-7xl mx-auto">
+        {stats.map((stat, index) => (
+          <div
+            className="rounded-xl flex items-center py-4 lg:py-8 shadow bg-white/80 dark:bg-card/90 p-4 lg:p-6 flex-col gap-1 border border-border/20 hover:shadow-lg transition-shadow"
+            key={index}
+          >
+            <div className="flex items-center gap-3 lg:gap-4 mb-1">
+              <div className="p-2 lg:p-4 rounded-lg bg-primary text-primary-foreground">
+                {stat.icon}
+              </div>
+              <div>
+                <p className="text-xs lg:text-base font-medium text-foreground">
+                  {stat.title}
+                </p>
+                <p className="text-sm lg:text-xl font-bold text-teal-600 dark:text-teal-300">
+                  {stat.value}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Quick Actions */}
+      <div className="w-full max-w-7xl mx-auto mt-8">
+        <h2 className="text-2xl font-bold mb-6 text-foreground text-left">
+          Quick Actions
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {quickActions.map((action, index) => (
+            <div
+              key={index}
+              className={`rounded-xl border border-border/20 bg-white/70 dark:bg-card/90 shadow p-4 flex items-center gap-3 hover:shadow-lg transition-shadow group cursor-pointer"}`}
+              onClick={action.onClick}
+            >
+              <div
+                className={`p-2 rounded-lg ${action.premium ? "bg-gradient-to-r from-violet-100 to-teal-100 dark:from-violet-900 dark:to-teal-900" : "bg-muted/40 dark:bg-muted/10"}`}
+              >
+                {action.icon}
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-base">{action.title}</h3>
+                  {action.premium && (
+                    <Crown className="h-4 w-4 text-violet-400" />
+                  )}
+                </div>
+                <p className="text-muted-foreground text-xs mt-0.5">
+                  {action.description}
+                </p>
+              </div>
+              <ArrowUpRight className="h-5 w-5 text-muted-foreground cursor-pointer group-hover:text-teal-400 transition-colors" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+};
+
+
+
+export default function Index() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [userStats, setUserStats] = useState<any>({});
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const isOverallLoading = isLoading || status === "loading";
+
+  // Fetch user plan ,no of pitch used and limit etc
+  useEffect(() => {
+    if (status === "loading" || !session?.user?._id) return; // wait until session is loaded
+
+    if (session?.user?.role === 'vc') {
+      setIsLoading(false);
+      return;
+    }
+
+    const fetchUserPlan = async () => {
+      try {
+        setIsLoading(true);
+        const response = await axios.get("/api/users/stats", {
+          params: { userId: session.user._id },
+        });
+        setUserStats(response.data);
+
+        console.log(response.data);
+      } catch (err) {
+        toast.error("Error fetching user stats.");
+        console.error("Error fetching user stats:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserPlan();
+  }, [session?.user?._id, status]); // re-run when user id becomes available
+
+
 
 
   // Full Skeleton Loading State
@@ -266,94 +417,29 @@ export default function Index() {
     );
   }
 
+  // Early return for unauthenticated
+  if (status === "unauthenticated") {
+    router.push("/login");
+    return null;
+  }
+
   return (
     <div className="">
-      <div className="flex flex-col gap-8 items-center mx-auto px-2 py-5">
-        {/* Welcome Banner */}
-        <div className="backdrop-blur-lg max-w-7xl mx-auto bg-white/70 dark:bg-card/80 rounded-3xl shadow-xl border border-border/30 p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6 w-full">
-          <div className="flex-1">
-            <h1 className="text-4xl font-extrabold bg-gradient-to-r from-teal-500 to-violet-500 bg-clip-text text-transparent tracking-tight mb-2 p-1">
-              Welcome back, {session?.user?.fullName}!
-            </h1>
-            <p className="text-lg text-muted-foreground mb-2">
-              Ready to perfect your pitch? Your{" "}
-              <span className="font-semibold text-teal-500">
-                {userStats?.planName}
-              </span>{" "}
-              plan gives you access to powerful AI coaching.
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            {userStats?.planName !== "enterprise" && (
-              <button
-                onClick={() => router.push("/payment")}
-                className="px-7 py-2 bg-gradient-to-r from-teal-500 to-violet-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-teal-500/30 transition-all"
-              >
-                Upgrade Plan
-              </button>
-            )}
-            {/* <ProfileDropdown user={user} /> */}
-          </div>
-        </div>
+      {session?.user?.role === 'vc' ? (
+        <VCDashboard
+          userStats={userStats}
+          session={session}
+          router={router}
+        />
+      ) : (
+        <FounderDashboard
+          userStats={userStats}
+          session={session}
+          router={router}
+          setShowUpgradeModal={setShowUpgradeModal}
+        />
+      )}
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-7xl mx-auto">
-          {stats.map((stat, index) => (
-            <div
-              className="rounded-xl flex items-center py-4 lg:py-8 shadow bg-white/80 dark:bg-card/90 p-4 lg:p-6 flex-col gap-1 border border-border/20 hover:shadow-lg transition-shadow"
-              key={index}
-            >
-              <div className="flex items-center gap-3 lg:gap-4 mb-1">
-                <div className="p-2 lg:p-4 rounded-lg bg-primary text-primary-foreground">
-                  {stat.icon}
-                </div>
-                <div>
-                  <p className="text-xs lg:text-base font-medium text-foreground">
-                    {stat.title}
-                  </p>
-                  <p className="text-sm lg:text-xl font-bold text-teal-600 dark:text-teal-300">
-                    {stat.value}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Quick Actions */}
-        <div className="w-full max-w-7xl mx-auto mt-8">
-          <h2 className="text-2xl font-bold mb-6 text-foreground text-left">
-            Quick Actions
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {quickActions.map((action, index) => (
-              <div
-                key={index}
-                className={`rounded-xl border border-border/20 bg-white/70 dark:bg-card/90 shadow p-4 flex items-center gap-3 hover:shadow-lg transition-shadow group cursor-pointer"}`}
-                onClick={action.onClick}
-              >
-                <div
-                  className={`p-2 rounded-lg ${action.premium ? "bg-gradient-to-r from-violet-100 to-teal-100 dark:from-violet-900 dark:to-teal-900" : "bg-muted/40 dark:bg-muted/10"}`}
-                >
-                  {action.icon}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-base">{action.title}</h3>
-                    {action.premium && (
-                      <Crown className="h-4 w-4 text-violet-400" />
-                    )}
-                  </div>
-                  <p className="text-muted-foreground text-xs mt-0.5">
-                    {action.description}
-                  </p>
-                </div>
-                <ArrowUpRight className="h-5 w-5 text-muted-foreground cursor-pointer group-hover:text-teal-400 transition-colors" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
       <UpgradeModal
         isOpen={showUpgradeModal}
         onClose={() => setShowUpgradeModal(false)}

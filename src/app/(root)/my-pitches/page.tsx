@@ -55,18 +55,26 @@ export default function PitchTranscripts() {
     const fetchPitches = async () => {
       if (status === "loading") return
 
-      if (!session?.user?._id) {
-        setIsLoading(false)
-        return
-      }
 
       try {
-        const response = await fetch(`/api/my-pitches`)
-        if (!response.ok) throw new Error("Failed to fetch pitches")
+        setIsLoading(true);
 
-        const data = await response.json()
-        const pitchesData = Array.isArray(data) ? data : data.pitches || data.data || []
-        setPitches(pitchesData)
+        if (session?.user?.role === 'vc') {
+          const response = await fetch(`/api/top-pitches`);
+          if (!response.ok) throw new Error("Failed to fetch pitches")
+          const data = await response.json()
+          const pitchesData = Array.isArray(data) ? data : data.pitches || data.data || [] //???
+          setPitches(pitchesData)
+          return
+        }
+        else {
+          const response = await fetch(`/api/my-pitches`)
+          if (!response.ok) throw new Error("Failed to fetch pitches")
+
+          const data = await response.json()
+          const pitchesData = Array.isArray(data) ? data : data.pitches || data.data || []
+          setPitches(pitchesData)
+        }
       } catch (error) {
         console.error("Error fetching pitches:", error)
         setPitches([])
@@ -76,7 +84,7 @@ export default function PitchTranscripts() {
     }
 
     fetchPitches()
-  }, [session, status])
+  }, [session, status, router])
 
   const togglePitchExpansion = (pitchId: string) => {
     const newExpanded = new Set(expandedPitches)
@@ -207,9 +215,9 @@ export default function PitchTranscripts() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Pitch Transcripts</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{session?.user?.role === 'vc' ? 'Browse Pitches' : 'Pitch Transcripts'}</h1>
             <p className="text-muted-foreground text-sm sm:text-base">
-              Review your conversation history
+              {session?.user?.role === 'vc' ? 'Discover and evaluate startup pitches' : 'Review your conversation history'}
             </p>
           </div>
         </div>
@@ -264,7 +272,7 @@ export default function PitchTranscripts() {
                 <p className="text-sm text-muted-foreground mt-2">
                   {searchTerm
                     ? "Try adjusting your search terms"
-                    : "Start a new pitch conversation to see it here"}
+                    : session?.user?.role === 'vc' ? "The pitch pipeline is empty. Encourage founders to start practicing their pitches." : "Start a new pitch conversation to see it here"}
                 </p>
               </div>
             </CardContent>
@@ -276,6 +284,7 @@ export default function PitchTranscripts() {
               const conversationHistory = pitch.conversationHistory || []
               const isEditing = editingPitchId === pitch._id
               const isDeleting = deletingPitchId === pitch._id
+              const isVC = session?.user?.role === 'vc'
 
               return (
                 <Card key={pitch._id} className="overflow-hidden group">
@@ -284,7 +293,7 @@ export default function PitchTranscripts() {
                       {/* Title + meta */}
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2 flex-wrap">
-                          {isEditing ? (
+                          {!isVC && isEditing ? (
                             <div className="flex items-center gap-2 flex-1 flex-wrap">
                               <Input
                                 value={editTitle}
@@ -325,15 +334,20 @@ export default function PitchTranscripts() {
                           ) : (
                             <CardTitle className="text-lg sm:text-xl flex items-center gap-2 flex-wrap">
                               {pitch.title}
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => startEditing(pitch)}
-                                className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
-                                title="Edit title"
-                              >
-                                <Edit className="h-3 w-3" />
-                              </Button>
+                              {
+                                !isVC && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => startEditing(pitch)}
+                                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
+                                    title="Edit title"
+                                  >
+                                    <Edit className="h-3 w-3" />
+                                  </Button>
+                                )
+                              }
+
                             </CardTitle>
                           )}
                         </div>
@@ -363,21 +377,27 @@ export default function PitchTranscripts() {
                         >
                           <BarChart3 className="h-4 w-4" /> Evaluate
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => deletePitch(pitch._id)}
-                          disabled={isDeleting}
-                          className="text-destructive hover:text-destructive flex items-center gap-1"
-                        >
-                          {isDeleting ? (
-                            <div className="animate-spin h-3 w-3 border border-destructive border-t-transparent rounded-full" />
-                          ) : (
-                            <>
-                              <Trash2 className="h-4 w-4" /> Delete
-                            </>
-                          )}
-                        </Button>
+
+                        {
+                          !isVC && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => deletePitch(pitch._id)}
+                              disabled={isDeleting}
+                              className="text-destructive hover:text-destructive flex items-center gap-1"
+                            >
+                              {isDeleting ? (
+                                <div className="animate-spin h-3 w-3 border border-destructive border-t-transparent rounded-full" />
+                              ) : (
+                                <>
+                                  <Trash2 className="h-4 w-4" /> Delete
+                                </>
+                              )}
+                            </Button>
+                          )
+                        }
+
                         <Button
                           variant="outline"
                           size="sm"
@@ -406,24 +426,21 @@ export default function PitchTranscripts() {
                             {conversationHistory.map((msg, idx) => (
                               <div
                                 key={idx}
-                                className={`flex ${
-                                  msg.role === "user" ? "justify-end" : "justify-start"
-                                }`}
+                                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"
+                                  }`}
                               >
                                 <div
-                                  className={`max-w-full sm:max-w-lg rounded-xl p-3 sm:p-4 ${
-                                    msg.role === "user"
-                                      ? "bg-primary text-primary-foreground"
-                                      : "bg-muted"
-                                  }`}
+                                  className={`max-w-full sm:max-w-lg rounded-xl p-3 sm:p-4 ${msg.role === "user"
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-muted"
+                                    }`}
                                 >
                                   <div className="flex items-center gap-2 mb-2">
                                     <div
-                                      className={`rounded-full p-1 ${
-                                        msg.role === "user"
-                                          ? "bg-primary-foreground/20"
-                                          : "bg-muted-foreground/20"
-                                      }`}
+                                      className={`rounded-full p-1 ${msg.role === "user"
+                                        ? "bg-primary-foreground/20"
+                                        : "bg-muted-foreground/20"
+                                        }`}
                                     >
                                       {msg.role === "user" ? (
                                         <User className="h-3 w-3" />
@@ -435,11 +452,10 @@ export default function PitchTranscripts() {
                                       {msg.role}
                                     </span>
                                     <span
-                                      className={`text-xs ml-4 ${
-                                        msg.role === "user"
-                                          ? "text-primary-foreground/70"
-                                          : "text-muted-foreground"
-                                      }`}
+                                      className={`text-xs ml-4 ${msg.role === "user"
+                                        ? "text-primary-foreground/70"
+                                        : "text-muted-foreground"
+                                        }`}
                                     >
                                       {new Date(msg.timestamp).toLocaleTimeString([], {
                                         hour: "2-digit",
