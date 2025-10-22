@@ -31,18 +31,14 @@ export async function POST(req: Request) {
         content: message.content,
         timestamp: message.timeStamp,
       }));
-    const res = await axios.get(
-      `https://api.deepgram.com/v1/projects/${process.env.DEEPGRAM_PROJECT_ID}/requests/${sessionId}`,
-      {
-        headers: {
-          Authorization: `Token ${process.env.DEEPGRAM_API_KEY}`,
-        },
-      }
-    );
-    console.log(res.data);
-
-    pitch.duration =
-      Math.ceil(res?.data?.response?.sts_details?.duration) ?? null;
+    const res = null;
+    // console.log(res.data);
+    const duration = res?.data?.response?.sts_details?.duration;
+    if (isNaN(duration)) {
+      pitch.duration = null;
+    } else {
+      pitch.duration = Math.ceil(duration);
+    }
     pitch.endTime = new Date();
     await pitch.save();
 
