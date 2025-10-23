@@ -22,6 +22,7 @@ import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
 import { ModeToggle } from "@/components/theme-toggle"
+import { Skeleton } from "@/components/ui/skeleton" 
 import {
   Sidebar,
   SidebarContent,
@@ -43,9 +44,86 @@ const getUserFromSession = (session: Session) => ({
   role: session?.user?.role || "founder",
 });
 
+//  SKELETON COMPONENT
+function SidebarSkeleton() {
+  return (
+    <Sidebar variant="inset">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg">
+              <div className="flex justify-between items-center w-full">
+                <div className="flex items-center gap-3 flex-1">
+                  <Skeleton className="h-10 w-10 rounded-full" />
+                  <Skeleton className="h-6 w-32" />
+                </div>
+                <Skeleton className="h-6 w-6 rounded" />
+              </div>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      
+      <SidebarContent>
+        {/* Navigation items skeleton */}
+        <div className="space-y-2">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="flex items-center gap-3 px-2 py-2">
+              <Skeleton className="h-4 w-4 rounded" />
+              <Skeleton className="h-4 flex-1" />
+            </div>
+          ))}
+        </div>
+        
+        {/* Secondary navigation skeleton */}
+        <div className="mt-auto space-y-2">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="flex items-center gap-3 px-2 py-2">
+              <Skeleton className="h-4 w-4 rounded" />
+              <Skeleton className="h-4 flex-1" />
+            </div>
+          ))}
+        </div>
+      </SidebarContent>
+
+      {/* Plan section skeleton */}
+      <SidebarFooter>
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg border">
+            <Skeleton className="h-4 w-4 rounded" />
+            <div className="flex-1">
+              <Skeleton className="h-4 w-24 mb-1" />
+              <Skeleton className="h-3 w-20" />
+            </div>
+          </div>
+        </div>
+      </SidebarFooter>
+
+      {/* User section skeleton */}
+      <SidebarFooter>
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-3 px-2 py-2">
+            <Skeleton className="h-8 w-8 rounded-full" />
+            <div className="flex-1">
+              <Skeleton className="h-4 w-20 mb-1" />
+              <Skeleton className="h-3 w-24" />
+            </div>
+          </div>
+        </div>
+      </SidebarFooter>
+    </Sidebar>
+  );
+}
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { data: session } = useSession();
-  console.log("session", session);
+  const { data: session,status } = useSession();
+
+  //  LOADING sidebar skeleton
+  if (status === "loading" || !session) {
+    return <SidebarSkeleton />;
+  }
+  
+
   const user = getUserFromSession(session!);
 
   const founderSidebar = {
