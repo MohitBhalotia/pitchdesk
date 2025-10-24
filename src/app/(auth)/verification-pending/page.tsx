@@ -41,7 +41,7 @@ export default function VerificationPending() {
                 </li>
                 <li className="flex items-start">
                   <span className="mr-2">•</span>
-                  You'll receive an email once verified
+                  You&apos;ll receive an email once verified
                 </li>
                 <li className="flex items-start">
                   <span className="mr-2">•</span>
