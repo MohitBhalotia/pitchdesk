@@ -5,7 +5,7 @@ import { NextAuthOptions } from "next-auth";
 import dbConnect from "@/lib/db";
 import { nanoid } from "nanoid";
 import bcrypt from "bcryptjs";
-import { createFreeUserPlan } from "@/lib/razorpayUtils";
+// import { createFreeUserPlan } from "@/lib/razorpayUtils";
 
 const salt = await bcrypt.genSalt(10);
 
@@ -50,7 +50,11 @@ const authOptions: NextAuthOptions = {
             throw new Error("No user found with this email");
           }
           if (!user.isVerified) {
-            throw new Error("You are not verified. Please verify your email.");
+            if (user.role === "founder")
+              throw new Error("You are not verified. Please verify your email.");
+            else if (user.role === "vc")
+              throw new Error("Your VC account is pending verification. Please wait for admin approval.");
+
           }
 
           const isPasswordCorrect = await bcrypt.compare(
@@ -100,7 +104,7 @@ const authOptions: NextAuthOptions = {
           await newUser.save();
 
           // Create free user plan for new Google users
-          await createFreeUserPlan(newUser._id.toString());
+          // await createFreeUserPlan(newUser._id.toString());// i did this in user update route,,,as role based
 
           user._id = newUser._id?.toString();
           user.isVerified = true;
@@ -134,7 +138,7 @@ const authOptions: NextAuthOptions = {
       }
 
       if (trigger === "update") {
-        const user=await UserModel.findById(token._id);
+        const user = await UserModel.findById(token._id);
         if (user) {
           token.userPlan = user.userPlan;
         }

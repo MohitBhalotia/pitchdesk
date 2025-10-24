@@ -50,10 +50,12 @@ export async function POST(req: NextRequest){
     });
     await user.save();
 
-    // Create free user plan
-    await createFreeUserPlan(user._id.toString());
+    // Create free user plan for founder
+    if(user.role === "founder"){
+      await createFreeUserPlan(user._id.toString());
+      await resendVerify(user.verificationCode,user.fullName,user.email, user._id.toString());
+    }
 
-    await resendVerify(user.verificationCode,user.fullName,user.email, user._id.toString());
 
     return NextResponse.json(
       {

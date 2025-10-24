@@ -1,7 +1,7 @@
 "use client"
 
 import {
-  
+
   ChevronsUpDown,
   CreditCard,
   Crown,
@@ -39,6 +39,8 @@ export function NavUser({
     name: string
     email: string
     avatar: string
+    plan: string
+    role: string
   }
 }) {
   const { isMobile } = useSidebar()
@@ -83,26 +85,28 @@ export function NavUser({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            {user.role === "founder" && (
+              <>
+                <DropdownMenuGroup>
+                  <DropdownMenuItem className="cursor-pointer flex items-center gap-2" onClick={() => { router.push('/payment') }}>
+                    <Crown />
+                    Upgrade Plan
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+              </>
+            )}
             <DropdownMenuGroup>
-              <DropdownMenuItem className="cursor-pointer flex items-center gap-2" onClick={() => {router.push('/payment')}}>
-                <Crown />
-                Upgrade Plan
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem className="cursor-pointer flex items-center gap-2" onClick={() => {router.push('/payment-history')}}>
-                <CreditCard />
-                Payment History
-              </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer flex items-center gap-2" onClick={() => {router.push('/change-password')}}>
-                <Lock/>
+              {user.role === "founder" && (
+                <DropdownMenuItem className="cursor-pointer flex items-center gap-2" onClick={() => { router.push('/payment-history') }}>
+                  <CreditCard />
+                  Payment History
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem className="cursor-pointer flex items-center gap-2" onClick={() => { router.push('/change-password') }}>
+                <Lock />
                 Change Password
               </DropdownMenuItem>
-              {/* <DropdownMenuItem className="cursor-pointer flex items-center gap-2">
-                <Bell />
-                Notifications
-              </DropdownMenuItem> */}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="cursor-pointer flex items-center gap-2" onClick={() => signOut({ callbackUrl: '/' })}>
