@@ -69,6 +69,7 @@ export default function Step2Form() {
           }
         }
       } else {
+        
         // Step1 user (stored in localStorage)
         const step1Data = JSON.parse(localStorage.getItem("step1Data") || "{}")
         localStorage.removeItem("step1Data")
