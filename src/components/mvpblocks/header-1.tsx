@@ -389,7 +389,7 @@ export default function Header1() {
                     Sign In
                   </Link>
                   <Link
-                    href="/register"
+                    href="/signup/step1"
                     className="block w-full rounded-lg bg-gradient-to-r from-primary to-blue-800 py-2 text-center font-medium text-white hover:shadow-lg transition"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
