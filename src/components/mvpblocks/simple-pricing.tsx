@@ -74,7 +74,7 @@ export default function SimplePricing() {
         {isEarlyBirdActive && (
           <div className="bg-green-50 border border-green-200 text-green-800 rounded-full px-4 py-2 text-sm font-medium flex items-center justify-center gap-2 shadow-sm">
             <Sparkles className="h-4 w-4 text-green-600" />
-            Early Bird Offer: Get <b>50% Off</b> all plans till{" "}
+            Early Bird Offer: Get <b>50% Off</b>on all plans till{" "}
             {EARLY_BIRD_EXPIRY.toLocaleDateString("en-IN", {
               day: "numeric",
               month: "short",
