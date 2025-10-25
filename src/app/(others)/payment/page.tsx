@@ -4,11 +4,15 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import NumberFlow from "@number-flow/react";
-import { BadgeCheck, Sparkles } from "lucide-react";
+import { BadgeCheck, IndianRupee, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+
+const EARLY_BIRD_DISCOUNT = 0.5; // 50% off
+const EARLY_BIRD_EXPIRY = new Date("2025-11-05"); // expires on 5 Nov 2025
+const isEarlyBirdActive = new Date() < EARLY_BIRD_EXPIRY;
 
 const TIERS = [
   {
@@ -156,20 +160,36 @@ const PricingCard = ({
       </h2>
 
       <div className="relative h-12">
-        {typeof price === "number" ? (
+        {isEarlyBirdActive ? (
           <>
-            <NumberFlow
-              format={{
-                style: "currency",
-                currency: "INR",
-                trailingZeroDisplay: "stripIfInteger",
-              }}
-              value={price}
-              className="text-4xl font-medium"
-            />
+            <div className="flex items-center gap-2">
+              {tier.id !== "hobby" && (
+                <span className="text-muted-foreground line-through text-lg flex items-center gap-1">
+                  <IndianRupee />
+                  {tier.price}
+                </span>
+              )}
+              <span
+                className={cn(
+                  "text-3xl font-bold flex items-center gap-1",
+                  tier.popular ? "text-primary" : "text-foreground"
+                )}
+              >
+                <IndianRupee />
+                {tier.price * EARLY_BIRD_DISCOUNT}
+              </span>
+            </div>
           </>
         ) : (
-          <h1 className="text-4xl font-medium">{price}</h1>
+          <span
+            className={cn(
+              "text-3xl font-bold flex items-center gap-1",
+              tier.popular ? "text-primary" : "text-foreground"
+            )}
+          >
+            <IndianRupee />
+            {tier.price}
+          </span>
         )}
       </div>
 
@@ -299,6 +319,17 @@ export default function PricingSection() {
           </p>
         </div>
       </div>
+      {isEarlyBirdActive && (
+        <div className="bg-green-50 border border-green-200 text-green-800 rounded-full px-4 py-2 text-sm font-medium flex items-center justify-center gap-2 shadow-sm">
+          <Sparkles className="h-4 w-4 text-green-600" />
+          Early Bird Offer: Get <b>50% Off</b> all plans till{" "}
+          {EARLY_BIRD_EXPIRY.toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+          })}
+          !
+        </div>
+      )}
 
       <div className="  grid w-full max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 ">
         {TIERS.map((tier, i) => (

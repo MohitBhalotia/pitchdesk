@@ -19,28 +19,22 @@ import { ArrowRight, Check, IndianRupee, Sparkles } from "lucide-react";
 import { plans } from "data/plans";
 import { useSession } from "next-auth/react";
 
-
-
 export default function SimplePricing() {
   const router = useRouter();
-  const {data: session} = useSession(); //useUser();
+  const { data: session } = useSession();
   const user = session?.user;
-  // const getCheckoutUrl = async (plan: string) => {
-  //   const response = await axios.post("/api/stripe/checkout", {
-  //     plan: plan,
-  //     email: user?.email as string,
-  //   });
-  //   if (response.data.url) {
-  //     console.log("response.data.url", response.data.url);
-  //     localStorage.setItem('checkoutToken', response.data.token);
-  //     router.push(response.data.url);
-  //   } else {
-  //     toast.error("Failed to get checkout URL");
-  //   }
-  // };
+
+  // 🏷️ Early Bird Offer Setup
+  const EARLY_BIRD_DISCOUNT = 0.5; // 50% off
+  const EARLY_BIRD_EXPIRY = new Date("2025-11-05"); // expires on 5 Nov 2025
+  const isEarlyBirdActive = new Date() < EARLY_BIRD_EXPIRY;
 
   return (
-    <div id="pricing" className="not-prose  py-10 relative flex w-full flex-col gap-16 overflow-hidden px-4 text-center ">
+    <div
+      id="pricing"
+      className="not-prose py-10 relative flex w-full flex-col gap-16 overflow-hidden px-4 text-center"
+    >
+      {/* Background gradients */}
       <div className="absolute inset-0 -z-10 overflow-hidden">
         <div className="bg-primary/10 absolute -top-[10%] left-[50%] h-[40%] w-[60%] -translate-x-1/2 rounded-full blur-3xl" />
         <div className="bg-primary/5 absolute -right-[10%] -bottom-[10%] h-[40%] w-[40%] rounded-full blur-3xl" />
@@ -75,6 +69,19 @@ export default function SimplePricing() {
             hidden fees, no surprises.
           </motion.p>
         </div>
+
+        {/* 🎉 Global Early Bird Banner */}
+        {isEarlyBirdActive && (
+          <div className="bg-green-50 border border-green-200 text-green-800 rounded-full px-4 py-2 text-sm font-medium flex items-center justify-center gap-2 shadow-sm">
+            <Sparkles className="h-4 w-4 text-green-600" />
+            Early Bird Offer: Get <b>50% Off</b> all plans till{" "}
+            {EARLY_BIRD_EXPIRY.toLocaleDateString("en-IN", {
+              day: "numeric",
+              month: "short",
+            })}
+            !
+          </div>
+        )}
 
         <div className="mt-8 grid w-full max-w-6xl grid-cols-1 gap-6 md:grid-cols-4">
           {Object.values(plans).map((plan, index) => (
@@ -127,20 +134,48 @@ export default function SimplePricing() {
                   </div>
                   <CardDescription className="mt-3 space-y-2">
                     <p className="text-sm">{plan.description}</p>
+
+                    {/* 💰 Price Section with Early Bird Discount */}
                     <div className="pt-2">
-                        <div className="flex items-baseline">
+                      <div className="flex flex-col">
+                        {isEarlyBirdActive ? (
+                          <>
+                            <div className="flex items-center gap-2">
+                              {plan.id !== "hobby" && (
+                                <span className="text-muted-foreground line-through text-lg flex items-center gap-1">
+                                  <IndianRupee />
+                                  {plan.price}
+                                </span>
+                              )}
+                              <span
+                                className={cn(
+                                  "text-3xl font-bold flex items-center gap-1",
+                                  plan.popular
+                                    ? "text-primary"
+                                    : "text-foreground"
+                                )}
+                              >
+                                <IndianRupee />
+                                {plan.price * EARLY_BIRD_DISCOUNT}
+                              </span>
+                            </div>
+                          </>
+                        ) : (
                           <span
                             className={cn(
                               "text-3xl font-bold flex items-center gap-1",
                               plan.popular ? "text-primary" : "text-foreground"
                             )}
                           >
-                          <IndianRupee/>{plan.price}
+                            <IndianRupee />
+                            {plan.price}
                           </span>
-                        </div>
+                        )}
+                      </div>
                     </div>
                   </CardDescription>
                 </CardHeader>
+
                 <CardContent className="grid gap-3 pb-6">
                   {plan.features.map((feature, index) => (
                     <motion.div
@@ -172,7 +207,12 @@ export default function SimplePricing() {
                     </motion.div>
                   ))}
                 </CardContent>
-                <CardFooter className={cn(plan.popular && "pointer-events-auto relative z-10")}>
+
+                <CardFooter
+                  className={cn(
+                    plan.popular && "pointer-events-auto relative z-10"
+                  )}
+                >
                   {user?.role === plan.id ? (
                     <Button className="w-full font-medium duration-300 bg-white text-black">
                       Current Plan
@@ -181,8 +221,7 @@ export default function SimplePricing() {
                     <Button
                       onClick={() => {
                         if (user) {
-                          console.log("plan", plan);
-                          // getCheckoutUrl(plan.id);
+                          router.push("/payment");
                           toast.success("Redirecting to checkout...");
                         } else {
                           toast.info("Please log in to continue");
