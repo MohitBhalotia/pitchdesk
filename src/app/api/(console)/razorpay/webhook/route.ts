@@ -6,7 +6,7 @@ import { activateUserPlan } from "@/lib/razorpayUtils";
 export async function POST(req: NextRequest){
     await dbConnect()
 
-    const secret = process.env.RAZOR_PAY_SECRET
+    const secret = process.env.RAZOR_PAY_WEBHOOK_SECRET
     const payload = await req.text()
     const signature = req.headers.get('x-razorpay-signature')
 
