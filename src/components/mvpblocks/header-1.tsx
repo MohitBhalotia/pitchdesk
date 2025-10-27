@@ -157,7 +157,7 @@ export default function Header1() {
                       onMouseLeave={() => setActiveDropdown(null)}
                     >
                       <Link
-                        href={user ? item.href2 : item.href1}
+                        href={user ? item.href2??item.href1 : item.href1}
                         onClick={(e) => {
                           if (item.href1.startsWith("#")) {
                             e.preventDefault();
