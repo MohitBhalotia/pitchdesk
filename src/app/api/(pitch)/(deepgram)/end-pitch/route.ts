@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import PitchModel from "@/models/PitchModel";
 import pitchSchema from "@/schemas/pitchSchema";
-import axios from "axios";
 import { userPlanModel } from "@/models/UserPlanModel";
+import axios from "axios";
 export async function POST(req: Request) {
   await dbConnect();
   try {
@@ -31,11 +31,17 @@ export async function POST(req: Request) {
         content: message.content,
         timestamp: message.timeStamp,
       }));
-    const res = null;
-    // console.log(res.data);
+      const res = await axios.get(
+        `https://api.deepgram.com/v1/projects/${process.env.DEEPGRAM_PROJECT_ID}/requests/${sessionId}`,
+        {
+          headers: {
+            Authorization: `Token ${process.env.DEEPGRAM_API_KEY}`,
+          },
+        }
+      );
     const duration = res?.data?.response?.sts_details?.duration;
     if (isNaN(duration)) {
-      pitch.duration = null;
+      pitch.duration = validatedData.duration;
     } else {
       pitch.duration = Math.ceil(duration);
     }

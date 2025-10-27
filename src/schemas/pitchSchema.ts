@@ -9,6 +9,7 @@ const messageSchema = z.object({
 const pitchSchema = z.object({
   userId: z.string(),
   sessionId: z.string(),
+  duration:z.number(),
   conversationHistory: z.array(messageSchema).default([]),
 });
 

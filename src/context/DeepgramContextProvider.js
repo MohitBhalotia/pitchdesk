@@ -20,6 +20,7 @@ const DeepgramContextProvider = ({ children }) => {
   const isConnecting = useRef(false);
   const { data: session } = useSession();
   const [duration, setDuration] = useState(0);
+  const durationRef = useRef(0);
   const closePromiseResolveRef = useRef(null);
 
   // Helper function to parse and format transcript messages
@@ -53,11 +54,15 @@ const DeepgramContextProvider = ({ children }) => {
   useEffect(() => {
     if (socketState === 1) {
       const interval = setInterval(() => {
-        setDuration((prev) => prev + 1);
+        setDuration((prev) => {
+          const newDuration = prev + 1;
+          durationRef.current = newDuration;
+          return newDuration;
+        });
       }, 1000);
       return () => clearInterval(interval);
     }
-  }, [socketState, duration]);
+  }, [socketState]);
 
   useEffect(() => {
     const startPitch = async () => {
@@ -138,6 +143,7 @@ const DeepgramContextProvider = ({ children }) => {
             sessionId: sessionIdRef.current,
             userId: session?.user?._id,
             conversationHistory: transcriptRef.current,
+            duration: durationRef.current,
           });
           console.log(res);
           resultData = { success: true, data: res.data };

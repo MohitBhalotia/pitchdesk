@@ -30,21 +30,23 @@ import {
 } from "../ui/dropdown-menu";
 import { signOut, useSession } from "next-auth/react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Skeleton } from "../ui/skeleton";
 
 interface NavItem {
   name: string;
-  href: string;
+  href1: string;
+  href2?: string;
   hasDropdown?: boolean;
   dropdownItems?: { name: string; href: string; description?: string }[];
 }
 
 const navItems: NavItem[] = [
-  { name: "Home", href: "/" },
+  { name: "Home", href1: "/" },
   {
     name: "Features",
-    href: "/#features",
+    href1: "/#features",
+    href2: "/community/features",
     // hasDropdown: true,
     // dropdownItems: [
     //   {
@@ -69,9 +71,9 @@ const navItems: NavItem[] = [
     //   },
     // ],
   },
-  { name: "CrowdFunding", href: "/community/crowdfunding" },
-  { name: "Pricing", href: "/#pricing" },
-  { name: "About", href: "/meet-the-team" },
+  { name: "CrowdFunding", href1: "/community/crowdfunding" },
+  { name: "Pricing", href1: "/#pricing", href2: "/payment" },
+  { name: "About", href1: "/meet-the-team" },
   // { name: "Meet the VCs", href: "/login" },
 ];
 export default function Header1() {
@@ -79,6 +81,7 @@ export default function Header1() {
   const authLoading = status === "loading";
   const user = session?.user;
   const router = useRouter();
+  const pathname = usePathname();
   const handleLogout = async () => {
     try {
       await signOut();
@@ -93,16 +96,14 @@ export default function Header1() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const { theme } = useTheme();
 
-  
-
   const handleSmoothScroll = (href: string) => {
-    if (href.startsWith('#')) {
-      const sectionId = href.replace('#', '');
+    if (href.startsWith("#")) {
+      const sectionId = href.replace("#", "");
       const section = document.getElementById(sectionId);
       if (section) {
         section.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
+          behavior: "smooth",
+          block: "start",
         });
       }
     }
@@ -116,12 +117,13 @@ export default function Header1() {
 
   return (
     <header
-      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${isScrolled
-        ? theme === "dark"
-          ? "bg-black/80 backdrop-blur shadow-lg"
-          : "bg-white/80 backdrop-blur shadow-lg"
-        : "bg-transparent"
-        }`}
+      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
+        isScrolled
+          ? theme === "dark"
+            ? "bg-black/80 backdrop-blur shadow-lg"
+            : "bg-white/80 backdrop-blur shadow-lg"
+          : "bg-transparent"
+      }`}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Top row */}
@@ -129,7 +131,6 @@ export default function Header1() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-full  ">
-
               <Image
                 src="/logo.png"
                 alt="PitchDesk Logo"
@@ -137,73 +138,75 @@ export default function Header1() {
                 height={40}
                 className="dark:invert rounded-full"
               />
-
             </div>
-            <span className=" text-xl font-bold ">
-              PitchDesk
-            </span>
+            <span className=" text-xl font-bold ">PitchDesk</span>
           </Link>
 
           {/* Desktop Nav */}
           <nav className="hidden lg:flex items-center space-x-8">
             <ul className="flex items-center space-x-6">
-              {navItems.map((item) => (
-                <li
-                  key={item.name}
-                  className="relative"
-                  onMouseEnter={() =>
-                    item.hasDropdown && setActiveDropdown(item.name)
-                  }
-                  onMouseLeave={() => setActiveDropdown(null)}
-                >
-                  <Link
-                    href={item.href}
-                    onClick={(e) => {
-                      if (item.href.startsWith('#')) {
-                        e.preventDefault();
-                        handleSmoothScroll(item.href);
+              {navItems.map(
+                (item) =>
+                  !(item.name === "Pricing" && pathname === "/payment") && (
+                    <li
+                      key={item.name}
+                      className="relative"
+                      onMouseEnter={() =>
+                        item.hasDropdown && setActiveDropdown(item.name)
                       }
-                    }}
-                    className="flex items-center space-x-1 font-medium text-foreground hover:text-primary transition"
-                  >
-                    <span>{item.name}</span>
-                    {item.hasDropdown && (
-                      <ChevronDown
-                        className={`h-4 w-4 transition-transform ${activeDropdown === item.name ? "rotate-180" : ""
-                          }`}
-                      />
-                    )}
-                  </Link>
-
-                  {item.hasDropdown && (
-                    <AnimatePresence>
-                      {activeDropdown === item.name && (
-                        <motion.ul
-                          className={`absolute top-full left-0 mt-2 w-80 rounded-xl border border-border bg-background shadow-xl z-40 ${item.name === "Solutions"
-                            ? "w-[600px] grid grid-cols-2 gap-6 p-6"
-                            : "p-2"
+                      onMouseLeave={() => setActiveDropdown(null)}
+                    >
+                      <Link
+                        href={user ? item.href2 : item.href1}
+                        onClick={(e) => {
+                          if (item.href1.startsWith("#")) {
+                            e.preventDefault();
+                            handleSmoothScroll(item.href1);
+                          }
+                        }}
+                        className="flex items-center space-x-1 font-medium text-foreground hover:text-primary transition"
+                      >
+                        <span>{item.name}</span>
+                        {item.hasDropdown && (
+                          <ChevronDown
+                            className={`h-4 w-4 transition-transform ${
+                              activeDropdown === item.name ? "rotate-180" : ""
                             }`}
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          {item.dropdownItems?.map((dropdown) => (
-                            <li key={dropdown.name}>
-                              <Link
-                                href={dropdown.href}
-                                className="block px-4 py-2 text-sm hover:bg-muted rounded-lg"
-                              >
-                                {dropdown.name}
-                              </Link>
-                            </li>
-                          ))}
-                        </motion.ul>
+                          />
+                        )}
+                      </Link>
+
+                      {item.hasDropdown && (
+                        <AnimatePresence>
+                          {activeDropdown === item.name && (
+                            <motion.ul
+                              className={`absolute top-full left-0 mt-2 w-80 rounded-xl border border-border bg-background shadow-xl z-40 ${
+                                item.name === "Solutions"
+                                  ? "w-[600px] grid grid-cols-2 gap-6 p-6"
+                                  : "p-2"
+                              }`}
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -10 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              {item.dropdownItems?.map((dropdown) => (
+                                <li key={dropdown.name}>
+                                  <Link
+                                    href={dropdown.href}
+                                    className="block px-4 py-2 text-sm hover:bg-muted rounded-lg"
+                                  >
+                                    {dropdown.name}
+                                  </Link>
+                                </li>
+                              ))}
+                            </motion.ul>
+                          )}
+                        </AnimatePresence>
                       )}
-                    </AnimatePresence>
-                  )}
-                </li>
-              ))}
+                    </li>
+                  )
+              )}
             </ul>
           </nav>
 
@@ -259,20 +262,24 @@ export default function Header1() {
                         </div>
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      <DropdownMenuGroup>
-                        <DropdownMenuItem>
-                          <Link
-                            href="/payment"
-                            className="flex items-center gap-2"
-                          >
-                            <Sparkles />
-                            Upgrade
-                          </Link>
-                        </DropdownMenuItem>
-                      </DropdownMenuGroup>
-                     
+                      {!(pathname === "/payment") && (
+                        <DropdownMenuGroup>
+                          <DropdownMenuItem>
+                            (
+                            <Link
+                              href="/payment"
+                              className="flex items-center gap-2"
+                            >
+                              <Sparkles />
+                              Upgrade
+                            </Link>
+                            )
+                          </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                      )}
+
                       <DropdownMenuItem onClick={handleLogout}>
-                        <LogOut className="mr-2"/>
+                        <LogOut className="mr-2" />
                         Log out
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -325,43 +332,48 @@ export default function Header1() {
             transition={{ duration: 0.3 }}
           >
             <ul className="space-y-2 h-[300px] overflow-auto">
-              {navItems.map((item) => (
-                <li key={item.name}>
+              {navItems.map(
+                (item) =>
+                  !(item.name === "Pricing" && pathname === "/payment") && (
+                    <li key={item.name}>
+                      <Link
+                        href={item.href2 ?? item.href1}
+                        className="block px-2 py-2 rounded-lg font-medium hover:bg-muted"
+                        onClick={(e) => {
+                          if (item.href1.startsWith("#")) {
+                            e.preventDefault();
+                            setIsMobileMenuOpen(false);
+                            setTimeout(() => {
+                              handleSmoothScroll(item.href1);
+                            }, 3000);
+                          } else {
+                            setIsMobileMenuOpen(false);
+                          }
+                        }}
+                      >
+                        {item.name}
+                      </Link>
 
-                  <Link
-                    href={item.href}
-                    className="block px-2 py-2 rounded-lg font-medium hover:bg-muted"
-                    onClick={(e) => {
-                      if (item.href.startsWith('#')) {
-                        e.preventDefault();
-                        setIsMobileMenuOpen(false);
-                        setTimeout(() => {
-                          handleSmoothScroll(item.href);
-                        }, 300);
-                      } else {
-                        setIsMobileMenuOpen(false);
-                      }
-                    }}
-                  >
-                    {item.name}
-                  </Link>
-
-                  {item.hasDropdown &&
-                    item.dropdownItems?.map((dropdown) => (
-                      <ul key={dropdown.name} className="ml-4 mt-1 space-y-1">
-                        <li>
-                          <Link
-                            href={dropdown.href}
-                            className="block px-5 py-1 text-sm text-foreground hover:bg-muted rounded-lg"
-                            onClick={() => setIsMobileMenuOpen(false)}
+                      {item.hasDropdown &&
+                        item.dropdownItems?.map((dropdown) => (
+                          <ul
+                            key={dropdown.name}
+                            className="ml-4 mt-1 space-y-1"
                           >
-                            {dropdown.name}
-                          </Link>
-                        </li>
-                      </ul>
-                    ))}
-                </li>
-              ))}
+                            <li>
+                              <Link
+                                href={dropdown.href}
+                                className="block px-5 py-1 text-sm text-foreground hover:bg-muted rounded-lg"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                              >
+                                {dropdown.name}
+                              </Link>
+                            </li>
+                          </ul>
+                        ))}
+                    </li>
+                  )
+              )}
             </ul>
             <div className="pt-4 border-t">
               {user ? (
