@@ -14,6 +14,7 @@ import {
   Crown,
   MessageSquare,
   HelpCircle,
+  Handshake
 } from "lucide-react"
 import Link from "next/link";
 import Image from "next/image";
@@ -153,6 +154,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "My Pitches",
         url: "/generated-pitches",
         icon: MessageSquare
+      },
+      {
+        title: "Venture Partners",
+        url: "/investors",
+        icon: Handshake
       }
 
     ],
