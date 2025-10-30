@@ -48,7 +48,7 @@ export default function HowToUse() {
             title: "Evaluate",
             description: "Get detailed feedback on your pitch session.",
             details: [
-                "Click 'End Pitch' to finish your session",
+                "Click 'End session' to finish your session",
                 "Go to 'Evaluate Pitch' from the sidebar",
                 "Select your latest pitch from the list",
                 "Get comprehensive evaluation with scores and suggestions"

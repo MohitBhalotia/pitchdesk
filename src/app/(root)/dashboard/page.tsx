@@ -199,7 +199,7 @@ const FounderDashboard = ({ userStats, session, router, setShowUpgradeModal }) =
     },
     {
       title: "Generate New Pitch Document",
-      description: "Create a professional pitch deck template",
+      description: "Create a professional pitch script",
       icon: <FileText className="h-6 w-6 text-blue-400" />,
       onClick: () => router.push("/generate-pitch"),
     },

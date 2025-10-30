@@ -29,6 +29,7 @@ const data = {
   help: {
     faqsAndSupport: "/community/support",
     feedback: "/community/feedback",
+    privacyPolicy: "/privacy-policy",
   },
   contact: {
     email: "info@pitchdesk.in",
@@ -69,6 +70,7 @@ const serviceLinks = [
 const helpfulLinks = [
   { text: "FAQs & Support", href: data.help.faqsAndSupport },
   { text: "Feedback", href: data.help.feedback },
+  { text: "Privacy Policy", href: data.help.privacyPolicy },
 ];
 
 const contactInfo = [

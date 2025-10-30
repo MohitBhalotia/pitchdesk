@@ -2,7 +2,11 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { signIn } from "next-auth/react";
 
-export default function OAuthButtons() {
+interface OAuthButtonsProps {
+  disabled?: boolean;
+}
+
+export default function OAuthButtons({ disabled = false }: OAuthButtonsProps) {
   return (
     <div>
       <Button
@@ -10,6 +14,7 @@ export default function OAuthButtons() {
         type="button"
         className="w-full flex justify-center"
         onClick={() => signIn("google", { callbackUrl: "/callBack" })}
+        disabled={disabled}
       >
         <span className="flex items-center gap-2">
           <Image src="/google.svg" alt="Google" width={20} height={20} />

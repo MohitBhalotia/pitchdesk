@@ -155,11 +155,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: "/generated-pitches",
         icon: MessageSquare
       },
-      {
-        title: "Venture Partners",
-        url: "/investors",
-        icon: Handshake
-      }
+      // {
+      //   title: "Venture Partners",
+      //   url: "/investors",
+      //   icon: Handshake
+      // }
 
     ],
     navSecondary: [
