@@ -14,6 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { Checkbox } from "@/components/ui/checkbox"
 import signupSchemaStep1 from "@/schemas/signUpSchemaStep1"
 import OAuthButtons from "@/components/oauth-button"
 import Link from "next/link"
@@ -28,6 +29,7 @@ export default function Step1Form() {
       email: "",
       password: "",
       confirmPassword: "",
+      privacyPolicy: false,
     },
   })
 
@@ -101,9 +103,40 @@ export default function Step1Form() {
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="privacyPolicy"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel className="text-sm font-normal cursor-pointer">
+                      I understand the{" "}
+                      <Link 
+                        href="/privacy-policy" 
+                        target="_blank"
+                        className="text-primary hover:underline font-medium"
+                      >
+                        Privacy Policy
+                      </Link>
+                      
+                    </FormLabel>
+                  </div>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full" disabled={!form.watch('privacyPolicy')}>
           Continue
         </Button>
 
@@ -118,7 +151,14 @@ export default function Step1Form() {
           </div>
         </div>
 
-        <OAuthButtons />
+        <div className="space-y-2">
+          <OAuthButtons disabled={!form.watch('privacyPolicy')} />
+          {!form.watch('privacyPolicy') && (
+            <p className="text-xs text-center text-muted-foreground">
+              Please accept the Privacy Policy to continue
+            </p>
+          )}
+        </div>
 
         <div className="text-center">
           <p className="text-sm ">

@@ -83,12 +83,12 @@ function HomeContent() {
     console.log("result", result);
     await stopMicrophone();
     if (result.success) {
-      toast.success("Pitch ended successfully!");
+      toast.success("Session ended successfully!");
       setTimeout(() => {
         window.close();
       }, 3000);
     } else {
-      toast.error("Failed to end pitch properly");
+      toast.error("Failed to end session properly");
     }
   }, [closeSocket, stopMicrophone]);
 
@@ -270,7 +270,7 @@ function HomeContent() {
                                 }}
                                 disabled={!started}
                               >
-                                End pitch!
+                                End Session!
                               </Button>
                             </div>
                           )}

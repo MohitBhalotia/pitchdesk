@@ -130,7 +130,7 @@ const FAQS = [
             "Yes, all your pitch content and business information is securely stored and kept confidential, in line with best industry standards.",
     },
     {
-        question: "Do I need a ready pitch deck?",
+        question: "Do I need a ready pitch document?",
         answer:
             "PitchDesk adapts to your stage of preparation—whether you have a full deck, notes, or just an idea, you’ll get valuable feedback.",
     },

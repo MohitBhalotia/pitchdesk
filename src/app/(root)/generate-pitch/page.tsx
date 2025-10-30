@@ -705,6 +705,14 @@ export default function PitchGenerator() {
               );
             })}
           </div>
+          <div className="space-y-2 text-left mt-4 bg-muted/20 p-3 rounded-lg border border-muted/30">
+            <p className="text-sm text-foreground/80">
+              You can navigate between steps by clicking on the circles above.
+            </p>
+            <p className="text-sm text-foreground/80">
+              <span className="text-red-500">*</span> Marked fields are compulsory.
+            </p>
+          </div>
         </div>
 
         <div
