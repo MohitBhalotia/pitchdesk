@@ -29,7 +29,7 @@ const data = {
   help: {
     faqsAndSupport: "/community/support",
     feedback: "/community/feedback",
-    privacyPolicy: "/privacy-policy",
+    privacyPolicy: "/privacy",
   },
   contact: {
     email: "info@pitchdesk.in",

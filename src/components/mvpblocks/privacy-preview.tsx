@@ -59,7 +59,7 @@ export default function PrivacyPreview() {
 
         {/* CTA */}
         <div className="text-center">
-          <Link href="/privacy-policy">
+          <Link href="/privacy">
             <Button size="lg" variant="outline" className="group">
               Read Our Full Privacy Policy
               <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />

@@ -120,7 +120,7 @@ export default function Step1Form() {
                     <FormLabel className="text-sm font-normal cursor-pointer">
                       I understand the{" "}
                       <Link 
-                        href="/privacy-policy" 
+                        href="/privacy" 
                         target="_blank"
                         className="text-primary hover:underline font-medium"
                       >
