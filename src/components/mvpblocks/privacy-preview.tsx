@@ -16,7 +16,7 @@ export default function PrivacyPreview() {
             Your Privacy is Our Priority
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            We understand that your startup's information is your most valuable asset. 
+            We understand that your startup&apos;s information is your most valuable asset. 
             Your data stays confidential, secure, and completely under your control.
           </p>
         </div>

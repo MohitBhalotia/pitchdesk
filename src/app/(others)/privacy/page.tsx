@@ -21,7 +21,7 @@ const PrivacyPolicy = () => {
         {/* Introduction Card */}
         <div className="bg-card rounded-lg border shadow-sm p-6 md:p-8 mb-8">
           <p className="text-lg leading-relaxed text-muted-foreground">
-            At PitchDesk, we understand that your startup's information is your most valuable asset. When you share your business ideas, pitch decks, financial data, and strategic plans with our AI-powered platform, you're placing immense trust in us. We take this responsibility seriously and are committed to maintaining the highest standards of data privacy and confidentiality.
+            At PitchDesk, we understand that your startup&apos;s information is your most valuable asset. When you share your business ideas, pitch decks, financial data, and strategic plans with our AI-powered platform, you&apos;re placing immense trust in us. We take this responsibility seriously and are committed to maintaining the highest standards of data privacy and confidentiality.
           </p>
         </div>
 
@@ -263,13 +263,13 @@ const PrivacyPolicy = () => {
           <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg border border-primary/20 p-6 md:p-8 text-center">
             <h2 className="text-2xl font-bold mb-4">Our Promise to You</h2>
             <p className="text-lg text-muted-foreground mb-4 leading-relaxed">
-              <span className="font-semibold text-foreground">At PitchDesk, your success is our mission, and your privacy is our foundation.</span> We're not just building AI tools for pitch training - we're creating a trusted ecosystem where founders can safely refine their strategies, practice their presentations, and prepare for funding rounds without compromising their competitive advantage.
+              <span className="font-semibold text-foreground">At PitchDesk, your success is our mission, and your privacy is our foundation.</span> We&apos;re not just building AI tools for pitch training - we&apos;re creating a trusted ecosystem where founders can safely refine their strategies, practice their presentations, and prepare for funding rounds without compromising their competitive advantage.
             </p>
             <p className="text-muted-foreground mb-4">
-              Your confidential information stays confidential. Your strategic plans remain strategic. Your success story is yours to tell, when you're ready to tell it.
+              Your confidential information stays confidential. Your strategic plans remain strategic. Your success story is yours to tell, when you&apos;re ready to tell it.
             </p>
             <p className="text-lg font-semibold text-primary">
-              Trust PitchDesk. Focus on your pitch. We'll handle the privacy.
+              Trust PitchDesk. Focus on your pitch. We&apos;ll handle the privacy.
             </p>
           </div>
         </section>
