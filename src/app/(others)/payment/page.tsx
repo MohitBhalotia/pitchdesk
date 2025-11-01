@@ -264,6 +264,9 @@ export default function PricingSection() {
       return;
     }
 
+    // Push temporary route so back button works
+    router.push("/payment", { scroll: false });
+
     const options = {
       key: data.key,
       amount: data.amount,
@@ -277,11 +280,12 @@ export default function PricingSection() {
       },
       modal: {
         ondismiss: function () {
-          toast.message("Payment cancelled. You can try again anytime.");
+          toast("Payment cancelled. You can try again anytime.");
           setLoading(false);
+          router.back(); // Back to previous route
         },
       },
-      handler: async (response: any) => {
+      handler: async (response: Record<string, string>) => {
         try {
           const verifyRes = await fetch("/api/razorpay/payment/verify", {
             method: "POST",
@@ -291,16 +295,18 @@ export default function PricingSection() {
           const verifyData = await verifyRes.json();
 
           if (verifyData.success) {
-            toast.success("Payment successful! Updating your plan...");
+            toast.success("Payment successful! Redirecting...");
             await new Promise((r) => setTimeout(r, 500));
             await update();
             router.replace("/dashboard");
           } else {
             toast.error("Payment verification failed.");
+            router.back(); // Back to pricing page
           }
         } catch (err) {
           console.error(err);
           toast.error("Error verifying payment.");
+          router.back();
         } finally {
           setLoading(false);
         }
@@ -315,6 +321,7 @@ export default function PricingSection() {
     setLoading(false);
   }
 };
+
 
 
   return (
