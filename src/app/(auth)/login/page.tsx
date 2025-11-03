@@ -41,7 +41,7 @@ export default function LoginPage() {
           loading="lazy"
           width={1000}
           height={1000}
-          src="/pavan.jpg"
+          src="/Shark.jpeg"
           alt="LoginBg"
           className="rounded-lg object-cover h-full w-full"
         />
