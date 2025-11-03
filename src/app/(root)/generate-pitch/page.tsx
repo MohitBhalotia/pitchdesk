@@ -26,6 +26,7 @@ import jsPDF from "jspdf";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
+import PopupVideo from "@/components/PopupVideo";
 
 const fields = [
   {
@@ -564,7 +565,7 @@ export default function PitchGenerator() {
       </Dialog>
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
-          <div>
+          <div className="flex flex-1 flex-col">
             <h1 className="text-4xl font-bold tracking-tight">
               Startup Pitch Generator
             </h1>
@@ -572,6 +573,10 @@ export default function PitchGenerator() {
               Create a compelling pitch for your startup by filling out the form
               below
             </p>
+          </div>
+          <div className="-mt-10 flex flex-col items-center justify-center gap-2">
+            <PopupVideo videoUrl="https://res.cloudinary.com/mohitbhalotia/video/upload/v1762169523/pitch-generation_u9poap.mp4" />
+            <p className="font-semibold  text-lg">How it works?</p>
           </div>
         </div>
 
@@ -710,7 +715,8 @@ export default function PitchGenerator() {
               You can navigate between steps by clicking on the circles above.
             </p>
             <p className="text-sm text-foreground/80">
-              <span className="text-red-500">*</span> Marked fields are compulsory.
+              <span className="text-red-500">*</span> Marked fields are
+              compulsory.
             </p>
           </div>
         </div>
