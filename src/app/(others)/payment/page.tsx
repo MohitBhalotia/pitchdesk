@@ -313,6 +313,7 @@ export default function PricingSection() {
       },
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rzp = new (window as any).Razorpay(options);
     rzp.open();
   } catch (err) {
