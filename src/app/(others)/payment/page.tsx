@@ -239,72 +239,90 @@ export default function PricingSection() {
   }, []);
 
   const handlePayment = async (planId: string) => {
-    setLoading(true);
-    try {
-      //check for user logg in
-      if (!userId) {
-        toast.error("User not logged in. Please sign in to continue.");
-        setLoading(false);
-        router.push("/login");
-        return;
-      }
+  if (loading) return;
+  setLoading(true);
 
-      const res = await fetch("/api/razorpay/create-order", {
-        method: "POST",
-        body: JSON.stringify({ planId, userId }),
-      });
-      const data = await res.json();
+  try {
+    if (!session || !session.user?._id) {
+      toast.error("Please sign in to continue.");
+      setLoading(false);
+      router.prefetch("/login");
+      setTimeout(() => router.push("/login"), 500);
+      return;
+    }
 
-      if (!data.key) {
-        toast.error("Error creating order");
-        setLoading(false);
-        return;
-      }
+    const res = await fetch("/api/razorpay/create-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ planId, userId: session.user._id }),
+    });
 
-      const options = {
-        key: data.key,
-        amount: data.amount,
-        currency: data.currency,
-        order_id: data.orderId,
-        name: "PitchDesk",
-        description: "Plan Subscription",
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        handler: async function (response: any) {
-          const res = await fetch("/api/razorpay/payment/verify", {
+    const data = await res.json();
+    if (!data.key || !data.orderId) {
+      toast.error("Failed to initialize payment.");
+      setLoading(false);
+      return;
+    }
+
+    // Push temporary route so back button works
+    router.push("/payment", { scroll: false });
+
+    const options = {
+      key: data.key,
+      amount: data.amount,
+      currency: data.currency,
+      order_id: data.orderId,
+      name: "PitchDesk",
+      description: "Plan Subscription",
+      prefill: {
+        name: session.user.fullName,
+        email: session.user.email,
+      },
+      modal: {
+        ondismiss: function () {
+          toast("Payment cancelled. You can try again anytime.");
+          setLoading(false);
+          router.back(); // Back to previous route
+        },
+      },
+      handler: async (response: Record<string, string>) => {
+        try {
+          const verifyRes = await fetch("/api/razorpay/payment/verify", {
             method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(response),
           });
-          const resData = await res.json();
-          console.log(resData);
+          const verifyData = await verifyRes.json();
 
-          if (resData.success) {
-            console.log("Payment successful! Your plan has been updated.");
-            console.log("session", session);
-
-            // Update session to reflect new plan
+          if (verifyData.success) {
+            toast.success("Payment successful! Redirecting...");
+            await new Promise((r) => setTimeout(r, 500));
             await update();
-            console.log("session after update", session);
             router.replace("/dashboard");
-            toast.success("Payment successful! Your plan has been updated.");
           } else {
-            toast.error("Payment verification failed. Please contact support.");
+            toast.error("Payment verification failed.");
+            router.back(); // Back to pricing page
           }
-        },
-        prefill: {
-          name: userName,
-          email: userEmail,
-        },
-      };
+        } catch (err) {
+          console.error(err);
+          toast.error("Error verifying payment.");
+          router.back();
+        } finally {
+          setLoading(false);
+        }
+      },
+    };
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const rzp = new (window as any).Razorpay(options);
-      rzp.open();
-    } catch {
-      toast.error("Payment error");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const rzp = new (window as any).Razorpay(options);
+    rzp.open();
+  } catch (err) {
+    console.error(err);
+    toast.error("Payment error.");
+    setLoading(false);
+  }
+};
+
+
 
   return (
     <section className="flex flex-col items-center mt-20 gap-10 py-10 bg-card dark:bg-background">
