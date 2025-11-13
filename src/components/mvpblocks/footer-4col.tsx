@@ -24,7 +24,8 @@ const data = {
   },
   about: {
     team: "/meet-the-team",
-    dream: "/our-dream",
+    // dream: "/our-dream",
+    advisors: "/advisors",
   },
   help: {
     faqsAndSupport: "/community/support",
@@ -55,6 +56,7 @@ const socialLinks = [
 const aboutLinks = [
   //{ text: 'Company History', href: data.about.history },
   { text: "Meet the Team", href: data.about.team },
+  { text: "Advisors", href: data.about.advisors },
   // { text: 'Our Dream', href: data.about.dream }
   //{ text: 'Employee Handbook', href: data.about.handbook },
   //{ text: 'Careers', href: data.about.careers },
@@ -128,12 +130,12 @@ export default function Footer4Col() {
               <ul className="mt-8 space-y-4 text-sm">
                 {aboutLinks.map(({ text, href }) => (
                   <li key={text}>
-                    <a
+                    <Link
                       className="text-secondary-foreground/70 transition"
                       href={href}
                     >
                       {text}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -153,14 +155,14 @@ export default function Footer4Col() {
               <ul className="mt-8 space-y-4 text-sm">
                 {helpfulLinks.map(({ text, href }) => (
                   <li key={text}>
-                    <a
+                    <Link
                       href={href}
                       className="text-secondary-foreground/70 transition"
                     >
                       <span className="text-secondary-foreground/70 transition">
                         {text}
                       </span>
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>

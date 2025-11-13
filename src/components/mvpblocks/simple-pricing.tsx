@@ -26,7 +26,7 @@ export default function SimplePricing() {
 
   // 🏷️ Early Bird Offer Setup
   const EARLY_BIRD_DISCOUNT = 0.5; // 50% off
-  const EARLY_BIRD_EXPIRY = new Date("2025-11-05"); // expires on 5 Nov 2025
+  const EARLY_BIRD_EXPIRY = new Date("2025-12-31"); // expires on 5 Nov 2025
   const isEarlyBirdActive = new Date() < EARLY_BIRD_EXPIRY;
 
   return (
