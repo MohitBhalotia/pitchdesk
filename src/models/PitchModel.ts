@@ -8,7 +8,7 @@ const MessageSchema = new Schema<Message>({
     },
     content: {
         type: String,
-        require: true
+        required: true
     },
     timestamp: {
         type: String,
@@ -25,6 +25,11 @@ const PitchSchema = new Schema<Pitch>(
         userId: {
             type: Schema.Types.ObjectId,
             ref: 'User',
+        },
+         tournamentId: {  //  NEW FIELD to distinguish between usual and tournament pitches
+            type: Schema.Types.ObjectId,
+            ref: 'Competition',
+            default: null
         },
         title:{
             type: String

@@ -1,0 +1,51 @@
+// lib/models/participant.ts
+import mongoose, { Document, Schema, Model } from 'mongoose';
+
+export interface IParticipant extends Document {
+  competitionId: mongoose.Types.ObjectId;
+  userId: mongoose.Types.ObjectId;
+  teamName: string;
+  teamLeader: {
+    email: string;
+    name: string;
+  };
+  teamMembers: Array<{
+    name: string;
+    email: string;
+  }>;
+  registrationDate: Date;
+  status: 'registered' | 'submitted' | 'disqualified';
+  pitchTime: number;
+  currentStage: number;
+  pitchSubmitted: boolean;
+  pitchEvaluated: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const ParticipantSchema = new Schema<IParticipant>({
+  competitionId: { type: Schema.Types.ObjectId, ref: 'Competition', required: true },
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  teamName: { type: String, required: true },
+  teamLeader: {
+    email: { type: String, required: true },
+    name: { type: String, required: true }
+  },
+  teamMembers: [{
+    name: { type: String, required: true },
+
+    email: { type: String, required: true },
+  }],
+  registrationDate: { type: Date, default: Date.now },
+  status: { type: String, enum: ['registered', 'submitted', 'disqualified'], default: 'registered' },
+  pitchTime: { type: Number, required: true },
+  currentStage: { type: Number, default: 0 },
+  pitchSubmitted: { type: Boolean, default: false },
+  pitchEvaluated: { type: Boolean, default: false },
+}, {
+  timestamps: true
+});
+
+const Participant: Model<IParticipant> = mongoose.models.Participant || mongoose.model<IParticipant>('Participant', ParticipantSchema);
+
+export default Participant;
