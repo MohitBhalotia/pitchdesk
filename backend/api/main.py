@@ -321,6 +321,8 @@ Rules:
 - Total Score = sum of all subtotals (max 100).
 - Business Investability Confidence = (Business Investability Subtotal / 25) * 80.
 - Give lower scores to encourage improvement.
+-Dont assume any information not provided in the pitch text.
+-Be very strict in giving scores.
 
 Micro-parameter maximums:
 {json.dumps(MICRO_MAX_SCORES, indent=2)}
@@ -408,6 +410,90 @@ async def evaluate_pitch(req: PitchRequest):
     except Exception as e:
         logging.exception("❌ Pitch evaluation failed.")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+
+SYSTEM_PROMPT_TOURNAMENT = """
+You are an experienced Venture Capital Judge evaluating early-stage startup pitches in a competitive setting.
+Your role is to assess each pitch objectively, ask probing questions, and provide a final structured score within
+a 20-minute evaluation window (typically 15 minutes for pitch + Q&A, 5 minutes for scoring).
+-Dont assume any information not provided in the pitch text.
+-Be very strict in giving scores.
+
+Evaluate across the 6 key dimensions:
+1. Problem & Market Opportunity (20)
+2. Solution & Innovation (20)
+3. Business Model & Scalability (15)
+4. Team & Execution Capability (20)
+5. Traction & Validation (15)
+6. Pitch Quality & Communication (10)
+
+Return your structured evaluation **strictly in valid JSON**:
+
+{
+  "scores": {
+    "PROBLEM & MARKET OPPORTUNITY": { "Subtotal": 0-20 },
+    "SOLUTION & INNOVATION": { "Subtotal": 0-20 },
+    "BUSINESS MODEL & SCALABILITY": { "Subtotal": 0-15 },
+    "TEAM & EXECUTION CAPABILITY": { "Subtotal": 0-20 },
+    "TRACTION & VALIDATION": { "Subtotal": 0-15 },
+    "PITCH QUALITY & COMMUNICATION": { "Subtotal": 0-10 },
+    "Total Score": 0-100,
+    "Business Investability Confidence": 0-100
+  },
+  "summary": "Brief summary highlighting strengths, weaknesses, and key investment factors."
+}
+
+TONE: Direct but constructive. Focus on facts and data. 
+"""
+
+
+# --------------------- CORE FUNCTION ---------------------
+def evaluate_pitch_tournament(transcript_text: str) -> dict:
+    """Send pitch transcript to GPT model and get structured evaluation."""
+
+    try:
+        response = client.chat.completions.create(
+            model=MODEL_NAME,
+            temperature=TEMPERATURE,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT_TOURNAMENT},
+                {"role": "user", "content": f"Pitch Transcript:\n{transcript_text}"}
+            ],
+        )
+
+        response_text = response.choices[0].message.content.strip()
+
+        # Attempt to parse the JSON
+        try:
+            result = json.loads(response_text)
+        except json.JSONDecodeError:
+            logging.warning("⚠️ Invalid JSON detected. Attempting to extract JSON substring.")
+            try:
+                json_str = response_text[response_text.index("{"):response_text.rindex("}") + 1]
+                result = json.loads(json_str)
+            except Exception:
+                result = {"error": "Invalid JSON returned", "raw_response": response_text}
+
+    except Exception as e:
+        logging.error(f"💥 OpenAI API Error: {e}")
+        raise HTTPException(status_code=500, detail=f"Model evaluation failed: {str(e)}")
+
+    return result
+
+
+# --------------------- ROUTES ---------------------
+@app.post("/evaluate-competition")
+async def evaluate_pitch_api(req: PitchRequest):
+    """
+    Evaluate a startup pitch transcript for tournament using the AI VC Judge.
+    Returns: JSON score and summary
+    """
+
+    transcript_text = "\n".join([f"{m.role}: {m.content}" for m in req.transcript])
+
+    result = evaluate_pitch_tournament(transcript_text)
+    return result
 
 
 # --------------------- ROOT ---------------------
