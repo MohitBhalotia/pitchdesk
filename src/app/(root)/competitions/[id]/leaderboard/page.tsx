@@ -61,22 +61,19 @@ const getRankIcon = (rank: number) => {
 const getRankBadgeColor = (rank: number) => {
   switch (rank) {
     case 1:
-      return "bg-yellow-500/20 text-yellow-700 border-yellow-500/30";
+      return "bg-yellow-500/20 text-yellow-700 border-yellow-500/30 text-sm";
     case 2:
-      return "bg-gray-400/20 text-gray-700 border-gray-400/30";
+      return "bg-gray-400/20 text-gray-700 border-gray-400/30 text-sm";
     case 3:
-      return "bg-amber-600/20 text-amber-700 border-amber-600/30";
+      return "bg-amber-600/20 text-amber-700 border-amber-600/30 text-sm";
     default:
-      return "bg-blue-500/20 text-blue-700 border-blue-500/30";
+      return "bg-blue-500/20 text-blue-700 border-blue-500/30 text-sm";
   }
 };
 
 const LeaderboardRow = ({ entry, isTop25 }: { entry: LeaderboardEntry; isTop25: boolean }) => {
   return (
-    <div className={`flex items-center justify-between p-4 rounded-lg border transition-all duration-200 ${isTop25
-      ? "bg-green-50 border-green-200 shadow-sm"
-      : "bg-card border-border"
-      } ${entry.rank <= 3 ? "scale-[1.02] shadow-md" : ""}`}>
+    <div className={`flex items-center justify-between p-4 rounded-lg border transition-all duration-200 bg-card border-border`}>
       {/* Left Section - Rank and Team Info */}
       <div className="flex items-center gap-4 flex-1">
         {/* Rank */}
@@ -95,12 +92,7 @@ const LeaderboardRow = ({ entry, isTop25 }: { entry: LeaderboardEntry; isTop25: 
             <h3 className="font-semibold text-foreground truncate text-lg">
               {entry.teamName}
             </h3>
-            {isTop25 && (
-              <Badge variant="default" className="bg-green-500 hover:bg-green-600">
-                <Star className="h-3 w-3 mr-1" />
-                Top 25
-              </Badge>
-            )}
+
           </div>
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
@@ -146,6 +138,7 @@ const LeaderboardRow = ({ entry, isTop25 }: { entry: LeaderboardEntry; isTop25: 
 
 export default function TournamentLeaderboard() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [totalRegisteredTeams, setTotalRegisteredTeams] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const { data: session, status } = useSession();
@@ -163,8 +156,9 @@ export default function TournamentLeaderboard() {
 
         if (!response.ok) throw new Error("Failed to fetch leaderboard");
 
-        const leaderboardData: LeaderboardEntry[] = await response.json();
-        setLeaderboard(leaderboardData);
+        const { rankedLeaderboard, totalRegisteredTeams } = await response.json();
+        setLeaderboard(rankedLeaderboard);
+        setTotalRegisteredTeams(totalRegisteredTeams);
       } catch (error) {
         console.error("Error fetching leaderboard:", error);
         setLeaderboard([]);
@@ -225,18 +219,9 @@ export default function TournamentLeaderboard() {
           </div>
 
           <div className="flex items-center gap-4">
-            {currentUserEntry && (
-              <Badge variant="secondary" className="px-3 py-1">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                Your Rank: #{currentUserEntry.rank}
-                {currentUserEntry.rank <= 25 && (
-                  <Star className="h-3 w-3 ml-1 text-green-500" />
-                )}
-              </Badge>
-            )}
-            <Badge variant="outline" className="px-3 py-1">
-              <Users className="h-3 w-3 mr-1" />
-              {leaderboard.length} Participants
+            <Badge variant="outline" className="px-3 py-1 text-sm">
+              <Users className="h-5 w-5 mr-2" />
+              Total teams registered : {leaderboard.length}
             </Badge>
           </div>
         </div>
@@ -281,8 +266,8 @@ export default function TournamentLeaderboard() {
                     <Crown className="h-5 w-5 text-yellow-500" />
                   </div>
                   <div>
-                    <div className="text-2xl font-bold">{leaderboard[0]?.totalScore || 0}</div>
-                    <div className="text-sm text-muted-foreground">Top Score</div>
+                    <div className="text-2xl font-bold">#{currentUserEntry?.rank || 0}</div>
+                    <div className="text-sm text-muted-foreground">Your rank</div>
                   </div>
                 </div>
               </CardContent>
@@ -310,7 +295,7 @@ export default function TournamentLeaderboard() {
                   </div>
                   <div>
                     <div className="text-2xl font-bold">{leaderboard.length}</div>
-                    <div className="text-sm text-muted-foreground">Total Teams</div>
+                    <div className="text-sm text-muted-foreground">Teams with submitted pitches</div>
                   </div>
                 </div>
               </CardContent>
@@ -349,16 +334,9 @@ export default function TournamentLeaderboard() {
           </Card>
         ) : (
           <div className="space-y-6">
-            {/* Top 25 Section */}
+            <p className="text-sm text-muted-foreground mb-4">⚡Rankings update in real-time as teams complete evaluations</p>            {/* Top 25 Section */}
             {top25.length > 0 && (
               <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-3 h-6 bg-green-500 rounded-full"></div>
-                  <h2 className="text-xl font-bold text-foreground">Top 25 - Qualified for Next Round</h2>
-                  <Badge variant="default" className="bg-green-500 hover:bg-green-600">
-                    {top25.length} Teams
-                  </Badge>
-                </div>
                 <Card className="border-green-200">
                   <CardContent className="p-0">
                     <div className="space-y-2 p-4">
@@ -378,13 +356,6 @@ export default function TournamentLeaderboard() {
             {/* Rest of the Leaderboard */}
             {rest.length > 0 && (
               <div>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-3 h-6 bg-blue-500 rounded-full"></div>
-                  <h2 className="text-xl font-bold text-foreground">Remaining Teams</h2>
-                  <Badge variant="outline">
-                    {rest.length} Teams
-                  </Badge>
-                </div>
                 <Card>
                   <CardContent className="p-0">
                     <ScrollArea className="h-[400px]">

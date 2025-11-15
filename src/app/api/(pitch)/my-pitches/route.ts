@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth/next";
 import PitchModel from "@/models/PitchModel";
 import dbConnect from "@/lib/db";
 import mongoose from "mongoose";
-import  authOptions  from "@/lib/auth";
+import authOptions from "@/lib/auth";
 
 export async function GET(/*req: NextRequest*/) {
   try {
@@ -17,8 +17,12 @@ export async function GET(/*req: NextRequest*/) {
     const userId = session.user._id;
 
     const pitches = await PitchModel.find({
-      userId: new mongoose.Types.ObjectId(userId)
-    }).sort({ createdAt: -1 }); 
+      userId: new mongoose.Types.ObjectId(userId),
+      $or: [
+        { competitionId: null },
+        { competitionId: { $exists: false } }
+      ]
+    }).sort({ createdAt: -1 });
 
     return NextResponse.json(pitches, { status: 200 });
   } catch (error) {
@@ -30,8 +34,8 @@ export async function GET(/*req: NextRequest*/) {
   }
 }
 
-export async function PUT(req: NextRequest){
-  try{
+export async function PUT(req: NextRequest) {
+  try {
     await dbConnect();
 
     const session = await getServerSession(authOptions);
@@ -42,13 +46,13 @@ export async function PUT(req: NextRequest){
     const { pitchId, title } = await req.json()
 
     await PitchModel.findByIdAndUpdate(
-      {_id: pitchId},
-      {title}
+      { _id: pitchId },
+      { title }
     )
 
-    return NextResponse.json({message: "Title updated successfully"})
+    return NextResponse.json({ message: "Title updated successfully" })
 
-  }catch(error){
+  } catch (error) {
     console.log(error)
     return NextResponse.json(
       { error: "Internal Server Error" },
@@ -57,8 +61,8 @@ export async function PUT(req: NextRequest){
   }
 }
 
-export async function DELETE(req: NextRequest){
-  try{
+export async function DELETE(req: NextRequest) {
+  try {
     await dbConnect();
 
     const session = await getServerSession(authOptions);
@@ -72,9 +76,9 @@ export async function DELETE(req: NextRequest){
       _id: pitchId
     })
 
-    return NextResponse.json({message:"Pitch deleted successfully"})
+    return NextResponse.json({ message: "Pitch deleted successfully" })
 
-  }catch(error){
+  } catch (error) {
     console.log(error)
     return NextResponse.json(
       { error: "Internal Server Error" },

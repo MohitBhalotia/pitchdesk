@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import { CompetitionPitchEval } from '@/models/CompetitionPitchEvalModel';
+import  Participant  from '@/models/Participant';
 import dbConnect from '@/lib/db';
 
 export async function GET(request: NextRequest) {
@@ -25,6 +26,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    //count total teams registered
+    const totalRegisteredTeams = await Participant.countDocuments({ 
+      competitionId: new mongoose.Types.ObjectId(competitionId)
+    });
     // Fetch leaderboard data with participant information
     const leaderboard = await CompetitionPitchEval.aggregate([
       {
@@ -79,7 +84,7 @@ export async function GET(request: NextRequest) {
       rank: index + 1
     }));
 
-    return NextResponse.json(rankedLeaderboard);
+    return NextResponse.json({rankedLeaderboard, totalRegisteredTeams});
 
   } catch (error) {
     console.error('Error fetching leaderboard:', error);
