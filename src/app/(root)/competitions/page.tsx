@@ -57,7 +57,7 @@ export default function TournamentsPage() {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Tournaments</h1>
+          <h1 className="text-4xl font-bold mb-2">Competitions</h1>
           <p className="text-muted-foreground">
             Discover and participate in entrepreneurship competitions from colleges worldwide
           </p>
@@ -91,7 +91,7 @@ export default function TournamentsPage() {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Tournaments</h1>
+          <h1 className="text-4xl font-bold mb-2">Competitions</h1>
           <p className="text-muted-foreground">
             Discover and participate in entrepreneurship competitions from colleges worldwide
           </p>
@@ -119,7 +119,7 @@ export default function TournamentsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className=" mb-8">
-        <h1 className="text-4xl font-bold mb-2">Tournaments</h1>
+        <h1 className="text-4xl font-bold mb-2">Competitions</h1>
         <p className="text-muted-foreground">
           Discover and participate in entrepreneurship competitions from colleges worldwide
         </p>
@@ -169,7 +169,7 @@ export default function TournamentsPage() {
 
               <CardFooter>
                 <Button asChild className="w-full">
-                  <Link href={`/tournaments/${competition._id}`}>
+                  <Link href={`/competitions/${competition._id}`}>
                     View Details
                   </Link>
                 </Button>

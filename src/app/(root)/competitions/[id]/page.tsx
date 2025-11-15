@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, Users, Mail, Phone, Trophy, Clock, User, MapPin, Award } from 'lucide-react';
+import { Calendar, Users, Mail, Phone, Trophy, Clock, User, MapPin, Award, BarChart3 } from 'lucide-react';
 import RegistrationForm from './registration-form';
 import { Skeleton } from '@/components/ui/skeleton';
 import axios from 'axios'
@@ -131,7 +131,7 @@ export default function CompetitionPage() {
     }
   };
 
-  const handleStartPitch = () => {
+  const handleStartPitchButton = () => {
     if (!competition?.vcId) {
       console.error('VC ID not found');
       return;
@@ -140,12 +140,20 @@ export default function CompetitionPage() {
 
   };
 
-  const handleLeaderboard = () => {
+  const handleLeaderboardButton = () => {
     if (!params?.id) {
       console.error('Competition ID not found');
       return;
     }
-    router.push(`/tournaments/${params.id}/leaderboard`);
+    router.push(`/competitions/${params.id}/leaderboard`);
+  };
+
+  const handlePitchEvaluationButton = () => {
+    if (!params?.id) {
+      console.error('Competition ID not found');
+      return;
+    }
+    router.push(`/competitions/${params.id}/evaluation`);
   };
 
   if (loading) {
@@ -166,7 +174,7 @@ export default function CompetitionPage() {
                 {error || 'The competition you are looking for does not exist.'}
               </p>
               <Button asChild>
-                <Link href="/tournaments">Back to Tournaments</Link>
+                <Link href="/competitions">Back to Competitions</Link>
               </Button>
             </div>
           </CardContent>
@@ -427,8 +435,9 @@ export default function CompetitionPage() {
               isAuthenticated={isAuthenticated}
               isRegistrationOpen={isRegistrationOpen}
               onShowRegistration={() => setShowRegistration(true)}
-              onStartPitch={handleStartPitch}
-              onLeaderboard={handleLeaderboard}
+              onStartPitch={handleStartPitchButton}
+              onLeaderboard={handleLeaderboardButton}
+              onPitchEvaluation={handlePitchEvaluationButton}
             />
           </div>
         </div>
@@ -440,7 +449,7 @@ export default function CompetitionPage() {
             onClose={() => setShowRegistration(false)}
             onSuccess={handleRegistrationSuccess}
             userData={{
-              id:session?.user?._id || '',
+              id: session?.user?._id || '',
               name: session?.user?.fullName || '',
               email: session?.user?.email || ''
             }}
@@ -459,7 +468,8 @@ function CompetitionSidebar({
   isRegistrationOpen,
   onShowRegistration,
   onStartPitch,
-  onLeaderboard
+  onLeaderboard,
+  onPitchEvaluation
 }: {
   competition: Competition;
   participant: Participant | null;
@@ -468,6 +478,7 @@ function CompetitionSidebar({
   onShowRegistration: () => void;
   onStartPitch: () => void;
   onLeaderboard: () => void;
+  onPitchEvaluation: () => void;
 }) {
   const daysLeft = calculateDaysLeft(competition.registrationDeadline);
 
@@ -584,22 +595,45 @@ function CompetitionSidebar({
                 <Trophy className="w-4 h-4 mr-2" />
                 Go to Leaderboard
               </Button>
-              <Button
-                onClick={onStartPitch}
-                variant="outline"
-                className="w-full"
-                size="lg"
-                disabled={!participant.pitchSubmitted && !isRegistrationOpen}
-              >
-                {participant.pitchSubmitted ? 'View Pitch' : 'Start Pitch'}
-              </Button>
 
-              {participant.pitchSubmitted && (
-                <div className="text-center">
-                  <Badge variant={participant.pitchEvaluated ? "default" : "secondary"}>
-                    {participant.pitchEvaluated ? 'Evaluated' : 'Pending Evaluation'}
-                  </Badge>
-                </div>
+              {!participant.pitchSubmitted && isRegistrationOpen ? (
+                // Case 1: No pitch submitted + registration open
+                <Button
+                  onClick={onStartPitch}
+                  variant="outline"
+                  className="w-full"
+                  size="lg"
+                >
+                  Start Pitch
+                </Button>
+              ) : participant.pitchSubmitted && !participant.pitchEvaluated ? (
+                // Case 2: Pitch submitted but not evaluated
+                <>
+                  <Button
+                    onClick={onPitchEvaluation}
+                    className="w-full"
+                    size="lg"
+                  >
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Evaluate Pitch
+                  </Button>
+                  <div className="text-center">
+                    <Badge variant="destructive">
+                      Evaluation pending
+                    </Badge>
+                  </div>
+                </>
+              ) : (
+                // Case 3: Pitch submitted and evaluated
+                <Button
+                  onClick={onPitchEvaluation}
+                  variant="outline"
+                  className="w-full"
+                  size="lg"
+                >
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Pitch Evaluation
+                </Button>
               )}
             </div>
           </div>

@@ -26,7 +26,7 @@ const PitchSchema = new Schema<Pitch>(
             type: Schema.Types.ObjectId,
             ref: 'User',
         },
-         tournamentId: {  //  NEW FIELD to distinguish between usual and tournament pitches
+        competitionId: {  //  NEW FIELD to distinguish between usual and competition pitches
             type: Schema.Types.ObjectId,
             ref: 'Competition',
             default: null

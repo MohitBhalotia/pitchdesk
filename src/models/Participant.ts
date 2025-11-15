@@ -16,7 +16,6 @@ export interface IParticipant extends Document {
   registrationDate: Date;
   status: 'registered' | 'submitted' | 'disqualified';
   pitchTime: number;
-  currentStage: number;
   pitchSubmitted: boolean;
   pitchEvaluated: boolean;
   createdAt: Date;
@@ -39,12 +38,14 @@ const ParticipantSchema = new Schema<IParticipant>({
   registrationDate: { type: Date, default: Date.now },
   status: { type: String, enum: ['registered', 'submitted', 'disqualified'], default: 'registered' },
   pitchTime: { type: Number, required: true },
-  currentStage: { type: Number, default: 0 },
   pitchSubmitted: { type: Boolean, default: false },
   pitchEvaluated: { type: Boolean, default: false },
 }, {
   timestamps: true
 });
+
+// Add to your Participant model
+ParticipantSchema.index({ competitionId: 1, userId: 1 }, { unique: true }); // One registration per user per competition
 
 const Participant: Model<IParticipant> = mongoose.models.Participant || mongoose.model<IParticipant>('Participant', ParticipantSchema);
 

@@ -158,8 +158,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: MessageSquare
       },
       {
-        title:"Tournaments",
-        url:"/tournaments",
+        title:"Competitions",
+        url:"/competitions",
         icon:Trophy
       },
       // {
