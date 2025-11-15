@@ -619,7 +619,7 @@ function CompetitionSidebar({
                   </Button>
                   <div className="text-center">
                     <Badge variant="destructive">
-                      Evaluation pending
+                      ⚠️ Complete evaluation to see your rank
                     </Badge>
                   </div>
                 </>

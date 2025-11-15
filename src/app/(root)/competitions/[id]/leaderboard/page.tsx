@@ -29,6 +29,7 @@ import {
   Star,
   Calendar,
   Mail,
+  BarChart3,
 } from "lucide-react";
 
 interface LeaderboardEntry {
@@ -43,9 +44,6 @@ interface LeaderboardEntry {
   evaluationDate: string;
 }
 
-interface LeaderboardResponse {
-  leaderboard: LeaderboardEntry[];
-}
 
 const getRankIcon = (rank: number) => {
   switch (rank) {
@@ -76,8 +74,8 @@ const getRankBadgeColor = (rank: number) => {
 const LeaderboardRow = ({ entry, isTop25 }: { entry: LeaderboardEntry; isTop25: boolean }) => {
   return (
     <div className={`flex items-center justify-between p-4 rounded-lg border transition-all duration-200 ${isTop25
-        ? "bg-green-50 border-green-200 shadow-sm"
-        : "bg-card border-border"
+      ? "bg-green-50 border-green-200 shadow-sm"
+      : "bg-card border-border"
       } ${entry.rank <= 3 ? "scale-[1.02] shadow-md" : ""}`}>
       {/* Left Section - Rank and Team Info */}
       <div className="flex items-center gap-4 flex-1">
@@ -165,8 +163,8 @@ export default function TournamentLeaderboard() {
 
         if (!response.ok) throw new Error("Failed to fetch leaderboard");
 
-        const data: LeaderboardResponse = await response.json();
-        setLeaderboard(data.leaderboard);
+        const leaderboardData: LeaderboardEntry[] = await response.json();
+        setLeaderboard(leaderboardData);
       } catch (error) {
         console.error("Error fetching leaderboard:", error);
         setLeaderboard([]);
@@ -215,14 +213,6 @@ export default function TournamentLeaderboard() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push(`/competitions/${competitionId}`)}
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Competition
-            </Button>
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
                 <Trophy className="h-8 w-8 text-yellow-500" />
@@ -257,14 +247,14 @@ export default function TournamentLeaderboard() {
             onClick={() => router.push(`/competitions/${competitionId}`)}
             variant="outline"
           >
-            <Trophy className="h-4 w-4 mr-2" />
-            Competition Details
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Competition
           </Button>
           <Button
             onClick={() => router.push(`/competitions/${competitionId}/evaluation`)}
           >
-            <Award className="h-4 w-4 mr-2" />
-            My Pitch Evaluation
+            <BarChart3 className="h-4 w-4 mr-2" />
+            View My Scores
           </Button>
         </div>
 
