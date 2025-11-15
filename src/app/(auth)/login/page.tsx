@@ -42,7 +42,7 @@ export default function LoginPage() {
           width={1000}
           height={1000}
           src="/Shark.jpeg"
-          alt="LoginBg"
+          alt="LoginBg"  
           className="rounded-lg object-cover h-full w-full"
         />
       </div>
