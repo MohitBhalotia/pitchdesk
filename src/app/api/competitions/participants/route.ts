@@ -5,6 +5,7 @@ import Competition from '@/models/Competition';
 import dbConnect from '@/lib/db';
 import resendInviteTeamMember from '@/lib/resend/resend-invite';
 import crypto from 'crypto';
+import mongoose from 'mongoose';
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,8 +20,13 @@ export async function POST(request: NextRequest) {
     
     // Grab competition to check team size
     const comp = await Competition.findById(body.competitionId);
-    const maxSize = comp?.teamSize?.max || 1;
-    // Check leader + invited
+    if (!comp) {
+      return NextResponse.json({ error: 'Competition not found' }, { status: 404 });
+    }
+    const maxSize = comp.teamSize?.max || 1;
+    const minSize = comp.teamSize?.min || 1;
+    
+    // Check leader + invited doesn't exceed max
     if ((body.teamMembers?.length || 0) > (maxSize - 1)) {
       return NextResponse.json({ error: `Maximum team size is ${maxSize}.` }, { status: 400 });
     }
@@ -48,7 +54,7 @@ export async function POST(request: NextRequest) {
     const participant = await Participant.create({
       ...body,
       teamMembers: teamMembersWithInvite,
-      teamStatus: teamMembersWithInvite.length > 0 ? 'pending' : 'validated'
+      teamStatus: minSize!=1 ? 'incomplete' : 'validated'
     });
     // 2. Send emails via Resend to each invited member
     await Promise.all(
@@ -61,7 +67,7 @@ export async function POST(request: NextRequest) {
           participant.teamLeader.name,
           comp ? comp.title : 'a competition',
           inviteLink,
-          participant._id.toString(),
+         (participant._id as mongoose.Types.ObjectId).toString(),
         );
       })
     );
@@ -126,7 +132,7 @@ export async function PUT(request: NextRequest) {
       participant.teamLeader.name,
       comp ? comp.title : 'a competition',
       inviteLink,
-      participant._id.toString()
+      (participant._id as mongoose.Types.ObjectId).toString(),
     );
     return NextResponse.json({ success: true, participant });
   } catch (error) {
@@ -149,9 +155,13 @@ export async function GET(request: NextRequest) {
     const userId = searchParams.get('userId');
     
     if (competitionId && userId) {
+      // Find participant where user is either team leader OR team member
       const participant = await Participant.findOne({
         competitionId,
-        userId:userId
+        $or: [
+          { userId: userId }, // User is team leader
+          { 'teamMembers.userId': userId } // User is an accepted team member
+        ]
       });
       return NextResponse.json(participant);
     }

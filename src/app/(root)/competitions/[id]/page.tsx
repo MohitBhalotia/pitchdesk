@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -58,7 +58,7 @@ interface Competition {
 type TeamMember = {
   name: string;
   email: string;
-  status: 'pending'|'accepted'|'declined';
+  status: 'pending' | 'accepted' | 'declined';
   userId?: string;
 };
 
@@ -70,8 +70,8 @@ interface Participant {
     name: string;
   };
   teamMembers: TeamMember[];
-  teamStatus: 'pending'|'validated'|'incomplete';
-  status: 'registered' | 'submitted' | 'disqualified';
+  teamStatus: 'disqualified' | 'validated' | 'incomplete';
+  // status: 'registered' | 'submitted' | 'disqualified';
   pitchSubmitted: boolean;
   pitchEvaluated: boolean;
 }
@@ -125,8 +125,11 @@ export default function CompetitionPage() {
       }
     }
 
-    fetchData();
-  }, [params?.id, session]);
+    // Only fetch if session is loaded (not loading) and we have params
+    if (status !== 'loading' && params?.id) {
+      fetchData();
+    }
+  }, [params?.id, session?.user?._id, status]);
 
   const handleRegistrationSuccess = (participantData: Participant) => {
     setParticipant(participantData);
@@ -513,9 +516,40 @@ function CompetitionSidebar({
   const [newMemberName, setNewMemberName] = useState('');
   const [newMemberEmail, setNewMemberEmail] = useState('');
   const [addLoading, setAddLoading] = useState(false);
+  const [addEmailError, setAddEmailError] = useState<string | null>(null);
+
+  // Email validation utility (copied from registration-form.tsx)
+  function validateTeamMemberEmails(members: {email: string}[], teamLeaderEmail: string) {
+    const errors: string[] = [];
+    const seen = new Set<string>();
+    const leaderEmailLower = teamLeaderEmail.trim().toLowerCase();
+    members.forEach((member, idx) => {
+      const email = member.email.trim();
+      const emailLower = email.toLowerCase();
+      if (!email) {
+        errors[idx] = 'Email is required';
+        return;
+      }
+      if (!/^\S+@\S+\.\S+$/.test(email)) {
+        errors[idx] = 'Invalid email format';
+        return;
+      }
+      if (emailLower === leaderEmailLower) {
+        errors[idx] = 'Cannot invite yourself';
+        return;
+      }
+      if (seen.has(emailLower)) {
+        errors[idx] = 'Duplicate email';
+        return;
+      }
+      seen.add(emailLower);
+      errors[idx] = '';
+    });
+    return errors;
+  }
 
   // Local state for participant update (for optimistic update when adding member)
-  const [localParticipant, setLocalParticipant] = useState<Participant|null>(participant);
+  const [localParticipant, setLocalParticipant] = useState<Participant | null>(participant);
 
   // Compute (leader + accepted + pending)
   const teamCount = 1 + (localParticipant?.teamMembers.filter(m => m.status === 'pending' || m.status === 'accepted').length || 0);
@@ -528,7 +562,7 @@ function CompetitionSidebar({
     if (!localParticipant) return;
     try {
       const res = await axios.get(`/api/competitions/participants?competitionId=${competition._id}&userId=${localParticipant.teamLeader.email}`);
-      if(res.data) setLocalParticipant(res.data);
+      if (res.data) setLocalParticipant(res.data);
     } catch (err) { /* do nothing, UI tolerant */ }
   }, [competition._id, localParticipant]);
 
@@ -539,18 +573,30 @@ function CompetitionSidebar({
 
   // Add member action (add is handled fully in state, not hard refresh)
   async function handleAddMember() {
+    // Validation
+    const trimmedEmail = newMemberEmail.trim();
+    const emailsToCheck = [
+      ...((localParticipant?.teamMembers || []).map(m => ({ email: m.email }))),
+      { email: trimmedEmail }
+    ];
+    const errors = validateTeamMemberEmails(emailsToCheck, localParticipant?.teamLeader?.email || '');
+    const thisError = errors[errors.length - 1];
+    setAddEmailError(thisError || null);
+    if (thisError) return;
+
     setAddLoading(true);
     try {
       const response = await axios.put('/api/competitions/participants', {
         participantId: localParticipant?._id,
         name: newMemberName,
-        email: newMemberEmail,
+        email: trimmedEmail,
       }, { validateStatus: () => true });
       if (response.status === 200 || response.data?.success) {
         toast.success('Invitation sent!');
         setAddModal(false);
         setNewMemberName('');
         setNewMemberEmail('');
+        setAddEmailError(null);
         // Use returned participant; or re-fetch if not present
         if (response.data?.participant) {
           setLocalParticipant(response.data.participant);
@@ -623,7 +669,7 @@ function CompetitionSidebar({
             )}
           </>
         ) : (
-          // Registered
+          // Registered (both leader and members see this team info)
           <div className="space-y-4">
             <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
               <h4 className="font-semibold mb-3 text-primary flex items-center gap-2">
@@ -632,32 +678,29 @@ function CompetitionSidebar({
               <div className="space-y-2 text-sm">
                 <div>
                   <strong>Team Name:</strong>
-                  <p className="font-semibold text-primary">{participant.teamName}</p>
+                  <p className="font-semibold text-primary">{localParticipant?.teamName || participant.teamName}</p>
                 </div>
                 <div>
                   <strong>Team Leader:</strong>
-                  <p>{participant.teamLeader.name} ({participant.teamLeader.email})</p>
+                  <p>{(localParticipant || participant).teamLeader.name} ({(localParticipant || participant).teamLeader.email})</p>
                 </div>
-                {participant.teamMembers.length > 0 && (
+                {(localParticipant || participant).teamMembers.length > 0 && (
                   <div>
                     <strong className="block mb-1">Team Members:</strong>
                     <ul className="space-y-1">
-                      {participant.teamMembers.map((member, index) => (
+                      {(localParticipant || participant).teamMembers.map((member, index) => (
                         <li key={index} className="flex items-center gap-2">
-                          <div 
+                          <div
                             className={
-                              member.status === 'accepted' ? 'w-2 h-2 rounded-full bg-green-500' : 
-                              member.status === 'declined' ? 'w-2 h-2 rounded-full bg-destructive' :
-                              'w-2 h-2 rounded-full bg-yellow-500'
+                              member.status === 'accepted' ? 'w-2 h-2 rounded-full bg-green-500' :
+                                member.status === 'declined' ? 'w-2 h-2 rounded-full bg-red-500 ' :
+                                  'w-2 h-2 rounded-full bg-yellow-500'
                             }
                           />
                           {member.name} ({member.email})
                           <span className="ml-2 text-xs font-medium">
                             {member.status === 'pending' ? 'Pending' : member.status === 'accepted' ? 'Accepted' : 'Declined'}
                           </span>
-                          {isLeader && member.status === 'declined' && (
-                            <span className="ml-2 text-xs text-destructive">(Declined)</span>
-                          )}
                         </li>
                       ))}
                     </ul>
@@ -666,37 +709,73 @@ function CompetitionSidebar({
               </div>
               <div className="mt-2">
                 <Badge
-                  variant={participant.teamStatus === 'validated' ? 'success' : participant.teamStatus === 'incomplete' ? 'destructive' : 'outline'}
-                  className={participant.teamStatus === 'validated' ? 'bg-green-100 text-green-800' : participant.teamStatus === 'incomplete' ? 'bg-destructive text-white' : ''}
+                  variant={(localParticipant || participant).teamStatus === 'validated' ? 'outline' : (localParticipant || participant).teamStatus === 'incomplete' ? 'destructive' : 'outline'}
+                  className={(localParticipant || participant).teamStatus === 'validated' ? 'bg-green-100 text-green-800' : (localParticipant || participant).teamStatus === 'incomplete' ? 'bg-destructive text-white' : ''}
                 >
-                  {participant.teamStatus === 'validated' ? 'Team Ready' : participant.teamStatus === 'incomplete' ? 'Team Not Valid' : 'Team Pending'}
+                  {(localParticipant || participant).teamStatus === 'validated' ? 'Team Ready' : (localParticipant || participant).teamStatus === 'incomplete' ? 'Team incomplete' : 'Team Disqualified'}
                 </Badge>
               </div>
             </div>
 
-            {/* Actions - only if teamLeader, else nothing */}
+            {/* Actions - only if teamLeader */}
             {isLeader && (
               <div className="space-y-3">
+                {/* Leaderboard button - enabled only if team is validated */}
                 <Button onClick={onLeaderboard} className="w-full" size="lg" disabled={!isValidated}>
                   <Trophy className="w-4 h-4 mr-2" /> Go to Leaderboard
                 </Button>
-                <Button
-                  onClick={onStartPitch}
-                  variant="outline"
-                  className="w-full"
-                  size="lg"
-                  disabled={!isValidated}
-                >
-                  Start Pitch
-                </Button>
+
+                {/* Conditional buttons based on pitch submission and evaluation status */}
+                {!(localParticipant || participant)?.pitchSubmitted ? (
+                  /* Start Pitch - shown only if validated AND pitch not submitted */
+                  <Button
+                    onClick={onStartPitch}
+                    variant="outline"
+                    className="w-full"
+                    size="lg"
+                    disabled={!isValidated}
+                  >
+                    Start Pitch
+                  </Button>
+                ) : !(localParticipant || participant)?.pitchEvaluated ? (
+                  /* Evaluate Pitch - shown if pitch submitted but not evaluated */
+                  <>
+                    <Button
+                      onClick={onPitchEvaluation}
+                      className="w-full"
+                      size="lg"
+                      variant="destructive"
+                    >
+                      <BarChart3 className="w-4 h-4 mr-2" />
+                      Evaluate Pitch
+                    </Button>
+                    <div className="text-center">
+                      <Badge variant="destructive" className="text-xs">
+                        ⚠️ Evaluation pending - Complete evaluation to see your rank
+                      </Badge>
+                    </div>
+                  </>
+                ) : (
+                  /* Pitch Evaluation - shown if pitch is evaluated */
+                  <Button
+                    onClick={onPitchEvaluation}
+                    variant="outline"
+                    className="w-full"
+                    size="lg"
+                  >
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Pitch Evaluation
+                  </Button>
+                )}
               </div>
             )}
 
-            {/* If member but not leader: show only team info! */}
+            {/* Team member view: show team info only, no action buttons */}
             {isTeamMember && !isLeader && (
-              <div className="text-muted-foreground text-sm py-4 text-center">
-                You are a member in this team.<br />
-                Waiting for all invitations to be accepted before leader actions will open!
+              <div className="text-center py-2">
+                <p className="text-sm text-muted-foreground">
+                  You are a team member. Team leader manages actions.
+                </p>
               </div>
             )}
             {localParticipant && (
@@ -713,11 +792,14 @@ function CompetitionSidebar({
                             </CardHeader>
                             <CardContent className="flex flex-col gap-4">
                               <Input value={newMemberName} onChange={e => setNewMemberName(e.target.value)} placeholder="Full Name" className="h-11" />
-                              <Input value={newMemberEmail} type="email" onChange={e => setNewMemberEmail(e.target.value)} placeholder="Email Address" className="h-11" />
+                              <Input value={newMemberEmail} type="email" onChange={e => setNewMemberEmail(e.target.value)} placeholder="Email Address" className={`h-11${addEmailError ? ' border-destructive' : ''}`} />
+{addEmailError && (
+  <div className="text-destructive text-xs mt-1">{addEmailError}</div>
+)}
                             </CardContent>
                             <CardFooter className="justify-between">
                               <Button onClick={() => setAddModal(false)} variant="outline">Cancel</Button>
-                              <Button loading={addLoading} disabled={addLoading || !newMemberName || !newMemberEmail}
+                              <Button disabled={addLoading || !newMemberName || !newMemberEmail}
                                 onClick={handleAddMember}>Send Invite</Button>
                             </CardFooter>
                           </Card>

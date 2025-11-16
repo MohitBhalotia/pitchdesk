@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import dbConnect from '@/lib/db';
 import Participant from '@/models/Participant';
-import User from '@/models/UserModel';
 import Competition from '@/models/Competition';
+import mongoose from 'mongoose';
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,18 +31,15 @@ export async function POST(request: NextRequest) {
     }
     // Get user
     const memberEmail = session.user.email;
-    let user = await User.findOne({ email: memberEmail });
-    if (!user) {
-      return NextResponse.json({ error: 'User not found. Try logging out and signing in again.' }, { status: 404 });
-    }
+    const memberId= session.user._id;
+    
     // Duplicity check: Is this user ALREADY a member or leader in any other team for this competition?
     const alreadyParticipant = await Participant.findOne({
       competitionId: competitionId,
       $or: [
-        { userId: user._id }, // Leader of another team
-        { 'teamMembers.userId': user._id }, // Accepted member of another team
+        { userId: memberId }, // Leader of another team
+        { 'teamMembers.userId': memberId }, // Accepted member of another team
         { 'teamLeader.email': memberEmail }, // Leader by email
-        { 'teamMembers.email': memberEmail }, // member anywhere, by email: (prevent double invites, acceptance, etc)
       ],
       _id: { $ne: teamId }
     });
@@ -67,7 +64,7 @@ export async function POST(request: NextRequest) {
     // Handle accept/decline
     if(action === 'accept') {
       participant.teamMembers[memberIdx].status = 'accepted';
-      participant.teamMembers[memberIdx].userId = user._id;
+      participant.teamMembers[memberIdx].userId = new mongoose.Types.ObjectId(memberId);
     }
     if(action === 'decline') {
       participant.teamMembers[memberIdx].status = 'declined';

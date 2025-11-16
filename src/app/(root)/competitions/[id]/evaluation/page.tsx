@@ -26,6 +26,7 @@ import {
   Search,
   Trophy,
   Sparkles,
+  ArrowLeft,
 } from "lucide-react";
 
 interface Message {
@@ -315,6 +316,23 @@ export default function TournamentPitchEvaluation() {
               Competition Pitch
             </Badge>
           </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex flex-wrap gap-3 mb-6">
+          <Button
+            onClick={() => router.push(`/competitions/${competitionId}`)}
+            variant="outline"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Competition
+          </Button>
+          <Button
+            onClick={() => router.push(`/competitions/${competitionId}/leaderboard`)}
+          >
+            <Trophy className="h-4 w-4 mr-2" />
+            View Leaderboard
+          </Button>
         </div>
 
         {/* Search Bar */}

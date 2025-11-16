@@ -17,8 +17,8 @@ export interface IParticipant extends Document {
     inviteToken?: string;                         // new: used for email invite links
   }>;
   registrationDate: Date;
-  status: 'registered' | 'submitted' | 'disqualified';
-  teamStatus: 'pending' | 'validated' | 'incomplete'; // new: team overall
+  // status: 'registered' | 'submitted' | 'disqualified';
+  teamStatus: 'disqualified' | 'validated' | 'incomplete'; // new: team overall
   pitchTime: number;
   pitchSubmitted: boolean;
   pitchEvaluated: boolean;
@@ -46,8 +46,8 @@ const ParticipantSchema = new Schema<IParticipant>({
     inviteToken: { type: String },
   }],
   registrationDate: { type: Date, default: Date.now },
-  status: { type: String, enum: ['registered', 'submitted', 'disqualified'], default: 'registered' },
-  teamStatus: { type: String, enum: ['pending', 'validated', 'incomplete'], default: 'pending' },
+  // status: { type: String, enum: ['registered', 'submitted', 'disqualified'], default: 'registered' },
+  teamStatus: { type: String, enum: ['validated', 'incomplete','disqualified'], default: 'incomplete' },
   pitchTime: { type: Number, required: true },
   pitchSubmitted: { type: Boolean, default: false },
   pitchEvaluated: { type: Boolean, default: false },

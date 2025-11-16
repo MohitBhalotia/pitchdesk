@@ -61,7 +61,45 @@ export default function RegistrationForm({ competition, onClose, onSuccess, user
     setTeamMembers(updated);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Email validation utility
+function validateTeamMemberEmails(members: TeamMember[], teamLeaderEmail: string) {
+  const errors: string[] = [];
+  const seen = new Set<string>();
+  const leaderEmailLower = teamLeaderEmail.trim().toLowerCase();
+
+  members.forEach((member, idx) => {
+    const email = member.email.trim();
+    const emailLower = email.toLowerCase();
+
+    // Required
+    if (!email) {
+      errors[idx] = 'Email is required';
+      return;
+    }
+    // Format
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      errors[idx] = 'Invalid email format';
+      return;
+    }
+    // Not team leader
+    if (emailLower === leaderEmailLower) {
+      errors[idx] = 'Cannot invite yourself';
+      return;
+    }
+    // Duplicate
+    if (seen.has(emailLower)) {
+      errors[idx] = 'Duplicate email';
+      return;
+    }
+    seen.add(emailLower);
+    errors[idx] = '';
+  });
+  return errors;
+}
+
+const [emailErrors, setEmailErrors] = useState<string[]>([]);
+
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate team size
@@ -70,6 +108,16 @@ export default function RegistrationForm({ competition, onClose, onSuccess, user
       alert(`Minimum team size is ${competition.teamSize.min}. Please add more team members.`);
       return;
     }
+
+    // Email validations
+    const trimmedMembers = teamMembers.map(m => ({ ...m, email: m.email.trim() }));
+    const errors = validateTeamMemberEmails(trimmedMembers, teamLeader.email);
+    setEmailErrors(errors);
+    if (errors.some(e => e)) {
+      return;
+    }
+    // Update trimmed emails
+    setTeamMembers(trimmedMembers);
 
     setLoading(true);
 
@@ -172,7 +220,7 @@ export default function RegistrationForm({ competition, onClose, onSuccess, user
                 </div>
 
                 {teamMembers.map((member, index) => (
-                  <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end p-4 border rounded-lg bg-card">
+                  <div key={index} className="grid grid-cols-1 md:grid-cols-[2fr_2fr_auto] gap-4 items-end p-4 border rounded-lg bg-card">
                     <div className="space-y-2">
                       <Label htmlFor={`memberName-${index}`} className="text-sm">Full Name</Label>
                       <Input
@@ -180,7 +228,7 @@ export default function RegistrationForm({ competition, onClose, onSuccess, user
                         value={member.name}
                         onChange={(e) => updateTeamMember(index, 'name', e.target.value)}
                         placeholder="Enter full name"
-                        className="h-11"
+                        className="h-11 w-full"
                       />
                     </div>
                     <div className="space-y-2">
@@ -191,8 +239,11 @@ export default function RegistrationForm({ competition, onClose, onSuccess, user
                         value={member.email}
                         onChange={(e) => updateTeamMember(index, 'email', e.target.value)}
                         placeholder="Enter email address"
-                        className="h-11"
+                        className={`h-11 w-full${emailErrors[index] ? ' border-destructive' : ''}`}
                       />
+                      {emailErrors[index] && (
+                        <div className="text-destructive text-xs mt-1">{emailErrors[index]}</div>
+                      )}
                     </div>
                     
                     <Button
