@@ -249,7 +249,7 @@ export default function CompetitionPage() {
 
             {/* Tabs Section */}
             <Tabs defaultValue="stages" className="w-full">
-              <TabsList className="grid w-full grid-cols-5 h-12">
+              <TabsList className="w-full h-12 overflow-x-auto flex md:grid md:grid-cols-5 gap-1 scrollbar-thin scrollbar-thumb-muted/30 scrollbar-track-transparent">
                 <TabsTrigger value="stages" className="text-sm">Stages & Timeline</TabsTrigger>
                 <TabsTrigger value="details" className="text-sm">Details</TabsTrigger>
                 <TabsTrigger value="dates" className="text-sm">Dates & Deadlines</TabsTrigger>
@@ -415,7 +415,7 @@ export default function CompetitionPage() {
                             )}
                           </div>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2 min-w-0">
                           <Button variant="outline" size="sm" asChild>
                             <a href={`mailto:${contact.email}`}>
                               <Mail className="w-4 h-4 mr-1" />
@@ -687,7 +687,7 @@ function CompetitionSidebar({
                 {(localParticipant || participant).teamMembers.length > 0 && (
                   <div>
                     <strong className="block mb-1">Team Members:</strong>
-                    <ul className="space-y-1">
+                    <ul className="space-y-1 flex flex-col flex-wrap max-h-48 overflow-y-auto">
                       {(localParticipant || participant).teamMembers.map((member, index) => (
                         <li key={index} className="flex items-center gap-2">
                           <div
