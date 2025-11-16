@@ -12,9 +12,13 @@ export interface IParticipant extends Document {
   teamMembers: Array<{
     name: string;
     email: string;
+    status: 'pending' | 'accepted' | 'declined';   // new
+    userId?: mongoose.Types.ObjectId;             // new: set after accept/signup
+    inviteToken?: string;                         // new: used for email invite links
   }>;
   registrationDate: Date;
   status: 'registered' | 'submitted' | 'disqualified';
+  teamStatus: 'pending' | 'validated' | 'incomplete'; // new: team overall
   pitchTime: number;
   pitchSubmitted: boolean;
   pitchEvaluated: boolean;
@@ -32,11 +36,18 @@ const ParticipantSchema = new Schema<IParticipant>({
   },
   teamMembers: [{
     name: { type: String, required: true },
-
     email: { type: String, required: true },
+    status: {
+      type: String,
+      enum: ['pending','accepted','declined'],
+      default: 'pending'
+    },
+    userId: { type: Schema.Types.ObjectId, ref: 'User' },
+    inviteToken: { type: String },
   }],
   registrationDate: { type: Date, default: Date.now },
   status: { type: String, enum: ['registered', 'submitted', 'disqualified'], default: 'registered' },
+  teamStatus: { type: String, enum: ['pending', 'validated', 'incomplete'], default: 'pending' },
   pitchTime: { type: Number, required: true },
   pitchSubmitted: { type: Boolean, default: false },
   pitchEvaluated: { type: Boolean, default: false },

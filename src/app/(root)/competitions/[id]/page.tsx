@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +12,9 @@ import RegistrationForm from './registration-form';
 import { Skeleton } from '@/components/ui/skeleton';
 import axios from 'axios'
 import Link from 'next/link'
+import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogFooter } from '@/components/ui/dialog';
 
 interface Competition {
   _id: string;
@@ -51,6 +54,14 @@ interface Competition {
   pitchTime: number;
 }
 
+// Update the participant type
+type TeamMember = {
+  name: string;
+  email: string;
+  status: 'pending'|'accepted'|'declined';
+  userId?: string;
+};
+
 interface Participant {
   _id: string;
   teamName: string;
@@ -58,10 +69,8 @@ interface Participant {
     email: string;
     name: string;
   };
-  teamMembers: Array<{
-    name: string;
-    email: string;
-  }>;
+  teamMembers: TeamMember[];
+  teamStatus: 'pending'|'validated'|'incomplete';
   status: 'registered' | 'submitted' | 'disqualified';
   pitchSubmitted: boolean;
   pitchEvaluated: boolean;
@@ -481,6 +490,82 @@ function CompetitionSidebar({
   onPitchEvaluation: () => void;
 }) {
   const daysLeft = calculateDaysLeft(competition.registrationDeadline);
+  const { data: session } = useSession();
+  const userEmail = session?.user?.email;
+  const userId = session?.user?._id;
+  let isLeader = false;
+  let isTeamMember = false;
+  let userMember: TeamMember | undefined;
+  if (participant && userEmail) {
+    if (participant.teamLeader.email === userEmail) {
+      isLeader = true;
+    } else {
+      userMember = participant.teamMembers.find(
+        m => m.email === userEmail
+      );
+      isTeamMember = !!userMember;
+    }
+  }
+  const isValidated = participant?.teamStatus === 'validated';
+
+  // ---- Add member modal logic ----
+  const [addModal, setAddModal] = useState(false);
+  const [newMemberName, setNewMemberName] = useState('');
+  const [newMemberEmail, setNewMemberEmail] = useState('');
+  const [addLoading, setAddLoading] = useState(false);
+
+  // Local state for participant update (for optimistic update when adding member)
+  const [localParticipant, setLocalParticipant] = useState<Participant|null>(participant);
+
+  // Compute (leader + accepted + pending)
+  const teamCount = 1 + (localParticipant?.teamMembers.filter(m => m.status === 'pending' || m.status === 'accepted').length || 0);
+  const maxTeam = competition.teamSize.max;
+  // If leader AND team not full (ignoring declined), let them add
+  const canAddMore = isLeader && teamCount < maxTeam;
+
+  // Used to update local UI instead of window.location.reload
+  const reFetchParticipant = useCallback(async () => {
+    if (!localParticipant) return;
+    try {
+      const res = await axios.get(`/api/competitions/participants?competitionId=${competition._id}&userId=${localParticipant.teamLeader.email}`);
+      if(res.data) setLocalParticipant(res.data);
+    } catch (err) { /* do nothing, UI tolerant */ }
+  }, [competition._id, localParticipant]);
+
+  // When prop participant changes (after registration), sync local state
+  useEffect(() => {
+    setLocalParticipant(participant);
+  }, [participant]);
+
+  // Add member action (add is handled fully in state, not hard refresh)
+  async function handleAddMember() {
+    setAddLoading(true);
+    try {
+      const response = await axios.put('/api/competitions/participants', {
+        participantId: localParticipant?._id,
+        name: newMemberName,
+        email: newMemberEmail,
+      }, { validateStatus: () => true });
+      if (response.status === 200 || response.data?.success) {
+        toast.success('Invitation sent!');
+        setAddModal(false);
+        setNewMemberName('');
+        setNewMemberEmail('');
+        // Use returned participant; or re-fetch if not present
+        if (response.data?.participant) {
+          setLocalParticipant(response.data.participant);
+        } else {
+          await reFetchParticipant();
+        }
+      } else {
+        toast.error(response.data?.error || 'Could not invite member.');
+      }
+    } catch (e: any) {
+      toast.error(e?.response?.data?.error || 'Network error.');
+    } finally {
+      setAddLoading(false);
+    }
+  }
 
   return (
     <Card className="sticky top-6">
@@ -492,6 +577,7 @@ function CompetitionSidebar({
       </CardHeader>
       <CardContent className="pt-6 space-y-6">
         {!participant ? (
+          // Not registered
           <>
             {!isAuthenticated ? (
               <div className="text-center space-y-4">
@@ -500,13 +586,9 @@ function CompetitionSidebar({
                 </div>
                 <div>
                   <h4 className="font-semibold mb-2">Sign In to Register</h4>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Please sign in to register for this competition
-                  </p>
+                  <p className="text-sm text-muted-foreground mb-4">Please sign in to register for this competition</p>
                 </div>
-                <Button asChild className="w-full">
-                  <Link href="/login">Sign In</Link>
-                </Button>
+                <Button asChild className="w-full"><Link href="/login">Sign In</Link></Button>
               </div>
             ) : (
               <>
@@ -520,49 +602,32 @@ function CompetitionSidebar({
                     {isRegistrationOpen ? 'Register Now' : 'Registration Closed'}
                   </Button>
                   {!isRegistrationOpen && (
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Registration deadline has passed
-                    </p>
+                    <p className="text-sm text-muted-foreground mt-2">Registration deadline has passed</p>
                   )}
                 </div>
-
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between items-center p-2 rounded-lg bg-muted/50">
-                    <span className="flex items-center gap-2">
-                      <Users className="w-4 h-4" />
-                      Registered Teams:
-                    </span>
+                    <span className="flex items-center gap-2"><Users className="w-4 h-4" />Registered Teams:</span>
                     <span className="font-semibold">{competition.totalRegistered}</span>
                   </div>
                   <div className="flex justify-between items-center p-2 rounded-lg bg-muted/50">
-                    <span className="flex items-center gap-2">
-                      <User className="w-4 h-4" />
-                      Team Size:
-                    </span>
-                    <span className="font-semibold">
-                      {competition.teamSize.min}-{competition.teamSize.max}
-                    </span>
+                    <span className="flex items-center gap-2"><User className="w-4 h-4" />Team Size:</span>
+                    <span className="font-semibold">{competition.teamSize.min}-{competition.teamSize.max}</span>
                   </div>
                   <div className="flex justify-between items-center p-2 rounded-lg bg-muted/50">
-                    <span className="flex items-center gap-2">
-                      <Clock className="w-4 h-4" />
-                      Deadline:
-                    </span>
-                    <span className="font-semibold">
-                      {daysLeft > 0 ? `${daysLeft} days left` : 'Closed'}
-                    </span>
+                    <span className="flex items-center gap-2"><Clock className="w-4 h-4" />Deadline:</span>
+                    <span className="font-semibold">{daysLeft > 0 ? `${daysLeft} days left` : 'Closed'}</span>
                   </div>
-
                 </div>
               </>
             )}
           </>
         ) : (
+          // Registered
           <div className="space-y-4">
             <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
               <h4 className="font-semibold mb-3 text-primary flex items-center gap-2">
-                <Award className="w-4 h-4" />
-                Your Team
+                <Award className="w-4 h-4" /> Your Team
               </h4>
               <div className="space-y-2 text-sm">
                 <div>
@@ -573,69 +638,96 @@ function CompetitionSidebar({
                   <strong>Team Leader:</strong>
                   <p>{participant.teamLeader.name} ({participant.teamLeader.email})</p>
                 </div>
-
                 {participant.teamMembers.length > 0 && (
                   <div>
                     <strong className="block mb-1">Team Members:</strong>
                     <ul className="space-y-1">
                       {participant.teamMembers.map((member, index) => (
                         <li key={index} className="flex items-center gap-2">
-                          <div className="w-1.5 h-1.5 bg-primary rounded-full" />
+                          <div 
+                            className={
+                              member.status === 'accepted' ? 'w-2 h-2 rounded-full bg-green-500' : 
+                              member.status === 'declined' ? 'w-2 h-2 rounded-full bg-destructive' :
+                              'w-2 h-2 rounded-full bg-yellow-500'
+                            }
+                          />
                           {member.name} ({member.email})
+                          <span className="ml-2 text-xs font-medium">
+                            {member.status === 'pending' ? 'Pending' : member.status === 'accepted' ? 'Accepted' : 'Declined'}
+                          </span>
+                          {isLeader && member.status === 'declined' && (
+                            <span className="ml-2 text-xs text-destructive">(Declined)</span>
+                          )}
                         </li>
                       ))}
                     </ul>
                   </div>
                 )}
               </div>
+              <div className="mt-2">
+                <Badge
+                  variant={participant.teamStatus === 'validated' ? 'success' : participant.teamStatus === 'incomplete' ? 'destructive' : 'outline'}
+                  className={participant.teamStatus === 'validated' ? 'bg-green-100 text-green-800' : participant.teamStatus === 'incomplete' ? 'bg-destructive text-white' : ''}
+                >
+                  {participant.teamStatus === 'validated' ? 'Team Ready' : participant.teamStatus === 'incomplete' ? 'Team Not Valid' : 'Team Pending'}
+                </Badge>
+              </div>
             </div>
 
-            <div className="space-y-3">
-              <Button onClick={onLeaderboard} className="w-full" size="lg">
-                <Trophy className="w-4 h-4 mr-2" />
-                Go to Leaderboard
-              </Button>
-
-              {!participant.pitchSubmitted && isRegistrationOpen ? (
-                // Case 1: No pitch submitted + registration open
+            {/* Actions - only if teamLeader, else nothing */}
+            {isLeader && (
+              <div className="space-y-3">
+                <Button onClick={onLeaderboard} className="w-full" size="lg" disabled={!isValidated}>
+                  <Trophy className="w-4 h-4 mr-2" /> Go to Leaderboard
+                </Button>
                 <Button
                   onClick={onStartPitch}
                   variant="outline"
                   className="w-full"
                   size="lg"
+                  disabled={!isValidated}
                 >
                   Start Pitch
                 </Button>
-              ) : participant.pitchSubmitted && !participant.pitchEvaluated ? (
-                // Case 2: Pitch submitted but not evaluated
-                <>
-                  <Button
-                    onClick={onPitchEvaluation}
-                    className="w-full"
-                    size="lg"
-                  >
-                    <BarChart3 className="w-4 h-4 mr-2" />
-                    Evaluate Pitch
-                  </Button>
-                  <div className="text-center">
-                    <Badge variant="destructive">
-                      ⚠️ Complete evaluation to see your rank
-                    </Badge>
-                  </div>
-                </>
-              ) : (
-                // Case 3: Pitch submitted and evaluated
-                <Button
-                  onClick={onPitchEvaluation}
-                  variant="outline"
-                  className="w-full"
-                  size="lg"
-                >
-                  <BarChart3 className="w-4 h-4 mr-2" />
-                  Pitch Evaluation
-                </Button>
-              )}
-            </div>
+              </div>
+            )}
+
+            {/* If member but not leader: show only team info! */}
+            {isTeamMember && !isLeader && (
+              <div className="text-muted-foreground text-sm py-4 text-center">
+                You are a member in this team.<br />
+                Waiting for all invitations to be accepted before leader actions will open!
+              </div>
+            )}
+            {localParticipant && (
+              <>
+                {isLeader && canAddMore && (
+                  <>
+                    <Button onClick={() => setAddModal(true)} variant="outline" className="w-full mb-1">Invite Another Member</Button>
+                    {addModal && (
+                      <Dialog open={addModal} onOpenChange={v => setAddModal(v)}>
+                        <DialogContent className="max-w-full">
+                          <Card>
+                            <CardHeader>
+                              <CardTitle>Add Team Member</CardTitle>
+                            </CardHeader>
+                            <CardContent className="flex flex-col gap-4">
+                              <Input value={newMemberName} onChange={e => setNewMemberName(e.target.value)} placeholder="Full Name" className="h-11" />
+                              <Input value={newMemberEmail} type="email" onChange={e => setNewMemberEmail(e.target.value)} placeholder="Email Address" className="h-11" />
+                            </CardContent>
+                            <CardFooter className="justify-between">
+                              <Button onClick={() => setAddModal(false)} variant="outline">Cancel</Button>
+                              <Button loading={addLoading} disabled={addLoading || !newMemberName || !newMemberEmail}
+                                onClick={handleAddMember}>Send Invite</Button>
+                            </CardFooter>
+                          </Card>
+                        </DialogContent>
+                      </Dialog>
+                    )}
+                  </>
+                )}
+              </>
+            )}
           </div>
         )}
       </CardContent>
