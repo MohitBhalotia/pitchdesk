@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     }
 
 
-    const competitions = await Competition.find({ isActive: true }).sort({ createdAt: -1 });
+    const competitions = await Competition.find({ isActive: true ,approved:true }).sort({ createdAt: -1 });
     
 
     return NextResponse.json(competitions);

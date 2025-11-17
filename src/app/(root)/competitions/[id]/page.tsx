@@ -28,6 +28,7 @@ interface Competition {
   prizePool: string;
   postedDate: string;
   registrationDeadline: string;
+
   teamSize: {
     min: number;
     max: number;
@@ -50,6 +51,10 @@ interface Competition {
     phone?: string;
     role: string;
   }>;
+  eventInterval?: {
+    start: string;
+    end: string;
+  };
   totalRegistered: number;
   pitchTime: number;
 }
@@ -495,7 +500,6 @@ function CompetitionSidebar({
   const daysLeft = calculateDaysLeft(competition.registrationDeadline);
   const { data: session } = useSession();
   const userEmail = session?.user?.email;
-  const userId = session?.user?._id;
   let isLeader = false;
   let isTeamMember = false;
   let userMember: TeamMember | undefined;
@@ -519,7 +523,7 @@ function CompetitionSidebar({
   const [addEmailError, setAddEmailError] = useState<string | null>(null);
 
   // Email validation utility (copied from registration-form.tsx)
-  function validateTeamMemberEmails(members: {email: string}[], teamLeaderEmail: string) {
+  function validateTeamMemberEmails(members: { email: string }[], teamLeaderEmail: string) {
     const errors: string[] = [];
     const seen = new Set<string>();
     const leaderEmailLower = teamLeaderEmail.trim().toLowerCase();
@@ -721,51 +725,79 @@ function CompetitionSidebar({
             {isLeader && (
               <div className="space-y-3">
                 {/* Leaderboard button - enabled only if team is validated */}
-                <Button onClick={onLeaderboard} className="w-full" size="lg" disabled={!isValidated}>
-                  <Trophy className="w-4 h-4 mr-2" /> Go to Leaderboard
-                </Button>
+                {/* Event interval logic for Leaderboard */}
+                {(() => {
+                  const now = new Date();
+                  const eventStart = competition.eventInterval?.start ? new Date(competition.eventInterval.start) : null;
+                  const eventEnd = competition.eventInterval?.end ? new Date(competition.eventInterval.end) : null;
+                  const pitchGiven = (localParticipant || participant)?.pitchSubmitted;
+                  if (eventStart && eventEnd) {
+                    if (now < eventStart) {
+                      return <Button className="w-full" size="lg" disabled><Trophy className="w-4 h-4 mr-2" />Go to Leaderboard <span className="ml-1 text-xs">(Available on event day)</span></Button>;
+                    }
+                    if (now > eventEnd && !pitchGiven) {
+                      return <Button className="w-full" size="lg" disabled><Trophy className="w-4 h-4 mr-2" />Go to Leaderboard <span className="ml-1 text-xs">(Event window closed)</span></Button>;
+                    }
+                  }
+                  return <Button onClick={onLeaderboard} className="w-full" size="lg" disabled={!isValidated}><Trophy className="w-4 h-4 mr-2" /> Go to Leaderboard</Button>;
+                })()}
 
                 {/* Conditional buttons based on pitch submission and evaluation status */}
                 {!(localParticipant || participant)?.pitchSubmitted ? (
-                  /* Start Pitch - shown only if validated AND pitch not submitted */
-                  <Button
-                    onClick={onStartPitch}
-                    variant="outline"
-                    className="w-full"
-                    size="lg"
-                    disabled={!isValidated}
-                  >
-                    Start Pitch
-                  </Button>
+                  // Start Pitch - shown only if validated AND pitch not submitted
+                  (() => {
+                    const now = new Date();
+                    const eventStart = competition.eventInterval?.start ? new Date(competition.eventInterval.start) : null;
+                    const eventEnd = competition.eventInterval?.end ? new Date(competition.eventInterval.end) : null;
+                    if (eventStart && eventEnd) {
+                      if (now < eventStart) {
+                        return <Button className="w-full" size="lg" disabled variant="outline">Start Pitch <span className="ml-1 text-xs">(Available on event day)</span></Button>;
+                      }
+                      if (now > eventEnd) {
+                        return <Button className="w-full" size="lg" disabled variant="outline">Start Pitch <span className="ml-1 text-xs">(Event window closed)</span></Button>;
+                      }
+                    }
+                    return (
+                      <Button
+                        onClick={onStartPitch}
+                        variant="outline"
+                        className="w-full"
+                        size="lg"
+                        disabled={!isValidated}
+                      >
+                        Start Pitch
+                      </Button>
+                    );
+                  })()
                 ) : !(localParticipant || participant)?.pitchEvaluated ? (
-                  /* Evaluate Pitch - shown if pitch submitted but not evaluated */
-                  <>
-                    <Button
-                      onClick={onPitchEvaluation}
-                      className="w-full"
-                      size="lg"
-                      variant="destructive"
-                    >
-                      <BarChart3 className="w-4 h-4 mr-2" />
-                      Evaluate Pitch
-                    </Button>
-                    <div className="text-center">
-                      <Badge variant="destructive" className="text-xs">
-                        ⚠️ Evaluation pending - Complete evaluation to see your rank
-                      </Badge>
-                    </div>
-                  </>
-                ) : (
-                  /* Pitch Evaluation - shown if pitch is evaluated */
+                /* Evaluate Pitch - shown if pitch submitted but not evaluated */
+                <>
                   <Button
                     onClick={onPitchEvaluation}
-                    variant="outline"
                     className="w-full"
                     size="lg"
+                    variant="destructive"
                   >
                     <BarChart3 className="w-4 h-4 mr-2" />
-                    Pitch Evaluation
+                    Evaluate Pitch
                   </Button>
+                  <div className="text-center">
+                    <Badge variant="destructive" className="text-xs">
+                      ⚠️ Evaluation pending - Complete evaluation to see your rank
+                    </Badge>
+                  </div>
+                </>
+                ) : (
+                /* Pitch Evaluation - shown if pitch is evaluated */
+                <Button
+                  onClick={onPitchEvaluation}
+                  variant="outline"
+                  className="w-full"
+                  size="lg"
+                >
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Pitch Evaluation
+                </Button>
                 )}
               </div>
             )}
@@ -780,7 +812,7 @@ function CompetitionSidebar({
             )}
             {localParticipant && (
               <>
-                {isLeader && canAddMore && (
+                {isLeader && canAddMore && new Date() < new Date(competition.registrationDeadline) && (
                   <>
                     <Button onClick={() => setAddModal(true)} variant="outline" className="w-full mb-1">Invite Another Member</Button>
                     {addModal && (
@@ -793,9 +825,9 @@ function CompetitionSidebar({
                             <CardContent className="flex flex-col gap-4">
                               <Input value={newMemberName} onChange={e => setNewMemberName(e.target.value)} placeholder="Full Name" className="h-11" />
                               <Input value={newMemberEmail} type="email" onChange={e => setNewMemberEmail(e.target.value)} placeholder="Email Address" className={`h-11${addEmailError ? ' border-destructive' : ''}`} />
-{addEmailError && (
-  <div className="text-destructive text-xs mt-1">{addEmailError}</div>
-)}
+                              {addEmailError && (
+                                <div className="text-destructive text-xs mt-1">{addEmailError}</div>
+                              )}
                             </CardContent>
                             <CardFooter className="justify-between">
                               <Button onClick={() => setAddModal(false)} variant="outline">Cancel</Button>
