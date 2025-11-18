@@ -8,15 +8,12 @@ export interface IDetails {
 }
 
 export interface ICompetition extends Document {
-  eventInterval?: {
-    start: Date;
-    end: Date;
-  };
+
   title: string;
   description: string;
-  collegeName: string;
   pitchTime: number;
   vcId: mongoose.Types.ObjectId;
+  collegeName: string;
   collegeLogo: string;
   bannerImage1: string;
   bannerImage2: string;
@@ -40,6 +37,10 @@ export interface ICompetition extends Document {
     phone?: string;
     role: string;
   }>;
+  eventInterval?: {
+    start: Date;
+    end: Date;
+  };
   isActive: boolean;
   approved: boolean;
   totalRegistered: number;
@@ -57,6 +58,8 @@ const DetailsSchema = new Schema<IDetails>({
 const CompetitionSchema = new Schema<ICompetition>({
   title: { type: String, required: true },
   description: { type: String, required: true },
+  pitchTime: { type: Number, required: true },
+  vcId: { type: Schema.Types.ObjectId, required: true },
   collegeName: { type: String, required: true },
   collegeLogo: { type: String, required: true },
   bannerImage1: { type: String, required: true },

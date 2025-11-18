@@ -9,8 +9,8 @@ import { Loader, CheckCircle, XCircle } from 'lucide-react';
 
 export default function InviteCompetitionPage() {
   const searchParams = useSearchParams();
-  const token = searchParams.get("token");
-  const teamId = searchParams.get("teamId");
+  const token = searchParams?.get("token") ?? null;
+  const teamId = searchParams?.get("teamId") ?? null;
   const { data: session, status } = useSession();
   const router = useRouter();
 
@@ -36,14 +36,18 @@ export default function InviteCompetitionPage() {
     try {
       const res = await axios.post('/api/competitions/participants/invite-response', { token, action, teamId }, { validateStatus: () => true });
       if(res.status === 200) {
-        setInviteStatus(action);
+        // Fix: Map the action to the correct status value
+        const status = action === 'accept' ? 'accepted' : 'declined';
+        setInviteStatus(status);
         setHandled(true);
         setInfo(action === 'accept' ? "You have joined the team!" : "You have declined the invitation.");
       } else {
         setError(res.data?.error || "An error occurred. Try again.");
+        setInviteStatus('error');
       }
     } catch (e:any) {
       setError(e.response?.data?.error || 'Could not process request.');
+      setInviteStatus('error');
     } finally {
       setLoading(false);
     }

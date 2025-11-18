@@ -3,7 +3,8 @@ import { getServerSession } from 'next-auth';
 import dbConnect from '@/lib/db';
 import Participant from '@/models/Participant';
 import Competition from '@/models/Competition';
-import mongoose from 'mongoose';
+import User from '@/models/UserModel';
+import { Types } from 'mongoose';
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,8 +13,9 @@ export async function POST(request: NextRequest) {
     if (!session || !session.user || !session.user.email) {
       return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
     }
+
     const { token, action, teamId } = await request.json();
-    if (!token || !['accept','decline'].includes(action) || !teamId) {
+    if (!token || !['accept', 'decline'].includes(action) || !teamId) {
       return NextResponse.json({ error: 'Missing or invalid parameters.' }, { status: 400 });
     }
     // Find participant by id and token
@@ -31,14 +33,26 @@ export async function POST(request: NextRequest) {
     }
     // Get user
     const memberEmail = session.user.email;
-    const memberId= session.user._id;
+    // Find the user from your User model by email to get their ID
+    const user = await User.findOne({ email: memberEmail });
+    if (!user) {
+      return NextResponse.json({ error: 'User not found.' }, { status: 404 });
+    }
+
+    // FIX
+    const memberObjectId = new Types.ObjectId(String(user._id));
+
+    console.log('Member ID:', memberObjectId);
+    console.log('Member ID type:', typeof memberObjectId);
+    console.log('Member Email:', memberEmail);
     
+
     // Duplicity check: Is this user ALREADY a member or leader in any other team for this competition?
     const alreadyParticipant = await Participant.findOne({
       competitionId: competitionId,
       $or: [
-        { userId: memberId }, // Leader of another team
-        { 'teamMembers.userId': memberId }, // Accepted member of another team
+        { userId: memberObjectId }, // Leader of another team
+        { 'teamMembers.userId': memberObjectId }, // Accepted member of another team
         { 'teamLeader.email': memberEmail }, // Leader by email
       ],
       _id: { $ne: teamId }
@@ -62,11 +76,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'This invite email does not match your PitchDesk account.' }, { status: 403 });
     }
     // Handle accept/decline
-    if(action === 'accept') {
+    if (action === 'accept') {
       participant.teamMembers[memberIdx].status = 'accepted';
-      participant.teamMembers[memberIdx].userId = new mongoose.Types.ObjectId(memberId);
+      participant.teamMembers[memberIdx].userId = memberObjectId;
     }
-    if(action === 'decline') {
+    if (action === 'decline') {
       participant.teamMembers[memberIdx].status = 'declined';
       participant.teamMembers[memberIdx].userId = undefined;
     }
@@ -75,7 +89,7 @@ export async function POST(request: NextRequest) {
     const comp = await Competition.findById(competitionId);
     const minSize = comp?.teamSize?.min || 1;
     const maxSize = comp?.teamSize?.max || 1;
-    const acceptedCount = 1 + participant.teamMembers.filter((m:any) => m.status === 'accepted').length; // +1 for leader
+    const acceptedCount = 1 + participant.teamMembers.filter((m: any) => m.status === 'accepted').length; // +1 for leader
     if (acceptedCount < minSize) participant.teamStatus = 'incomplete';
     else if (acceptedCount > maxSize) participant.teamStatus = 'incomplete'; // can't grow > max, but admin can mark DQ
     else participant.teamStatus = 'validated';

@@ -113,6 +113,7 @@ export default function CompetitionPage() {
             const partResponse = await axios.get(
               `/api/competitions/participants?competitionId=${params.id}&userId=${session.user._id}`
             );
+            console.log("participant data from main page",partResponse.data);
             // Check if participant data exists
             if (partResponse.data) {
               setParticipant(partResponse.data);
@@ -565,7 +566,8 @@ function CompetitionSidebar({
   const reFetchParticipant = useCallback(async () => {
     if (!localParticipant) return;
     try {
-      const res = await axios.get(`/api/competitions/participants?competitionId=${competition._id}&userId=${localParticipant.teamLeader.email}`);
+      const res = await axios.get(`/api/competitions/participants?competitionId=${competition._id}&userId=${session?.user?._id}`);
+      console.log("data from sidebar",res.data);
       if (res.data) setLocalParticipant(res.data);
     } catch (err) { /* do nothing, UI tolerant */ }
   }, [competition._id, localParticipant]);
