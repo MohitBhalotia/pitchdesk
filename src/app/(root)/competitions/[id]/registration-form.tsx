@@ -8,7 +8,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Plus, Trash2 } from 'lucide-react';
 import axios from 'axios'
-import { useSession } from 'next-auth/react';
 
 interface Competition {
   _id: string;
@@ -25,10 +24,31 @@ interface TeamMember {
   email: string;
 }
 
+type TeamMember1 = {
+  name: string;
+  email: string;
+  status: "pending" | "accepted" | "declined";
+  userId?: string;
+};
+
+interface Participant {
+  _id: string;
+  teamName: string;
+  teamLeader: {
+    email: string;
+    name: string;
+  };
+  teamMembers: TeamMember1[];
+  teamStatus: "disqualified" | "validated" | "incomplete";
+  // status: 'registered' | 'submitted' | 'disqualified';
+  pitchSubmitted: boolean;
+  pitchEvaluated: boolean;
+}
+
 interface RegistrationFormProps {
   competition: Competition;
   onClose: () => void;
-  onSuccess: (participant: any) => void;
+  onSuccess: (participant: Participant) => void;
   userData: {
     id:string;
     name: string;

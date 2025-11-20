@@ -46,7 +46,7 @@ export default function InviteTeamMemberEmail({
             {/* Logo Section */}
             <Section style={imageSection}>
               <Img
-                src={`${baseUrl}/logo.svg`}
+                src={`${baseUrl}/logo1.png`}
                 width="75"
                 height="45"
                 alt="Pitch Desk Logo"

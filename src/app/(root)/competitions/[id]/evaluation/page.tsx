@@ -391,7 +391,7 @@ export default function TournamentPitchEvaluation() {
                   No competition pitch found
                 </p>
                 <p className="text-sm text-muted-foreground mt-2">
-                  You haven't submitted a pitch for this competition yet
+                  You haven&apos;t submitted a pitch for this competition yet
                 </p>
                 <Button
                   onClick={() => router.push(`/competitions/${competitionId}`)}
@@ -450,11 +450,11 @@ export default function TournamentPitchEvaluation() {
                     >
                       {isExpanded ? (
                         <>
-                          <ChevronUp className="h-3 h-3 sm:h-4 sm:w-4" /> Collapse
+                          <ChevronUp className="h-3 w-3 sm:h-4 sm:w-4" /> Collapse
                         </>
                       ) : (
                         <>
-                          <ChevronDown className="h-3 h-3 sm:h-4 sm:w-4" /> Expand
+                          <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4" /> Expand
                         </>
                       )}
                     </Button>
@@ -553,7 +553,7 @@ export default function TournamentPitchEvaluation() {
                   <div className="flex flex-col gap-3 sm:gap-4">
                     <div className="flex-1">
                       <CardTitle className="text-base sm:text-lg lg:text-xl flex items-center gap-2 mb-2">
-                        <BarChart3 className="h-4 h-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+                        <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
                         <span>Pitch Evaluation</span>
                       </CardTitle>
                       <CardDescription className="text-xs sm:text-sm">
@@ -575,11 +575,11 @@ export default function TournamentPitchEvaluation() {
                       >
                         {isEvaluationExpanded ? (
                           <>
-                            <ChevronUp className="h-3 h-3 sm:h-4 sm:w-4" /> Collapse
+                            <ChevronUp className="h-3 w-3 sm:h-4 sm:w-4" /> Collapse
                           </>
                         ) : (
                           <>
-                            <ChevronDown className="h-3 h-3 sm:h-4 sm:w-4" /> Expand
+                            <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4" /> Expand
                           </>
                         )}
                       </Button>
