@@ -47,7 +47,9 @@ export default function InviteCompetitionPage() {
         setError(res.data?.error || "An error occurred. Try again.");
         setInviteStatus('error');
       }
-    } catch (e:any) {
+    } 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    catch (e) {
       setError(e.response?.data?.error || 'Could not process request.');
       setInviteStatus('error');
     } finally {
@@ -117,7 +119,7 @@ export default function InviteCompetitionPage() {
         </CardHeader>
         <CardContent className="text-center space-y-4 sm:space-y-6 px-4 sm:px-6">
           <div className="text-base sm:text-lg font-medium">
-            You've been invited to join a team for a competition on Pitch Desk.
+            You&apos;ve been invited to join a team for a competition on Pitch Desk.
           </div>
           {!!error && (
             <div className="text-red-500 text-xs sm:text-sm mt-2 break-words">{error}</div>

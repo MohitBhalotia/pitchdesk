@@ -33,8 +33,8 @@ export default function VerifyEmail() {
 
   const router = useRouter()
   const searchParams = useSearchParams()
-  const id = searchParams.get("id")
-  const code = searchParams.get("code")
+  const id = searchParams?.get("id")
+  const code = searchParams?.get("code")
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {

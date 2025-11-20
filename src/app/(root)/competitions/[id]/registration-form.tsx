@@ -155,7 +155,9 @@ const handleSubmit = async (e: React.FormEvent) => {
         const participant = response.data;
         onSuccess(participant);
       }
-    } catch (error: any) {
+    } 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    catch (error: any) {
       console.error('Registration error:', error);
       alert(error.response?.data?.error || 'Registration failed. Please try again.');
     } finally {
