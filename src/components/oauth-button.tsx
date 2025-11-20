@@ -1,19 +1,31 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { signIn } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 
 interface OAuthButtonsProps {
   disabled?: boolean;
 }
 
 export default function OAuthButtons({ disabled = false }: OAuthButtonsProps) {
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams?.get("redirect");
+  
+  const handleGoogleSignIn = () => {
+    // Store redirect URL in sessionStorage before OAuth redirect
+    if (redirectUrl) {
+      sessionStorage.setItem("authRedirect", redirectUrl);
+    }
+    signIn("google", { callbackUrl: "/callBack" });
+  };
+
   return (
     <div>
       <Button
         variant="outline"
         type="button"
         className="w-full flex justify-center"
-        onClick={() => signIn("google", { callbackUrl: "/callBack" })}
+        onClick={handleGoogleSignIn}
         disabled={disabled}
       >
         <span className="flex items-center gap-2">

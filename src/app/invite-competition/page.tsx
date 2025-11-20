@@ -25,9 +25,11 @@ export default function InviteCompetitionPage() {
     if (!token || !teamId) return;
     if (status === "loading") return;
     if (status !== "authenticated") {
-      signIn(undefined, { callbackUrl: `/invite-competition?token=${encodeURIComponent(token)}&teamId=${encodeURIComponent(teamId)}` });
+      // Store the invite URL as a redirect parameter
+      const redirectUrl = `/invite-competition?token=${encodeURIComponent(token)}&teamId=${encodeURIComponent(teamId)}`;
+      router.push(`/login?redirect=${encodeURIComponent(redirectUrl)}`);
     }
-  }, [status, token, teamId]);
+  }, [status, token, teamId, router]);
 
   // Core accept/decline handler
   async function respondToInvite(action: 'accept'|'decline') {

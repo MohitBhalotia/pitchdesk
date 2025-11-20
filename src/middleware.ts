@@ -64,5 +64,7 @@ export const config = {
     "/community/feedback",
     "/meet-the-team",
     "/investors",
+    "/invite-competition",
+    "/competitions/:path*",
   ],
 };

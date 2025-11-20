@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -12,16 +12,18 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Checkbox } from "@/components/ui/checkbox"
-import signupSchemaStep1 from "@/schemas/signUpSchemaStep1"
-import OAuthButtons from "@/components/oauth-button"
-import Link from "next/link"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import signupSchemaStep1 from "@/schemas/signUpSchemaStep1";
+import OAuthButtons from "@/components/oauth-button";
+import Link from "next/link";
 
 export default function Step1Form() {
-  const router = useRouter()
-  
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams?.get("redirect");
+
   const form = useForm({
     resolver: zodResolver(signupSchemaStep1),
     defaultValues: {
@@ -31,22 +33,23 @@ export default function Step1Form() {
       confirmPassword: "",
       privacyPolicy: false,
     },
-  })
+  });
 
   const onSubmit = async (data: z.infer<typeof signupSchemaStep1>) => {
-    localStorage.setItem("step1Data", JSON.stringify(data))
-    router.push("/signup/step2")
-  }
+    localStorage.setItem("step1Data", JSON.stringify(data));
+    // Store redirect URL if it exists
+    if (redirectUrl) {
+      localStorage.setItem("signupRedirect", redirectUrl);
+    }
+    router.push("/signup/step2");
+  };
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-4"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="flex flex-col items-center gap-2 text-center my-10">
-        <h1 className="text-3xl font-bold">Create Account</h1>
-      </div>
+          <h1 className="text-3xl font-bold">Create Account</h1>
+        </div>
         <div className="space-y-4">
           <FormField
             control={form.control}
@@ -69,7 +72,11 @@ export default function Step1Form() {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="john@example.com" {...field} />
+                  <Input
+                    type="email"
+                    placeholder="john@example.com"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -119,14 +126,13 @@ export default function Step1Form() {
                   <div className="space-y-1 leading-none">
                     <FormLabel className="text-sm font-normal cursor-pointer">
                       I understand the{" "}
-                      <Link 
-                        href="/privacy" 
+                      <Link
+                        href="/privacy"
                         target="_blank"
                         className="text-primary hover:underline font-medium"
                       >
                         Privacy Policy
                       </Link>
-                      
                     </FormLabel>
                   </div>
                 </div>
@@ -136,7 +142,11 @@ export default function Step1Form() {
           />
         </div>
 
-        <Button type="submit" className="w-full" disabled={!form.watch('privacyPolicy')}>
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={!form.watch("privacyPolicy")}
+        >
           Continue
         </Button>
 
@@ -152,8 +162,8 @@ export default function Step1Form() {
         </div>
 
         <div className="space-y-2">
-          <OAuthButtons disabled={!form.watch('privacyPolicy')} />
-          {!form.watch('privacyPolicy') && (
+          <OAuthButtons disabled={!form.watch("privacyPolicy")} />
+          {!form.watch("privacyPolicy") && (
             <p className="text-xs text-center text-muted-foreground">
               Please accept the Privacy Policy to continue
             </p>
@@ -163,12 +173,19 @@ export default function Step1Form() {
         <div className="text-center">
           <p className="text-sm ">
             Already have an account?{" "}
-            <Link href="/login" className="hover:underline">
+            <Link
+              href={
+                redirectUrl
+                  ? `/login?redirect=${encodeURIComponent(redirectUrl)}`
+                  : "/login"
+              }
+              className="hover:underline"
+            >
               Login
             </Link>
           </p>
         </div>
       </form>
     </Form>
-  )
+  );
 }

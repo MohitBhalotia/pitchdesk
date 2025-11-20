@@ -141,6 +141,9 @@ const authOptions: NextAuthOptions = {
         const user = await UserModel.findById(token._id);
         if (user) {
           token.userPlan = user.userPlan;
+          token.signupStep2Done = user.signupStep2Done;
+          token.role = user.role;
+          token.isVerified = user.isVerified;
         }
       }
       return token;

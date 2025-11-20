@@ -16,7 +16,7 @@ import {
   FormLabel,
 } from "../../../components/ui/form";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
 
@@ -27,6 +27,8 @@ export function LoginForm(
   }: React.ComponentProps<"form">
 ) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams?.get("redirect");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const form = useForm<z.infer<typeof loginSchema>>({
@@ -43,14 +45,22 @@ export function LoginForm(
         redirect: false,
         email: data.email,
         password: data.password,
-        callbackUrl: "/dashboard",
       });
       if (result?.error) {
         throw new Error(result.error);
       }
-      if (result?.url) {
+      if (result?.ok) {
         toast.success("Login successfull");
-        router.replace(result.url);
+        // Check for post-verification redirect (for credential signup flow)
+        const postVerifyRedirect = sessionStorage.getItem("postVerifyRedirect");
+        if (postVerifyRedirect) {
+          sessionStorage.removeItem("postVerifyRedirect");
+          router.replace(postVerifyRedirect);
+        } else {
+          // Redirect to the original URL if redirect parameter exists, otherwise go to dashboard
+          const destination = redirectUrl || "/dashboard";
+          router.replace(destination);
+        }
       }
     } catch (error) {
       toast.error(
@@ -140,7 +150,7 @@ export function LoginForm(
 
           <div className="text-center text-sm">
             Don&apos;t have an account?{" "}
-            <Link href="/signup/step1" className="underline underline-offset-4">
+            <Link href={redirectUrl ? `/signup/step1?redirect=${encodeURIComponent(redirectUrl)}` : "/signup/step1"} className="underline underline-offset-4">
               Sign up
             </Link>
           </div>

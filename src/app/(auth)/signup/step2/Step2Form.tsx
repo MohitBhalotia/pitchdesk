@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Select,
@@ -6,10 +6,10 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { Button } from "@/components/ui/button"
+} from "@/components/ui/select";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -17,89 +17,119 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import axios, { AxiosError } from "axios"
-import signupSchemaStep2, { SignupStep2Type } from "@/schemas/signUpSchemaStep2"
-import { toast } from "sonner"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
-import { useSession } from "next-auth/react"
-import ApiResponse from "@/types/ApiResponse"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import axios, { AxiosError } from "axios";
+import signupSchemaStep2, {
+  SignupStep2Type,
+} from "@/schemas/signUpSchemaStep2";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import ApiResponse from "@/types/ApiResponse";
 
 export default function Step2Form() {
-  const router = useRouter()
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<SignupStep2Type>({
     resolver: zodResolver(signupSchemaStep2),
     defaultValues: {
       role: "founder",
       company: "",
-      websiteUrl: ""
+      websiteUrl: "",
     },
-  })
+  });
 
-  const { data: session, status } = useSession()
-  const [isGoogleUser, setIsGoogleUser] = useState(false)
+  const { data: session, status, update } = useSession();
+  const [isGoogleUser, setIsGoogleUser] = useState(false);
 
   useEffect(() => {
     // Check if Google user is logged in - using the original logic
     if (status === "authenticated" && session?.user?.email) {
-      setIsGoogleUser(true)
+      setIsGoogleUser(true);
     }
-  }, [status, session])
+  }, [status, session]);
 
   const onSubmit = async (data: SignupStep2Type) => {
-    setIsSubmitting(true)
-    const step2Data = data
+    setIsSubmitting(true);
+    const step2Data = data;
 
     try {
-      console.log(isGoogleUser)
+      console.log(isGoogleUser);
       if (isGoogleUser) {
-        const res = await axios.post("/api/users/update", step2Data)
+        const res = await axios.post("/api/users/update", step2Data);
         if (res.status === 200) {
-          if (data.role === 'founder') {
-            router.push("/login")
-            toast.success("User details updated successfully")
-          }
-          else if (data.role === 'vc') {
-            router.push("/verification-pending")
-            toast.success("Thank you for registering as a Venture Capitalist! Our team will verify your VC account and contact you soon.")
+          // Update the session to reflect signupStep2Done: true
+          await update();
+
+          if (data.role === "founder") {
+            // Check if there's a stored redirect URL from OAuth flow
+            const storedRedirect = sessionStorage.getItem("authRedirect");
+            toast.success("Profile completed successfully");
+
+            // Use window.location for full page reload to ensure JWT token is refreshed
+            if (storedRedirect) {
+              sessionStorage.removeItem("authRedirect");
+              window.location.href = storedRedirect;
+            } else {
+              window.location.href = "/dashboard";
+            }
+          } else if (data.role === "vc") {
+            toast.success(
+              "Thank you for registering as a Venture Capitalist! Our team will verify your VC account and contact you soon."
+            );
+            window.location.href = "/verification-pending";
           }
         }
       } else {
-        
         // Step1 user (stored in localStorage)
-        const step1Data = JSON.parse(localStorage.getItem("step1Data") || "{}")
-        localStorage.removeItem("step1Data")
-        const finalPayload = { ...step1Data, ...step2Data }
+        const step1Data = JSON.parse(localStorage.getItem("step1Data") || "{}");
+        const storedRedirect = localStorage.getItem("signupRedirect");
+        localStorage.removeItem("step1Data");
+        const finalPayload = { ...step1Data, ...step2Data };
 
-        const res = await axios.post<ApiResponse>("/api/auth/signup", finalPayload)
-        console.log(res.data)
+        const res = await axios.post<ApiResponse>(
+          "/api/auth/signup",
+          finalPayload
+        );
+        console.log(res.data);
         if (res.data.success) {
           if (data.role === "vc") {
-            router.push("/verification-pending")
-            toast.success("Thank you for registering as a Venture Capitalist! Our team will verify your VC account and contact you soon.")
+            router.push("/verification-pending");
+            toast.success(
+              "Thank you for registering as a Venture Capitalist! Our team will verify your VC account and contact you soon."
+            );
           } else {
-            router.push("/verify-email?id=" + res.data?.data)
-            toast.success(res.data.message)
+            // Store redirect URL for after email verification and login
+            if (storedRedirect) {
+              sessionStorage.setItem("postVerifyRedirect", storedRedirect);
+              localStorage.removeItem("signupRedirect");
+            }
+            router.push("/verify-email?id=" + res.data?.data);
+            toast.success(res.data.message);
           }
         }
       }
     } catch (error) {
-      const axiosError = error as AxiosError<ApiResponse>
-      toast.error(axiosError.response?.data.message || "an error occured while submitting details")
-      console.error(error)
+      const axiosError = error as AxiosError<ApiResponse>;
+      toast.error(
+        axiosError.response?.data.message ||
+          "an error occured while submitting details"
+      );
+      console.error(error);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 ">
-        <h2 className="text-2xl font-bold text-center lg:text-left">Complete Your Profile</h2>
+        <h2 className="text-2xl font-bold text-center lg:text-left">
+          Complete Your Profile
+        </h2>
 
         <div className="space-y-6 py-10">
           <FormField
@@ -108,7 +138,10 @@ export default function Step2Form() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Select Role</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select your role" />
@@ -118,7 +151,6 @@ export default function Step2Form() {
                     <SelectItem value="founder">Founder</SelectItem>
                     <SelectItem value="vc">VC</SelectItem>
                   </SelectContent>
-
                 </Select>
                 <FormMessage />
               </FormItem>
@@ -146,10 +178,7 @@ export default function Step2Form() {
               <FormItem>
                 <FormLabel>Website URL</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="https://example.com"
-                    {...field}
-                  />
+                  <Input placeholder="https://example.com" {...field} />
                 </FormControl>
                 {/* {form.watch("role") === "vc" && (
                   <p className="text-sm text-blue-600 bg-blue-50 p-2 rounded-md mt-2">
@@ -162,11 +191,7 @@ export default function Step2Form() {
           />
         </div>
 
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={isSubmitting}
-        >
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? "Processing..." : "Submit"}
         </Button>
 
@@ -175,5 +200,5 @@ export default function Step2Form() {
         </p>
       </form>
     </Form>
-  )
+  );
 }
