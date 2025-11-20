@@ -7,6 +7,7 @@ import { Calendar, Users, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import axios from 'axios';
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 
 interface Competition {
   _id: string;
@@ -55,10 +56,10 @@ export default function TournamentsPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Competitions</h1>
-          <p className="text-muted-foreground">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Competitions</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Discover and participate in entrepreneurship competitions from colleges worldwide
           </p>
         </div>
@@ -89,10 +90,10 @@ export default function TournamentsPage() {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Competitions</h1>
-          <p className="text-muted-foreground">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Competitions</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Discover and participate in entrepreneurship competitions from colleges worldwide
           </p>
         </div>
@@ -117,10 +118,10 @@ export default function TournamentsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className=" mb-8">
-        <h1 className="text-4xl font-bold mb-2">Competitions</h1>
-        <p className="text-muted-foreground">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Competitions</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">
           Discover and participate in entrepreneurship competitions from colleges worldwide
         </p>
       </div>
@@ -131,38 +132,40 @@ export default function TournamentsPage() {
 
           return (
             <Card key={competition._id} className="hover:shadow-lg transition-shadow">
-              <div className="aspect-video relative overflow-hidden rounded-t-lg">
-                <img
+              <div className="-mt-6 ">
+                <Image
                   src={competition.bannerImage1}
                   alt={competition.title}
-                  className="object-cover w-full h-full"
+                  width={500}
+                  height={300}
+                  className=" rounded-t-lg"
                 />
               </div>
 
               <CardHeader>
-                <div className="flex items-start justify-between mb-2">
-                  <Badge variant="secondary" className="mb-2">
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
+                  <Badge variant="secondary" className="w-fit">
                     {competition.collegeName}
                   </Badge>
-                  <Badge variant={daysLeft > 7 ? "default" : daysLeft > 0 ? "destructive" : "secondary"}>
+                  <Badge variant={daysLeft > 7 ? "default" : daysLeft > 0 ? "destructive" : "secondary"} className="w-fit">
                     {daysLeft > 0 ? `${daysLeft} days left` : 'Closed'}
                   </Badge>
                 </div>
-                <CardTitle className="line-clamp-2">{competition.title}</CardTitle>
-                <CardDescription className="line-clamp-2">
+                <CardTitle className="line-clamp-2 text-lg sm:text-xl">{competition.title}</CardTitle>
+                <CardDescription className="line-clamp-2 text-sm">
                   {competition.description}
                 </CardDescription>
               </CardHeader>
 
               <CardContent>
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-sm text-muted-foreground">
                   <div className="flex items-center gap-1">
-                    <Trophy className="w-4 h-4" />
-                    <span>{competition.prizePool}</span>
+                    <Trophy className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate">{competition.prizePool}</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Users className="w-4 h-4" />
-                    <span>{competition.totalRegistered} registered</span>
+                    <Users className="w-4 h-4 flex-shrink-0" />
+                    <span className="whitespace-nowrap">{competition.totalRegistered} registered</span>
                   </div>
                 </div>
               </CardContent>

@@ -149,20 +149,20 @@ const ScoreCard = ({
   color: string;
 }) => {
   return (
-    <div className="bg-card rounded-lg border p-4">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-card-foreground">{title}</h3>
+    <div className="bg-card rounded-lg border p-3 sm:p-4">
+      <div className="flex items-center justify-between mb-2 sm:mb-3">
+        <h3 className="text-xs sm:text-sm font-semibold text-card-foreground truncate flex-1 pr-2">{title}</h3>
         <PieChart
           score={score}
           maxScore={maxScore}
           label=""
           color={color}
-          size={60}
+          size={50}
         />
       </div>
       <div className="text-center">
-        <span className="text-2xl font-bold text-primary">{score}</span>
-        <span className="text-sm text-muted-foreground ml-1">/ {maxScore}</span>
+        <span className="text-lg sm:text-xl lg:text-2xl font-bold text-primary">{score}</span>
+        <span className="text-xs sm:text-sm text-muted-foreground ml-1">/ {maxScore}</span>
       </div>
     </div>
   );
@@ -300,50 +300,56 @@ export default function TournamentPitchEvaluation() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              Competition Pitch
-            </h1>
-            <p className="text-muted-foreground text-sm sm:text-base">
-              Review your competition pitch submission and evaluation
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Trophy className="h-6 w-6 text-yellow-500" />
-            <Badge variant="secondary" className="px-3 py-1">
-              Competition Pitch
-            </Badge>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        <div className="flex flex-col gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <div className="flex-1">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight mb-1 sm:mb-2">
+                Competition Pitch
+              </h1>
+              <p className="text-muted-foreground text-xs sm:text-sm lg:text-base">
+                Review your competition pitch submission and evaluation
+              </p>
+            </div>
+            <div className="flex items-center gap-2 w-fit">
+              <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-500 flex-shrink-0" />
+              <Badge variant="secondary" className="px-2 sm:px-3 py-1 text-xs sm:text-sm whitespace-nowrap">
+                Competition Pitch
+              </Badge>
+            </div>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap gap-3 mb-6">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-6">
           <Button
             onClick={() => router.push(`/competitions/${competitionId}`)}
             variant="outline"
+            size="sm"
+            className="text-xs sm:text-sm"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
             Back to Competition
           </Button>
           <Button
             onClick={() => router.push(`/competitions/${competitionId}/leaderboard`)}
+            size="sm"
+            className="text-xs sm:text-sm"
           >
-            <Trophy className="h-4 w-4 mr-2" />
+            <Trophy className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
             View Leaderboard
           </Button>
         </div>
 
         {/* Search Bar */}
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <div className="relative max-w-md w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-3  sm:h-4 sm:w-4" />
             <Input
-              placeholder="Search conversation content..."
+              placeholder="Search conversation..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-8 sm:pl-10 text-xs sm:text-sm h-9 sm:h-10"
             />
           </div>
         </div>
@@ -400,55 +406,55 @@ export default function TournamentPitchEvaluation() {
           <div className="space-y-6">
             {/* Pitch Card */}
             <Card key={pitch._id} className="overflow-hidden">
-              <CardHeader className="pb-3">
-                <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+              <CardHeader className="pb-3 p-4 sm:p-6">
+                <div className="flex flex-col gap-3 sm:gap-4">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2 flex-wrap">
-                      <CardTitle className="text-lg sm:text-xl flex items-center gap-2 flex-wrap">
+                    <div className="flex flex-col sm:flex-row sm:items-start gap-2 mb-2">
+                      <CardTitle className="text-base sm:text-lg lg:text-xl flex-1 break-words">
                         {pitch.title}
-                        {isEvaluating && (
-                          <Badge variant="outline" className="ml-2">
-                            <Sparkles className="h-3 w-3 mr-1" />
-                            Evaluating...
-                          </Badge>
-                        )}
                       </CardTitle>
+                      {isEvaluating && (
+                        <Badge variant="outline" className="w-fit text-xs">
+                          <Sparkles className="h-3 w-3 mr-1" />
+                          Evaluating...
+                        </Badge>
+                      )}
                     </div>
 
-                    <CardDescription className="flex flex-wrap gap-3 text-sm">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
+                    <CardDescription className="flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm">
+                      <span className="flex items-center gap-1 whitespace-nowrap">
+                        <Calendar className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                         {new Date(pitch.startTime).toLocaleDateString()}
                       </span>
-                      <span className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
+                      <span className="flex items-center gap-1 whitespace-nowrap">
+                        <Clock className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                         {formatDuration(pitch.duration || 0)}
                       </span>
-                      <Badge variant="outline">
+                      <Badge variant="outline" className="text-xs">
                         {pitch.conversationHistory?.length || 0} messages
                       </Badge>
                       {searchTerm && (
-                        <Badge variant="secondary">
+                        <Badge variant="secondary" className="text-xs">
                           {filteredMessages.length} matches
                         </Badge>
                       )}
                     </CardDescription>
                   </div>
 
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={togglePitchExpansion}
-                      className="flex items-center gap-1"
+                      className="flex items-center gap-1 text-xs sm:text-sm"
                     >
                       {isExpanded ? (
                         <>
-                          <ChevronUp className="h-4 w-4" /> Collapse
+                          <ChevronUp className="h-3 h-3 sm:h-4 sm:w-4" /> Collapse
                         </>
                       ) : (
                         <>
-                          <ChevronDown className="h-4 w-4" /> Expand
+                          <ChevronDown className="h-3 h-3 sm:h-4 sm:w-4" /> Expand
                         </>
                       )}
                     </Button>
@@ -457,10 +463,10 @@ export default function TournamentPitchEvaluation() {
               </CardHeader>
 
               {isExpanded && (
-                <CardContent className="pt-0">
+                <CardContent className="pt-0 p-4 sm:p-6">
                   <div className="border-t pt-4">
-                    <ScrollArea className="h-[300px] sm:h-[400px] pr-2 sm:pr-4">
-                      <div className="space-y-4">
+                    <ScrollArea className="h-[250px] sm:h-[300px] lg:h-[400px] pr-2 sm:pr-4">
+                      <div className="space-y-3 sm:space-y-4">
                         {(searchTerm ? filteredMessages : pitch.conversationHistory || []).map((msg, idx) => (
                           <div
                             key={idx}
@@ -470,14 +476,14 @@ export default function TournamentPitchEvaluation() {
                               }`}
                           >
                             <div
-                              className={`max-w-full sm:max-w-lg rounded-xl p-3 sm:p-4 ${msg.role === "user"
+                              className={`max-w-full sm:max-w-[85%] lg:max-w-lg rounded-xl p-3 sm:p-4 ${msg.role === "user"
                                 ? "bg-primary text-primary-foreground"
                                 : "bg-muted"
                                 }`}
                             >
-                              <div className="flex items-center gap-2 mb-2">
+                              <div className="flex items-center gap-2 mb-2 flex-wrap">
                                 <div
-                                  className={`rounded-full p-1 ${msg.role === "user"
+                                  className={`rounded-full p-1 flex-shrink-0 ${msg.role === "user"
                                     ? "bg-primary-foreground/20"
                                     : "bg-muted-foreground/20"
                                     }`}
@@ -492,7 +498,7 @@ export default function TournamentPitchEvaluation() {
                                   {msg.role}
                                 </span>
                                 <span
-                                  className={`text-xs ml-4 ${msg.role === "user"
+                                  className={`text-xs ${msg.role === "user"
                                     ? "text-primary-foreground/70"
                                     : "text-muted-foreground"
                                     }`}
@@ -505,7 +511,7 @@ export default function TournamentPitchEvaluation() {
                                   })}
                                 </span>
                               </div>
-                              <p className="text-sm break-words">
+                              <p className="text-xs sm:text-sm break-words leading-relaxed">
                                 {msg.content}
                               </p>
                             </div>
@@ -543,37 +549,37 @@ export default function TournamentPitchEvaluation() {
               </Card>
             ) : evaluation ? (
               <Card className="overflow-hidden border-primary/20">
-                <CardHeader className="pb-3 bg-primary/5">
-                  <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
-                    <div>
-                      <CardTitle className="text-lg sm:text-xl flex items-center gap-2">
-                        <BarChart3 className="h-5 w-5 text-primary" />
-                        Pitch Evaluation
+                <CardHeader className="pb-3 bg-primary/5 p-4 sm:p-6">
+                  <div className="flex flex-col gap-3 sm:gap-4">
+                    <div className="flex-1">
+                      <CardTitle className="text-base sm:text-lg lg:text-xl flex items-center gap-2 mb-2">
+                        <BarChart3 className="h-4 h-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+                        <span>Pitch Evaluation</span>
                       </CardTitle>
-                      <CardDescription>
+                      <CardDescription className="text-xs sm:text-sm">
                         Competition scoring based on 6 key dimensions
                       </CardDescription>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-primary">
+                    <div className="flex items-center justify-between sm:justify-start gap-3 sm:gap-4">
+                      <div className="text-center sm:text-left">
+                        <div className="text-xl sm:text-2xl font-bold text-primary">
                           {evaluation.scores.TotalScore}
                         </div>
-                        <div className="text-xs text-muted-foreground">Total Score</div>
+                        <div className="text-xs text-muted-foreground whitespace-nowrap">Total Score</div>
                       </div>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={toggleEvaluationExpansion}
-                        className="flex items-center gap-1"
+                        className="flex items-center gap-1 text-xs sm:text-sm"
                       >
                         {isEvaluationExpanded ? (
                           <>
-                            <ChevronUp className="h-4 w-4" /> Collapse
+                            <ChevronUp className="h-3 h-3 sm:h-4 sm:w-4" /> Collapse
                           </>
                         ) : (
                           <>
-                            <ChevronDown className="h-4 w-4" /> Expand
+                            <ChevronDown className="h-3 h-3 sm:h-4 sm:w-4" /> Expand
                           </>
                         )}
                       </Button>
@@ -582,17 +588,17 @@ export default function TournamentPitchEvaluation() {
                 </CardHeader>
 
                 {isEvaluationExpanded && (
-                  <CardContent className="pt-6 space-y-6">
+                  <CardContent className="pt-4 sm:pt-6 space-y-4 sm:space-y-6 p-4 sm:p-6">
                     {/* Overall Score */}
-                    <div className="bg-card rounded-lg border p-6">
-                      <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold mb-2">Overall Performance</h3>
-                          <p className="text-muted-foreground text-sm">
+                    <div className="bg-card rounded-lg border p-4 sm:p-6">
+                      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
+                        <div className="flex-1 w-full sm:w-auto text-center sm:text-left">
+                          <h3 className="text-base sm:text-lg font-semibold mb-2">Overall Performance</h3>
+                          <p className="text-muted-foreground text-xs sm:text-sm">
                             Total Score: {evaluation.scores.TotalScore}/100
                           </p>
-                          <div className="mt-3">
-                            <Badge variant="secondary">
+                          <div className="mt-2 sm:mt-3">
+                            <Badge variant="secondary" className="text-xs sm:text-sm">
                               {getPerformanceLabel(evaluation.scores.TotalScore)}
                             </Badge>
                           </div>
@@ -602,13 +608,13 @@ export default function TournamentPitchEvaluation() {
                           maxScore={100}
                           label="Total Score"
                           color="var(--color-primary)"
-                          size={100}
+                          size={80}
                         />
                       </div>
                     </div>
 
                     {/* Score Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                       <ScoreCard
                         title="Problem & Market"
                         score={evaluation.scores.ProblemMarketOpportunity}
@@ -648,38 +654,38 @@ export default function TournamentPitchEvaluation() {
                     </div>
 
                     {/* Confidence Score */}
-                    <div className="bg-card rounded-lg border p-6">
-                      <h3 className="text-lg font-semibold mb-4">
+                    <div className="bg-card rounded-lg border p-4 sm:p-6">
+                      <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
                         Business Investability Confidence
                       </h3>
-                      <div className="flex items-center space-x-4">
-                        <div className="flex-1">
-                          <div className="w-full bg-muted rounded-full h-4">
+                      <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
+                        <div className="flex-1 w-full">
+                          <div className="w-full bg-muted rounded-full h-3 sm:h-4">
                             <div
-                              className="bg-chart-2 h-4 rounded-full transition-all duration-500"
+                              className="bg-chart-2 h-3 sm:h-4 rounded-full transition-all duration-500"
                               style={{
                                 width: `${evaluation.scores.BusinessInvestabilityConfidence}%`,
                               }}
                             ></div>
                           </div>
                         </div>
-                        <div className="text-2xl font-bold text-chart-2">
+                        <div className="text-xl sm:text-2xl font-bold text-chart-2 whitespace-nowrap">
                           {evaluation.scores.BusinessInvestabilityConfidence}%
                         </div>
                       </div>
                     </div>
 
                     {/* Summary */}
-                    <div className="bg-card rounded-lg border p-6">
-                      <h3 className="text-lg font-semibold mb-4">Summary</h3>
-                      <p className="text-card-foreground/80 leading-relaxed">
+                    <div className="bg-card rounded-lg border p-4 sm:p-6">
+                      <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Summary</h3>
+                      <p className="text-card-foreground/80 leading-relaxed text-xs sm:text-sm">
                         {evaluation.summary}
                       </p>
                     </div>
 
                     {/* Metadata */}
-                    <div className="bg-muted rounded-lg p-4">
-                      <div className="text-sm text-muted-foreground">
+                    <div className="bg-muted rounded-lg p-3 sm:p-4">
+                      <div className="text-xs sm:text-sm text-muted-foreground">
                         Evaluation generated on{" "}
                         {new Date(evaluation.createdAt).toLocaleDateString()} at{" "}
                         {new Date(evaluation.createdAt).toLocaleTimeString()}

@@ -7,7 +7,7 @@ declare module "next-auth" {
     fullName?: string;
     email?: string;
     isVerified?: boolean;
-    role?: "founder" | "vc" | null;
+    role?: "founder" | "vc" ;
     userPlan?: "free" | "standard" | "pro" | "enterprise";
     provider?: "google" | "credentials";
     signupStep2Done: boolean

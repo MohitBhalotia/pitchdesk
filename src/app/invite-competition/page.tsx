@@ -56,34 +56,92 @@ export default function InviteCompetitionPage() {
   }
 
   if (!token || !teamId) {
-    return <Card className="max-w-lg mx-auto my-36"><CardHeader><CardTitle>Invalid Link</CardTitle></CardHeader><CardContent>This invitation link is invalid or broken.</CardContent></Card>;
+    return (
+      <div className="container mx-auto px-4 sm:px-6">
+        <Card className="max-w-lg mx-auto my-16 sm:my-24 lg:my-36">
+          <CardHeader>
+            <CardTitle className="text-xl sm:text-2xl">Invalid Link</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm sm:text-base">
+            This invitation link is invalid or broken.
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   if (status === "loading" || loading) {
-    return <div className="flex flex-col items-center justify-center min-h-[60vh]"><Loader className="animate-spin w-8 h-8 mb-2" />Processing...</div>;
+    return (
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="flex flex-col items-center justify-center min-h-[50vh] sm:min-h-[60vh]">
+          <Loader className="animate-spin w-6 h-6 sm:w-8 sm:h-8 mb-2" />
+          <p className="text-sm sm:text-base">Processing...</p>
+        </div>
+      </div>
+    );
   }
 
   if (handled) {
-    return <Card className="max-w-lg mx-auto my-36 border-primary"><CardHeader><CardTitle>Invitation {inviteStatus === 'accepted' ? 'Accepted!' : 'Declined'}</CardTitle></CardHeader><CardContent className="flex flex-col items-center gap-4">
-      {inviteStatus === 'accepted' ? <CheckCircle className="w-12 h-12 text-green-500" /> : <XCircle className="w-12 h-12 text-red-500" />}
-      <div>{info}</div>
-      <Button onClick={() => router.push('/dashboard')}>Go to Dashboard</Button>
-    </CardContent></Card>;
+    return (
+      <div className="container mx-auto px-4 sm:px-6">
+        <Card className="max-w-lg mx-auto my-16 sm:my-24 lg:my-36 border-primary">
+          <CardHeader>
+            <CardTitle className="text-xl sm:text-2xl">
+              Invitation {inviteStatus === 'accepted' ? 'Accepted!' : 'Declined'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center gap-4 px-4 sm:px-6">
+            {inviteStatus === 'accepted' ? (
+              <CheckCircle className="w-10 h-10 sm:w-12 sm:h-12 text-green-500" />
+            ) : (
+              <XCircle className="w-10 h-10 sm:w-12 sm:h-12 text-red-500" />
+            )}
+            <div className="text-sm sm:text-base text-center">{info}</div>
+            <Button 
+              onClick={() => router.push('/dashboard')}
+              className="w-full sm:w-auto"
+            >
+              Go to Dashboard
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
-    <Card className="max-w-lg mx-auto my-36">
-      <CardHeader>
-        <CardTitle>Join Your Team</CardTitle>
-      </CardHeader>
-      <CardContent className="text-center space-y-6">
-        <div className="text-lg font-medium">You've been invited to join a team for a competition on Pitch Desk.</div>
-        {!!error && <div className="text-red-500 text-sm mt-2">{error}</div>}
-        <div className="flex gap-4 justify-center">
-          <Button variant="default" className="px-6" onClick={() => respondToInvite('accept')} disabled={loading}>Accept Invite</Button>
-          <Button variant="outline" className="px-6" onClick={() => respondToInvite('decline')} disabled={loading}>Decline</Button>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="container mx-auto px-4 sm:px-6">
+      <Card className="max-w-lg mx-auto my-16 sm:my-24 lg:my-36">
+        <CardHeader>
+          <CardTitle className="text-xl sm:text-2xl">Join Your Team</CardTitle>
+        </CardHeader>
+        <CardContent className="text-center space-y-4 sm:space-y-6 px-4 sm:px-6">
+          <div className="text-base sm:text-lg font-medium">
+            You've been invited to join a team for a competition on Pitch Desk.
+          </div>
+          {!!error && (
+            <div className="text-red-500 text-xs sm:text-sm mt-2 break-words">{error}</div>
+          )}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+            <Button 
+              variant="default" 
+              className="w-full sm:w-auto px-6" 
+              onClick={() => respondToInvite('accept')} 
+              disabled={loading}
+            >
+              Accept Invite
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full sm:w-auto px-6" 
+              onClick={() => respondToInvite('decline')} 
+              disabled={loading}
+            >
+              Decline
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

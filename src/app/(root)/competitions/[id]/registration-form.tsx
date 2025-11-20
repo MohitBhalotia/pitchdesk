@@ -149,7 +149,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   return (
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <Card>
+        <Card className="bg-background border-none">
           <CardHeader>
             <CardTitle className="text-2xl">Register for {competition.title}</CardTitle>
             <CardDescription className="text-base">

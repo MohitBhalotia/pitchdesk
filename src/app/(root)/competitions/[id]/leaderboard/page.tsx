@@ -73,12 +73,12 @@ const getRankBadgeColor = (rank: number) => {
 
 const LeaderboardRow = ({ entry, isTop25 }: { entry: LeaderboardEntry; isTop25: boolean }) => {
   return (
-    <div className={`flex items-center justify-between p-4 rounded-lg border transition-all duration-200 bg-card border-border`}>
+    <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border transition-all duration-200 bg-card border-border`}>
       {/* Left Section - Rank and Team Info */}
-      <div className="flex items-center gap-4 flex-1">
+      <div className="flex items-start sm:items-center gap-3 sm:gap-4 flex-1 min-w-0">
         {/* Rank */}
-        <div className="flex items-center gap-3 w-20">
-          <div className="flex items-center justify-center w-8 h-8 rounded-full">
+        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          <div className="flex items-center justify-center w-6 h-6 sm:w-8 sm:h-8 rounded-full">
             {getRankIcon(entry.rank)}
           </div>
           <Badge variant="outline" className={getRankBadgeColor(entry.rank)}>
@@ -89,18 +89,17 @@ const LeaderboardRow = ({ entry, isTop25 }: { entry: LeaderboardEntry; isTop25: 
         {/* Team Information */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-semibold text-foreground truncate text-lg">
+            <h3 className="font-semibold text-foreground truncate text-sm sm:text-base lg:text-lg">
               {entry.teamName}
             </h3>
-
           </div>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
             <div className="flex items-center gap-1">
-              <User className="h-3 w-3" />
-              <span>{entry.teamLeaderName}</span>
+              <User className="h-3 w-3 flex-shrink-0" />
+              <span className="truncate">{entry.teamLeaderName}</span>
             </div>
             <div className="flex items-center gap-1">
-              <Mail className="h-3 w-3" />
+              <Mail className="h-3 w-3 flex-shrink-0" />
               <span className="truncate">{entry.teamLeaderEmail}</span>
             </div>
           </div>
@@ -108,16 +107,16 @@ const LeaderboardRow = ({ entry, isTop25 }: { entry: LeaderboardEntry; isTop25: 
       </div>
 
       {/* Right Section - Score and Time */}
-      <div className="flex items-center gap-6">
+      <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6 pl-8 sm:pl-0">
         {/* Submission Time */}
-        <div className="text-right">
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-            <Calendar className="h-3 w-3" />
-            <span>{new Date(entry.submissionTime).toLocaleDateString()}</span>
+        <div className="text-left sm:text-right">
+          <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground">
+            <Calendar className="h-3 w-3 flex-shrink-0" />
+            <span className="whitespace-nowrap">{new Date(entry.submissionTime).toLocaleDateString()}</span>
           </div>
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Clock className="h-3 w-3" />
-            <span>{new Date(entry.submissionTime).toLocaleTimeString([], {
+            <Clock className="h-3 w-3 flex-shrink-0" />
+            <span className="whitespace-nowrap">{new Date(entry.submissionTime).toLocaleTimeString([], {
               hour: '2-digit',
               minute: '2-digit'
             })}</span>
@@ -125,11 +124,11 @@ const LeaderboardRow = ({ entry, isTop25 }: { entry: LeaderboardEntry; isTop25: 
         </div>
 
         {/* Total Score */}
-        <div className="text-right">
-          <div className="text-2xl font-bold text-foreground">
+        <div className="text-right flex-shrink-0">
+          <div className="text-xl sm:text-2xl font-bold text-foreground">
             {entry.totalScore}
           </div>
-          <div className="text-xs text-muted-foreground">Total Score</div>
+          <div className="text-xs text-muted-foreground whitespace-nowrap">Total Score</div>
         </div>
       </div>
     </div>
@@ -203,99 +202,101 @@ export default function TournamentLeaderboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-          <div className="flex items-center gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex items-center gap-2">
-                <Trophy className="h-8 w-8 text-yellow-500" />
-                Competition Leaderboard
-              </h1>
-              <p className="text-muted-foreground text-sm sm:text-base">
-                Top 25 teams qualify for the next round
-              </p>
-            </div>
+        <div className="flex flex-col gap-3 sm:gap-4 mb-6 sm:mb-8">
+          <div>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight flex items-center gap-2 mb-1 sm:mb-2">
+              <Trophy className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-500 flex-shrink-0" />
+              <span className="truncate">Competition Leaderboard</span>
+            </h1>
+            <p className="text-muted-foreground text-xs sm:text-sm lg:text-base">
+              Top 25 teams qualify for the next round
+            </p>
           </div>
 
-          <div className="flex items-center gap-4">
-            <Badge variant="outline" className="px-3 py-1 text-sm">
-              <Users className="h-5 w-5 mr-2" />
-              Total teams registered : {leaderboard.length}
+          <div className="flex items-center">
+            <Badge variant="outline" className="px-2 sm:px-3 py-1 text-xs sm:text-sm">
+              <Users className="h-4 w-4 sm:h-5 sm:h-5 mr-1 sm:mr-2" />
+              Total teams : {leaderboard.length}
             </Badge>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-wrap gap-3 mb-6">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3 mb-4 sm:mb-6">
           <Button
             onClick={() => router.push(`/competitions/${competitionId}`)}
             variant="outline"
+            className="text-xs sm:text-sm"
+            size="sm"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="h-3 h-3 sm:h-4 sm:w-4 mr-2" />
             Back to Competition
           </Button>
           <Button
             onClick={() => router.push(`/competitions/${competitionId}/evaluation`)}
+            className="text-xs sm:text-sm"
+            size="sm"
           >
-            <BarChart3 className="h-4 w-4 mr-2" />
+            <BarChart3 className="h-3 h-3 sm:h-4 sm:w-4 mr-2" />
             View My Scores
           </Button>
         </div>
 
         {/* Search Bar */}
-        <div className="mb-6">
+        <div className="mb-4 sm:mb-6">
           <div className="relative max-w-md w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-3 h-3 sm:h-4 sm:w-4" />
             <Input
-              placeholder="Search by team name, leader name, or email..."
+              placeholder="Search teams..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
+              className="pl-8 sm:pl-10 text-xs sm:text-sm h-9 sm:h-10"
             />
           </div>
         </div>
 
         {/* Stats Cards */}
         {!isLoading && leaderboard.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
             <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center">
-                    <Crown className="h-5 w-5 text-yellow-500" />
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-yellow-500/20 flex items-center justify-center flex-shrink-0">
+                    <Crown className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
                   </div>
-                  <div>
-                    <div className="text-2xl font-bold">#{currentUserEntry?.rank || 0}</div>
-                    <div className="text-sm text-muted-foreground">Your rank</div>
+                  <div className="min-w-0">
+                    <div className="text-lg sm:text-xl lg:text-2xl font-bold">#{currentUserEntry?.rank || 0}</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground truncate">Your rank</div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
-                    <Star className="h-5 w-5 text-green-500" />
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                    <Star className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
                   </div>
-                  <div>
-                    <div className="text-2xl font-bold">25</div>
-                    <div className="text-sm text-muted-foreground">Qualify Next Round</div>
+                  <div className="min-w-0">
+                    <div className="text-lg sm:text-xl lg:text-2xl font-bold">25</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground truncate">Qualify Next Round</div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
-                    <Users className="h-5 w-5 text-blue-500" />
+              <CardContent className="p-3 sm:p-4">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                    <Users className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
                   </div>
-                  <div>
-                    <div className="text-2xl font-bold">{leaderboard.length}</div>
-                    <div className="text-sm text-muted-foreground">Teams with submitted pitches</div>
+                  <div className="min-w-0">
+                    <div className="text-lg sm:text-xl lg:text-2xl font-bold">{leaderboard.length}</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground">Teams submitted</div>
                   </div>
                 </div>
               </CardContent>
@@ -333,13 +334,14 @@ export default function TournamentLeaderboard() {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-6">
-            <p className="text-sm text-muted-foreground mb-4">⚡Rankings update in real-time as teams complete evaluations</p>            {/* Top 25 Section */}
+          <div className="space-y-4 sm:space-y-6">
+            <p className="text-xs sm:text-sm text-muted-foreground mb-4">⚡Rankings update in real-time as teams complete evaluations</p>
+            {/* Top 25 Section */}
             {top25.length > 0 && (
               <div>
                 <Card className="border-green-200">
                   <CardContent className="p-0">
-                    <div className="space-y-2 p-4">
+                    <div className="space-y-2 p-2 sm:p-4">
                       {top25.map((entry) => (
                         <LeaderboardRow
                           key={entry._id}
@@ -358,8 +360,8 @@ export default function TournamentLeaderboard() {
               <div>
                 <Card>
                   <CardContent className="p-0">
-                    <ScrollArea className="h-[400px]">
-                      <div className="space-y-2 p-4">
+                    <ScrollArea className="h-[300px] sm:h-[400px]">
+                      <div className="space-y-2 p-2 sm:p-4">
                         {rest.map((entry) => (
                           <LeaderboardRow
                             key={entry._id}
