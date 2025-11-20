@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
 import {
   Users,
   Target,
@@ -11,7 +10,6 @@ import {
   Globe,
   Heart
 } from "lucide-react";
-import Link from "next/link";
 
 export default function CrowdfundingPage() {
   // const [email, setEmail] = useState("");

@@ -6,9 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+  
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,7 +17,6 @@ import {
   Trophy,
   Crown,
   Medal,
-  TrendingUp,
   Users,
   Search,
   ArrowLeft,
@@ -217,7 +214,7 @@ export default function TournamentLeaderboard() {
 
           <div className="flex items-center">
             <Badge variant="outline" className="px-2 sm:px-3 py-1 text-xs sm:text-sm">
-              <Users className="h-4 w-4 sm:h-5 sm:h-5 mr-1 sm:mr-2" />
+              <Users className="h-4 w-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" />
               Total teams : {leaderboard.length}
             </Badge>
           </div>
@@ -231,7 +228,7 @@ export default function TournamentLeaderboard() {
             className="text-xs sm:text-sm"
             size="sm"
           >
-            <ArrowLeft className="h-3 h-3 sm:h-4 sm:w-4 mr-2" />
+            <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
             Back to Competition
           </Button>
           <Button
@@ -239,7 +236,7 @@ export default function TournamentLeaderboard() {
             className="text-xs sm:text-sm"
             size="sm"
           >
-            <BarChart3 className="h-3 h-3 sm:h-4 sm:w-4 mr-2" />
+            <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
             View My Scores
           </Button>
         </div>
@@ -247,7 +244,7 @@ export default function TournamentLeaderboard() {
         {/* Search Bar */}
         <div className="mb-4 sm:mb-6">
           <div className="relative max-w-md w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-3 h-3 sm:h-4 sm:w-4" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-3 w-3 sm:h-4 sm:w-4" />
             <Input
               placeholder="Search teams..."
               value={searchTerm}

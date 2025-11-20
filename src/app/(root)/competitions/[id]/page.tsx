@@ -32,7 +32,7 @@ import axios from "axios";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import Image from "next/image";
 
 interface Competition {
@@ -767,7 +767,9 @@ function CompetitionSidebar({
       } else {
         toast.error(response.data?.error || "Could not invite member.");
       }
-    } catch (e: any) {
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    catch (e) {
       toast.error(e?.response?.data?.error || "Network error.");
     } finally {
       setAddLoading(false);
@@ -869,20 +871,20 @@ function CompetitionSidebar({
                   <Badge
                     variant={
                       (localParticipant || participant).teamStatus ===
-                      "validated"
+                        "validated"
                         ? "outline"
                         : (localParticipant || participant).teamStatus ===
-                            "incomplete"
+                          "incomplete"
                           ? "destructive"
                           : "outline"
                     }
                     className={`text-xs ${(localParticipant || participant).teamStatus === "validated" ? "bg-green-100 text-green-800" : (localParticipant || participant).teamStatus === "incomplete" ? "bg-destructive text-white" : ""}`}
                   >
                     {(localParticipant || participant).teamStatus ===
-                    "validated"
+                      "validated"
                       ? "Team Ready"
                       : (localParticipant || participant).teamStatus ===
-                          "incomplete"
+                        "incomplete"
                         ? "Team incomplete"
                         : "Team Disqualified"}
                   </Badge>
