@@ -30,8 +30,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const { name, voice, firstMessage, systemPrompt } = await req.json();
-  if (!name || !voice || !firstMessage || !systemPrompt) {
+  const { name, voice, firstMessage, systemPrompt, image } = await req.json();
+  if (!name || !voice || !firstMessage || !systemPrompt|| !image) {
     return NextResponse.json(
       { error: "All fields are required" },
       { status: 400 }
@@ -44,6 +44,7 @@ export async function POST(req: NextRequest) {
       voice,
       firstMessage,
       systemPrompt,
+      image,
     });
     return NextResponse.json({ agent });
   } catch (error) {
