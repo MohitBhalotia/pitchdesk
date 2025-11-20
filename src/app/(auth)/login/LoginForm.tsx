@@ -18,9 +18,9 @@ import {
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
-export function LoginForm(
+function LoginFormContent(
   {
     /*className,
   ...props*/
@@ -150,12 +150,27 @@ export function LoginForm(
 
           <div className="text-center text-sm">
             Don&apos;t have an account?{" "}
-            <Link href={redirectUrl ? `/signup/step1?redirect=${encodeURIComponent(redirectUrl)}` : "/signup/step1"} className="underline underline-offset-4">
+            <Link
+              href={
+                redirectUrl
+                  ? `/signup/step1?redirect=${encodeURIComponent(redirectUrl)}`
+                  : "/signup/step1"
+              }
+              className="underline underline-offset-4"
+            >
               Sign up
             </Link>
           </div>
         </form>
       </Form>
     </div>
+  );
+}
+
+export default function LoginForm() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginFormContent />
+    </Suspense>
   );
 }

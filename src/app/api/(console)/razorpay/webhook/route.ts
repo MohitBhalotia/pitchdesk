@@ -15,7 +15,7 @@ export async function POST(req: NextRequest){
   }
 
   const expectedSignature = crypto
-    .createHmac("sha256", secret)
+    .createHmac("sha256", secret!)
     .update(payload)
     .digest("hex");
 

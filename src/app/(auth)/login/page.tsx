@@ -1,6 +1,6 @@
 "use client";
 
-import { LoginForm } from "@/app/(auth)/login/LoginForm";
+import LoginForm from "@/app/(auth)/login/LoginForm";
 import Image from "next/image";
 import Link from "next/link";
 

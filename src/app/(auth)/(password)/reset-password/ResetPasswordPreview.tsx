@@ -46,7 +46,7 @@ export default function ResetPasswordPreview() {
 
 
   const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+  const token = searchParams?.get("token");
 
   const [loading,setLoading]=useState(false);
   const handleReset = async (values: z.infer<typeof formSchema>) => {

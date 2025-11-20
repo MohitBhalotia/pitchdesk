@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
 
     // 1. Handle invite token & setup for invitees
     const inviteBaseUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invite-competition?token=`;
-    const teamMembersWithInvite = (body.teamMembers || []).map((member: any) => {
+    const teamMembersWithInvite = (body.teamMembers || []).map((member) => {
       const inviteToken = crypto.randomBytes(28).toString('base64url');
       return {
         ...member,
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     });
     // 2. Send emails via Resend to each invited member
     await Promise.all(
-      teamMembersWithInvite.map(async (member: any) => {
+      teamMembersWithInvite.map(async (member) => {
         const inviteLink = `${inviteBaseUrl}${encodeURIComponent(member.inviteToken)}`;
         await resendInviteTeamMember(
           member.name,
@@ -109,7 +109,7 @@ export async function PUT(request: NextRequest) {
     const max = comp?.teamSize?.max || 1;
     // Count (leader + pending + accepted)
     const currentCount = 1 + participant.teamMembers.filter(
-      (m: any) => m.status === 'accepted' || m.status === 'pending'
+      (m) => m.status === 'accepted' || m.status === 'pending'
     ).length;
     if (currentCount >= max) {
       return NextResponse.json({ error: `Team already at maximum size (${max}) including all accepted & pending members.` }, { status: 400 });

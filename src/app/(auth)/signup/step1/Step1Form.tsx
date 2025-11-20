@@ -18,8 +18,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import signupSchemaStep1 from "@/schemas/signUpSchemaStep1";
 import OAuthButtons from "@/components/oauth-button";
 import Link from "next/link";
+import { Suspense } from "react";
 
-export default function Step1Form() {
+function Step1FormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectUrl = searchParams?.get("redirect");
@@ -187,5 +188,12 @@ export default function Step1Form() {
         </div>
       </form>
     </Form>
+  );
+}
+export default function Step1Form() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Step1FormContent />
+    </Suspense>
   );
 }
