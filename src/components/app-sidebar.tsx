@@ -14,7 +14,8 @@ import {
   Crown,
   MessageSquare,
   HelpCircle,
-  Handshake
+  Handshake,
+  Trophy
 } from "lucide-react"
 import Link from "next/link";
 import Image from "next/image";
@@ -36,6 +37,7 @@ import {
 
 import { useSession } from "next-auth/react";
 import { Session } from "next-auth";
+import { title } from "process";
 
 const getUserFromSession = (session: Session) => ({
   name: session?.user?.fullName || "User",
@@ -154,6 +156,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "My Pitches",
         url: "/generated-pitches",
         icon: MessageSquare
+      },
+      {
+        title:"Competitions",
+        url:"/competitions",
+        icon:Trophy
       },
       // {
       //   title: "Venture Partners",

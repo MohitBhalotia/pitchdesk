@@ -272,7 +272,7 @@ export default function EvaluationPage() {
   const [mounted, setMounted] = useState(false);
 
   // Extract and clean pitchId
-  let pitchId = decodeURIComponent(params.pitchId as string);
+  let pitchId = decodeURIComponent(params?.pitchId as string);
   if (pitchId.startsWith("pitchId=")) {
     pitchId = pitchId.replace("pitchId=", "");
   }
