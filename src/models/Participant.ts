@@ -8,6 +8,8 @@ export interface IParticipant extends Document {
   teamLeader: {
     email: string;
     name: string;
+    phone: string;
+    collegeName: string;
   };
   teamMembers: Array<{
     name: string;
@@ -32,7 +34,9 @@ const ParticipantSchema = new Schema<IParticipant>({
   teamName: { type: String, required: true },
   teamLeader: {
     email: { type: String, required: true },
-    name: { type: String, required: true }
+    name: { type: String, required: true },
+    phone: { type: String, required: true },
+    collegeName: { type: String, required: true },
   },
   teamMembers: [{
     name: { type: String, required: true },

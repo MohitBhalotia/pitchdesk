@@ -89,6 +89,7 @@ export async function POST(request: NextRequest) {
     const comp = await Competition.findById(competitionId);
     const minSize = comp?.teamSize?.min || 1;
     const maxSize = comp?.teamSize?.max || 1;
+    
     const acceptedCount = 1 + participant.teamMembers.filter((m: any) => m.status === 'accepted').length; // +1 for leader
     if (acceptedCount < minSize) participant.teamStatus = 'incomplete';
     else if (acceptedCount > maxSize) participant.teamStatus = 'incomplete'; // can't grow > max, but admin can mark DQ
