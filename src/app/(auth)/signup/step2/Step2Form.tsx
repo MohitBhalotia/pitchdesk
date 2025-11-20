@@ -57,31 +57,51 @@ export default function Step2Form() {
     const step2Data = data;
 
     try {
-      console.log(isGoogleUser);
+      console.log("isGoogleUser:", isGoogleUser);
       if (isGoogleUser) {
+        console.log("Making API call to update user...");
         const res = await axios.post("/api/users/update", step2Data);
+        console.log("API response status:", res.status);
+        
         if (res.status === 200) {
+          console.log("Updating session...");
           // Update the session to reflect signupStep2Done: true
           await update();
+          console.log("Session updated");
 
           if (data.role === "founder") {
             // Check if there's a stored redirect URL from OAuth flow
             const storedRedirect = sessionStorage.getItem("authRedirect");
-            toast.success("Profile completed successfully");
-
-            // Use window.location for full page reload to ensure JWT token is refreshed
+            console.log("Stored redirect:", storedRedirect);
+            
             if (storedRedirect) {
+              toast.success("Profile completed successfully! Redirecting...");
               sessionStorage.removeItem("authRedirect");
-              window.location.href = storedRedirect;
+              
+              // Wait for session to propagate
+              await new Promise(resolve => setTimeout(resolve, 500));
+              console.log("Redirecting to stored URL:", storedRedirect);
+              window.location.replace(storedRedirect);
             } else {
-              window.location.href = "/dashboard";
+              toast.success("Profile completed successfully! Redirecting...");
+              
+              // Reload the page - middleware will redirect to dashboard automatically
+              // This ensures the JWT token is fresh
+              await new Promise(resolve => setTimeout(resolve, 500));
+              console.log("Reloading page to let middleware redirect to dashboard");
+              window.location.reload();
             }
           } else if (data.role === "vc") {
+            console.log("VC user, redirecting to verification pending");
             toast.success(
               "Thank you for registering as a Venture Capitalist! Our team will verify your VC account and contact you soon."
             );
-            window.location.href = "/verification-pending";
+            await new Promise(resolve => setTimeout(resolve, 500));
+            window.location.replace("/verification-pending");
           }
+        } else {
+          console.error("API call failed with status:", res.status);
+          toast.error("Failed to update profile. Please try again.");
         }
       } else {
         // Step1 user (stored in localStorage)

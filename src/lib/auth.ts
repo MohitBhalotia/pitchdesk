@@ -51,10 +51,13 @@ const authOptions: NextAuthOptions = {
           }
           if (!user.isVerified) {
             if (user.role === "founder")
-              throw new Error("You are not verified. Please verify your email.");
+              throw new Error(
+                "You are not verified. Please verify your email."
+              );
             else if (user.role === "vc")
-              throw new Error("Your VC account is pending verification. Please wait for admin approval.");
-
+              throw new Error(
+                "Your VC account is pending verification. Please wait for admin approval."
+              );
           }
 
           const isPasswordCorrect = await bcrypt.compare(
@@ -99,6 +102,7 @@ const authOptions: NextAuthOptions = {
             userPlan: "free",
             resetPasswordToken: null,
             provider: "google",
+            signupStep2Done: false,
           });
 
           await newUser.save();
@@ -112,6 +116,7 @@ const authOptions: NextAuthOptions = {
           user.email = newUser.email;
           user.role = "founder";
           user.userPlan = "free";
+          user.signupStep2Done = false;
         } else {
           user._id = existingUser._id?.toString();
           user.isVerified = existingUser.isVerified;
