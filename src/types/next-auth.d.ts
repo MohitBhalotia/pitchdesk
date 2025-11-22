@@ -7,10 +7,10 @@ declare module "next-auth" {
     fullName?: string;
     email?: string;
     isVerified?: boolean;
-    role?: "founder" | "vc" ;
-    userPlan?: "free" | "standard" | "pro" | "enterprise"|"mini";
+    role?: "founder" | "vc";
+    userPlan?: "free" | "standard" | "pro" | "enterprise" | "mini";
     provider?: "google" | "credentials";
-    signupStep2Done: boolean
+    signupStep2Done: boolean;
   }
   interface Session {
     user: {
@@ -19,9 +19,9 @@ declare module "next-auth" {
       email?: string;
       isVerified?: boolean;
       role?: "founder" | "vc" | null;
-      userPlan?: "free" | "standard" | "pro" | "enterprise"|"mini";
+      userPlan?: "free" | "standard" | "pro" | "enterprise" | "mini";
       provider?: "google" | "credentials";
-      signupStep2Done?: boolean
+      signupStep2Done?: boolean;
     } & DefaultSession["user"];
   }
 }
@@ -31,11 +31,11 @@ declare module "next-auth/jwt" {
   interface JWT {
     _id?: string;
     fullName?: string;
-    email?:string
+    email?: string;
     isVerified?: boolean;
-    role?:"founder"|"vc"|null;
-    userPlan?: "free" | "standard" | "pro" | "enterprise"|"mini";
-    provider?:"google"|"credentials"
+    role?: "founder" | "vc" | null;
+    userPlan?: "free" | "standard" | "pro" | "enterprise" | "mini";
+    provider?: "google" | "credentials";
     signupStep2Done?: boolean;
   }
 }

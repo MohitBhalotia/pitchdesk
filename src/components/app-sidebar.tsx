@@ -120,7 +120,6 @@ function SidebarSkeleton() {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: session, status } = useSession();
-
   //  LOADING sidebar skeleton
   if (status === "loading" || !session) {
     return <SidebarSkeleton />;
@@ -328,15 +327,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     {user.plan[0].toUpperCase() + user.plan.slice(1)} Plan
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {user.plan.toLowerCase() === "free"
-                      ? "Basic features"
-                      : user.plan.toLowerCase() === "standard"
-                        ? "Enhanced features"
-                        : user.plan.toLowerCase() === "pro"
-                          ? "Advanced features"
-                          : user.plan.toLowerCase() === "enterprise"
-                            ? "Maximum features"
-                            : ""}
+                    {user.plan.toLowerCase() === "mini"
+                      ? "Practice Plan"
+                      : user.plan.toLowerCase() === "free"
+                        ? "Basic features"
+                        : user.plan.toLowerCase() === "standard"
+                          ? "Enhanced features"
+                          : user.plan.toLowerCase() === "pro"
+                            ? "Advanced features"
+                            : user.plan.toLowerCase() === "enterprise"
+                              ? "Maximum features"
+                              : ""}
                   </p>
                 </div>
               </div>
