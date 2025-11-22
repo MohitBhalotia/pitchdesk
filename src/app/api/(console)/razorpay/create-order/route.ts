@@ -25,6 +25,8 @@ export async function POST(req: NextRequest) {
       payment_capture: 1
     }
 
+    console.log("hello")
+
     const razorpayOrder = await razorpay.orders.create(options)
 
     await orderModel.create({

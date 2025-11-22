@@ -16,6 +16,29 @@ const isEarlyBirdActive = new Date() < EARLY_BIRD_EXPIRY;
 
 const TIERS = [
   {
+    id: "mini",
+    name: "mini",
+    planId: "6921acd6d8e375db6e5271f5",
+    // price: {
+    //   monthly: 399,
+    //   yearly: 3000,
+    // },
+    price: 140,
+    description: "Everything you need to refine and perfect your pitch",
+    features: [
+      "30 minutes of comprehensive pitch practice",
+      "Extended Q&A sessions with detailed feedback",
+      "Access to all AI Venture Capitalists",
+      "Advanced pitch analysis with actionable insights",
+      "AI-powered improvement suggestions",
+      "Personalized pitch generation with advanced metrics",
+      "Priority email support",
+      // "Single-user account",
+    ],
+    cta: "Buy Now",
+    // popular: true,
+  },
+  {
     id: "standard",
     name: "Standard",
     planId: "68aa8cbf5958f9468e59ca14",
@@ -349,8 +372,7 @@ export default function PricingSection() {
           !
         </div>
       )}
-
-      <div className="  grid w-full max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 ">
+      <div className="  grid w-full max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4">
         {TIERS.map((tier, i) => (
           <PricingCard
             key={i}

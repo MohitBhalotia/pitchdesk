@@ -11,7 +11,7 @@ declare global {
     resetPasswordToken: string | null;
     resetPasswordTokenExpiry: Date | null;
     role: "founder" | "vc" | null;
-    userPlan: "free" | "standard" | "pro" | "enterprise";
+    userPlan: "free" | "standard" | "pro" | "enterprise" | "mini";
     company: mongoose.Schema.Types.ObjectId | null;
     provider: "credentials" | "google";
     signupStep2Done: boolean;
@@ -57,7 +57,7 @@ declare global {
   }
 
   export interface IPlan extends Document {
-    name: "free" | "standard" | "pro" | "enterprise"
+    name: "free" | "standard" | "pro" | "enterprise" | "mini"
     amount: number
     pitchesTime: number // in minutes
     englishVCs: number

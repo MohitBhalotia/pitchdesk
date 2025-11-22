@@ -83,7 +83,7 @@ export default function SimplePricing() {
           </div>
         )}
 
-        <div className="mt-8 grid w-full max-w-6xl grid-cols-1 gap-6 md:grid-cols-4">
+        <div className="mt-8 grid w-full max-w-6xl grid-cols-1 gap-6 md:grid-cols-3">
           {Object.values(plans).map((plan, index) => (
             <motion.div
               key={plan.id}
