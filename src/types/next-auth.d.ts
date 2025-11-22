@@ -8,7 +8,7 @@ declare module "next-auth" {
     email?: string;
     isVerified?: boolean;
     role?: "founder" | "vc" ;
-    userPlan?: "free" | "standard" | "pro" | "enterprise";
+    userPlan?: "free" | "standard" | "pro" | "enterprise"|"mini";
     provider?: "google" | "credentials";
     signupStep2Done: boolean
   }
@@ -19,7 +19,7 @@ declare module "next-auth" {
       email?: string;
       isVerified?: boolean;
       role?: "founder" | "vc" | null;
-      userPlan?: "free" | "standard" | "pro" | "enterprise";
+      userPlan?: "free" | "standard" | "pro" | "enterprise"|"mini";
       provider?: "google" | "credentials";
       signupStep2Done?: boolean
     } & DefaultSession["user"];
@@ -34,7 +34,7 @@ declare module "next-auth/jwt" {
     email?:string
     isVerified?: boolean;
     role?:"founder"|"vc"|null;
-    userPlan?: "free" | "standard" | "pro" | "enterprise";
+    userPlan?: "free" | "standard" | "pro" | "enterprise"|"mini";
     provider?:"google"|"credentials"
     signupStep2Done?: boolean;
   }
