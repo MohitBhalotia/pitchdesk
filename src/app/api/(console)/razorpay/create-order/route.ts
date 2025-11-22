@@ -22,7 +22,8 @@ export async function POST(req: NextRequest) {
       amount: plan.amount * 100,
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
-      payment_capture: 1
+      payment_capture: 1,
+      offers: [process.env.RAZOR_OFFER_ID!],
     }
 
     console.log("hello")
