@@ -138,16 +138,16 @@ export default function TournamentsPage() {
                   alt={competition.title}
                   width={500}
                   height={300}
-                  className=" rounded-t-lg"
+                  className="rounded-t-lg"
                 />
               </div>
 
               <CardHeader>
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
-                  <Badge variant="secondary" className="w-fit">
+                  <Badge variant="secondary" className="flex justify-center ">
                     {competition.collegeName}
                   </Badge>
-                  <Badge variant={daysLeft > 7 ? "default" : daysLeft > 0 ? "destructive" : "secondary"} className="w-fit">
+                  <Badge variant={daysLeft > 7 ? "default" : daysLeft > 0 ? "destructive" : "secondary"} className="flex justify-center ">
                     {daysLeft > 0 ? `${daysLeft} days left` : 'Closed'}
                   </Badge>
                 </div>
