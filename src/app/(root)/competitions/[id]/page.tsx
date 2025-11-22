@@ -11,11 +11,7 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/ui/alert"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,7 +26,7 @@ import {
   MapPin,
   Award,
   BarChart3,
-  CheckCircle2Icon
+  CheckCircle2Icon,
 } from "lucide-react";
 import RegistrationForm from "./registration-form";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -776,9 +772,8 @@ function CompetitionSidebar({
       } else {
         toast.error(response.data?.error || "Could not invite member.");
       }
-    }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    catch (e) {
+    } catch (e) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       toast.error(e?.response?.data?.error || "Network error.");
     } finally {
       setAddLoading(false);
@@ -786,25 +781,35 @@ function CompetitionSidebar({
   }
 
   return (
-    <div>
-
-
+    <div className="space-y-6">
       <Alert>
-        <CheckCircle2Icon />
-        <AlertTitle>Mini Practice Plan Available!</AlertTitle>
-
-        <AlertDescription>
-          <div className="flex items-center justify-between">
-            <span>
-              Boost your tournament preparation with our Mini Practice Plan.
-              Start practicing now and improve your performance!
-              <strong>Starting at just ₹70.</strong>
+        <AlertTitle className="text-lg sm:text-xl flex items-center gap-2 mt-2">
+          <CheckCircle2Icon className="w-6 h-6 " />
+          Mini Practice Plan for{" "}
+          <p className="flex gap-2">
+            <span className="line-through text-red-600">
+              {new Intl.NumberFormat("en-IN", {
+                style: "currency",
+                currency: "INR",
+              }).format(140)}
             </span>
+            <span className="text-green-600">
+              {new Intl.NumberFormat("en-IN", {
+                style: "currency",
+                currency: "INR",
+              }).format(70)}
+            </span>
+          </p>
+        </AlertTitle>
 
-            <Button className="ml-4" onClick={() => router.push("/payment")}>
-              View Plan
-            </Button>
-          </div>
+        <AlertDescription className="p-2 py-4">
+              <ul className="list-disc list-inside ">
+                <li>Boost your preparation with our Mini Practice Plan.</li>
+                <li>Start practicing now and improve your performance!</li>
+              </ul>
+              <Button onClick={() => router.push("/payment")} className="mt-4 w-full">
+                View Plan
+              </Button>
         </AlertDescription>
       </Alert>
 
@@ -902,20 +907,20 @@ function CompetitionSidebar({
                     <Badge
                       variant={
                         (localParticipant || participant).teamStatus ===
-                          "validated"
+                        "validated"
                           ? "outline"
                           : (localParticipant || participant).teamStatus ===
-                            "incomplete"
+                              "incomplete"
                             ? "destructive"
                             : "outline"
                       }
                       className={`text-xs ${(localParticipant || participant).teamStatus === "validated" ? "bg-green-100 text-green-800" : (localParticipant || participant).teamStatus === "incomplete" ? "bg-destructive text-white" : ""}`}
                     >
                       {(localParticipant || participant).teamStatus ===
-                        "validated"
+                      "validated"
                         ? "Team Ready"
                         : (localParticipant || participant).teamStatus ===
-                          "incomplete"
+                            "incomplete"
                           ? "Team incomplete"
                           : "Team Disqualified"}
                     </Badge>
@@ -963,7 +968,10 @@ function CompetitionSidebar({
                                   ({member.email})
                                 </p>
                               </div>
-                              <Badge variant="secondary" className="mt-1 text-xs">
+                              <Badge
+                                variant="secondary"
+                                className="mt-1 text-xs"
+                              >
                                 {member.status === "pending"
                                   ? "Pending"
                                   : member.status === "accepted"
@@ -1107,8 +1115,8 @@ function CompetitionSidebar({
                       </Button>
                       <div className="text-center">
                         <Badge variant="destructive" className="text-xs">
-                          ⚠️ Evaluation pending - Complete evaluation to see your
-                          rank
+                          ⚠️ Evaluation pending - Complete evaluation to see
+                          your rank
                         </Badge>
                       </div>
                     </>
