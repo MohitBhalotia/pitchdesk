@@ -395,7 +395,7 @@ export default function CompetitionPage() {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle>Rules & Guidelines</CardTitle>
+                    <CardTitle>Rules & Guidelines for online round</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-2">
