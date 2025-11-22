@@ -11,6 +11,11 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from "@/components/ui/alert"
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -25,6 +30,7 @@ import {
   MapPin,
   Award,
   BarChart3,
+  CheckCircle2Icon
 } from "lucide-react";
 import RegistrationForm from "./registration-form";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -640,6 +646,7 @@ function CompetitionSidebar({
   const daysLeft = calculateDaysLeft(competition.registrationDeadline);
   const { data: session } = useSession();
   const userEmail = session?.user?.email;
+  const router = useRouter();
   let isLeader = false;
   let isTeamMember = false;
   let userMember: TeamMember | undefined;
@@ -779,236 +786,205 @@ function CompetitionSidebar({
   }
 
   return (
-    <Card className="lg:sticky lg:top-6">
-      <CardHeader className="border-b ">
-        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-          <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-          Competition Info
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-4 sm:pt-6 space-y-4 sm:space-y-6 p-4 sm:p-6">
-        {!participant ? (
-          // Not registered
-          <>
-            {!isAuthenticated ? (
-              <div className="text-center space-y-3 sm:space-y-4">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
-                  <User className="w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground" />
-                </div>
-                <div>
-                  <h4 className="font-semibold text-sm sm:text-base mb-2">
-                    Sign In to Register
-                  </h4>
-                  <p className="text-xs sm:text-sm text-muted-foreground mb-4">
-                    Please sign in to register for this competition
-                  </p>
-                </div>
-                <Button
-                  asChild
-                  className="w-full h-10 sm:h-11 text-sm sm:text-base"
-                >
-                  <Link href="/login">Sign In</Link>
-                </Button>
-              </div>
-            ) : (
-              <>
-                <div className="text-center">
-                  <Button
-                    onClick={onShowRegistration}
-                    disabled={!isRegistrationOpen}
-                    className="w-full h-10 sm:h-12 text-sm sm:text-base lg:text-lg"
-                    size="lg"
-                  >
-                    {isRegistrationOpen
-                      ? "Register Now"
-                      : "Registration Closed"}
-                  </Button>
-                  {!isRegistrationOpen && (
-                    <p className="text-xs sm:text-sm text-muted-foreground mt-2">
-                      Registration deadline has passed
+    <div>
+
+
+      <Alert>
+        <CheckCircle2Icon />
+        <AlertTitle>Mini Practice Plan Available!</AlertTitle>
+
+        <AlertDescription>
+          <div className="flex items-center justify-between">
+            <span>
+              Boost your tournament preparation with our Mini Practice Plan.
+              Start practicing now and improve your performance!
+              <strong>Starting at just ₹70.</strong>
+            </span>
+
+            <Button className="ml-4" onClick={() => router.push("/payment")}>
+              View Plan
+            </Button>
+          </div>
+        </AlertDescription>
+      </Alert>
+
+      <Card className="lg:sticky lg:top-6">
+        <CardHeader className="border-b ">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Trophy className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+            Competition Info
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-4 sm:pt-6 space-y-4 sm:space-y-6 p-4 sm:p-6">
+          {!participant ? (
+            // Not registered
+            <>
+              {!isAuthenticated ? (
+                <div className="text-center space-y-3 sm:space-y-4">
+                  <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto bg-muted rounded-full flex items-center justify-center">
+                    <User className="w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-sm sm:text-base mb-2">
+                      Sign In to Register
+                    </h4>
+                    <p className="text-xs sm:text-sm text-muted-foreground mb-4">
+                      Please sign in to register for this competition
                     </p>
-                  )}
+                  </div>
+                  <Button
+                    asChild
+                    className="w-full h-10 sm:h-11 text-sm sm:text-base"
+                  >
+                    <Link href="/login">Sign In</Link>
+                  </Button>
                 </div>
-                <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
-                  <div className="flex justify-between items-center p-2 rounded-lg bg-muted/50">
-                    <span className="flex items-center gap-2">
-                      <Users className="w-3 h-3 sm:w-4 sm:h-4" />
-                      Registered Teams:
-                    </span>
-                    <span className="font-semibold">
-                      {competition.totalRegistered}
-                    </span>
+              ) : (
+                <>
+                  <div className="text-center">
+                    <Button
+                      onClick={onShowRegistration}
+                      disabled={!isRegistrationOpen}
+                      className="w-full h-10 sm:h-12 text-sm sm:text-base lg:text-lg"
+                      size="lg"
+                    >
+                      {isRegistrationOpen
+                        ? "Register Now"
+                        : "Registration Closed"}
+                    </Button>
+                    {!isRegistrationOpen && (
+                      <p className="text-xs sm:text-sm text-muted-foreground mt-2">
+                        Registration deadline has passed
+                      </p>
+                    )}
                   </div>
-                  <div className="flex justify-between items-center p-2 rounded-lg bg-muted/50">
-                    <span className="flex items-center gap-2">
-                      <User className="w-3 h-3 sm:w-4 sm:h-4" />
-                      Team Size:
-                    </span>
-                    <span className="font-semibold">
-                      {competition.teamSize.min}-{competition.teamSize.max}
-                    </span>
+                  <div className="space-y-2 sm:space-y-3 text-xs sm:text-sm">
+                    <div className="flex justify-between items-center p-2 rounded-lg bg-muted/50">
+                      <span className="flex items-center gap-2">
+                        <Users className="w-3 h-3 sm:w-4 sm:h-4" />
+                        Registered Teams:
+                      </span>
+                      <span className="font-semibold">
+                        {competition.totalRegistered}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 rounded-lg bg-muted/50">
+                      <span className="flex items-center gap-2">
+                        <User className="w-3 h-3 sm:w-4 sm:h-4" />
+                        Team Size:
+                      </span>
+                      <span className="font-semibold">
+                        {competition.teamSize.min}-{competition.teamSize.max}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center p-2 rounded-lg bg-muted/50">
+                      <span className="flex items-center gap-2">
+                        <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
+                        Deadline:
+                      </span>
+                      <span className="font-semibold whitespace-nowrap">
+                        {daysLeft > 0 ? `${daysLeft} days left` : "Closed"}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex justify-between items-center p-2 rounded-lg bg-muted/50">
-                    <span className="flex items-center gap-2">
-                      <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-                      Deadline:
-                    </span>
-                    <span className="font-semibold whitespace-nowrap">
-                      {daysLeft > 0 ? `${daysLeft} days left` : "Closed"}
-                    </span>
-                  </div>
-                </div>
-              </>
-            )}
-          </>
-        ) : (
-          // Registered (both leader and members see this team info)
-          <div className="space-y-3 sm:space-y-4">
-            <div className="p-3 sm:p-4 bg-background rounded-lg border border-primary/20">
-              <div className="flex flex-row items-center justify-between py-2">
-                <h4 className="font-semibold text-xl flex justify-center items-center gap-2">
-                  <Award className="w-4 h-4 sm:w-5 sm:h-5 " /> Your Team
-                </h4>
-                <div className="">
-                  <Badge
-                    variant={
-                      (localParticipant || participant).teamStatus ===
+                </>
+              )}
+            </>
+          ) : (
+            // Registered (both leader and members see this team info)
+            <div className="space-y-3 sm:space-y-4">
+              <div className="p-3 sm:p-4 bg-background rounded-lg border border-primary/20">
+                <div className="flex flex-row items-center justify-between py-2">
+                  <h4 className="font-semibold text-xl flex justify-center items-center gap-2">
+                    <Award className="w-4 h-4 sm:w-5 sm:h-5 " /> Your Team
+                  </h4>
+                  <div className="">
+                    <Badge
+                      variant={
+                        (localParticipant || participant).teamStatus ===
+                          "validated"
+                          ? "outline"
+                          : (localParticipant || participant).teamStatus ===
+                            "incomplete"
+                            ? "destructive"
+                            : "outline"
+                      }
+                      className={`text-xs ${(localParticipant || participant).teamStatus === "validated" ? "bg-green-100 text-green-800" : (localParticipant || participant).teamStatus === "incomplete" ? "bg-destructive text-white" : ""}`}
+                    >
+                      {(localParticipant || participant).teamStatus ===
                         "validated"
-                        ? "outline"
+                        ? "Team Ready"
                         : (localParticipant || participant).teamStatus ===
                           "incomplete"
-                          ? "destructive"
-                          : "outline"
-                    }
-                    className={`text-xs ${(localParticipant || participant).teamStatus === "validated" ? "bg-green-100 text-green-800" : (localParticipant || participant).teamStatus === "incomplete" ? "bg-destructive text-white" : ""}`}
-                  >
-                    {(localParticipant || participant).teamStatus ===
-                      "validated"
-                      ? "Team Ready"
-                      : (localParticipant || participant).teamStatus ===
-                        "incomplete"
-                        ? "Team incomplete"
-                        : "Team Disqualified"}
-                  </Badge>
+                          ? "Team incomplete"
+                          : "Team Disqualified"}
+                    </Badge>
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-2 text-xs sm:text-sm">
-                <div className="flex items-center gap-2 bg-muted/50 rounded-lg p-2">
-                  <p className="font-semibold text-primary break-words text-lg w-full text-center">
-                    {localParticipant?.teamName || participant.teamName}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 justify-between py-2">
-                  <div>
-                    <p className="break-words">
-                      {(localParticipant || participant).teamLeader.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      ({(localParticipant || participant).teamLeader.email})
+                <div className="space-y-2 text-xs sm:text-sm">
+                  <div className="flex items-center gap-2 bg-muted/50 rounded-lg p-2">
+                    <p className="font-semibold text-primary break-words text-lg w-full text-center">
+                      {localParticipant?.teamName || participant.teamName}
                     </p>
                   </div>
-                  <Badge
-                    variant="outline"
-                    className="text-xs bg-amber-500 text-black"
-                  >
-                    Team Leader
-                  </Badge>
-                </div>
-                {(localParticipant || participant).teamMembers.length > 0 && (
-                  <div className="space-y-1 py-2">
-                    <strong className="block mb-1">Team Members:</strong>
-                    <ul className="space-y-1 max-h-32 sm:max-h-48 overflow-y-auto pr-1">
-                      {(localParticipant || participant).teamMembers.map(
-                        (member, index) => (
-                          <li
-                            key={index}
-                            className={`flex items-center gap-4 ${member.status === "accepted" ? "bg-green-400/50" : member.status === "declined" ? "bg-red-400/50" : "bg-yellow-300/50"} rounded-lg p-2`}
-                          >
-                            <div
-                              className={`w-2 h-2 rounded-full ${member.status === "accepted" ? "bg-green-500" : member.status === "declined" ? "bg-red-500" : "bg-yellow-500"} mt-1 flex-shrink-0`}
-                            />
-                            <div className="min-w-0 flex-1">
-                              <p className="break-words">{member.name}</p>
-                              <p className="text-xs text-muted-foreground truncate">
-                                ({member.email})
-                              </p>
-                            </div>
-                            <Badge variant="secondary" className="mt-1 text-xs">
-                              {member.status === "pending"
-                                ? "Pending"
-                                : member.status === "accepted"
-                                  ? "Accepted"
-                                  : "Declined"}
-                            </Badge>
-                          </li>
-                        )
-                      )}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Actions - only if teamLeader */}
-            {isLeader && (
-              <div className="space-y-2 sm:space-y-3">
-                {/* Leaderboard button - enabled only if team is validated */}
-                {/* Event interval logic for Leaderboard */}
-                {(() => {
-                  const now = new Date();
-                  const eventStart = competition.eventInterval?.start
-                    ? new Date(competition.eventInterval.start)
-                    : null;
-                  const eventEnd = competition.eventInterval?.end
-                    ? new Date(competition.eventInterval.end)
-                    : null;
-                  const pitchGiven = (localParticipant || participant)
-                    ?.pitchSubmitted;
-                  if (eventStart && eventEnd) {
-                    if (now < eventStart) {
-                      return (
-                        <Button className="w-full" size="lg" disabled>
-                          <Trophy className="w-4 h-4 mr-2" />
-                          <div className="flex sm:flex-row flex-col items-center sm:gap-2">
-                            <span>Go to Leaderboard</span>
-                            <span className="text-xs">
-                              (Available on event day)
-                            </span>
-                          </div>
-                        </Button>
-                      );
-                    }
-                    if (now > eventEnd && !pitchGiven) {
-                      return (
-                        <Button className="w-full" size="lg" disabled>
-                          <Trophy className="w-4 h-4 mr-2" />
-                          <div className="flex sm:flex-row flex-col items-center sm:gap-2">
-                            <span>Go to Leaderboard</span>
-                            <span className="text-xs">
-                              (Event window closed)
-                            </span>
-                          </div>
-                        </Button>
-                      );
-                    }
-                  }
-                  return (
-                    <Button
-                      onClick={onLeaderboard}
-                      className="w-full"
-                      size="lg"
-                      disabled={!isValidated}
+                  <div className="flex items-center gap-2 justify-between py-2">
+                    <div>
+                      <p className="break-words">
+                        {(localParticipant || participant).teamLeader.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        ({(localParticipant || participant).teamLeader.email})
+                      </p>
+                    </div>
+                    <Badge
+                      variant="outline"
+                      className="text-xs bg-amber-500 text-black"
                     >
-                      <Trophy className="w-4 h-4 mr-2" /> Go to Leaderboard
-                    </Button>
-                  );
-                })()}
+                      Team Leader
+                    </Badge>
+                  </div>
+                  {(localParticipant || participant).teamMembers.length > 0 && (
+                    <div className="space-y-1 py-2">
+                      <strong className="block mb-1">Team Members:</strong>
+                      <ul className="space-y-1 max-h-32 sm:max-h-48 overflow-y-auto pr-1">
+                        {(localParticipant || participant).teamMembers.map(
+                          (member, index) => (
+                            <li
+                              key={index}
+                              className={`flex items-center gap-4 ${member.status === "accepted" ? "bg-green-400/50" : member.status === "declined" ? "bg-red-400/50" : "bg-yellow-300/50"} rounded-lg p-2`}
+                            >
+                              <div
+                                className={`w-2 h-2 rounded-full ${member.status === "accepted" ? "bg-green-500" : member.status === "declined" ? "bg-red-500" : "bg-yellow-500"} mt-1 flex-shrink-0`}
+                              />
+                              <div className="min-w-0 flex-1">
+                                <p className="break-words">{member.name}</p>
+                                <p className="text-xs text-muted-foreground truncate">
+                                  ({member.email})
+                                </p>
+                              </div>
+                              <Badge variant="secondary" className="mt-1 text-xs">
+                                {member.status === "pending"
+                                  ? "Pending"
+                                  : member.status === "accepted"
+                                    ? "Accepted"
+                                    : "Declined"}
+                              </Badge>
+                            </li>
+                          )
+                        )}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
 
-                {/* Conditional buttons based on pitch submission and evaluation status */}
-                {!(localParticipant || participant)?.pitchSubmitted ? (
-                  // Start Pitch - shown only if validated AND pitch not submitted
-                  (() => {
+              {/* Actions - only if teamLeader */}
+              {isLeader && (
+                <div className="space-y-2 sm:space-y-3">
+                  {/* Leaderboard button - enabled only if team is validated */}
+                  {/* Event interval logic for Leaderboard */}
+                  {(() => {
                     const now = new Date();
                     const eventStart = competition.eventInterval?.start
                       ? new Date(competition.eventInterval.start)
@@ -1016,17 +992,15 @@ function CompetitionSidebar({
                     const eventEnd = competition.eventInterval?.end
                       ? new Date(competition.eventInterval.end)
                       : null;
+                    const pitchGiven = (localParticipant || participant)
+                      ?.pitchSubmitted;
                     if (eventStart && eventEnd) {
                       if (now < eventStart) {
                         return (
-                          <Button
-                            className="w-full"
-                            size="lg"
-                            disabled
-                            variant="outline"
-                          >
+                          <Button className="w-full" size="lg" disabled>
+                            <Trophy className="w-4 h-4 mr-2" />
                             <div className="flex sm:flex-row flex-col items-center sm:gap-2">
-                              <span>Start Pitch</span>
+                              <span>Go to Leaderboard</span>
                               <span className="text-xs">
                                 (Available on event day)
                               </span>
@@ -1034,16 +1008,12 @@ function CompetitionSidebar({
                           </Button>
                         );
                       }
-                      if (now > eventEnd) {
+                      if (now > eventEnd && !pitchGiven) {
                         return (
-                          <Button
-                            className="w-full"
-                            size="lg"
-                            disabled
-                            variant="outline"
-                          >
+                          <Button className="w-full" size="lg" disabled>
+                            <Trophy className="w-4 h-4 mr-2" />
                             <div className="flex sm:flex-row flex-col items-center sm:gap-2">
-                              <span>Start Pitch</span>
+                              <span>Go to Leaderboard</span>
                               <span className="text-xs">
                                 (Event window closed)
                               </span>
@@ -1054,135 +1024,195 @@ function CompetitionSidebar({
                     }
                     return (
                       <Button
-                        onClick={onStartPitch}
-                        variant="outline"
+                        onClick={onLeaderboard}
                         className="w-full"
                         size="lg"
                         disabled={!isValidated}
                       >
-                        Start Pitch
+                        <Trophy className="w-4 h-4 mr-2" /> Go to Leaderboard
                       </Button>
                     );
-                  })()
-                ) : !(localParticipant || participant)?.pitchEvaluated ? (
-                  /* Evaluate Pitch - shown if pitch submitted but not evaluated */
-                  <>
-                    <Button
-                      onClick={onPitchEvaluation}
-                      className="w-full"
-                      size="lg"
-                      variant="destructive"
-                    >
-                      <BarChart3 className="w-4 h-4 mr-2" />
-                      Evaluate Pitch
-                    </Button>
-                    <div className="text-center">
-                      <Badge variant="destructive" className="text-xs">
-                        ⚠️ Evaluation pending - Complete evaluation to see your
-                        rank
-                      </Badge>
-                    </div>
-                  </>
-                ) : (
-                  /* Pitch Evaluation - shown if pitch is evaluated */
-                  <Button
-                    onClick={onPitchEvaluation}
-                    variant="outline"
-                    className="w-full"
-                    size="lg"
-                  >
-                    <BarChart3 className="w-4 h-4 mr-2" />
-                    Pitch Evaluation
-                  </Button>
-                )}
-              </div>
-            )}
+                  })()}
 
-            {/* Team member view: show team info only, no action buttons */}
-            {isTeamMember && !isLeader && (
-              <div className="text-center py-2">
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  You are a team member. Team leader manages actions.
-                </p>
-              </div>
-            )}
-            {localParticipant && (
-              <>
-                {isLeader &&
-                  canAddMore &&
-                  new Date() < new Date(competition.registrationDeadline) && (
+                  {/* Conditional buttons based on pitch submission and evaluation status */}
+                  {!(localParticipant || participant)?.pitchSubmitted ? (
+                    // Start Pitch - shown only if validated AND pitch not submitted
+                    (() => {
+                      const now = new Date();
+                      const eventStart = competition.eventInterval?.start
+                        ? new Date(competition.eventInterval.start)
+                        : null;
+                      const eventEnd = competition.eventInterval?.end
+                        ? new Date(competition.eventInterval.end)
+                        : null;
+                      if (eventStart && eventEnd) {
+                        if (now < eventStart) {
+                          return (
+                            <Button
+                              className="w-full"
+                              size="lg"
+                              disabled
+                              variant="outline"
+                            >
+                              <div className="flex sm:flex-row flex-col items-center sm:gap-2">
+                                <span>Start Pitch</span>
+                                <span className="text-xs">
+                                  (Available on event day)
+                                </span>
+                              </div>
+                            </Button>
+                          );
+                        }
+                        if (now > eventEnd) {
+                          return (
+                            <Button
+                              className="w-full"
+                              size="lg"
+                              disabled
+                              variant="outline"
+                            >
+                              <div className="flex sm:flex-row flex-col items-center sm:gap-2">
+                                <span>Start Pitch</span>
+                                <span className="text-xs">
+                                  (Event window closed)
+                                </span>
+                              </div>
+                            </Button>
+                          );
+                        }
+                      }
+                      return (
+                        <Button
+                          onClick={onStartPitch}
+                          variant="outline"
+                          className="w-full"
+                          size="lg"
+                          disabled={!isValidated}
+                        >
+                          Start Pitch
+                        </Button>
+                      );
+                    })()
+                  ) : !(localParticipant || participant)?.pitchEvaluated ? (
+                    /* Evaluate Pitch - shown if pitch submitted but not evaluated */
                     <>
                       <Button
-                        onClick={() => setAddModal(true)}
-                        variant="outline"
-                        className="w-full mb-1"
+                        onClick={onPitchEvaluation}
+                        className="w-full"
+                        size="lg"
+                        variant="destructive"
                       >
-                        Invite Another Member
+                        <BarChart3 className="w-4 h-4 mr-2" />
+                        Evaluate Pitch
                       </Button>
-                      {addModal && (
-                        <Dialog
-                          open={addModal}
-                          onOpenChange={(v) => setAddModal(v)}
-                        >
-                          <DialogContent className="max-w-full">
-                            <Card className="bg-background border-none">
-                              <CardHeader>
-                                <CardTitle>Add Team Member</CardTitle>
-                              </CardHeader>
-                              <CardContent className="flex flex-col gap-4">
-                                <Input
-                                  value={newMemberName}
-                                  onChange={(e) =>
-                                    setNewMemberName(e.target.value)
-                                  }
-                                  placeholder="Full Name"
-                                  className="h-11"
-                                />
-                                <Input
-                                  value={newMemberEmail}
-                                  type="email"
-                                  onChange={(e) =>
-                                    setNewMemberEmail(e.target.value)
-                                  }
-                                  placeholder="Email Address"
-                                  className={`h-11${addEmailError ? " border-destructive" : ""}`}
-                                />
-                                {addEmailError && (
-                                  <div className="text-destructive text-xs mt-1">
-                                    {addEmailError}
-                                  </div>
-                                )}
-                              </CardContent>
-                              <CardFooter className="justify-between">
-                                <Button
-                                  onClick={() => setAddModal(false)}
-                                  variant="outline"
-                                >
-                                  Cancel
-                                </Button>
-                                <Button
-                                  disabled={
-                                    addLoading ||
-                                    !newMemberName ||
-                                    !newMemberEmail
-                                  }
-                                  onClick={handleAddMember}
-                                >
-                                  Send Invite
-                                </Button>
-                              </CardFooter>
-                            </Card>
-                          </DialogContent>
-                        </Dialog>
-                      )}
+                      <div className="text-center">
+                        <Badge variant="destructive" className="text-xs">
+                          ⚠️ Evaluation pending - Complete evaluation to see your
+                          rank
+                        </Badge>
+                      </div>
                     </>
+                  ) : (
+                    /* Pitch Evaluation - shown if pitch is evaluated */
+                    <Button
+                      onClick={onPitchEvaluation}
+                      variant="outline"
+                      className="w-full"
+                      size="lg"
+                    >
+                      <BarChart3 className="w-4 h-4 mr-2" />
+                      Pitch Evaluation
+                    </Button>
                   )}
-              </>
-            )}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                </div>
+              )}
+
+              {/* Team member view: show team info only, no action buttons */}
+              {isTeamMember && !isLeader && (
+                <div className="text-center py-2">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    You are a team member. Team leader manages actions.
+                  </p>
+                </div>
+              )}
+              {localParticipant && (
+                <>
+                  {isLeader &&
+                    canAddMore &&
+                    new Date() < new Date(competition.registrationDeadline) && (
+                      <>
+                        <Button
+                          onClick={() => setAddModal(true)}
+                          variant="outline"
+                          className="w-full mb-1"
+                        >
+                          Invite Another Member
+                        </Button>
+                        {addModal && (
+                          <Dialog
+                            open={addModal}
+                            onOpenChange={(v) => setAddModal(v)}
+                          >
+                            <DialogContent className="max-w-full">
+                              <Card className="bg-background border-none">
+                                <CardHeader>
+                                  <CardTitle>Add Team Member</CardTitle>
+                                </CardHeader>
+                                <CardContent className="flex flex-col gap-4">
+                                  <Input
+                                    value={newMemberName}
+                                    onChange={(e) =>
+                                      setNewMemberName(e.target.value)
+                                    }
+                                    placeholder="Full Name"
+                                    className="h-11"
+                                  />
+                                  <Input
+                                    value={newMemberEmail}
+                                    type="email"
+                                    onChange={(e) =>
+                                      setNewMemberEmail(e.target.value)
+                                    }
+                                    placeholder="Email Address"
+                                    className={`h-11${addEmailError ? " border-destructive" : ""}`}
+                                  />
+                                  {addEmailError && (
+                                    <div className="text-destructive text-xs mt-1">
+                                      {addEmailError}
+                                    </div>
+                                  )}
+                                </CardContent>
+                                <CardFooter className="justify-between">
+                                  <Button
+                                    onClick={() => setAddModal(false)}
+                                    variant="outline"
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    disabled={
+                                      addLoading ||
+                                      !newMemberName ||
+                                      !newMemberEmail
+                                    }
+                                    onClick={handleAddMember}
+                                  >
+                                    Send Invite
+                                  </Button>
+                                </CardFooter>
+                              </Card>
+                            </DialogContent>
+                          </Dialog>
+                        )}
+                      </>
+                    )}
+                </>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
