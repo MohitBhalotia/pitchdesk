@@ -574,9 +574,9 @@ export default function PitchGenerator() {
               below
             </p>
           </div>
-          <div className="-mt-10 flex flex-col items-center justify-center gap-2">
+          <div className="-mt-10 mr-4 sm:mr-20 flex flex-col items-center justify-center gap-2">
             <PopupVideo videoUrl="https://res.cloudinary.com/mohitbhalotia/video/upload/v1762169523/pitch-generation_u9poap.mp4" />
-            <p className="font-semibold  text-lg">How it works?</p>
+            <p className="font-semibold  text-lg hidden sm:block">How it works?</p>
           </div>
         </div>
 

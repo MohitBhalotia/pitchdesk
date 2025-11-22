@@ -2,7 +2,7 @@
 
 import React /*, { useState } */ from "react";
 import VCSummaryCard from "@/components/VCSummaryCard";
-import { vcs /*, VC */ } from "../../../../data/vc";
+import { vcs  } from "../../../../data/vc";
 import PopupVideo from "@/components/PopupVideo";
 
 export default function MeetTheVCsPage() {
@@ -10,7 +10,7 @@ export default function MeetTheVCsPage() {
     <main className="bg-background  py-6 px-4 sm:px-6 md:px-12 lg:px-20">
       {/* Header */}
       <div className="max-w-6xl mx-auto text-center flex items-center justify-center gap-4">
-        <div className="flex flex-1 flex-col items-center justify-center gap-4">
+        <div className="flex flex-1 flex-col items-center justify-center gap-2">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 text-foreground">
             Meet the AI VCs
           </h1>
@@ -18,11 +18,10 @@ export default function MeetTheVCsPage() {
             Click on a VC to explore their personality, philosophy, and
             deal-making style.
           </p>
-          <span className="inline-block bg-primary/10 h-1 w-24 sm:w-32 rounded-full mt-4" />
         </div>
-        <div className="-mt-10 flex flex-col items-center justify-center gap-2">
+        <div className="mr-4 sm:mr-20 flex flex-col items-center justify-center gap-2">
           <PopupVideo videoUrl="https://res.cloudinary.com/mohitbhalotia/video/upload/v1762169522/pitch-practice_nsqhjw.mp4" />
-          <p className="font-semibold  text-lg">How it works?</p>
+          <p className="font-semibold  text-lg hidden sm:block">How it works?</p>
         </div>
       </div>
 

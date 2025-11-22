@@ -226,7 +226,7 @@ export default function PitchTranscripts() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div className="flex flex-row items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
               {session?.user?.role === "vc"
@@ -239,9 +239,9 @@ export default function PitchTranscripts() {
                 : "Review your conversation history"}
             </p>
           </div>
-          <div className="mr-20 flex flex-col items-center justify-center gap-2">
+          <div className="mr-4 sm:mr-20 flex flex-col items-center justify-center gap-2">
             <PopupVideo videoUrl="https://res.cloudinary.com/mohitbhalotia/video/upload/v1762169523/pitch-evaluation_lcsa42.mp4" />
-            <p className="font-semibold  text-lg">How it works?</p>
+            <p className="font-semibold  text-lg hidden sm:block">How it works?</p>
           </div>
         </div>
 

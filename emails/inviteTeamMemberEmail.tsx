@@ -45,11 +45,18 @@ export default function InviteTeamMemberEmail({
           <Section style={coverSection}>
             {/* Logo Section */}
             <Section style={imageSection}>
-              <Img
+            <Img
                 src={`${baseUrl}/logo1.png`}
-                width="75"
-                height="45"
                 alt="Pitch Desk Logo"
+                height={60} // helps email clients render correctly
+                style={{
+                  height: "60px",
+                  width: "auto",
+                  maxWidth: "160px", // won't grow beyond this
+                  display: "block",
+                  objectFit: "contain",
+                  margin: "0 auto",
+                }}
               />
             </Section>
 
