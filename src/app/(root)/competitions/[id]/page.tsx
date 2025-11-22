@@ -787,13 +787,13 @@ function CompetitionSidebar({
           <CheckCircle2Icon className="w-6 h-6 " />
           Mini Practice Plan for{" "}
           <p className="flex gap-2">
-            <span className="line-through text-red-600">
+            <span className="line-through text-muted-foreground">
               {new Intl.NumberFormat("en-IN", {
                 style: "currency",
                 currency: "INR",
               }).format(140)}
             </span>
-            <span className="text-green-600">
+            <span >
               {new Intl.NumberFormat("en-IN", {
                 style: "currency",
                 currency: "INR",
