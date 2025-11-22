@@ -34,6 +34,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import Image from "next/image";
+import { start } from "repl";
 
 interface Competition {
   _id: string;
@@ -236,7 +237,7 @@ export default function CompetitionPage() {
             alt={competition.title}
             width={1000}
             height={1000}
-            className="object-cover w-full h-full border-3 border-white/30 rounded-xl"
+            className="object-fit w-full h-full border-3 border-white/30 rounded-xl"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           <div className="absolute bottom-3 sm:bottom-6 left-3 sm:left-6 right-3 sm:right-6 text-white">
@@ -425,7 +426,7 @@ export default function CompetitionPage() {
                       >
                         {new Date(
                           competition.registrationDeadline
-                        ).toLocaleDateString("en-GB", {
+                        ).toLocaleDateString("en-IN", {
                           day: "2-digit",
                           month: "short",
                           year: "numeric",
@@ -447,7 +448,7 @@ export default function CompetitionPage() {
                             <div className="w-full sm:w-fit flex flex-row sm:flex-col justify-between items-end gap-2">
                               <p className="text-sm">
                                 {new Date(stage.startDate).toLocaleDateString(
-                                  "en-GB",
+                                  "en-IN",
                                   {
                                     day: "2-digit",
                                     month: "short",
@@ -456,8 +457,9 @@ export default function CompetitionPage() {
                                 )}{" "}
                                 -{" "}
                                 {new Date(stage.endDate).toLocaleDateString(
-                                  "en-GB",
+                                  "en-IN",
                                   {
+                                    timeZone: "Asia/Kolkata",
                                     day: "2-digit",
                                     month: "short",
                                     year: "numeric",

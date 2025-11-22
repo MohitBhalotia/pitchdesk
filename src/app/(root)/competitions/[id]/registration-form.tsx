@@ -151,6 +151,20 @@ export default function RegistrationForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate required team leader fields
+    if (!teamLeader.collegeName.trim()) {
+      toast.error('College name is required.');
+      return;
+    }
+    if (!teamLeader.phone.trim()) {
+      toast.error('Phone number is required.');
+      return;
+    }
+    if (!/^\d{10}$/.test(teamLeader.phone.trim())) {
+      toast.error('Phone number must be exactly 10 digits.');
+      return;
+    }
+
     // Validate team size
     const totalTeamSize =
       1 + teamMembers.filter((member) => member.name && member.email).length;
@@ -159,6 +173,15 @@ export default function RegistrationForm({
         `Minimum team size is ${competition.teamSize.min}. Please add more team members.`
       );
       return;
+    }
+
+    // Require both name and email for each team member if any field is filled
+    for (let i = 0; i < teamMembers.length; i++) {
+      const member = teamMembers[i];
+      if ((member.name && !member.email) || (!member.name && member.email)) {
+        toast.error(`Please fill both name and email for team member #${i + 1}.`);
+        return;
+      }
     }
 
     // Email validations
@@ -196,7 +219,7 @@ export default function RegistrationForm({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     catch (error: any) {
       console.error('Registration error:', error);
-      alert(error.response?.data?.error || 'Registration failed. Please try again.');
+      toast.error(error.response?.data?.error || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
