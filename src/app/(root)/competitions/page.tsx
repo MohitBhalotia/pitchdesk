@@ -148,7 +148,7 @@ export default function TournamentsPage() {
                     {competition.collegeName}
                   </Badge>
                   <Badge variant={daysLeft > 7 ? "default" : daysLeft > 0 ? "destructive" : "secondary"} className="flex justify-center ">
-                    {daysLeft > 0 ? `${daysLeft} days left` : 'Closed'}
+                    {daysLeft  > 0 ? `${daysLeft} days left` : 'Closed'}
                   </Badge>
                 </div>
                 <CardTitle className="line-clamp-2 text-lg sm:text-xl">{competition.title}</CardTitle>
