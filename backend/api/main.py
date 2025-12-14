@@ -8,6 +8,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, HTTPException, Form
 from typing import List, Optional
 
+from api.valuation_engine import (
+    UniversalValuationInput,
+    run_valuation_and_projection
+)
+
 
 # --------------------- CONFIG ---------------------
 load_dotenv(override=True)
@@ -494,6 +499,63 @@ async def evaluate_pitch_api(req: PitchRequest):
 
     result = evaluate_pitch_tournament(transcript_text)
     return result
+
+
+
+# --------------------- VALUATION ENGINE ---------------------
+
+def generate_valuation_explanations(result: dict) -> dict:
+    prompt = f"""
+Write a professional VC-grade valuation memo explaining each valuation method,
+stage effects, quality of metrics, and investment readiness.
+
+Return strict JSON:
+{{
+  "berkus": "",
+  "scorecard": "",
+  "cost_to_duplicate": "",
+  "vc_method": "",
+  "risk_factor": "",
+  "recommended_pre_money": "",
+  "projections": "",
+  "runway": "",
+  "overall_investability": ""
+}}
+
+DATA:
+{json.dumps(result, indent=2)}
+"""
+
+    response = client.chat.completions.create(
+        model= MODEL_NAME,
+        temperature= TEMPERATURE,
+        response_format={"type": "json_object"},
+        messages=[{"role": "user", "content": prompt}],
+    )
+
+    return json.loads(response.choices[0].message.content)
+
+
+
+@app.post("/valuation-report")
+def valuation_report(data: UniversalValuationInput):
+    try:
+        base_result = run_valuation_and_projection(data)
+        explanations = generate_valuation_explanations(base_result)
+
+        return {
+            **base_result,
+            "explanations": explanations
+        }
+
+    except Exception as e:
+        logging.exception("Valuation report failed")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+
+
+
 
 
 # --------------------- ROOT ---------------------
