@@ -110,6 +110,7 @@ const formSchema = z
 type FormValues = z.infer<typeof formSchema>;
 
 export default function ProjectionPage() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [result, setResult] = useState<any>(null);
     const [loading, setLoading] = useState(false);
 
@@ -347,7 +348,7 @@ export default function ProjectionPage() {
                                     <FormField
                                         key={name}
                                         control={form.control}
-                                        name={name as any}
+                                        name={name as keyof FormValues}
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel>{label}</FormLabel>

@@ -42,13 +42,13 @@ export async function POST(req: NextRequest) {
     const data = await fastApiResponse.json();
 
     return NextResponse.json(data, { status: 200 });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Projection API error:", err);
 
     return NextResponse.json(
       {
         error: "Internal server error",
-        message: err?.message || "Unknown error",
+        message: err instanceof Error ? err.message : "Unknown error",
       },
       { status: 500 }
     );

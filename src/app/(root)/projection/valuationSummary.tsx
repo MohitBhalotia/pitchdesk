@@ -6,6 +6,7 @@ const money = (value?: number) =>
     typeof value === "number" ? `$${value.toLocaleString()}` : "—";
 
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function ValuationSummary({ result }: { result: any }) {
     const v = result.valuations;
     const p = result.projections;
@@ -23,9 +24,11 @@ export default function ValuationSummary({ result }: { result: any }) {
 
 
     const negativeMonth = p.monthly.find(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (m: any) => m.cash_balance < 0
     )?.month;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const burns = p.monthly.map((m: any) => Math.abs(m.net_profit));
     const avgBurn =
         burns.reduce((a: number, b: number) => a + b, 0) / burns.length;

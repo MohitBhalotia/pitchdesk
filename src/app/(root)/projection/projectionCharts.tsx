@@ -12,6 +12,7 @@ import {
 import { Card } from "@/components/ui/card";
 import { useTheme } from "next-themes";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function ProjectionCharts({ data }: { data: any[] }) {
   const { theme } = useTheme();
   const axisColor = theme === "dark" ? "#ffffff" : "#6b7280";
