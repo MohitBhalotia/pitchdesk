@@ -37,24 +37,75 @@ const formSchema = z
         market_size: z.enum(["niche", "medium", "large"]),
         competitive_position: z.enum(["weak", "moderate", "strong"]),
 
+        // Pre-revenue fields
         product_stage: z.enum(["idea", "prototype", "MVP"]).optional(),
-        expected_customers_year1: z.number().optional(),
-        expected_monthly_revenue_year1: z.number().optional(),
+        expected_customers_year1: z.string().optional(),
+        expected_monthly_revenue_year1: z.string().optional(),
 
-        customers: z.number().optional(),
-        monthly_revenue: z.number().optional(),
-        monthly_growth_rate: z.number().optional(),
-        monthly_churn_rate: z.number().optional(),
+        // Revenue/Growth fields
+        customers: z.string().optional(),
+        monthly_revenue: z.string().optional(),
+        monthly_growth_rate: z.string().optional(),
+        monthly_churn_rate: z.string().optional(),
     })
-    .refine(
-        (d) =>
-            d.stage_of_business !== "pre_revenue" ||
-            d.product_stage !== undefined,
-        {
-            message: "Product stage is required for pre-revenue startups",
-            path: ["product_stage"],
+    .superRefine((data, ctx) => {
+        // Pre-revenue validation
+        if (data.stage_of_business === "pre_revenue") {
+            if (!data.product_stage) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "Product stage is required",
+                    path: ["product_stage"],
+                });
+            }
+            if (!data.expected_customers_year1 || data.expected_customers_year1 === "") {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "Expected customers is required",
+                    path: ["expected_customers_year1"],
+                });
+            }
+            if (!data.expected_monthly_revenue_year1 || data.expected_monthly_revenue_year1 === "") {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "Expected revenue is required",
+                    path: ["expected_monthly_revenue_year1"],
+                });
+            }
         }
-    );
+
+        // Early revenue & Growth validation
+        if (data.stage_of_business === "early_revenue" || data.stage_of_business === "growth") {
+            if (!data.customers || data.customers === "") {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "Customers is required",
+                    path: ["customers"],
+                });
+            }
+            if (!data.monthly_revenue || data.monthly_revenue === "") {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "Monthly revenue is required",
+                    path: ["monthly_revenue"],
+                });
+            }
+            if (!data.monthly_growth_rate || data.monthly_growth_rate === "") {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "Monthly growth rate is required",
+                    path: ["monthly_growth_rate"],
+                });
+            }
+            if (!data.monthly_churn_rate || data.monthly_churn_rate === "") {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "Monthly churn rate is required",
+                    path: ["monthly_churn_rate"],
+                });
+            }
+        }
+    });
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -69,6 +120,13 @@ export default function ProjectionPage() {
             team_strength: "average",
             market_size: "medium",
             competitive_position: "moderate",
+            product_stage: "idea",
+            expected_customers_year1: "",
+            expected_monthly_revenue_year1: "",
+            customers: "",
+            monthly_revenue: "",
+            monthly_growth_rate: "",
+            monthly_churn_rate: "",
         },
     });
 
@@ -76,9 +134,25 @@ export default function ProjectionPage() {
 
     async function onSubmit(values: FormValues) {
         setLoading(true);
+
+        // Convert string values to numbers for backend
+        const payload = {
+            ...values,
+            expected_customers_year1: values.expected_customers_year1
+                ? Number(values.expected_customers_year1)
+                : undefined,
+            expected_monthly_revenue_year1: values.expected_monthly_revenue_year1
+                ? Number(values.expected_monthly_revenue_year1)
+                : undefined,
+            customers: values.customers ? Number(values.customers) : undefined,
+            monthly_revenue: values.monthly_revenue ? Number(values.monthly_revenue) : undefined,
+            monthly_growth_rate: values.monthly_growth_rate ? Number(values.monthly_growth_rate) : undefined,
+            monthly_churn_rate: values.monthly_churn_rate ? Number(values.monthly_churn_rate) : undefined,
+        };
+
         const res = await fetch("/api/projection", {
             method: "POST",
-            body: JSON.stringify(values),
+            body: JSON.stringify(payload),
         });
         const data = await res.json();
         setResult(data);
@@ -216,6 +290,7 @@ export default function ProjectionPage() {
                                                     <SelectItem value="MVP">MVP</SelectItem>
                                                 </SelectContent>
                                             </Select>
+                                            <FormMessage />
                                         </FormItem>
                                     )}
                                 />
@@ -230,11 +305,11 @@ export default function ProjectionPage() {
                                                 <Input
                                                     type="number"
                                                     {...field}
-                                                    onChange={(e) =>
-                                                        field.onChange(+e.target.value)
-                                                    }
+                                                    value={field.value || ""}
+                                                    onChange={(e) => field.onChange(e.target.value)}
                                                 />
                                             </FormControl>
+                                            <FormMessage />
                                         </FormItem>
                                     )}
                                 />
@@ -249,11 +324,11 @@ export default function ProjectionPage() {
                                                 <Input
                                                     type="number"
                                                     {...field}
-                                                    onChange={(e) =>
-                                                        field.onChange(+e.target.value)
-                                                    }
+                                                    value={field.value || ""}
+                                                    onChange={(e) => field.onChange(e.target.value)}
                                                 />
                                             </FormControl>
+                                            <FormMessage />
                                         </FormItem>
                                     )}
                                 />
@@ -264,28 +339,28 @@ export default function ProjectionPage() {
                         {stage !== "pre_revenue" && (
                             <>
                                 {[
-                                    "customers",
-                                    "monthly_revenue",
-                                    "monthly_growth_rate",
-                                    "monthly_churn_rate",
-                                ].map((name) => (
+                                    { name: "customers", label: "Customers" },
+                                    { name: "monthly_revenue", label: "Monthly Revenue" },
+                                    { name: "monthly_growth_rate", label: "Monthly Growth Rate (%)" },
+                                    { name: "monthly_churn_rate", label: "Monthly Churn Rate (%)" },
+                                ].map(({ name, label }) => (
                                     <FormField
                                         key={name}
                                         control={form.control}
                                         name={name as any}
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>{name.replace("_", " ")}</FormLabel>
+                                                <FormLabel>{label}</FormLabel>
                                                 <FormControl>
                                                     <Input
                                                         type="number"
                                                         step="any"
                                                         {...field}
-                                                        onChange={(e) =>
-                                                            field.onChange(+e.target.value)
-                                                        }
+                                                        value={field.value || ""}
+                                                        onChange={(e) => field.onChange(e.target.value)}
                                                     />
                                                 </FormControl>
+                                                <FormMessage />
                                             </FormItem>
                                         )}
                                     />
