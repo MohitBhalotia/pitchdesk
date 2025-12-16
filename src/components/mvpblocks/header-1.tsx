@@ -71,6 +71,8 @@ const navItems: NavItem[] = [
     //   },
     // ],
   },
+
+  { name: "Competitions", href1: "/competitions" },
   { name: "CrowdFunding", href1: "/community/crowdfunding" },
   { name: "Pricing", href1: "/#pricing", href2: "/payment" },
   { name: "Advisors", href1: "/advisors" },

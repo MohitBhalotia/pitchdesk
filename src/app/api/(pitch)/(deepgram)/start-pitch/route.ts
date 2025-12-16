@@ -5,7 +5,7 @@ import PitchModel from "@/models/PitchModel";
 export async function POST(req: NextRequest) {
   try{
   await dbConnect();
-  const { userId, sessionId } = await req.json();
+  const { userId, sessionId,competitionId } = await req.json();
   if (!userId)
     return NextResponse.json(
       {
@@ -14,13 +14,14 @@ export async function POST(req: NextRequest) {
       },
       { status: 400 }
     );
-  const count = await PitchModel.countDocuments({userId})
+  const count = await PitchModel.countDocuments({userId}) 
   const pitch = await PitchModel.create({
     userId,
     title: `Pitch ${count + 1}`,
     sessionId,
     lastUpdated: Date.now(),
     startTime: Date.now(),
+    competitionId: competitionId || null
   });
   return NextResponse.json({
     success: true,

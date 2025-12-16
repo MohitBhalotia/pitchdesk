@@ -22,14 +22,24 @@ import Image from "next/image";
 import axios from "axios";
 import { toast } from "sonner";
 function HomeContent() {
-  const { socket, socketState, duration, setUserId, closeSocket } =
-    useDeepgram();
+  const {
+    socket,
+    socketState,
+    duration,
+    setUserId,
+    closeSocket,
+    setCompetitionId,
+  } = useDeepgram();
   const { startMicrophone, stopMicrophone, microphoneState, setupMicrophone } =
     useMicrophone();
 
   const [config, setConfig] = useState<object | null>(null);
   const searchParams = useSearchParams();
   const agentId = searchParams.get("agentId");
+  const competitionId = searchParams.get("competitionId");
+  if (competitionId) {
+    setCompetitionId(competitionId);
+  }
   const [agent, setAgent] = useState<object | null>(null);
   useEffect(() => {
     if (agentId) {

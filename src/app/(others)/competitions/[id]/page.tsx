@@ -1060,6 +1060,7 @@ function CompetitionSidebar({
                               className="w-full"
                               size="lg"
                               disabled
+                              onClick={()=>window.open(`${process.env.NEXT_PUBLIC_APP_URL}/start-pitch?agentId=691f96d941c3c5f27c4bcc01&competitionId=${competition._id}`)}
                               variant="outline"
                             >
                               <div className="flex sm:flex-row flex-col items-center sm:gap-2">
