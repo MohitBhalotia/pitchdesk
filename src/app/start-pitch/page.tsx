@@ -11,7 +11,15 @@ import { stsConfig } from "../../lib/constants";
 import Conversation from "../../components/Conversation";
 import { isMobile } from "react-device-detect";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowBigUp, Link, Loader2, MoveUpRight } from "lucide-react";
+import {
+  ArrowBigUp,
+  Handshake,
+  Link,
+  Loader2,
+  LogOut,
+  MoveUpRight,
+  Target,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDeepgram } from "@/context/DeepgramContextProvider";
 import { useMicrophone } from "@/context/MicrophoneContextProvider";
@@ -34,6 +42,7 @@ function HomeContent() {
     useMicrophone();
 
   const [config, setConfig] = useState<object | null>(null);
+  const [exit,setExit]=useState(false);
   const searchParams = useSearchParams();
   const agentId = searchParams.get("agentId");
   const competitionId = searchParams.get("competitionId");
@@ -89,6 +98,7 @@ function HomeContent() {
 
   const handleStop = useCallback(async () => {
     setStarted(false);
+    setExit(true);
     const result = await closeSocket();
     console.log("result", result);
     await stopMicrophone();
@@ -146,7 +156,14 @@ function HomeContent() {
       setConfig(null);
     }
   };
-
+  if(exit){
+    return (<div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="text-white text-lg font-bold flex items-center">
+        <Loader2 className="animate-spin mr-2 inline-block" size={24} />
+        Ending session...
+      </div>
+    </div>);
+  }
   return (
     <div className="min-h-screen bg-black">
       {/* Header */}
@@ -158,7 +175,7 @@ function HomeContent() {
             {started && remainingTime !== null && remainingTime > 0 && (
               <div className="absolute top-2 left-2 flex gap-2">
                 {/* Elapsed Time */}
-                <div className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg">
+                <div className="border-2 border-blue-500 text-white px-4 py-2 rounded-lg shadow-lg">
                   <div className="text-xs font-semibold">Elapsed</div>
                   <div className="text-lg font-bold">
                     {Math.floor(duration / 60)}:
@@ -169,12 +186,12 @@ function HomeContent() {
                 <div
                   className={`text-white px-4 py-2 rounded-lg shadow-lg transition-colors ${
                     remainingTime - duration <= 10
-                      ? "bg-red-600 animate-pulse"
+                      ? "border-2 border-red-600 animate-pulse"
                       : remainingTime - duration <= 30
-                        ? "bg-red-500"
+                        ? "border-2 border-red-500"
                         : remainingTime - duration <= 60
-                          ? "bg-orange-500"
-                          : "bg-green-500"
+                          ? "border-2 border-orange-500"
+                          : "border-2 border-green-500"
                   }`}
                 >
                   <div className="text-xs font-semibold">Remaining</div>
@@ -193,7 +210,7 @@ function HomeContent() {
             <div className="text-center mb-4 flex flex-col items-center">
               <div className="rounded-full overflow-hidden mb-4">
                 <Image
-                  className="w-20 h-20 "
+                  className="size-20 object-fit "
                   src="/logo.png"
                   alt="PitchDesk"
                   width={100}
@@ -201,7 +218,7 @@ function HomeContent() {
                 />
               </div>
               <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
-                Pitch Desk
+                PitchDesk
               </h1>
               <p className="text-gray-600">Interact with your AI Shark</p>
             </div>
@@ -215,7 +232,7 @@ function HomeContent() {
                 </Suspense>
               </div>
 
-              <div className="w-full max-w-md flex flex-col items-center">
+              <div className="w-full  max-w-md flex flex-col items-center">
                 <Suspense>
                   {loading ? (
                     <Loader2 className="animate-spin " size={24} />
@@ -232,7 +249,10 @@ function HomeContent() {
                       <div className="flex justify-center mt-2">
                         {!started && (
                           <Button
+                            variant="outline"
                             type="button"
+                            size="lg"
+                            className="border-primary border-2"
                             onClick={async () => {
                               await handleStart();
                             }}
@@ -243,44 +263,50 @@ function HomeContent() {
                         {started &&
                           remainingTime !== null &&
                           remainingTime > 0 && (
-                            <div className="flex flex-col gap-2">
-                              <div className="flex gap-2">
-                                <Button
-                                  className="bg-amber-300 text-black hover:bg-amber-600"
-                                  onClick={() =>
-                                    socket.send(
-                                      JSON.stringify({
-                                        type: "InjectUserMessage",
-                                        content: "Negotiate",
-                                      })
-                                    )
-                                  }
-                                >
-                                  Negotiate
-                                </Button>
-                                <Button
-                                  className="bg-green-300 text-black hover:bg-green-600"
-                                  onClick={() =>
-                                    socket.send(
-                                      JSON.stringify({
-                                        type: "InjectUserMessage",
-                                        content: "Get Verdict",
-                                      })
-                                    )
-                                  }
-                                >
-                                  Get Verdict
-                                </Button>
-                              </div>
+                            <div className="flex justify-center gap-4 w-full mt-4 ">
                               <Button
-                                className="w-full bg-red-600 hover:bg-red-800"
+                                variant="outline"
+                                size="lg"
+                                className="border-2 flex items-center border-amber-300 text-white hover:bg-amber-800"
+                                onClick={() =>
+                                  socket.send(
+                                    JSON.stringify({
+                                      type: "InjectUserMessage",
+                                      content: "Negotiate",
+                                    })
+                                  )
+                                }
+                              >
+                                <Handshake />
+                                <span>Negotiate</span>
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="lg"
+                                className="border-2 flex items-center border-green-300 text-white hover:bg-green-800"
+                                onClick={() =>
+                                  socket.send(
+                                    JSON.stringify({
+                                      type: "InjectUserMessage",
+                                      content: "Get Verdict",
+                                    })
+                                  )
+                                }
+                              >
+                                <Target />
+                                <span>Get Verdict</span>
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="lg"
+                                className="border-2 flex items-center border-red-600 hover:bg-red-800"
                                 type="button"
                                 onClick={async () => {
                                   await handleStop();
                                 }}
                                 disabled={!started}
                               >
-                                End Session!
+                                <LogOut /> <span>End Session!</span>
                               </Button>
                             </div>
                           )}
