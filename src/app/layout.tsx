@@ -5,6 +5,7 @@ import "./globals.css";
 import { ThemeProvider } from "next-themes";
 import SessionWrapper from "../components/SessionWrapper";
 import { Toaster } from "../components/ui/sonner";
+import { Analytics } from "@vercel/analytics/next";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -53,6 +54,7 @@ export default function RootLayout({
               {children}
               <Toaster position="bottom-right" richColors/>
             </SessionWrapper>
+            <Analytics />
           </ThemeProvider>
         </body>
     </html>
