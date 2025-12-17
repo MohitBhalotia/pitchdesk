@@ -20,6 +20,7 @@ const DeepgramContextProvider = ({ children }) => {
   const isConnecting = useRef(false);
   const { data: session } = useSession();
   const [duration, setDuration] = useState(0);
+  const [competitionId, setCompetitionId] = useState(null);
   const durationRef = useRef(0);
   const closePromiseResolveRef = useRef(null);
 
@@ -71,6 +72,7 @@ const DeepgramContextProvider = ({ children }) => {
           const res = await axios.post("/api/start-pitch", {
             userId: session?.user?._id,
             sessionId: sessionIdRef.current,
+            competitionId,
           });
           console.log("res", res);
         }
@@ -82,7 +84,7 @@ const DeepgramContextProvider = ({ children }) => {
       }
     };
     startPitch();
-  }, [sessionIdRef.current, session?.user?._id]);
+  }, [sessionIdRef.current, competitionId, session?.user?._id]);
 
   const connectToDeepgram = async () => {
     console.log("userId", userId);
@@ -205,6 +207,7 @@ const DeepgramContextProvider = ({ children }) => {
         closeSocket,
         addTranscriptMessage,
         sessionIdRef,
+        setCompetitionId,
         duration,
         setUserId,
       }}

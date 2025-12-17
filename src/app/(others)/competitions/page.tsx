@@ -1,13 +1,20 @@
-"use client"
+"use client";
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import {  Users, Trophy } from 'lucide-react';
-import Link from 'next/link';
-import axios from 'axios';
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Users, Trophy } from "lucide-react";
+import Link from "next/link";
+import axios from "axios";
+import { useState, useEffect } from "react";
+import Image from "next/image";
 
 interface Competition {
   _id: string;
@@ -40,12 +47,12 @@ export default function TournamentsPage() {
     async function fetchCompetitions() {
       try {
         setLoading(true);
-        const res = await axios.get('/api/competitions');
-        console.log(res.data)
+        const res = await axios.get("/api/competitions");
+        console.log(res.data);
         setCompetitions(res.data);
       } catch (error) {
-        console.error('Error fetching competitions:', error);
-        setError('Failed to fetch competitions');
+        console.error("Error fetching competitions:", error);
+        setError("Failed to fetch competitions");
       } finally {
         setLoading(false);
       }
@@ -58,9 +65,12 @@ export default function TournamentsPage() {
     return (
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Competitions</h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
+            Competitions
+          </h1>
           <p className="text-sm sm:text-base text-muted-foreground">
-            Discover and participate in entrepreneurship competitions from colleges worldwide
+            Discover and participate in entrepreneurship competitions from
+            colleges worldwide
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -92,16 +102,21 @@ export default function TournamentsPage() {
     return (
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Competitions</h1>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
+            Competitions
+          </h1>
           <p className="text-sm sm:text-base text-muted-foreground">
-            Discover and participate in entrepreneurship competitions from colleges worldwide
+            Discover and participate in entrepreneurship competitions from
+            colleges worldwide
           </p>
         </div>
         <Card className="border-destructive">
           <CardContent className="pt-6">
             <div className="text-center text-destructive">
               <Trophy className="w-16 h-16 mx-auto mb-4" />
-              <p className="font-semibold text-lg mb-2">Error Loading Competitions</p>
+              <p className="font-semibold text-lg mb-2">
+                Error Loading Competitions
+              </p>
               <p>{error}</p>
               <Button
                 onClick={() => window.location.reload()}
@@ -118,11 +133,12 @@ export default function TournamentsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="container mx-auto pb-20 px-4 sm:px-8 lg:px-12">
       <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Competitions</h1>
+        <h1 className="text-3xl  font-bold mb-2">Competitions</h1>
         <p className="text-sm sm:text-base text-muted-foreground">
-          Discover and participate in entrepreneurship competitions from colleges worldwide
+          Discover and participate in entrepreneurship competitions from
+          colleges worldwide
         </p>
       </div>
 
@@ -131,7 +147,10 @@ export default function TournamentsPage() {
           const daysLeft = calculateDaysLeft(competition.registrationDeadline);
 
           return (
-            <Card key={competition._id} className="hover:shadow-lg transition-shadow">
+            <Card
+              key={competition._id}
+              className="hover:shadow-lg transition-shadow"
+            >
               <div className="-mt-6 ">
                 <Image
                   src={competition.bannerImage1}
@@ -144,14 +163,25 @@ export default function TournamentsPage() {
 
               <CardHeader>
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
-                  <Badge variant="secondary" className="flex justify-center ">
+                  <Badge variant="secondary" className="text-center ">
                     {competition.collegeName}
                   </Badge>
-                  <Badge variant={daysLeft > 7 ? "default" : daysLeft > 0 ? "destructive" : "secondary"} className="flex justify-center ">
-                    {daysLeft  > 0 ? `${daysLeft} days left` : 'Closed'}
+                  <Badge
+                    variant={
+                      daysLeft > 7
+                        ? "default"
+                        : daysLeft > 0
+                          ? "destructive"
+                          : "secondary"
+                    }
+                    className="text-center "
+                  >
+                    {daysLeft > 0 ? `${daysLeft} days left` : "Closed"}
                   </Badge>
                 </div>
-                <CardTitle className="line-clamp-2 text-lg sm:text-xl">{competition.title}</CardTitle>
+                <CardTitle className="line-clamp-2 text-lg sm:text-xl">
+                  {competition.title}
+                </CardTitle>
                 <CardDescription className="line-clamp-2 text-sm">
                   {competition.description}
                 </CardDescription>
@@ -165,7 +195,9 @@ export default function TournamentsPage() {
                   </div>
                   <div className="flex items-center gap-1">
                     <Users className="w-4 h-4 flex-shrink-0" />
-                    <span className="whitespace-nowrap">{competition.totalRegistered} registered</span>
+                    <span className="whitespace-nowrap">
+                      {competition.totalRegistered} registered
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -185,7 +217,9 @@ export default function TournamentsPage() {
       {competitions.length === 0 && (
         <div className="text-center py-12">
           <Trophy className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No competitions available</h3>
+          <h3 className="text-lg font-semibold mb-2">
+            No competitions available
+          </h3>
           <p className="text-muted-foreground">
             Check back later for new entrepreneurship competitions
           </p>
