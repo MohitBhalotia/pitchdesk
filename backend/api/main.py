@@ -10,7 +10,8 @@ from typing import List, Optional
 
 from api.valuation_engine import (
     UniversalValuationInput,
-    run_valuation_and_projection
+    run_valuation,
+    run_projections
 )
 
 
@@ -504,53 +505,75 @@ async def evaluate_pitch_api(req: PitchRequest):
 
 # --------------------- VALUATION ENGINE ---------------------
 
-def generate_valuation_explanations(result: dict) -> dict:
+# --------------------------------------------------
+# AI EXPLANATION (STRICT JSON)
+# --------------------------------------------------
+def generate_narrative_explanation(result):
     prompt = f"""
-Write a professional VC-grade valuation memo explaining each valuation method,
-stage effects, quality of metrics, and investment readiness.
+You are a senior venture capitalist writing an investment-grade explanation.
 
-Return strict JSON:
+ABSOLUTE RULES:
+- ALL monetary values are in INR (₹)
+- EVERY field must be explained in natural language
+- Do NOT hallucinate or invent numbers
+- Each JSON value must be a paragraph of explanation
+- Professional VC tone, no bullet points
+
+Return STRICT JSON in exactly this structure:
+
 {{
-  "berkus": "",
-  "scorecard": "",
-  "cost_to_duplicate": "",
-  "vc_method": "",
-  "risk_factor": "",
-  "recommended_pre_money": "",
-  "projections": "",
-  "runway": "",
-  "overall_investability": ""
+  "valuations": {{
+    "scorecard": "explanation text",
+    "vc_method": {{
+      "pre_money": "explanation text",
+    }},
+    "risk_factor": "explanation text",
+    "recommended_pre_money": "explanation text"
+  }},
+  "projections": {{
+    "annual_revenue": "explanation text",
+    "runway_months": "explaination text(if Null, then it means the company wont go bankrupt.. and has enough funds thus give explaination accordingly)"
+  }},
+  "overall_summary": "concise investment conclusion"
 }}
 
-DATA:
+GROUND TRUTH DATA (DO NOT CHANGE NUMBERS):
 {json.dumps(result, indent=2)}
 """
 
     response = client.chat.completions.create(
-        model= MODEL_NAME,
-        temperature= TEMPERATURE,
-        response_format={"type": "json_object"},
-        messages=[{"role": "user", "content": prompt}],
+        model="gpt-4o-mini",
+        temperature=0.15,
+        response_format={"type": "json_object"},  # ✅ SINGLE BRACES
+        messages=[
+            {"role": "user", "content": prompt}
+        ]
     )
 
     return json.loads(response.choices[0].message.content)
 
 
+# --------------------------------------------------
+# API
+# --------------------------------------------------
 
 @app.post("/valuation-report")
 def valuation_report(data: UniversalValuationInput):
-    try:
-        base_result = run_valuation_and_projection(data)
-        explanations = generate_valuation_explanations(base_result)
+    valuations = run_valuation(data)
+    projections = run_projections(data)
 
-        return {
-            **base_result,
-            "explanations": explanations
-        }
+    combined = {
+        "valuations": valuations,
+        "projections": projections
+    }
 
-    except Exception as e:
-        logging.exception("Valuation report failed")
-        raise HTTPException(status_code=500, detail=str(e))
+    explanations = generate_narrative_explanation(combined)
+
+    return {
+        "valuations": valuations,
+        "projections": projections,
+        "explanations": explanations
+    }
 
 
 

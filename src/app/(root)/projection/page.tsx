@@ -30,9 +30,38 @@ import ValuationSummary from "./valuationSummary";
 
 /* ---------------- Schema ---------------- */
 
+const sectorOptions = [
+    { value: "agriculture_natural_resources", label: "Agriculture & Natural Resources" },
+    { value: "mining_oil_gas", label: "Mining, Oil & Gas" },
+    { value: "manufacturing", label: "Manufacturing" },
+    { value: "food_consumer_goods", label: "Food & Consumer Goods" },
+    { value: "construction_infrastructure", label: "Construction & Infrastructure" },
+    { value: "transportation_logistics", label: "Transportation & Logistics" },
+    { value: "retail_wholesale", label: "Retail & Wholesale" },
+    { value: "ecommerce_marketplaces", label: "E-Commerce & Marketplaces" },
+    { value: "hospitality_tourism", label: "Hospitality & Tourism" },
+    { value: "healthcare_life_sciences", label: "Healthcare & Life Sciences" },
+    { value: "pharmaceuticals_biotechnology", label: "Pharmaceuticals & Biotechnology" },
+    { value: "education_edtech", label: "Education & EdTech" },
+    { value: "information_technology_software", label: "IT & Software" },
+    { value: "artificial_intelligence_data", label: "AI & Data" },
+    { value: "financial_services_banking", label: "Financial Services & Banking" },
+    { value: "fintech_payments", label: "Fintech & Payments" },
+    { value: "insurance", label: "Insurance" },
+    { value: "real_estate_proptech", label: "Real Estate & PropTech" },
+    { value: "media_entertainment_gaming", label: "Media, Entertainment & Gaming" },
+    { value: "marketing_advertising_creator", label: "Marketing, Advertising & Creators" },
+    { value: "professional_consulting_services", label: "Professional & Consulting Services" },
+    { value: "energy_ev_climatetech", label: "Energy, EV & ClimateTech" },
+    { value: "government_public_ngos", label: "Government, Public & NGOs" },
+    { value: "research_innovation_deeptech", label: "Research, Innovation & DeepTech" },
+    { value: "space_advanced_technologies", label: "Space & Advanced Tech" },
+];
+
 const formSchema = z
     .object({
         stage_of_business: z.enum(["pre_revenue", "early_revenue", "growth"]),
+        sector: z.string().min(1, "Sector is required"),
         team_strength: z.enum(["weak", "average", "strong"]),
         market_size: z.enum(["niche", "medium", "large"]),
         competitive_position: z.enum(["weak", "moderate", "strong"]),
@@ -47,6 +76,12 @@ const formSchema = z
         monthly_revenue: z.string().optional(),
         monthly_growth_rate: z.string().optional(),
         monthly_churn_rate: z.string().optional(),
+
+        // Advanced/optional
+        gross_margin: z.string().optional(),
+        monthly_burn: z.string().optional(),
+        top_3_customers_percent: z.string().optional(),
+        fixed_assets_value: z.string().optional(),
     })
     .superRefine((data, ctx) => {
         // Pre-revenue validation
@@ -118,6 +153,7 @@ export default function ProjectionPage() {
         resolver: zodResolver(formSchema),
         defaultValues: {
             stage_of_business: "pre_revenue",
+            sector: "manufacturing",
             team_strength: "average",
             market_size: "medium",
             competitive_position: "moderate",
@@ -128,6 +164,10 @@ export default function ProjectionPage() {
             monthly_revenue: "",
             monthly_growth_rate: "",
             monthly_churn_rate: "",
+            gross_margin: "",
+            monthly_burn: "",
+            top_3_customers_percent: "",
+            fixed_assets_value: "",
         },
     });
 
@@ -136,19 +176,31 @@ export default function ProjectionPage() {
     async function onSubmit(values: FormValues) {
         setLoading(true);
 
-        // Convert string values to numbers for backend
+        // Convert and map for backend
         const payload = {
             ...values,
-            expected_customers_year1: values.expected_customers_year1
-                ? Number(values.expected_customers_year1)
-                : undefined,
-            expected_monthly_revenue_year1: values.expected_monthly_revenue_year1
-                ? Number(values.expected_monthly_revenue_year1)
-                : undefined,
-            customers: values.customers ? Number(values.customers) : undefined,
-            monthly_revenue: values.monthly_revenue ? Number(values.monthly_revenue) : undefined,
+            customers:
+                values.stage_of_business === "pre_revenue"
+                    ? values.expected_customers_year1
+                        ? Number(values.expected_customers_year1)
+                        : undefined
+                    : values.customers
+                        ? Number(values.customers)
+                        : undefined,
+            monthly_revenue:
+                values.stage_of_business === "pre_revenue"
+                    ? values.expected_monthly_revenue_year1
+                        ? Number(values.expected_monthly_revenue_year1)
+                        : undefined
+                    : values.monthly_revenue
+                        ? Number(values.monthly_revenue)
+                        : undefined,
             monthly_growth_rate: values.monthly_growth_rate ? Number(values.monthly_growth_rate) : undefined,
             monthly_churn_rate: values.monthly_churn_rate ? Number(values.monthly_churn_rate) : undefined,
+            gross_margin: values.gross_margin ? Number(values.gross_margin) : undefined,
+            monthly_burn: values.monthly_burn ? Number(values.monthly_burn) : undefined,
+            top_3_customers_percent: values.top_3_customers_percent ? Number(values.top_3_customers_percent) : undefined,
+            fixed_assets_value: values.fixed_assets_value ? Number(values.fixed_assets_value) : undefined,
         };
 
         const res = await fetch("/api/projection", {
@@ -191,6 +243,29 @@ export default function ProjectionPage() {
                                             <SelectItem value="pre_revenue">Pre-Revenue</SelectItem>
                                             <SelectItem value="early_revenue">Early Revenue</SelectItem>
                                             <SelectItem value="growth">Growth</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </FormItem>
+                            )}
+                        />
+
+                        {/* Sector */}
+                        <FormField
+                            control={form.control}
+                            name="sector"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Sector</FormLabel>
+                                    <Select value={field.value} onValueChange={field.onChange}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {sectorOptions.map(opt => (
+                                                <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                 </FormItem>
@@ -369,6 +444,108 @@ export default function ProjectionPage() {
                             </>
                         )}
 
+                        {/* Advanced/Optional Fields */}
+                        <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 bg-muted/50 rounded-md p-4 border mt-2">
+                            <span className="font-medium md:col-span-2 mb-0.5 text-sm text-muted-foreground">Optional / Advanced Inputs</span>
+                            <FormField
+                                control={form.control}
+                                name="gross_margin"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>
+                                            Gross Margin
+                                            <span className="text-xs text-muted-foreground ml-2">(Value 0-1, e.g., 0.55)</span>
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="number"
+                                                min={0}
+                                                max={1}
+                                                step={0.01}
+                                                placeholder="0.55"
+                                                {...field}
+                                                value={field.value || ""}
+                                                onChange={e => field.onChange(e.target.value)}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="monthly_burn"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>
+                                            Monthly Burn
+                                            <span className="text-xs text-muted-foreground ml-2">(Monthly cash outflow, e.g., 25000)</span>
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="number"
+                                                min={0}
+                                                step={1}
+                                                placeholder="25000"
+                                                {...field}
+                                                value={field.value || ""}
+                                                onChange={e => field.onChange(e.target.value)}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="top_3_customers_percent"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>
+                                            Top 3 Customers %
+                                            <span className="text-xs text-muted-foreground ml-2">(e.g., 40 for 40%)</span>
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="number"
+                                                min={0}
+                                                max={100}
+                                                step={1}
+                                                placeholder="40"
+                                                {...field}
+                                                value={field.value || ""}
+                                                onChange={e => field.onChange(e.target.value)}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="fixed_assets_value"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>
+                                            Fixed Assets Value
+                                            <span className="text-xs text-muted-foreground ml-2">(e.g., 60000)</span>
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="number"
+                                                min={0}
+                                                step={100}
+                                                placeholder="60000"
+                                                {...field}
+                                                value={field.value || ""}
+                                                onChange={e => field.onChange(e.target.value)}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
                         <Button
                             type="submit"
                             className="md:col-span-2"

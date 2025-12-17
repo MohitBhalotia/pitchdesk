@@ -1,294 +1,278 @@
-from typing import Optional
+import os
+from fastapi import FastAPI
 from pydantic import BaseModel
+from typing import Optional
+from openai import OpenAI
+from dotenv import load_dotenv
 
 
 # --------------------------------------------------
-# UNIVERSAL INPUT MODEL
+# INPUT MODEL
 # --------------------------------------------------
 class UniversalValuationInput(BaseModel):
-    stage_of_business: str                    # pre_revenue | early_revenue | growth
+    stage_of_business: str            # pre_revenue | early_revenue | growth
+    sector: str
 
-    team_strength: str                        # weak | average | strong
-    market_size: str                          # niche | medium | large
-    competitive_position: str                 # weak | moderate | strong
+    team_strength: str                # weak | average | strong
+    market_size: str                  # niche | medium | large
+    competitive_position: str         # weak | moderate | strong
 
-    # Pre-Revenue Inputs
-    product_stage: Optional[str] = None       # idea | prototype | MVP
-    expected_customers_year1: Optional[int] = None
-    expected_monthly_revenue_year1: Optional[float] = None
+    product_stage: Optional[str] = None
 
-    # Early/Growth Inputs
     customers: Optional[int] = None
     monthly_revenue: Optional[float] = None
     monthly_growth_rate: Optional[float] = None
     monthly_churn_rate: Optional[float] = None
 
+    # QUALITY INPUTS (NEW)
+    gross_margin: Optional[float] = None          # 0–1
+    monthly_burn: Optional[float] = None          # INR
+    top_3_customers_percent: Optional[float] = None  # %
+
+    # ASSETS
+    fixed_assets_value: Optional[float] = 0
 
 # --------------------------------------------------
-# CONFIGURATION (Minimal Hard-Coding)
+# SECTOR MULTIPLES
 # --------------------------------------------------
-STAGE_CONFIG = {
-    "pre_revenue": {
-        "base_value": 1_200_000,
-        "fixed_costs": 25_000,
-        "variable_cost": 5,
-        "gross_margin": 0.65,
-        "default_growth": 0.10,
-        "default_churn": 0.00,
-        "default_cash": 150_000,
-        "exit_multiplier": 8
-    },
-    "early_revenue": {
-        "base_value": 2_500_000,
-        "fixed_costs": 40_000,
-        "variable_cost": 8,
-        "gross_margin": 0.70,
-        "default_growth": 0.08,
-        "default_churn": 0.04,
-        "default_cash": 150_000,
-        "exit_multiplier": 12
-    },
-    "growth": {
-        "base_value": 8_000_000,
-        "fixed_costs": 80_000,
-        "variable_cost": 12,
-        "gross_margin": 0.75,
-        "default_growth": 0.12,
-        "default_churn": 0.03,
-        "default_cash": 200_000,
-        "exit_multiplier": 20
-    }
+SECTOR_ARR_MULTIPLES = { "agriculture_natural_resources": (2, 4), "mining_oil_gas": (2, 4), "manufacturing": (2, 5), "food_consumer_goods": (1.5, 3), "construction_infrastructure": (1.5, 3), "transportation_logistics": (2, 4), "retail_wholesale": (1, 2), "ecommerce_marketplaces": (2, 4), "hospitality_tourism": (1.5, 3), "healthcare_life_sciences": (2, 4), "pharmaceuticals_biotechnology": (6, 10), "education_edtech": (2, 5), "information_technology_software": (5, 9), "artificial_intelligence_data": (8, 15), "financial_services_banking": (1.5, 3), "fintech_payments": (4, 7), "insurance": (2, 4), "real_estate_proptech": (2, 4), "media_entertainment_gaming": (3, 6), "marketing_advertising_creator": (3, 6), "professional_consulting_services": (1.5, 3), "energy_ev_climatetech": (5, 10), "government_public_ngos": (1, 2), "research_innovation_deeptech": (6, 12), "space_advanced_technologies": (7, 14) }
+
+# --------------------------------------------------
+# TAM (RELATIVE, FOR NORMALIZATION)
+# --------------------------------------------------
+SECTOR_TAM = { "agriculture_natural_resources": 15, "mining_oil_gas": 2, "manufacturing": 16, "food_consumer_goods": 8, "construction_infrastructure": 12, "transportation_logistics": 9.5, "retail_wholesale": 25, "ecommerce_marketplaces": 6.5, "hospitality_tourism": 8, "healthcare_life_sciences": 12.5, "pharmaceuticals_biotechnology": 1.7, "education_edtech": 10, "information_technology_software": 5.5, "artificial_intelligence_data": 2.5, "financial_services_banking": 20, "fintech_payments": 1.5, "insurance": 6, "real_estate_proptech": 11, "media_entertainment_gaming": 2, "marketing_advertising_creator": 1, "professional_consulting_services": 3.5, "energy_ev_climatetech": 8.5, "government_public_ngos": 50, "research_innovation_deeptech": 2.5, "space_advanced_technologies": 0.5 }
+
+# --------------------------------------------------
+# PRE-REVENUE FLOOR (INR)
+# --------------------------------------------------
+PRE_REVENUE_FLOOR = {
+    # Primary & Heavy Industries
+    "agriculture_natural_resources": 3_500_000,
+    "mining_oil_gas": 5_000_000,
+    "manufacturing": 4_000_000,
+    "construction_infrastructure": 4_500_000,
+    "transportation_logistics": 4_000_000,
+
+    # Consumer & Commerce
+    "food_consumer_goods": 3_500_000,
+    "retail_wholesale": 3_000_000,
+    "ecommerce_marketplaces": 4_500_000,
+    "hospitality_tourism": 3_000_000,
+
+    # Healthcare & Life Sciences
+    "healthcare_life_sciences": 5_000_000,
+    "pharmaceuticals_biotechnology": 8_000_000,
+
+    # Education & Services
+    "education_edtech": 4_000_000,
+    "professional_consulting_services": 3_000_000,
+    "marketing_advertising_creator": 3_000_000,
+
+    # Technology & Software
+    "information_technology_software": 6_000_000,
+    "artificial_intelligence_data": 7_000_000,
+    "fintech_payments": 5_000_000,
+    "financial_services_banking": 4_500_000,
+    "insurance": 4_500_000,
+
+    # Property & Media
+    "real_estate_proptech": 5_000_000,
+    "media_entertainment_gaming": 4_000_000,
+
+    # Energy, Climate & Public
+    "energy_ev_climatetech": 6_000_000,
+    "government_public_ngos": 3_000_000,
+
+    # DeepTech & Frontier
+    "research_innovation_deeptech": 6_500_000,
+    "space_advanced_technologies": 7_500_000,
 }
 
-BERKUS_MAP = {
-    "idea":        [100_000, 20_000, 50_000, 20_000, 0],
-    "prototype":   [200_000, 100_000, 150_000, 80_000, 0],
-    "MVP":         [300_000, 250_000, 200_000, 150_000, 50_000]
+
+# --------------------------------------------------
+# SCORES
+# --------------------------------------------------
+TEAM_SCORE = {"weak": 0.85, "average": 1.0, "strong": 1.15}
+MARKET_SCORE = {"niche": 0.85, "medium": 1.0, "large": 1.15}
+COMP_SCORE = {"weak": 0.9, "moderate": 1.0, "strong": 1.1}
+PRODUCT_SCORE = {"idea": 0.85, "prototype": 1.0, "MVP": 1.15}
+
+# --------------------------------------------------
+# ASSET WEIGHTS
+# --------------------------------------------------
+ASSET_WEIGHT = {
+    "manufacturing": 0.6,
+    "healthcare_life_sciences": 0.7,
+    "pharmaceuticals_biotechnology": 0.6,
+    "energy_ev_climatetech": 0.6,
+    "real_estate_proptech": 0.75,
 }
-
-TEAM_RISK = {"weak": -150_000, "average": 0, "strong": 200_000}
-MARKET_RISK = {"niche": -200_000, "medium": 0, "large": 250_000}
-COMP_RISK = {"weak": -100_000, "moderate": 0, "strong": 150_000}
-
-CTD_TEMPLATE = {
-    "pre_revenue": {"engineering": 80_000, "design": 20_000, "legal": 10_000},
-    "early_revenue": {"engineering": 150_000, "design": 40_000, "legal": 20_000},
-    "growth": {"engineering": 300_000, "design": 80_000, "legal": 40_000}
-}
-
-WEIGHTS = {
-    "market": 0.3,
-    "competition": 0.1,
-    "team": 0.25,
-    "product": 0.15,
-    "sales": 0.1,
-    "other": 0.1
-}
-
+DEFAULT_ASSET_WEIGHT = 0.3
 
 # --------------------------------------------------
-# AUTO DERIVATION
+# HELPERS
 # --------------------------------------------------
-def derive_parameters(d: UniversalValuationInput):
-    cfg = STAGE_CONFIG[d.stage_of_business]
-
-    if d.stage_of_business == "pre_revenue":
-        return {
-            "arpu": None,
-            "gross_margin": cfg["gross_margin"],
-            "fixed_costs": cfg["fixed_costs"],
-            "variable_cost": cfg["variable_cost"],
-            "exit_value": cfg["base_value"] * cfg["exit_multiplier"],
-        }
-
-    arpu = d.monthly_revenue / max(d.customers, 1)
-
-    return {
-        "arpu": arpu,
-        "gross_margin": cfg["gross_margin"],
-        "fixed_costs": cfg["fixed_costs"],
-        "variable_cost": cfg["variable_cost"],
-        "exit_value": d.monthly_revenue * 12 * cfg["exit_multiplier"],
-    }
-
-
 # --------------------------------------------------
-# SHARED HELPERS
+# 12-MONTH FINANCIAL PROJECTIONS
 # --------------------------------------------------
-def scorecard_value(base, ratings):
-    return base * (1 + sum(WEIGHTS[f] * ratings[f] for f in ratings))
+def run_projections(d: UniversalValuationInput):
+    MONTHS = 12
 
+    # -------- SAFETY DEFAULTS --------
+    customers = d.customers or 100
+    revenue = d.monthly_revenue or 0
+    growth = d.monthly_growth_rate or 0.04
+    churn = d.monthly_churn_rate or 0.02
+    margin = d.gross_margin or 0.5
+    burn = d.monthly_burn or 0
 
-def risk_value(base, d):
-    return base + TEAM_RISK[d.team_strength] + MARKET_RISK[d.market_size] + COMP_RISK[d.competitive_position]
+    # Cost assumptions
+    fixed_cost = burn if burn > 0 else revenue * (1 - margin)
+    variable_cost_per_customer = (
+        (revenue * (1 - margin)) / max(customers, 1)
+        if customers > 0 else 0
+    )
 
+    cash = 200_000  # conservative opening cash buffer
 
-# --------------------------------------------------
-# VALUATION MODELS
-# --------------------------------------------------
-def run_pre_revenue_model(d, derived):
-    cfg = STAGE_CONFIG["pre_revenue"]
+    monthly = []
 
-    berkus_val = sum(BERKUS_MAP[d.product_stage])
-
-    ratings = {
-        "market": MARKET_RISK[d.market_size] / 200_000,
-        "competition": 0,
-        "team": TEAM_RISK[d.team_strength] / 200_000,
-        "product": 1 if d.product_stage == "MVP" else -1,
-        "sales": 0,
-        "other": 0
-    }
-    score_val = scorecard_value(cfg["base_value"], ratings)
-
-    ctd = sum(CTD_TEMPLATE["pre_revenue"].values())
-
-    post = derived["exit_value"] / 12
-    pre = post - 500_000
-
-    risk = risk_value(cfg["base_value"], d)
-
-    rec = round((berkus_val + score_val + ctd + pre + risk) / 5, 2)
-
-    return {
-        "berkus": berkus_val,
-        "scorecard": score_val,
-        "cost_to_duplicate": ctd,
-        "vc_method": {"pre_money": pre, "post_money": post},
-        "risk_factor": risk,
-        "recommended_pre_money": rec
-    }
-
-
-def run_early_revenue_model(d, derived):
-    cfg = STAGE_CONFIG["early_revenue"]
-
-    berkus_val = sum(BERKUS_MAP["MVP"])
-
-    ratings = {
-        "market": MARKET_RISK[d.market_size] / 200_000,
-        "competition": 0,
-        "team": TEAM_RISK[d.team_strength] / 200_000,
-        "product": 1,
-        "sales": 1,
-        "other": 0
-    }
-    score_val = scorecard_value(cfg["base_value"], ratings)
-
-    ctd = sum(CTD_TEMPLATE["early_revenue"].values())
-
-    post = derived["exit_value"] / 8
-    pre = post - 1_000_000
-
-    risk = risk_value(cfg["base_value"], d)
-
-    rec = round((berkus_val + score_val + ctd + pre + risk) / 5, 2)
-
-    return {
-        "berkus": berkus_val,
-        "scorecard": score_val,
-        "cost_to_duplicate": ctd,
-        "vc_method": {"pre_money": pre, "post_money": post},
-        "risk_factor": risk,
-        "recommended_pre_money": rec
-    }
-
-
-def run_growth_model(d, derived):
-    cfg = STAGE_CONFIG["growth"]
-
-    ratings = {
-        "market": MARKET_RISK[d.market_size] / 200_000,
-        "competition": COMP_RISK[d.competitive_position] / 150_000,
-        "team": TEAM_RISK[d.team_strength] / 200_000,
-        "product": 2,
-        "sales": 2,
-        "other": 1
-    }
-    score_val = scorecard_value(cfg["base_value"], ratings)
-
-    ctd = sum(CTD_TEMPLATE["growth"].values())
-
-    post = derived["exit_value"] / 5
-    pre = post - 3_000_000
-
-    risk = risk_value(cfg["base_value"], d)
-
-    rec = round((score_val + ctd + pre + risk) / 4, 2)
-
-    return {
-        "scorecard": score_val,
-        "cost_to_duplicate": ctd,
-        "vc_method": {"pre_money": pre, "post_money": post},
-        "risk_factor": risk,
-        "recommended_pre_money": rec
-    }
-
-
-# --------------------------------------------------
-# PROJECTION ENGINE
-# --------------------------------------------------
-def run_projections(d, derived):
-    cfg = STAGE_CONFIG[d.stage_of_business]
-
-    if d.stage_of_business == "pre_revenue":
-        customers = d.expected_customers_year1 or 300
-        monthly_rev = (d.expected_monthly_revenue_year1 or 24_000) / 12
-        growth = cfg["default_growth"]
-        churn = cfg["default_churn"]
-    else:
-        customers = d.customers
-        monthly_rev = d.monthly_revenue
-        growth = d.monthly_growth_rate or cfg["default_growth"]
-        churn = d.monthly_churn_rate or cfg["default_churn"]
-
-    cash = cfg["default_cash"]
-    projection = []
-
-    for month in range(1, 13):
+    for m in range(1, MONTHS + 1):
         customers = customers * (1 + growth) * (1 - churn)
-        revenue = monthly_rev if d.stage_of_business == "pre_revenue" else customers * derived["arpu"]
 
-        cost = cfg["fixed_costs"] + customers * derived["variable_cost"]
-        net_profit = revenue - cost
+        arpu = revenue / max(d.customers or customers, 1)
+        revenue = customers * arpu
+
+        gross_profit = revenue * margin
+        total_cost = fixed_cost + (customers * variable_cost_per_customer)
+        net_profit = revenue - total_cost
 
         cash += net_profit
 
-        projection.append({
-            "month": month,
+        monthly.append({
+            "month": m,
             "customers": int(customers),
             "revenue": round(revenue, 2),
+            "gross_profit": round(gross_profit, 2),
             "net_profit": round(net_profit, 2),
             "cash_balance": round(cash, 2)
         })
 
-    burn = abs(min(p["net_profit"] for p in projection))
-    runway = cash / burn if burn > 0 else float("inf")
+    # -------- RUNWAY --------
+    recent_months = monthly[-3:]  # last 3 months
+    recent_losses = [m["net_profit"] for m in recent_months if m["net_profit"] < 0]
 
-    return {
-        "monthly": projection,
-        "annual_revenue": round(sum(p["revenue"] for p in projection), 2),
-        "runway_months": round(runway, 2)
-    }
-
-
-# --------------------------------------------------
-# ORCHESTRATOR (PURE)
-# --------------------------------------------------
-def run_valuation_and_projection(data: UniversalValuationInput):
-    derived = derive_parameters(data)
-
-    if data.stage_of_business == "pre_revenue":
-        valuations = run_pre_revenue_model(data, derived)
-    elif data.stage_of_business == "early_revenue":
-        valuations = run_early_revenue_model(data, derived)
+    if not recent_losses:
+        runway = None  # profitable or breakeven business
     else:
-        valuations = run_growth_model(data, derived)
+        avg_burn = abs(sum(recent_losses) / len(recent_losses))
+        runway = round(cash / avg_burn, 2)
 
-    projections = run_projections(data, derived)
 
     return {
-        "valuations": valuations,
-        "projections": projections,
-        "derived_parameters": derived
+        "monthly": monthly,
+        "annual_revenue": round(sum(p["revenue"] for p in monthly), 2),
+        "runway_months": runway
     }
+
+def tam_multiplier(sector, market_size):
+    tam = SECTOR_TAM[sector]
+    expected = "large" if tam >= 15 else "medium" if tam >= 5 else "niche"
+    if market_size == expected:
+        return 1.0
+    if market_size == "large" and expected != "large":
+        return 0.85
+    if market_size == "niche" and expected == "large":
+        return 1.1
+    return 0.95
+
+def conviction(d):
+    return (
+        TEAM_SCORE[d.team_strength] *
+        MARKET_SCORE[d.market_size] *
+        COMP_SCORE[d.competitive_position] *
+        tam_multiplier(d.sector, d.market_size)
+    )
+
+def margin_multiplier(margin, sector):
+    if margin is None:
+        return 0.9
+    ideal = 0.4 if sector == "manufacturing" else 0.65
+    if margin >= ideal:
+        return 1.1
+    if margin >= ideal * 0.7:
+        return 1.0
+    return 0.85
+
+def concentration_penalty(pct):
+    if pct is None:
+        return 1.0
+    if pct > 60:
+        return 0.8
+    if pct > 40:
+        return 0.9
+    return 1.0
+
+def burn_efficiency(revenue, burn):
+    if burn is None or burn <= 0:
+        return 1.05
+    burn_multiple = burn / max(revenue, 1)
+    if burn_multiple <= 1:
+        return 1.0
+    if burn_multiple <= 1.5:
+        return 0.95
+    return 0.85
+
+# --------------------------------------------------
+# VALUATION ENGINE
+# --------------------------------------------------
+def run_valuation(d: UniversalValuationInput):
+    c = conviction(d)
+
+    asset_weight = ASSET_WEIGHT.get(d.sector, DEFAULT_ASSET_WEIGHT)
+    asset_value = (d.fixed_assets_value or 0) * asset_weight
+
+    # ---------- PRE-REVENUE ----------
+    if d.stage_of_business == "pre_revenue":
+        base = PRE_REVENUE_FLOOR[d.sector] * PRODUCT_SCORE[d.product_stage]
+        final = (base * c) + asset_value
+        final=final*0.80
+
+        return {
+            "scorecard": final,
+            "cost_to_duplicate": 500_000,
+            "vc_method": {"pre_money": final, "post_money": final * 1.2},
+            "risk_factor": final * 0.9,
+            "recommended_pre_money": round(final, 2)
+        }
+
+    # ---------- EARLY / GROWTH ----------
+    arr = d.monthly_revenue * 12
+    low, high = SECTOR_ARR_MULTIPLES[d.sector]
+
+    growth_bonus = min((d.monthly_growth_rate or 0) * 2, 0.25)
+    churn_penalty = 0.15 if (d.monthly_churn_rate or 0) > 0.05 else 0
+
+    base_multiple = low + (high - low) * (growth_bonus + 0.1)
+
+    quality = (
+        margin_multiplier(d.gross_margin, d.sector) *
+        concentration_penalty(d.top_3_customers_percent) *
+        burn_efficiency(d.monthly_revenue, d.monthly_burn)
+    )
+    quality *= COMP_SCORE[d.competitive_position]
+
+    operating_value = arr * base_multiple * c * quality * (1 - churn_penalty)
+    final = operating_value + asset_value
+    final=final*0.80
+
+    return {
+        "scorecard": final * 0.9,
+        "vc_method": {"pre_money": final, "post_money": final * 1.1},
+        "risk_factor": final * 0.92,
+        "recommended_pre_money": round(final, 2)
+    }
+
+
+
+
