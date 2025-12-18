@@ -28,10 +28,12 @@ export default function AppHero() {
           <BannerTitle>
             You can now compete in various competitions across the world!
           </BannerTitle>
-          <BannerAction onClick={() => router.push("/competitions")}>
-            Learn more
-          </BannerAction>
-          <BannerClose />
+          <div className="ml-auto flex items-center gap-2">
+            <BannerAction onClick={() => router.push("/competitions")}>
+              Learn more
+            </BannerAction>
+            <BannerClose />
+          </div>
         </Banner>
       </div>
       <div

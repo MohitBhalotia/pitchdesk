@@ -5,6 +5,7 @@ export interface IAgent extends Document {
   voice: string;
   firstMessage: string;
   systemPrompt: string;
+  tags: string[];
 }
 
 const agentSchema = new Schema({
@@ -28,6 +29,9 @@ const agentSchema = new Schema({
     type: String,
     required: true,
   },
+  tags:[{
+    type: String,
+  }],
 });
 
 const Agent:Model<IAgent> =mongoose.models.Agent || mongoose.model<IAgent>("Agent", agentSchema);

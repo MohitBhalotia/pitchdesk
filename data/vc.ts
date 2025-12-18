@@ -7,9 +7,29 @@ export interface VC {
   highlights: string[];
   image: string;
   agentLink: string;
+  tags?: string[];
 }
 
 export const vcs: VC[] = [
+  {
+    id: "sanjay-khanna",
+    name: "Sanjay Khanna",
+    title: "The Big daddy of all VCs",
+    tagline: "He doesn’t believe pitches — he believes pressure.If your startup has a weak spot, Sanjay will find it.",
+    shortDescription:
+      "Sanjay Khanna is a relentless, high-intensity investor who specializes in exposing the real pain points behind ambitious ideas. He doesn’t let founders hide behind buzzwords, slides, or optimistic projections. Every answer you give invites another question — deeper, sharper, and harder to dodge.",
+    highlights: [
+      "Obsessively hunts for the core pain point your startup claims to solve",
+      "Challenges assumptions, not just answers",
+      "Pushes founders until clarity replaces confidence",
+      "Uncomfortable silence is part of his strategy",
+      "Believes real businesses are forged under scrutiny, not praise",
+      "Measures resilience, logic, and honesty over charm"
+    ],
+    image: "https://res.cloudinary.com/mohitbhalotia/image/upload/v1765818140/WhatsApp_Image_2025-12-14_at_4.28.04_PM_dhtfej.jpg",
+    agentLink: "69403f71c00caa45dfa94b6e",
+    tags: ["Grilling Agent"],
+  },
   {
     id: "rohan-oberoi",
     name: "Rohan Oberoi",
@@ -25,7 +45,8 @@ export const vcs: VC[] = [
       "Offers more than capital — brings strategic value and vision"
     ],
     image: "https://res.cloudinary.com/mohitbhalotia/image/upload/v1755015127/Mark_Cuban_bctoyu.jpg",
-    agentLink: "689a45f989f40f995de7356b"
+    agentLink: "689a45f989f40f995de7356b",
+    tags: ["Most Popular"],
   },
   {
     id: "vikram-desai",

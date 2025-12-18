@@ -35,7 +35,7 @@ export const plans: Record<string, Plan> = {
   },
   mini: {
     id: "mini",
-    name: "mini",
+    name: "Mini",
     icon: Star,
     // planId: "6921acd6d8e375db6e5271f5",
     // price: {

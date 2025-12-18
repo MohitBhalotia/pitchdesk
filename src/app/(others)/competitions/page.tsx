@@ -162,11 +162,12 @@ export default function TournamentsPage() {
               </div>
 
               <CardHeader>
-                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
+                <div className="flex  sm:flex-row sm:items-start justify-between gap-2 mb-2">
                   <Badge variant="secondary" className="text-center ">
                     {competition.collegeName}
                   </Badge>
                   <Badge
+                      className=" text-center"
                     variant={
                       daysLeft > 7
                         ? "default"
@@ -174,7 +175,6 @@ export default function TournamentsPage() {
                           ? "destructive"
                           : "secondary"
                     }
-                    className="text-center "
                   >
                     {daysLeft > 0 ? `${daysLeft} days left` : "Closed"}
                   </Badge>

@@ -52,7 +52,7 @@ export const Banner = ({
     <BannerContext.Provider value={{ show, setShow }}>
       <div
         className={cn(
-          "flex w-full items-center justify-between gap-2 bg-primary/40 px-4 py-2 text-primary-foreground",
+          "flex w-full flex-wrap items-center justify-between gap-2 bg-primary/40 px-4 py-2 text-primary-foreground sm:flex-nowrap",
           inset && "rounded-lg",
           className
         )}
@@ -87,7 +87,10 @@ export const BannerIcon = ({
 export type BannerTitleProps = HTMLAttributes<HTMLParagraphElement>;
 
 export const BannerTitle = ({ className, ...props }: BannerTitleProps) => (
-  <p className={cn("flex-1 text-sm", className)} {...props} />
+  <p
+    className={cn("flex-1 basis-full text-sm sm:basis-auto", className)}
+    {...props}
+  />
 );
 
 export type BannerActionProps = ComponentProps<typeof Button>;
@@ -100,7 +103,7 @@ export const BannerAction = ({
 }: BannerActionProps) => (
   <Button
     className={cn(
-      "shrink-0 bg-transparent hover:bg-background/10 hover:text-foreground cursor-pointer",
+      "shrink-0 bg-transparent hover:bg-background/10 hover:text-foreground cursor-pointer touch-manipulation",
       className
     )}
     size={size}
@@ -128,7 +131,7 @@ export const BannerClose = ({
   return (
     <Button
       className={cn(
-        "shrink-0 bg-transparent hover:bg-background/10 hover:text-foreground cursor-pointer",
+        "shrink-0 bg-transparent hover:bg-background/10 hover:text-foreground cursor-pointer touch-manipulation",
         className
       )}
       onClick={handleClick}

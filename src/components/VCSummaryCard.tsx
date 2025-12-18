@@ -8,6 +8,7 @@ interface VCSummaryCardProps {
   agentLink: string;
   shortDescription: string;
   highlights: string[];
+  tags?: string[];
 }
 
 import Image from "next/image";
@@ -34,11 +35,16 @@ const VCSummaryCard: React.FC<VCSummaryCardProps> = ({
   agentLink,
   shortDescription,
   highlights,
+  tags,
 }) => {
   return (
-    <div
-      className=" bg-background rounded-2xl shadow-lg border border-border p-6 hover:shadow-2xl hover:scale-105 transition-all group cursor-pointer flex flex-col text-center items-center"
-    >
+    <div className="relative overflow-hidden bg-background rounded-2xl shadow-lg border border-border p-6 hover:shadow-2xl hover:scale-105 transition-all group cursor-pointer flex flex-col text-center items-center">
+      {/* Ribbon */}
+      {tags && tags.length > 0 && (
+        <div className={`absolute -left-10 top-5 -rotate-45 ${tags[0]==="Grilling Agent"?"bg-orange-800":"bg-secondary"} text-primary-foreground text-sm font-semibold py-1 px-10 shadow-md`}>
+          {tags.join(", ")}
+        </div>
+      )}
       <Image
         width={1200}
         height={1200}
@@ -54,7 +60,7 @@ const VCSummaryCard: React.FC<VCSummaryCardProps> = ({
         &ldquo;{tagline}&rdquo;
       </p>
 
-      <ButtonGroup className="mt-4 font-semibold py-4 ">
+      <ButtonGroup className="mt-4 font-semibold  border-2 border-input rounded-lg">
         <Button variant="default" type="button" size="default">
           <a
             className="flex items-center justify-center"
