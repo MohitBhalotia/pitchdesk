@@ -1,9 +1,6 @@
-import os
-from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Optional
-from openai import OpenAI
-from dotenv import load_dotenv
+
 
 
 # --------------------------------------------------
@@ -31,6 +28,9 @@ class UniversalValuationInput(BaseModel):
 
     # ASSETS
     fixed_assets_value: Optional[float] = 0
+    
+    # CASH
+    initial_cash: Optional[float] = None
 
 # --------------------------------------------------
 # SECTOR MULTIPLES
@@ -133,7 +133,7 @@ def run_projections(d: UniversalValuationInput):
         if customers > 0 else 0
     )
 
-    cash = 200_000  # conservative opening cash buffer
+    cash = d.initial_cash if d.initial_cash is not None else 200_000  # opening cash buffer
 
     monthly = []
 

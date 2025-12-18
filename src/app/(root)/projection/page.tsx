@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,7 +23,6 @@ import {
     SelectItem,
 } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 
 import ProjectionCharts from "./projectionCharts";
 import ValuationSummary from "./valuationSummary";
@@ -68,20 +67,46 @@ const formSchema = z
 
         // Pre-revenue fields
         product_stage: z.enum(["idea", "prototype", "MVP"]).optional(),
-        expected_customers_year1: z.string().optional(),
-        expected_monthly_revenue_year1: z.string().optional(),
 
         // Revenue/Growth fields
-        customers: z.string().optional(),
-        monthly_revenue: z.string().optional(),
-        monthly_growth_rate: z.string().optional(),
-        monthly_churn_rate: z.string().optional(),
+        customers: z.string().optional().refine(
+            (val) => !val || Number(val) >= 0,
+            { message: "Customers cannot be negative" }
+        ),
+        monthly_revenue: z.string().optional().refine(
+            (val) => !val || Number(val) >= 0,
+            { message: "Monthly revenue cannot be negative" }
+        ),
 
         // Advanced/optional
-        gross_margin: z.string().optional(),
-        monthly_burn: z.string().optional(),
-        top_3_customers_percent: z.string().optional(),
-        fixed_assets_value: z.string().optional(),
+        gross_margin: z.string().optional().refine(
+            (val) => !val || (Number(val) >= 0 && Number(val) <= 1),
+            { message: "Gross margin must be between 0 and 1 (e.g., 0.55 for 55%)" }
+        ),
+        monthly_burn: z.string().optional().refine(
+            (val) => !val || Number(val) >= 0,
+            { message: "Monthly burn cannot be negative" }
+        ),
+        monthly_churn_rate: z.string().optional().refine(
+            (val) => !val || (Number(val) >= 0 && Number(val) <= 1),
+            { message: "Churn rate must be between 0 and 1 (e.g., 0.02 for 2%)" }
+        ),
+        monthly_growth_rate: z.string().optional().refine(
+            (val) => !val || (Number(val) >= -1 && Number(val) <= 10),
+            { message: "Growth rate must be between -1 and 10 (e.g., 0.05 for 5%)" }
+        ),
+        top_3_customers_percent: z.string().optional().refine(
+            (val) => !val || (Number(val) >= 0 && Number(val) <= 100),
+            { message: "Top 3 customers % must be between 0 and 100" }
+        ),
+        fixed_assets_value: z.string().optional().refine(
+            (val) => !val || Number(val) >= 0,
+            { message: "Fixed assets value cannot be negative" }
+        ),
+        initial_cash: z.string().optional().refine(
+            (val) => !val || Number(val) >= 0,
+            { message: "Initial cash cannot be negative" }
+        ),
     })
     .superRefine((data, ctx) => {
         // Pre-revenue validation
@@ -91,20 +116,6 @@ const formSchema = z
                     code: z.ZodIssueCode.custom,
                     message: "Product stage is required",
                     path: ["product_stage"],
-                });
-            }
-            if (!data.expected_customers_year1 || data.expected_customers_year1 === "") {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: "Expected customers is required",
-                    path: ["expected_customers_year1"],
-                });
-            }
-            if (!data.expected_monthly_revenue_year1 || data.expected_monthly_revenue_year1 === "") {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: "Expected revenue is required",
-                    path: ["expected_monthly_revenue_year1"],
                 });
             }
         }
@@ -132,11 +143,20 @@ const formSchema = z
                     path: ["monthly_growth_rate"],
                 });
             }
-            if (!data.monthly_churn_rate || data.monthly_churn_rate === "") {
+            // Validate that monthly_revenue is positive
+            if (data.monthly_revenue && Number(data.monthly_revenue) <= 0) {
                 ctx.addIssue({
                     code: z.ZodIssueCode.custom,
-                    message: "Monthly churn rate is required",
-                    path: ["monthly_churn_rate"],
+                    message: "Monthly revenue must be greater than 0",
+                    path: ["monthly_revenue"],
+                });
+            }
+            // Validate that customers is positive
+            if (data.customers && Number(data.customers) <= 0) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: "Customers must be greater than 0",
+                    path: ["customers"],
                 });
             }
         }
@@ -148,6 +168,7 @@ export default function ProjectionPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [result, setResult] = useState<any>(null);
     const [loading, setLoading] = useState(false);
+    const resultsRef = useRef<HTMLDivElement>(null);
 
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
@@ -158,8 +179,6 @@ export default function ProjectionPage() {
             market_size: "medium",
             competitive_position: "moderate",
             product_stage: "idea",
-            expected_customers_year1: "",
-            expected_monthly_revenue_year1: "",
             customers: "",
             monthly_revenue: "",
             monthly_growth_rate: "",
@@ -179,28 +198,15 @@ export default function ProjectionPage() {
         // Convert and map for backend
         const payload = {
             ...values,
-            customers:
-                values.stage_of_business === "pre_revenue"
-                    ? values.expected_customers_year1
-                        ? Number(values.expected_customers_year1)
-                        : undefined
-                    : values.customers
-                        ? Number(values.customers)
-                        : undefined,
-            monthly_revenue:
-                values.stage_of_business === "pre_revenue"
-                    ? values.expected_monthly_revenue_year1
-                        ? Number(values.expected_monthly_revenue_year1)
-                        : undefined
-                    : values.monthly_revenue
-                        ? Number(values.monthly_revenue)
-                        : undefined,
+            customers: values.customers ? Number(values.customers) : undefined,
+            monthly_revenue: values.monthly_revenue ? Number(values.monthly_revenue) : undefined,
             monthly_growth_rate: values.monthly_growth_rate ? Number(values.monthly_growth_rate) : undefined,
             monthly_churn_rate: values.monthly_churn_rate ? Number(values.monthly_churn_rate) : undefined,
             gross_margin: values.gross_margin ? Number(values.gross_margin) : undefined,
             monthly_burn: values.monthly_burn ? Number(values.monthly_burn) : undefined,
             top_3_customers_percent: values.top_3_customers_percent ? Number(values.top_3_customers_percent) : undefined,
             fixed_assets_value: values.fixed_assets_value ? Number(values.fixed_assets_value) : undefined,
+            initial_cash: values.initial_cash ? Number(values.initial_cash) : undefined,
         };
 
         const res = await fetch("/api/projection", {
@@ -210,6 +216,11 @@ export default function ProjectionPage() {
         const data = await res.json();
         setResult(data);
         setLoading(false);
+        
+        // Scroll to results after a brief delay to ensure rendering
+        setTimeout(() => {
+            resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 100);
     }
 
     return (
@@ -344,71 +355,31 @@ export default function ProjectionPage() {
 
                         {/* Pre-Revenue */}
                         {stage === "pre_revenue" && (
-                            <>
-                                <FormField
-                                    control={form.control}
-                                    name="product_stage"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Product Stage</FormLabel>
-                                            <Select
-                                                value={field.value}
-                                                onValueChange={field.onChange}
-                                            >
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    <SelectItem value="idea">Idea</SelectItem>
-                                                    <SelectItem value="prototype">Prototype</SelectItem>
-                                                    <SelectItem value="MVP">MVP</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="expected_customers_year1"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Expected Customers (Year 1)</FormLabel>
+                            <FormField
+                                control={form.control}
+                                name="product_stage"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Product Stage</FormLabel>
+                                        <Select
+                                            value={field.value}
+                                            onValueChange={field.onChange}
+                                        >
                                             <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    {...field}
-                                                    value={field.value || ""}
-                                                    onChange={(e) => field.onChange(e.target.value)}
-                                                />
+                                                <SelectTrigger>
+                                                    <SelectValue />
+                                                </SelectTrigger>
                                             </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="expected_monthly_revenue_year1"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Expected Revenue (Year 1)</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    type="number"
-                                                    {...field}
-                                                    value={field.value || ""}
-                                                    onChange={(e) => field.onChange(e.target.value)}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </>
+                                            <SelectContent>
+                                                <SelectItem value="idea">Idea</SelectItem>
+                                                <SelectItem value="prototype">Prototype</SelectItem>
+                                                <SelectItem value="MVP">MVP</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                         )}
 
                         {/* Revenue / Growth */}
@@ -416,9 +387,7 @@ export default function ProjectionPage() {
                             <>
                                 {[
                                     { name: "customers", label: "Customers" },
-                                    { name: "monthly_revenue", label: "Monthly Revenue" },
-                                    { name: "monthly_growth_rate", label: "Monthly Growth Rate (%)" },
-                                    { name: "monthly_churn_rate", label: "Monthly Churn Rate (%)" },
+                                    { name: "monthly_revenue", label: "Monthly Revenue (INR)" },
                                 ].map(({ name, label }) => (
                                     <FormField
                                         key={name}
@@ -441,93 +410,149 @@ export default function ProjectionPage() {
                                         )}
                                     />
                                 ))}
+                                <FormField
+                                    control={form.control}
+                                    name="monthly_growth_rate"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>
+                                                Monthly Revenue Growth Rate
+                                                <span className="text-xs text-muted-foreground ml-2">(decimal, e.g., 0.05 for 5% growth)</span>
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="number"
+                                                    min={-1}
+                                                    max={10}
+                                                    step={0.01}
+                                                    placeholder="0.05"
+                                                    {...field}
+                                                    value={field.value || ""}
+                                                    onChange={(e) => field.onChange(e.target.value)}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
                             </>
                         )}
 
                         {/* Advanced/Optional Fields */}
                         <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 bg-muted/50 rounded-md p-4 border mt-2">
                             <span className="font-medium md:col-span-2 mb-0.5 text-sm text-muted-foreground">Optional / Advanced Inputs</span>
-                            <FormField
-                                control={form.control}
-                                name="gross_margin"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>
-                                            Gross Margin
-                                            <span className="text-xs text-muted-foreground ml-2">(Value 0-1, e.g., 0.55)</span>
-                                        </FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="number"
-                                                min={0}
-                                                max={1}
-                                                step={0.01}
-                                                placeholder="0.55"
-                                                {...field}
-                                                value={field.value || ""}
-                                                onChange={e => field.onChange(e.target.value)}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="monthly_burn"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>
-                                            Monthly Burn
-                                            <span className="text-xs text-muted-foreground ml-2">(Monthly cash outflow, e.g., 25000)</span>
-                                        </FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="number"
-                                                min={0}
-                                                step={1}
-                                                placeholder="25000"
-                                                {...field}
-                                                value={field.value || ""}
-                                                onChange={e => field.onChange(e.target.value)}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="top_3_customers_percent"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>
-                                            Top 3 Customers %
-                                            <span className="text-xs text-muted-foreground ml-2">(e.g., 40 for 40%)</span>
-                                        </FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="number"
-                                                min={0}
-                                                max={100}
-                                                step={1}
-                                                placeholder="40"
-                                                {...field}
-                                                value={field.value || ""}
-                                                onChange={e => field.onChange(e.target.value)}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                            
+                            {stage !== "pre_revenue" && (
+                                <>
+                                    <FormField
+                                        control={form.control}
+                                        name="monthly_churn_rate"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>
+                                                    Monthly Churn Rate
+                                                    <span className="text-xs text-muted-foreground ml-2">(decimal, e.g., 0.02 for 2%)</span>
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        type="number"
+                                                        min={0}
+                                                        max={1}
+                                                        step={0.01}
+                                                        placeholder="0.02"
+                                                        {...field}
+                                                        value={field.value || ""}
+                                                        onChange={e => field.onChange(e.target.value)}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="gross_margin"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>
+                                                    Gross Margin
+                                                    <span className="text-xs text-muted-foreground ml-2">(Value 0-1, e.g., 0.55)</span>
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        type="number"
+                                                        min={0}
+                                                        max={1}
+                                                        step={0.01}
+                                                        placeholder="0.55"
+                                                        {...field}
+                                                        value={field.value || ""}
+                                                        onChange={e => field.onChange(e.target.value)}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="monthly_burn"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>
+                                                    Monthly Burn (INR)
+                                                    <span className="text-xs text-muted-foreground ml-2">(Monthly cash outflow, e.g., 25000)</span>
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        type="number"
+                                                        min={0}
+                                                        step={1}
+                                                        placeholder="25000"
+                                                        {...field}
+                                                        value={field.value || ""}
+                                                        onChange={e => field.onChange(e.target.value)}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="top_3_customers_percent"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>
+                                                    Top 3 Customers %
+                                                    <span className="text-xs text-muted-foreground ml-2">(e.g., 40 for 40%)</span>
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        type="number"
+                                                        min={0}
+                                                        max={100}
+                                                        step={1}
+                                                        placeholder="40"
+                                                        {...field}
+                                                        value={field.value || ""}
+                                                        onChange={e => field.onChange(e.target.value)}
+                                                    />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </>
+                            )}
+                            
                             <FormField
                                 control={form.control}
                                 name="fixed_assets_value"
                                 render={({ field }) => (
                                     <FormItem>
                                         <FormLabel>
-                                            Fixed Assets Value
+                                            Fixed Assets Value (INR)
                                             <span className="text-xs text-muted-foreground ml-2">(e.g., 60000)</span>
                                         </FormLabel>
                                         <FormControl>
@@ -545,10 +570,36 @@ export default function ProjectionPage() {
                                     </FormItem>
                                 )}
                             />
+                            <FormField
+                                control={form.control}
+                                name="initial_cash"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>
+                                            Initial Cash Balance (INR)
+                                            <span className="text-xs text-muted-foreground ml-2">(e.g., 500000, default: 200000)</span>
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="number"
+                                                min={0}
+                                                step={1000}
+                                                placeholder="200000"
+                                                {...field}
+                                                value={field.value || ""}
+                                                onChange={e => field.onChange(e.target.value)}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                         </div>
+
+                        {/* Submit */}
                         <Button
                             type="submit"
-                            className="md:col-span-2"
+                            className="md:col-span-2 w-full"
                             disabled={loading}
                         >
                             {loading ? "Calculating..." : "Generate Projection"}
@@ -559,32 +610,81 @@ export default function ProjectionPage() {
 
             {/* ---------------- RESULTS ---------------- */}
             {result && (
-                <div className="space-y-12">
+                <div ref={resultsRef} className="space-y-12">
                     {/* Executive + Valuation + Burn */}
                     <ValuationSummary result={result} />
 
                     {/* Growth & Cash Charts */}
                     <ProjectionCharts data={result.projections.monthly} />
 
-                    {/* Investor Memo */}
-                    <Card className="p-6">
-                        <h2 className="mb-4 text-lg font-semibold">Investor Memo</h2>
-                        <Accordion type="single" collapsible>
-                            {Object.entries(result.explanations).map(
-                                ([k, v]) =>
-                                    typeof v === "string" && (
-                                        <AccordionItem key={k} value={k}>
-                                            <AccordionTrigger className="capitalize">
-                                                {k.replace("_", " ")}
-                                            </AccordionTrigger>
-                                            <AccordionContent className="text-sm text-muted-foreground">
-                                                {v}
-                                            </AccordionContent>
-                                        </AccordionItem>
-                                    )
+                    {/* AI Analysis & Insights */}
+                    {result.explanations && (
+                        <div className="space-y-6">
+                            <h2 className="text-2xl font-bold">AI Analysis & Insights</h2>
+                            
+                            {/* Overall Summary */}
+                            {result.explanations.overall_summary && (
+                                <Card className="p-6 bg-primary/5 border-primary/20">
+                                    <h3 className="mb-3 font-semibold text-lg">Investment Summary</h3>
+                                    <p className="text-sm leading-relaxed text-muted-foreground">{result.explanations.overall_summary}</p>
+                                </Card>
                             )}
-                        </Accordion>
-                    </Card>
+
+                            {/* Valuation Explanations */}
+                            {result.explanations.valuations && (
+                                <Card className="p-6">
+                                    <h3 className="mb-4 font-semibold text-lg">Valuation Analysis</h3>
+                                    <div className="space-y-4">
+                                        {result.explanations.valuations.scorecard && (
+                                            <div>
+                                                <h4 className="font-medium text-sm mb-2">Scorecard Method</h4>
+                                                <p className="text-sm text-muted-foreground leading-relaxed">{result.explanations.valuations.scorecard}</p>
+                                            </div>
+                                        )}
+                                        {result.explanations.valuations.vc_method?.pre_money && (
+                                            <div>
+                                                <h4 className="font-medium text-sm mb-2">VC Method</h4>
+                                                <p className="text-sm text-muted-foreground leading-relaxed">{result.explanations.valuations.vc_method.pre_money}</p>
+                                            </div>
+                                        )}
+                                        {result.explanations.valuations.risk_factor && (
+                                            <div>
+                                                <h4 className="font-medium text-sm mb-2">Risk Factor Analysis</h4>
+                                                <p className="text-sm text-muted-foreground leading-relaxed">{result.explanations.valuations.risk_factor}</p>
+                                            </div>
+                                        )}
+                                        {result.explanations.valuations.recommended_pre_money && (
+                                            <div>
+                                                <h4 className="font-medium text-sm mb-2">Recommended Valuation</h4>
+                                                <p className="text-sm text-muted-foreground leading-relaxed">{result.explanations.valuations.recommended_pre_money}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </Card>
+                            )}
+
+                            {/* Projection Explanations */}
+                            {result.explanations.projections && (
+                                <Card className="p-6">
+                                    <h3 className="mb-4 font-semibold text-lg">Financial Projections Analysis</h3>
+                                    <div className="space-y-4">
+                                        {result.explanations.projections.annual_revenue && (
+                                            <div>
+                                                <h4 className="font-medium text-sm mb-2">Annual Revenue Projection</h4>
+                                                <p className="text-sm text-muted-foreground leading-relaxed">{result.explanations.projections.annual_revenue}</p>
+                                            </div>
+                                        )}
+                                        {result.explanations.projections.runway_months && (
+                                            <div>
+                                                <h4 className="font-medium text-sm mb-2">Runway Analysis</h4>
+                                                <p className="text-sm text-muted-foreground leading-relaxed">{result.explanations.projections.runway_months}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </Card>
+                            )}
+                        </div>
+                    )}
                 </div>
             )}
         </div>

@@ -21,8 +21,10 @@ export default function ProjectionCharts({ data }: { data: any[] }) {
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
       {[
         { key: "customers", label: "Customers", color: "#3b82f6" },
-        { key: "revenue", label: "Revenue", color: "#10b981" },
-        { key: "cash_balance", label: "Cash Balance", color: "#f59e0b" },
+        { key: "revenue", label: "Revenue (INR)", color: "#10b981" },
+        { key: "gross_profit", label: "Gross Profit (INR)", color: "#8b5cf6" },
+        { key: "net_profit", label: "Net Profit (INR)", color: "#ec4899" },
+        { key: "cash_balance", label: "Cash Balance (INR)", color: "#f59e0b" },
       ].map((c) => (
         <Card key={c.key} className="p-4">
           <p className="mb-2 font-medium">{c.label}</p>

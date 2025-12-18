@@ -3,68 +3,71 @@
 import { Card } from "@/components/ui/card";
 
 const money = (value?: number) =>
-    typeof value === "number" ? `$${value.toLocaleString()}` : "—";
+    typeof value === "number" ? `₹${value.toLocaleString("en-IN")}` : "—";
 
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function ValuationSummary({ result }: { result: any }) {
     const v = result.valuations;
     const p = result.projections;
+    const e = result.explanations;
 
     const valuationCandidates = [
-        v.berkus,
-        v.scorecard,
-        v.cost_to_duplicate,
-        v.vc_method?.pre_money,
-        v.risk_factor,
+        v?.berkus,
+        v?.scorecard,
+        v?.cost_to_duplicate,
+        v?.vc_method?.pre_money,
+        v?.risk_factor,
     ].filter((n): n is number => typeof n === "number");
+    const valuationMin = valuationCandidates.length > 0 ? Math.min(...valuationCandidates) : null;
+    const valuationMax = valuationCandidates.length > 0 ? Math.max(...valuationCandidates) : null;
 
-    const valuationMin = Math.min(...valuationCandidates);
-    const valuationMax = Math.max(...valuationCandidates);
-
-
-    const negativeMonth = p.monthly.find(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (m: any) => m.cash_balance < 0
-    )?.month;
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const burns = p.monthly.map((m: any) => Math.abs(m.net_profit));
-    const avgBurn =
-        burns.reduce((a: number, b: number) => a + b, 0) / burns.length;
+    const annualRevenue = p?.annual_revenue ?? null;
+    const negativeMonth = p?.monthly?.find((m: any) => m.cash_balance < 0)?.month;
+    const burns = p?.monthly?.map((m: any) => Math.abs(m.net_profit)) || [];
+    const avgBurn = burns.length > 0 ? burns.reduce((a: number, b: number) => a + b, 0) / burns.length : 0;
+    const runwayMonths = p?.runway_months;
+    const highBurn = typeof runwayMonths === "number" && runwayMonths < 6 ? true : false;
+    const highlight = highBurn ? "bg-destructive/10 border-destructive/50 text-destructive" : "bg-success/10 border-success/40 text-success-800";
 
     return (
         <div className="space-y-10">
-            {/* Executive Summary */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-                <Card className="p-4">
-                    <p className="text-sm text-muted-foreground">Recommended Valuation</p>
-                    <p className="text-xl font-semibold">
-                        {money(v.recommended_pre_money)}
+            {/* Executive, Revenue, Runway */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
+                <Card className="p-4 md:col-span-2 flex flex-col gap-1 justify-between">
+                    <div>
+                        <p className="text-muted-foreground text-xs">Recommended Valuation</p>
+                        <p className="text-2xl font-bold tracking-tight lg:text-3xl">{money(v?.recommended_pre_money)}</p>
+                    </div>
+                    <p className="text-xs pt-1 text-muted-foreground">
+                        Pre-money estimate, based on blended methods
                     </p>
                 </Card>
-
-                <Card className="p-4">
-                    <p className="text-sm text-muted-foreground">Valuation Range</p>
-                    <p className="text-xl font-semibold">
-                        {money(valuationMin)} – {money(valuationMax)}
+                <Card className="p-4 flex flex-col gap-1">
+                    <p className="text-muted-foreground text-xs">Valuation Range</p>
+                    <p className="text-lg font-semibold">
+                        {valuationMin !== null && valuationMax !== null
+                            ? `${money(valuationMin)} – ${money(valuationMax)}`
+                            : "—"}
                     </p>
                 </Card>
-
-                <Card className="p-4">
-                    <p className="text-sm text-muted-foreground">Runway</p>
-                    <p className="text-xl font-semibold">
-                        {p.runway_months} months
+                <Card className={`p-4 flex flex-col gap-1 border-2 ${highlight}`}>
+                    <p className="text-muted-foreground text-xs">Runway (Last 3 Months)</p>
+                    <p className="text-lg font-semibold">
+                        {typeof runwayMonths === "number" ? `${runwayMonths} mo` : "Profitable"}
                     </p>
+                    <span className="text-xs font-medium">
+                        {typeof runwayMonths === "number" 
+                            ? (highBurn ? "⚠ Raise capital soon!" : "Healthy runway") 
+                            : "No losses in recent months"}
+                    </span>
                 </Card>
-
-                <Card className="p-4">
-                    <p className="text-sm text-muted-foreground">Financial Health</p>
-                    <p className="text-sm">
-                        {p.runway_months < 6
-                            ? "High burn, urgent funding needed"
-                            : "Manageable cash position"}
+                <Card className="p-4 flex flex-col gap-1">
+                    <p className="text-muted-foreground text-xs">12-Month Revenue</p>
+                    <p className="text-lg font-semibold">
+                        {annualRevenue !== null ? money(annualRevenue) : "—"}
                     </p>
+                    <span className="text-xs">predicted by cashflow model</span>
                 </Card>
             </div>
 
@@ -79,7 +82,6 @@ export default function ValuationSummary({ result }: { result: any }) {
                         </>
                     )}
                     <span>Scorecard Method</span><span>{money(v.scorecard)}</span>
-                    <span>Cost to Duplicate</span><span>{money(v.cost_to_duplicate)}</span>
                     <span>VC Method (Pre)</span><span>{money(v.vc_method.pre_money)}</span>
                     <span>Risk Factor</span><span>{money(v.risk_factor)}</span>
                     <span className="font-medium">Recommended</span>
@@ -112,16 +114,6 @@ export default function ValuationSummary({ result }: { result: any }) {
                     </p>
                 </Card>
             </div>
-
-            {/* Actionable Insights */}
-            <Card className="p-6">
-                <h2 className="mb-3 font-semibold">What This Means For You</h2>
-                <ul className="list-disc space-y-1 pl-5 text-sm text-muted-foreground">
-                    {p.runway_months < 6 && <li>Raise capital within the next 6 months</li>}
-                    <li>Improve monetization before scaling users further</li>
-                    <li>Control fixed costs to extend runway</li>
-                </ul>
-            </Card>
         </div>
     );
 }
