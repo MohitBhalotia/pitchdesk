@@ -2,6 +2,16 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Participant from "@/models/Participant";
 
+type ParticipantLean = {
+  teamName: string;
+  teamStatus: "validated" | "incomplete" | "disqualified";
+  teamLeader: {
+    name: string;
+    email: string;
+    collegeName: string;
+  };
+};
+
 // GET /api/team-stats?competitionId=...
 export async function GET(req: Request) {
   try {
@@ -17,7 +27,6 @@ export async function GET(req: Request) {
       );
     }
 
-    // Fetch required fields only
     const participants = await Participant.find(
       { competitionId },
       {
@@ -28,9 +37,9 @@ export async function GET(req: Request) {
         "teamLeader.collegeName": 1,
         _id: 0,
       }
-    ).lean();
+    ).lean<ParticipantLean[]>();
 
-    const mapTeam = (team: any) => ({
+    const mapTeam = (team: ParticipantLean) => ({
       teamName: team.teamName,
       leaderName: team.teamLeader.name,
       leaderEmail: team.teamLeader.email,
