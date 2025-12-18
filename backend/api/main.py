@@ -8,6 +8,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, HTTPException, Form
 from typing import List, Optional
 
+from api.valuation_engine import (
+    UniversalValuationInput,
+    run_valuation,
+    run_projections
+)
+
 
 # --------------------- CONFIG ---------------------
 load_dotenv(override=True)
@@ -494,6 +500,85 @@ async def evaluate_pitch_api(req: PitchRequest):
 
     result = evaluate_pitch_tournament(transcript_text)
     return result
+
+
+
+# --------------------- VALUATION ENGINE ---------------------
+
+# --------------------------------------------------
+# AI EXPLANATION (STRICT JSON)
+# --------------------------------------------------
+def generate_narrative_explanation(result):
+    prompt = f"""
+You are a senior venture capitalist writing an investment-grade explanation.
+
+ABSOLUTE RULES:
+- ALL monetary values are in INR (₹)
+- EVERY field must be explained in natural language
+- Do NOT hallucinate or invent numbers
+- Each JSON value must be a paragraph of explanation
+- Professional VC tone, no bullet points
+
+Return STRICT JSON in exactly this structure:
+
+{{
+  "valuations": {{
+    "scorecard": "explanation text",
+    "vc_method": {{
+      "pre_money": "explanation text",
+    }},
+    "risk_factor": "explanation text",
+    "recommended_pre_money": "explanation text"
+  }},
+  "projections": {{
+    "annual_revenue": "explanation text",
+    "runway_months": "explaination text(if Null, then it means the company wont go bankrupt.. and has enough funds thus give explaination accordingly)"
+  }},
+  "overall_summary": "concise investment conclusion"
+}}
+
+GROUND TRUTH DATA (DO NOT CHANGE NUMBERS):
+{json.dumps(result, indent=2)}
+"""
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        temperature=0.15,
+        response_format={"type": "json_object"},  # ✅ SINGLE BRACES
+        messages=[
+            {"role": "user", "content": prompt}
+        ]
+    )
+
+    return json.loads(response.choices[0].message.content)
+
+
+# --------------------------------------------------
+# API
+# --------------------------------------------------
+
+@app.post("/valuation-report")
+def valuation_report(data: UniversalValuationInput):
+    valuations = run_valuation(data)
+    projections = run_projections(data)
+
+    combined = {
+        "valuations": valuations,
+        "projections": projections
+    }
+
+    explanations = generate_narrative_explanation(combined)
+
+    return {
+        "valuations": valuations,
+        "projections": projections,
+        "explanations": explanations
+    }
+
+
+
+
+
 
 
 # --------------------- ROOT ---------------------
