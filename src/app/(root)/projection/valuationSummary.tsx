@@ -15,7 +15,7 @@ const money = (value?: number) =>
     typeof value === "number" ? `₹${value.toLocaleString("en-IN")}` : "—";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function ValuationSummary({ result }: { result: any }) {
+export default function ValuationSummary({ result, stage }: { result: any; stage: string }) {
     const v = result.valuations;
     const p = result.projections;
 
@@ -38,8 +38,8 @@ export default function ValuationSummary({ result }: { result: any }) {
         ? p.monthly
         : [];
 
-    const negativeMonth =
-        monthly.find((m) => m.cash_balance < 0)?.month ?? null;
+    // Use backend's calculated cash exhausted month (hybrid approach)
+    const negativeMonth = p?.cash_exhausted_month ?? null;
 
     const burns = monthly
         .filter((m) => m.net_profit < 0)
@@ -61,10 +61,12 @@ export default function ValuationSummary({ result }: { result: any }) {
         ? "bg-destructive/10 border-destructive/50 text-destructive"
         : "bg-success/10 border-success/40 text-success-800";
 
+    const isPreRevenue = stage === "pre_revenue";
+
     return (
         <div className="space-y-10">
             {/* Executive, Revenue, Runway */}
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
+            <div className={`grid grid-cols-1 gap-4 ${isPreRevenue ? "md:grid-cols-2" : "md:grid-cols-5"}`}>
                 <Card className="p-4 md:col-span-2 flex flex-col gap-1 justify-between">
                     <div>
                         <p className="text-muted-foreground text-xs">
@@ -90,37 +92,42 @@ export default function ValuationSummary({ result }: { result: any }) {
                     </p>
                 </Card>
 
-                <Card className={`p-4 flex flex-col gap-1 border-2 ${highlight}`}>
-                    <p className="text-muted-foreground text-xs">
-                        Runway (Last 3 Months)
-                    </p>
-                    <p className="text-lg font-semibold">
-                        {typeof runwayMonths === "number"
-                            ? `${runwayMonths} mo`
-                            : "Profitable"}
-                    </p>
-                    <span className="text-xs font-medium">
-                        {typeof runwayMonths === "number"
-                            ? highBurn
-                                ? "⚠ Raise capital soon!"
-                                : "Healthy runway"
-                            : "No losses in recent months"}
-                    </span>
-                </Card>
+                {/* Only show projection metrics for revenue/growth stages */}
+                {!isPreRevenue && (
+                    <>
+                        <Card className={`p-4 flex flex-col gap-1 border-2 ${highlight}`}>
+                            <p className="text-muted-foreground text-xs">
+                                Runway (Current Burn Rate)
+                            </p>
+                            <p className="text-lg font-semibold">
+                                {typeof runwayMonths === "number"
+                                    ? `${runwayMonths} mo`
+                                    : "Profitable"}
+                            </p>
+                            <span className="text-xs font-medium">
+                                {typeof runwayMonths === "number"
+                                    ? highBurn
+                                        ? "⚠ Raise capital soon!"
+                                        : "Healthy runway"
+                                    : "Currently profitable"}
+                            </span>
+                        </Card>
 
-                <Card className="p-4 flex flex-col gap-1">
-                    <p className="text-muted-foreground text-xs">
-                        12-Month Revenue
-                    </p>
-                    <p className="text-lg font-semibold">
-                        {annualRevenue !== null
-                            ? money(annualRevenue)
-                            : "—"}
-                    </p>
-                    <span className="text-xs">
-                        predicted by cashflow model
-                    </span>
-                </Card>
+                        <Card className="p-4 flex flex-col gap-1">
+                            <p className="text-muted-foreground text-xs">
+                                12-Month Revenue
+                            </p>
+                            <p className="text-lg font-semibold">
+                                {annualRevenue !== null
+                                    ? money(annualRevenue)
+                                    : "—"}
+                            </p>
+                            <span className="text-xs">
+                                predicted by cashflow model
+                            </span>
+                        </Card>
+                    </>
+                )}
             </div>
 
             {/* Valuation Breakdown */}
@@ -129,7 +136,7 @@ export default function ValuationSummary({ result }: { result: any }) {
                     Valuation Breakdown
                 </h2>
                 <div className="grid grid-cols-2 gap-y-2 text-sm">
-                    {typeof v.berkus === "number" && (
+                    {typeof v.berkus === "number" && isPreRevenue && (
                         <>
                             <span>Berkus Method</span>
                             <span>{money(v.berkus)}</span>
@@ -137,8 +144,10 @@ export default function ValuationSummary({ result }: { result: any }) {
                     )}
                     <span>Scorecard Method</span>
                     <span>{money(v.scorecard)}</span>
-                    <span>VC Method (Pre)</span>
+                    <span>VC Method (Pre-Money)</span>
                     <span>{money(v.vc_method.pre_money)}</span>
+                    <span>VC Method (Post-Money)</span>
+                    <span>{money(v.vc_method.post_money)}</span>
                     <span>Risk Factor</span>
                     <span>{money(v.risk_factor)}</span>
                     <span className="font-medium">Recommended</span>
@@ -148,35 +157,37 @@ export default function ValuationSummary({ result }: { result: any }) {
                 </div>
             </Card>
 
-            {/* Burn & Runway */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <Card className="p-4">
-                    <p className="text-sm text-muted-foreground">
-                        Avg Monthly Burn
-                    </p>
-                    <p className="text-lg font-semibold">
-                        {money(Math.round(avgBurn))}
-                    </p>
-                </Card>
+            {/* Burn & Runway - Only show for revenue/growth stages */}
+            {!isPreRevenue && (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <Card className="p-4">
+                        <p className="text-sm text-muted-foreground">
+                            Avg Monthly Burn
+                        </p>
+                        <p className="text-lg font-semibold">
+                            {money(Math.round(avgBurn))}
+                        </p>
+                    </Card>
 
-                <Card className="p-4">
-                    <p className="text-sm text-muted-foreground">
-                        Peak Burn
-                    </p>
-                    <p className="text-lg font-semibold">
-                        {money(Math.round(peakBurn))}
-                    </p>
-                </Card>
+                    <Card className="p-4">
+                        <p className="text-sm text-muted-foreground">
+                            Peak Burn
+                        </p>
+                        <p className="text-lg font-semibold">
+                            {money(Math.round(peakBurn))}
+                        </p>
+                    </Card>
 
-                <Card className="p-4">
-                    <p className="text-sm text-muted-foreground">
-                        Cash Exhausted
-                    </p>
-                    <p className="text-lg font-semibold">
-                        Month {negativeMonth ?? "—"}
-                    </p>
-                </Card>
-            </div>
+                    <Card className="p-4">
+                        <p className="text-sm text-muted-foreground">
+                            Cash Exhausted
+                        </p>
+                        <p className="text-lg font-semibold">
+                            {negativeMonth ? `Month ${negativeMonth}` : "Never"}
+                        </p>
+                    </Card>
+                </div>
+            )}
         </div>
     );
 }

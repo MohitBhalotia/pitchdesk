@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -173,7 +173,7 @@ export default function ProjectionPage() {
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            stage_of_business: "pre_revenue",
+            stage_of_business: "early_revenue",
             sector: "manufacturing",
             team_strength: "average",
             market_size: "medium",
@@ -191,6 +191,18 @@ export default function ProjectionPage() {
     });
 
     const stage = form.watch("stage_of_business");
+
+    // Reset fields when stage changes to prevent hidden field values from being submitted
+    useEffect(() => {
+        if (stage === "pre_revenue") {
+            // Clear revenue/growth fields when switching to pre_revenue
+            form.setValue("customers", "");
+            form.setValue("monthly_revenue", "");
+            form.setValue("monthly_growth_rate", "");
+            form.setValue("monthly_churn_rate", "");
+        }
+    }, [stage, form]);
+
 
     async function onSubmit(values: FormValues) {
         setLoading(true);
@@ -214,9 +226,14 @@ export default function ProjectionPage() {
             body: JSON.stringify(payload),
         });
         const data = await res.json();
-        setResult(data);
-        setLoading(false);
         
+        // Store the stage used for this calculation with the results
+        setResult({
+            ...data,
+            submittedStage: values.stage_of_business
+        });
+        setLoading(false);
+
         // Scroll to results after a brief delay to ensure rendering
         setTimeout(() => {
             resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -416,7 +433,7 @@ export default function ProjectionPage() {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>
-                                                Monthly Revenue Growth Rate
+                                                Monthly Customer Growth Rate
                                                 <span className="text-xs text-muted-foreground ml-2">(decimal, e.g., 0.05 for 5% growth)</span>
                                             </FormLabel>
                                             <FormControl>
@@ -441,7 +458,7 @@ export default function ProjectionPage() {
                         {/* Advanced/Optional Fields */}
                         <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 bg-muted/50 rounded-md p-4 border mt-2">
                             <span className="font-medium md:col-span-2 mb-0.5 text-sm text-muted-foreground">Optional / Advanced Inputs</span>
-                            
+
                             {stage !== "pre_revenue" && (
                                 <>
                                     <FormField
@@ -545,7 +562,7 @@ export default function ProjectionPage() {
                                     />
                                 </>
                             )}
-                            
+
                             <FormField
                                 control={form.control}
                                 name="fixed_assets_value"
@@ -612,16 +629,18 @@ export default function ProjectionPage() {
             {result && (
                 <div ref={resultsRef} className="space-y-12">
                     {/* Executive + Valuation + Burn */}
-                    <ValuationSummary result={result} />
+                    <ValuationSummary result={result} stage={result.submittedStage} />
 
-                    {/* Growth & Cash Charts */}
-                    <ProjectionCharts data={result.projections.monthly} />
+                    {/* Growth & Cash Charts - Only show for revenue/growth stages */}
+                    {result.submittedStage !== "pre_revenue" && result.projections?.monthly && (
+                        <ProjectionCharts data={result.projections.monthly} />
+                    )}
 
                     {/* AI Analysis & Insights */}
                     {result.explanations && (
                         <div className="space-y-6">
                             <h2 className="text-2xl font-bold">AI Analysis & Insights</h2>
-                            
+
                             {/* Overall Summary */}
                             {result.explanations.overall_summary && (
                                 <Card className="p-6 bg-primary/5 border-primary/20">
@@ -635,6 +654,12 @@ export default function ProjectionPage() {
                                 <Card className="p-6">
                                     <h3 className="mb-4 font-semibold text-lg">Valuation Analysis</h3>
                                     <div className="space-y-4">
+                                        {result.explanations.valuations.berkus && (
+                                            <div>
+                                                <h4 className="font-medium text-sm mb-2">Berkus Method</h4>
+                                                <p className="text-sm text-muted-foreground leading-relaxed">{result.explanations.valuations.berkus}</p>
+                                            </div>
+                                        )}
                                         {result.explanations.valuations.scorecard && (
                                             <div>
                                                 <h4 className="font-medium text-sm mb-2">Scorecard Method</h4>
@@ -663,8 +688,8 @@ export default function ProjectionPage() {
                                 </Card>
                             )}
 
-                            {/* Projection Explanations */}
-                            {result.explanations.projections && (
+                            {/* Projection Explanations - Only show for revenue/growth stages */}
+                            {result.submittedStage !== "pre_revenue" && result.explanations.projections && (
                                 <Card className="p-6">
                                     <h3 className="mb-4 font-semibold text-lg">Financial Projections Analysis</h3>
                                     <div className="space-y-4">

@@ -509,6 +509,11 @@ async def evaluate_pitch_api(req: PitchRequest):
 # AI EXPLANATION (STRICT JSON)
 # --------------------------------------------------
 def generate_narrative_explanation(result):
+    # Check if Berkus method exists in the data
+    has_berkus = "berkus" in result.get("valuations", {})
+    
+    berkus_field = '"berkus": "explanation text",' if has_berkus else ""
+    
     prompt = f"""
 You are a senior venture capitalist writing an investment-grade explanation.
 
@@ -518,11 +523,13 @@ ABSOLUTE RULES:
 - Do NOT hallucinate or invent numbers
 - Each JSON value must be a paragraph of explanation
 - Professional VC tone, no bullet points
+- Only include fields that exist in the ground truth data
 
 Return STRICT JSON in exactly this structure:
 
 {{
   "valuations": {{
+    {berkus_field}
     "scorecard": "explanation text",
     "vc_method": {{
       "pre_money": "explanation text",

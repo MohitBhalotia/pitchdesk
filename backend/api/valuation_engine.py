@@ -158,21 +158,29 @@ def run_projections(d: UniversalValuationInput):
             "cash_balance": round(cash, 2)
         })
 
-    # -------- RUNWAY --------
-    recent_months = monthly[-3:]  # last 3 months
-    recent_losses = [m["net_profit"] for m in recent_months if m["net_profit"] < 0]
-
-    if not recent_losses:
-        runway = None  # profitable or breakeven business
+    # -------- HYBRID RUNWAY CALCULATION --------
+    # 1. Calculate runway based on FIRST 3 months (current burn rate)
+    early_months = monthly[:3]  # first 3 months
+    early_losses = [m["net_profit"] for m in early_months if m["net_profit"] < 0]
+    
+    if not early_losses:
+        runway = None  # currently profitable or breakeven
     else:
-        avg_burn = abs(sum(recent_losses) / len(recent_losses))
-        runway = round(cash / avg_burn, 2)
-
+        avg_burn = abs(sum(early_losses) / len(early_losses))
+        current_cash = monthly[0]["cash_balance"]  # cash at start of projections
+        runway = round(current_cash / avg_burn, 2) if avg_burn > 0 else None
+    
+    # 2. Find actual month when cash goes negative (from full projection)
+    cash_exhausted_month = next(
+        (m["month"] for m in monthly if m["cash_balance"] < 0), 
+        None
+    )
 
     return {
         "monthly": monthly,
         "annual_revenue": round(sum(p["revenue"] for p in monthly), 2),
-        "runway_months": runway
+        "runway_months": runway,  # Based on current burn (first 3 months)
+        "cash_exhausted_month": cash_exhausted_month  # Actual from projection
     }
 
 def tam_multiplier(sector, market_size):
@@ -236,9 +244,26 @@ def run_valuation(d: UniversalValuationInput):
     if d.stage_of_business == "pre_revenue":
         base = PRE_REVENUE_FLOOR[d.sector] * PRODUCT_SCORE[d.product_stage]
         final = (base * c) + asset_value
-        final=final*0.80
+        final = final * 0.80
+        
+        # Berkus Method for pre-revenue (max 500k per factor, 5 factors)
+        # Factors: Sound Idea, Prototype, Quality Management, Strategic Relationships, Product Rollout/Sales
+        berkus_score = 0
+        # Sound Idea & Market (based on market size and sector)
+        berkus_score += 400_000 if d.market_size == "large" else 300_000 if d.market_size == "medium" else 200_000
+        # Prototype/Product (based on product stage)
+        berkus_score += 500_000 if d.product_stage == "MVP" else 300_000 if d.product_stage == "prototype" else 100_000
+        # Management Team (based on team strength)
+        berkus_score += 500_000 if d.team_strength == "strong" else 300_000 if d.team_strength == "average" else 150_000
+        # Strategic Relationships (based on competitive position)
+        berkus_score += 400_000 if d.competitive_position == "strong" else 250_000 if d.competitive_position == "moderate" else 100_000
+        # Product Rollout/Pilot Customers (default for pre-revenue)
+        berkus_score += 200_000
+        
+        berkus_final = berkus_score + asset_value
 
         return {
+            "berkus": round(berkus_final, 2),
             "scorecard": final,
             "cost_to_duplicate": 500_000,
             "vc_method": {"pre_money": final, "post_money": final * 1.2},
