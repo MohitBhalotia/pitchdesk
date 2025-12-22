@@ -31,10 +31,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `Maximum team size is ${maxSize}.` }, { status: 400 });
     }
 
-    // Check if user is already registered
+    // Check if user is already registered as leader or accepted member
+    // Allow pending members to create their own team
     const existingParticipant = await Participant.findOne({
       competitionId: body.competitionId,
-      userId: body.userId
+      $or: [
+        { userId: body.userId }, // Already a leader
+        { 'teamMembers.userId': body.userId, 'teamMembers.status': 'accepted' } // Accepted member
+      ]
     });
 
     if (existingParticipant) {
@@ -137,6 +141,110 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ success: true, participant });
   } catch (error) {
     console.error('Error adding member:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+// ---- Resend invite endpoint ----
+export async function PATCH(request: NextRequest) {
+  try {
+    await dbConnect();
+    const session = await getServerSession();
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const body = await request.json();
+    const { participantId, memberEmail } = body;
+    if (!participantId || !memberEmail) {
+      return NextResponse.json({ error: 'Missing required fields.' }, { status: 400 });
+    }
+    // Find participant
+    const participant = await Participant.findById(participantId);
+    if (!participant) {
+      return NextResponse.json({ error: 'Team not found.' }, { status: 404 });
+    }
+    // Only team leader can resend
+    if (session.user.email !== participant.teamLeader.email) {
+      return NextResponse.json({ error: 'Only team leader can resend invitations.' }, { status: 403 });
+    }
+    // Find the member
+    const member = participant.teamMembers.find(m => m.email === memberEmail);
+    if (!member) {
+      return NextResponse.json({ error: 'Member not found.' }, { status: 404 });
+    }
+    // Only allow resending to pending members
+    if (member.status !== 'pending') {
+      return NextResponse.json({ error: 'Can only resend invitations to pending members.' }, { status: 400 });
+    }
+    // Generate new token
+    const inviteToken = crypto.randomBytes(28).toString('base64url');
+    member.inviteToken = inviteToken;
+    await participant.save();
+    // Send email
+    const comp = await Competition.findById(participant.competitionId);
+    const inviteBaseUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invite-competition?token=`;
+    const inviteLink = `${inviteBaseUrl}${encodeURIComponent(inviteToken)}`;
+    await resendInviteTeamMember(
+      member.name,
+      member.email,
+      participant.teamName,
+      participant.teamLeader.name,
+      comp ? comp.title : 'a competition',
+      inviteLink,
+      (participant._id as mongoose.Types.ObjectId).toString(),
+    );
+    return NextResponse.json({ success: true, participant });
+  } catch (error) {
+    console.error('Error resending invite:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+// ---- Remove pending member endpoint ----
+export async function DELETE(request: NextRequest) {
+  try {
+    await dbConnect();
+    const session = await getServerSession();
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const body = await request.json();
+    const { participantId, memberEmail } = body;
+    if (!participantId || !memberEmail) {
+      return NextResponse.json({ error: 'Missing required fields.' }, { status: 400 });
+    }
+    // Find participant
+    const participant = await Participant.findById(participantId);
+    if (!participant) {
+      return NextResponse.json({ error: 'Team not found.' }, { status: 404 });
+    }
+    // Only team leader can remove
+    if (session.user.email !== participant.teamLeader.email) {
+      return NextResponse.json({ error: 'Only team leader can remove members.' }, { status: 403 });
+    }
+    // Find member index
+    const memberIndex = participant.teamMembers.findIndex(m => m.email === memberEmail);
+    if (memberIndex === -1) {
+      return NextResponse.json({ error: 'Member not found.' }, { status: 404 });
+    }
+    const member = participant.teamMembers[memberIndex];
+    // Only allow removing pending members
+    if (member.status !== 'pending') {
+      return NextResponse.json({ error: 'Can only remove members with pending invitations.' }, { status: 400 });
+    }
+    // Remove member
+    participant.teamMembers.splice(memberIndex, 1);
+    // Update team status if needed
+    const comp = await Competition.findById(participant.competitionId);
+    const minSize = comp?.teamSize?.min || 1;
+    const acceptedCount = 1 + participant.teamMembers.filter(m => m.status === 'accepted').length;
+    if (acceptedCount < minSize) {
+      participant.teamStatus = 'incomplete';
+    }
+    await participant.save();
+    return NextResponse.json({ success: true, participant });
+  } catch (error) {
+    console.error('Error removing member:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

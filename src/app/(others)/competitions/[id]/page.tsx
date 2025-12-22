@@ -662,6 +662,8 @@ function CompetitionSidebar({
   const [newMemberEmail, setNewMemberEmail] = useState("");
   const [addLoading, setAddLoading] = useState(false);
   const [addEmailError, setAddEmailError] = useState<string | null>(null);
+  const [resendLoading, setResendLoading] = useState<string | null>(null); // email of member being resent
+  const [removeLoading, setRemoveLoading] = useState<string | null>(null); // email of member being removed
 
   // Email validation utility (copied from registration-form.tsx)
   function validateTeamMemberEmails(
@@ -729,6 +731,73 @@ function CompetitionSidebar({
   useEffect(() => {
     setLocalParticipant(participant);
   }, [participant]);
+
+  // Resend invite action
+  async function handleResendInvite(memberEmail: string) {
+    if (!localParticipant?._id) return;
+    setResendLoading(memberEmail);
+    try {
+      const response = await axios.patch(
+        "/api/competitions/participants",
+        {
+          participantId: localParticipant._id,
+          memberEmail: memberEmail,
+        },
+        { validateStatus: () => true }
+      );
+      if (response.status === 200 || response.data?.success) {
+        toast.success("Invitation resent successfully!");
+        if (response.data?.participant) {
+          setLocalParticipant(response.data.participant);
+        } else {
+          await reFetchParticipant();
+        }
+      } else {
+        toast.error(response.data?.error || "Could not resend invitation.");
+      }
+    } catch (e) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      toast.error((e as any)?.response?.data?.error || "Network error.");
+    } finally {
+      setResendLoading(null);
+    }
+  }
+
+  // Remove pending member action
+  async function handleRemoveMember(memberEmail: string) {
+    if (!localParticipant?._id) return;
+    if (!confirm(`Are you sure you want to remove ${memberEmail} from the team?`)) {
+      return;
+    }
+    setRemoveLoading(memberEmail);
+    try {
+      const response = await axios.delete(
+        "/api/competitions/participants",
+        {
+          data: {
+            participantId: localParticipant._id,
+            memberEmail: memberEmail,
+          },
+          validateStatus: () => true
+        }
+      );
+      if (response.status === 200 || response.data?.success) {
+        toast.success("Member removed successfully!");
+        if (response.data?.participant) {
+          setLocalParticipant(response.data.participant);
+        } else {
+          await reFetchParticipant();
+        }
+      } else {
+        toast.error(response.data?.error || "Could not remove member.");
+      }
+    } catch (e) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      toast.error((e as any)?.response?.data?.error || "Network error.");
+    } finally {
+      setRemoveLoading(null);
+    }
+  }
 
   // Add member action (add is handled fully in state, not hard refresh)
   async function handleAddMember() {
@@ -968,16 +1037,40 @@ function CompetitionSidebar({
                                   ({member.email})
                                 </p>
                               </div>
-                              <Badge
-                                variant="secondary"
-                                className="mt-1 text-xs"
-                              >
-                                {member.status === "pending"
-                                  ? "Pending"
-                                  : member.status === "accepted"
-                                    ? "Accepted"
-                                    : "Declined"}
-                              </Badge>
+                              <div className="flex items-center gap-2">
+                                <Badge
+                                  variant="secondary"
+                                  className="mt-1 text-xs"
+                                >
+                                  {member.status === "pending"
+                                    ? "Pending"
+                                    : member.status === "accepted"
+                                      ? "Accepted"
+                                      : "Declined"}
+                                </Badge>
+                                {isLeader && member.status === "pending" && (
+                                  <div className="flex gap-1">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="h-6 px-2 text-xs"
+                                      onClick={() => handleResendInvite(member.email)}
+                                      disabled={resendLoading === member.email || removeLoading !== null}
+                                    >
+                                      {resendLoading === member.email ? "..." : "Resend"}
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="destructive"
+                                      className="h-6 px-2 text-xs"
+                                      onClick={() => handleRemoveMember(member.email)}
+                                      disabled={removeLoading === member.email || resendLoading !== null}
+                                    >
+                                      {removeLoading === member.email ? "..." : "Remove"}
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
                             </li>
                           )
                         )}

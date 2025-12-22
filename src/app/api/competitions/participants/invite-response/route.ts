@@ -47,12 +47,20 @@ export async function POST(request: NextRequest) {
     console.log('Member Email:', memberEmail);
     
 
-    // Duplicity check: Is this user ALREADY a member or leader in any other team for this competition?
+    // Duplicity check: Block only if user is already a leader or accepted member
+    // Allow pending members to accept invites (users can have multiple pending invites)
     const alreadyParticipant = await Participant.findOne({
       competitionId: competitionId,
       $or: [
         { userId: memberObjectId }, // Leader of another team
-        { 'teamMembers.userId': memberObjectId }, // Accepted member of another team
+        { 
+          teamMembers: {
+            $elemMatch: {
+              userId: memberObjectId,
+              status: 'accepted' // Explicitly check for accepted status only
+            }
+          }
+        }, // Accepted member of another team
         { 'teamLeader.email': memberEmail }, // Leader by email
       ],
       _id: { $ne: teamId }
