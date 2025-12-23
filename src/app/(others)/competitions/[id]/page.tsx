@@ -27,6 +27,7 @@ import {
   Award,
   BarChart3,
   CheckCircle2Icon,
+  ExternalLink,
 } from "lucide-react";
 import RegistrationForm from "./registration-form";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -36,7 +37,6 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import Image from "next/image";
-import { start } from "repl";
 
 interface Competition {
   _id: string;
@@ -79,6 +79,7 @@ interface Competition {
   };
   totalRegistered: number;
   pitchTime: number;
+  isPractice: boolean;
 }
 
 // Update the participant type
@@ -179,7 +180,7 @@ export default function CompetitionPage() {
       console.error("VC ID not found");
       return;
     }
-    router.push(`/start-pitch?agentId=${competition.vcId}`);
+    window.open(`/start-pitch?agentId=${competition.vcId}&competitionId=${competition._id}${competition.isPractice ? "&practice=true" : ""}`, "_blank");
   };
 
   const handleLeaderboardButton = () => {
@@ -235,7 +236,7 @@ export default function CompetitionPage() {
         {/* Banner Image with Overlay */}
         <div className="relative aspect-video sm:aspect-[21/9] rounded-xl overflow-hidden mb-6 sm:mb-8 shadow-lg">
           <Image
-            src={competition.bannerImage1}
+            src={competition.bannerImage2}
             alt={competition.title}
             width={1000}
             height={1000}
@@ -1059,8 +1060,8 @@ function CompetitionSidebar({
                             <Button
                               className="w-full"
                               size="lg"
-                              disabled
-                              onClick={()=>window.open(`${process.env.NEXT_PUBLIC_APP_URL}/start-pitch?agentId=691f96d941c3c5f27c4bcc01&competitionId=${competition._id}`)}
+                              // disabled
+                              onClick={()=>window.open(`${process.env.NEXT_PUBLIC_APP_URL}/start-pitch?agentId=691f96d941c3c5f27c4bcc01&competitionId=${competition._id}${competition.isPractice ? "&practice=true" : ""}`)}
                               variant="outline"
                             >
                               <div className="flex sm:flex-row flex-col items-center sm:gap-2">
@@ -1098,7 +1099,7 @@ function CompetitionSidebar({
                           size="lg"
                           disabled={!isValidated}
                         >
-                          Start Pitch
+                          Start Pitch <ExternalLink/>
                         </Button>
                       );
                     })()

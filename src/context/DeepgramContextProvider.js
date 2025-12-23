@@ -65,27 +65,6 @@ const DeepgramContextProvider = ({ children }) => {
     }
   }, [socketState]);
 
-  useEffect(() => {
-    const startPitch = async () => {
-      try {
-        if (sessionIdRef.current && session?.user?._id) {
-          const res = await axios.post("/api/start-pitch", {
-            userId: session?.user?._id,
-            sessionId: sessionIdRef.current,
-            competitionId,
-          });
-          console.log("res", res);
-        }
-      } catch (error) {
-        clearInterval(keepAlive.current);
-        setSocketState(3);
-        setReconnectAttempts((attempts) => attempts + 1);
-        console.error("Error starting pitch", error);
-      }
-    };
-    startPitch();
-  }, [sessionIdRef.current, competitionId, session?.user?._id]);
-
   const connectToDeepgram = async () => {
     console.log("userId", userId);
     if (reconnectAttempts >= maxReconnectAttempts) {
@@ -122,7 +101,6 @@ const DeepgramContextProvider = ({ children }) => {
       setReconnectAttempts(0); // reset reconnect attempts after a successful connection
       isConnecting.current = false; // Reset connection flag
       console.log("WebSocket connected.");
-
       keepAlive.current = setInterval(sendKeepAliveMessage(newSocket), 10000);
     };
 
@@ -143,6 +121,7 @@ const DeepgramContextProvider = ({ children }) => {
         try {
           res = await axios.post("/api/end-pitch", {
             sessionId: sessionIdRef.current,
+            competitionId,
             userId: session?.user?._id,
             conversationHistory: transcriptRef.current,
             duration: durationRef.current,
@@ -207,6 +186,7 @@ const DeepgramContextProvider = ({ children }) => {
         closeSocket,
         addTranscriptMessage,
         sessionIdRef,
+        transcriptRef,
         setCompetitionId,
         duration,
         setUserId,

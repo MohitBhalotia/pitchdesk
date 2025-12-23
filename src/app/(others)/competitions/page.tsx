@@ -156,8 +156,8 @@ export default function TournamentsPage() {
                   src={competition.bannerImage1}
                   alt={competition.title}
                   width={500}
-                  height={300}
-                  className="rounded-t-lg"
+                  height={200}
+                  className="rounded-t-lg aspect-video "
                 />
               </div>
 

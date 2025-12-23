@@ -10,6 +10,7 @@ const pitchSchema = z.object({
   userId: z.string(),
   sessionId: z.string(),
   duration:z.number(),
+  competitionId: z.string().nullable(),
   conversationHistory: z.array(messageSchema).default([]),
 });
 
