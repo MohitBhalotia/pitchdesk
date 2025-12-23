@@ -41,6 +41,15 @@ interface LeaderboardEntry {
   evaluationDate: string;
 }
 
+interface Competition {
+  _id: string;
+  leaderboardConfig?: {
+    topQualifiers: number;
+    isFinalRound: boolean;
+    customMessage?: string;
+  };
+}
+
 
 const getRankIcon = (rank: number) => {
   switch (rank) {
@@ -68,7 +77,7 @@ const getRankBadgeColor = (rank: number) => {
   }
 };
 
-const LeaderboardRow = ({ entry, isTop25 }: { entry: LeaderboardEntry; isTop25: boolean }) => {
+const LeaderboardRow = ({ entry, isTopTeam }: { entry: LeaderboardEntry; isTopTeam: boolean }) => {
   return (
     <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 p-3 sm:p-4 rounded-lg border transition-all duration-200 bg-card border-border`}>
       {/* Left Section - Rank and Team Info */}
@@ -135,6 +144,7 @@ const LeaderboardRow = ({ entry, isTop25 }: { entry: LeaderboardEntry; isTop25: 
 export default function TournamentLeaderboard() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [totalRegisteredTeams, setTotalRegisteredTeams] = useState(0);
+  const [competition, setCompetition] = useState<Competition | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const { data: session, status } = useSession();
@@ -143,20 +153,39 @@ export default function TournamentLeaderboard() {
 
   const competitionId = params?.id as string;
 
+  // Get leaderboard config with defaults
+  const topQualifiers = competition?.leaderboardConfig?.topQualifiers ?? 25;
+  const isFinalRound = competition?.leaderboardConfig?.isFinalRound ?? false;
+  const customMessage = competition?.leaderboardConfig?.customMessage;
+
+  // Generate qualification message
+  const getQualificationMessage = () => {
+    if (customMessage) return customMessage;
+    if (isFinalRound) return `Top ${topQualifiers} teams will be awarded`;
+    return `Top ${topQualifiers} teams qualify for the next round`;
+  };
+
   useEffect(() => {
-    // In your leaderboard page component
-    const fetchLeaderboard = async () => {
+    const fetchData = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`/api/competitions/leaderboard?competitionId=${competitionId}`);
+        
+        // Fetch competition data
+        const compResponse = await fetch(`/api/competitions?id=${competitionId}`);
+        if (compResponse.ok) {
+          const compData = await compResponse.json();
+          setCompetition(compData);
+        }
 
-        if (!response.ok) throw new Error("Failed to fetch leaderboard");
+        // Fetch leaderboard data
+        const leaderboardResponse = await fetch(`/api/competitions/leaderboard?competitionId=${competitionId}`);
+        if (!leaderboardResponse.ok) throw new Error("Failed to fetch leaderboard");
 
-        const { rankedLeaderboard, totalRegisteredTeams } = await response.json();
+        const { rankedLeaderboard, totalRegisteredTeams } = await leaderboardResponse.json();
         setLeaderboard(rankedLeaderboard);
         setTotalRegisteredTeams(totalRegisteredTeams);
       } catch (error) {
-        console.error("Error fetching leaderboard:", error);
+        console.error("Error fetching data:", error);
         setLeaderboard([]);
       } finally {
         setIsLoading(false);
@@ -164,7 +193,7 @@ export default function TournamentLeaderboard() {
     };
 
     if (competitionId) {
-      fetchLeaderboard();
+      fetchData();
     }
   }, [competitionId]);
 
@@ -174,8 +203,8 @@ export default function TournamentLeaderboard() {
     entry.teamLeaderEmail.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const top25 = filteredLeaderboard.slice(0, 25);
-  const rest = filteredLeaderboard.slice(25);
+  const topTeams = filteredLeaderboard.slice(0, topQualifiers);
+  const rest = filteredLeaderboard.slice(topQualifiers);
 
   const currentUserEntry = leaderboard.find(entry =>
     session?.user?.email === entry.teamLeaderEmail
@@ -208,7 +237,7 @@ export default function TournamentLeaderboard() {
               <span className="truncate">Competition Leaderboard</span>
             </h1>
             <p className="text-muted-foreground text-xs sm:text-sm lg:text-base">
-              Top 25 teams qualify for the next round
+              {getQualificationMessage()}
             </p>
           </div>
 
@@ -278,8 +307,10 @@ export default function TournamentLeaderboard() {
                     <Star className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
                   </div>
                   <div className="min-w-0">
-                    <div className="text-lg sm:text-xl lg:text-2xl font-bold">25</div>
-                    <div className="text-xs sm:text-sm text-muted-foreground truncate">Qualify Next Round</div>
+                    <div className="text-lg sm:text-xl lg:text-2xl font-bold">{topQualifiers}</div>
+                    <div className="text-xs sm:text-sm text-muted-foreground truncate">
+                      {isFinalRound ? 'Will Be Awarded' : 'Qualify Next Round'}
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -333,17 +364,17 @@ export default function TournamentLeaderboard() {
         ) : (
           <div className="space-y-4 sm:space-y-6">
             <p className="text-xs sm:text-sm text-muted-foreground mb-4">⚡Rankings update in real-time as teams complete evaluations</p>
-            {/* Top 25 Section */}
-            {top25.length > 0 && (
+            {/* Top Teams Section */}
+            {topTeams.length > 0 && (
               <div>
                 <Card className="border-green-200">
                   <CardContent className="p-0">
                     <div className="space-y-2 p-2 sm:p-4">
-                      {top25.map((entry) => (
+                      {topTeams.map((entry) => (
                         <LeaderboardRow
                           key={entry._id}
                           entry={entry}
-                          isTop25={true}
+                          isTopTeam={true}
                         />
                       ))}
                     </div>
@@ -363,7 +394,7 @@ export default function TournamentLeaderboard() {
                           <LeaderboardRow
                             key={entry._id}
                             entry={entry}
-                            isTop25={false}
+                            isTopTeam={false}
                           />
                         ))}
                       </div>

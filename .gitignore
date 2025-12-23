@@ -45,3 +45,6 @@ venv/
 
 #mytodo.txt
 mytodo.txt
+
+*.md
+!README.md

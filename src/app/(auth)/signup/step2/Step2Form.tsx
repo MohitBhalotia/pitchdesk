@@ -169,7 +169,7 @@ export default function Step2Form() {
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="founder">Founder</SelectItem>
-                    <SelectItem value="vc">VC</SelectItem>
+                    {/* <SelectItem value="vc">VC</SelectItem> */}
                   </SelectContent>
                 </Select>
                 <FormMessage />

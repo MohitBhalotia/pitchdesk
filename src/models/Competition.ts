@@ -41,6 +41,11 @@ export interface ICompetition extends Document {
     start: Date;
     end: Date;
   };
+  leaderboardConfig?: {
+    topQualifiers: number;
+    isFinalRound: boolean;
+    customMessage?: string;
+  };
   isActive: boolean;
   approved: boolean;
   totalRegistered: number;
@@ -87,6 +92,11 @@ const CompetitionSchema = new Schema<ICompetition>({
   eventInterval: {
     start: { type: Date },
     end: { type: Date }
+  },
+  leaderboardConfig: {
+    topQualifiers: { type: Number, default: 25 },
+    isFinalRound: { type: Boolean, default: false },
+    customMessage: { type: String }
   },
   isActive: { type: Boolean, default: true },
   approved: { type: Boolean, default: false },
