@@ -38,7 +38,7 @@ const PitchSchema = new Schema<Pitch>(
             type: Date,
             default: Date.now
         },
-        endTime: {
+        lastUpdated: {  
             type: Date,
             default: null
         },

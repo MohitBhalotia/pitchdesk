@@ -112,31 +112,10 @@ const DeepgramContextProvider = ({ children }) => {
 
     const onClose = async () => {
       clearInterval(keepAlive.current);
-      console.log("Posting...");
-      let res;
       let resultData = { success: false };
 
       // Use the ref values which have the current data
-      if (sessionIdRef.current) {
-        try {
-          res = await axios.post("/api/end-pitch", {
-            sessionId: sessionIdRef.current,
-            competitionId,
-            userId: session?.user?._id,
-            conversationHistory: transcriptRef.current,
-            duration: durationRef.current,
-          });
-          console.log(res);
-          resultData = { success: true, data: res.data };
-        } catch (error) {
-          console.error("Error ending pitch:", error);
-          resultData = { success: false, error };
-        }
-        sessionIdRef.current = null;
-        transcriptRef.current = [];
-      } else {
-        console.warn("No sessionId available to end pitch");
-      }
+      
 
       setSocketState(3); // closed
       setReconnectAttempts((attempts) => attempts + 1);
@@ -189,6 +168,7 @@ const DeepgramContextProvider = ({ children }) => {
         transcriptRef,
         setCompetitionId,
         duration,
+        durationRef,
         setUserId,
       }}
     >

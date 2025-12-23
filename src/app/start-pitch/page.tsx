@@ -36,6 +36,7 @@ function HomeContent() {
     socketState,
     duration,
     setUserId,
+    durationRef,
     sessionIdRef,
     transcriptRef,
     closeSocket,
@@ -119,6 +120,14 @@ function HomeContent() {
   useEffect(() => {
     if (started) {
       setInterval(() => {
+        console.log("🔒🔒🔒Updating pitch", {
+          pitchId: pitchId,
+          sessionId: sessionIdRef.current,
+          competitionId: competitionId ?? null,
+          userId: session?.user?._id,
+          transcript: transcriptRef.current,
+          duration: durationRef.current,
+        });
         inngest.send({
           name: "pitch.update",
           data: {
@@ -127,7 +136,7 @@ function HomeContent() {
             competitionId: competitionId ?? null,
             userId: session?.user?._id,
             transcript: transcriptRef.current,
-            duration: duration,
+            duration: durationRef.current,
           },
         });
       }, 20000);
@@ -135,19 +144,26 @@ function HomeContent() {
   }, [started]);
 
   const handleStop = useCallback(async () => {
+    console.log("🔒🔒🔒Ending pitch");
+    await inngest.send({
+      name: "pitch.update",
+      data: {
+        pitchId: pitchId,
+        sessionId: sessionIdRef.current,
+        competitionId: competitionId ?? null,
+        userId: session?.user?._id,
+        transcript: transcriptRef.current,
+        duration: durationRef.current,
+      },
+    });
     setStarted(false);
     setExit(true);
-    const result = await closeSocket();
-    console.log("result", result);
+    await closeSocket();
     await stopMicrophone();
-    if (result.success) {
-      toast.success("Session ended successfully!");
-      setTimeout(() => {
-        window.close();
-      }, 3000);
-    } else {
-      toast.error("Failed to end session properly");
-    }
+    toast.success("Session ended successfully!");
+    setTimeout(() => {
+      window.close();
+    }, 3000);
   }, [closeSocket, stopMicrophone]);
 
   // Automatically end session when duration exceeds remaining time
