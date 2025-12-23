@@ -12,7 +12,7 @@ export const updatePitch = inngest.createFunction(
       duration: null,
     });
     for (const pitch of pitches) {
-      const sessionId = pitch.sessionId;
+      const sessionId = pitch.sessionId; 
       try {
         const res = await axios.get(
           `https://api.deepgram.com/v1/projects/${process.env.DEEPGRAM_PROJECT_ID}/requests/${sessionId}`,
