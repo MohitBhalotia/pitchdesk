@@ -6,6 +6,7 @@ import dbConnect from '@/lib/db';
 import { sendInviteEmailEvent } from '@/lib/inngest/email-helpers';
 import crypto from 'crypto';
 import mongoose from 'mongoose';
+import resendInviteTeamMember from '@/lib/resend/resend-invite';
 
 export async function POST(request: NextRequest) {
   try {
