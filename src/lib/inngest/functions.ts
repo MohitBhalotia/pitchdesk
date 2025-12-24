@@ -5,6 +5,12 @@ import { userPlanModel } from "@/models/UserPlanModel";
 import Competition from "@/models/Competition";
 import Participant from "@/models/Participant";
 
+import { EmailEventData } from "./email-types";
+import resendInviteTeamMember from "@/lib/resend/resend-invite";
+import resendVerify from "@/lib/resend/resend-verification";
+import resendForgot from "@/lib/resend/resend-forgot";
+import resendContactUs from "@/lib/resend/resend-contactUs";
+
 export const updatePitch = inngest.createFunction(
   {
     id: "update-pitch",
@@ -123,5 +129,110 @@ export const updatePitch = inngest.createFunction(
     } else {
       return { success: false, error: "Pitch synchronization failed" };
     }
+  }
+);
+
+// Resend free plan: 2 requests/second, 100 emails/day, 3000 emails/month
+// 1 event = 1 email = 1 function execution
+export const sendEmail = inngest.createFunction(
+  {
+    id: "send-email",
+    name: "Send Email",
+    concurrency: {
+      limit: 1, // Only 1 email processes at a time to respect 2 req/sec limit
+    },
+    // NO BATCHING - 1 event = 1 email = 1 execution
+    rateLimit: {
+      limit: 100,
+      period: "24h",
+    },
+    retries: 3,
+  },
+  { event: "email.send" },
+  async ({ event, step }) => {
+    const emailData: EmailEventData = event.data;
+
+    const sendEmailStep = await step.run("send-email", async () => {
+      try {
+        let emailResult;
+
+        switch (emailData.type) {
+          case "invite": {
+            emailResult = await resendInviteTeamMember(
+              emailData.memberName,
+              emailData.memberEmail,
+              emailData.teamName,
+              emailData.leaderName,
+              emailData.competitionTitle,
+              emailData.inviteLink,
+              emailData.teamId
+            );
+            break;
+          }
+
+          case "verification": {
+            emailResult = await resendVerify(
+              emailData.verificationCode,
+              emailData.fullName,
+              emailData.email,
+              emailData.userId
+            );
+            break;
+          }
+
+          case "forgot": {
+            emailResult = await resendForgot(
+              emailData.resetPasswordToken,
+              emailData.fullName,
+              emailData.email
+            );
+            break;
+          }
+
+          case "contact": {
+            emailResult = await resendContactUs(
+              emailData.name,
+              emailData.email,
+              emailData.message
+            );
+            break;
+          }
+
+          default:
+            throw new Error(`Unknown email type: ${(emailData as EmailEventData).type}`);
+        }
+
+        // Resend returns data object with id on success, null/undefined on error
+        if (emailResult && emailResult.id) {
+          return {
+            success: true,
+            email: emailData.to,
+            type: emailData.type,
+            data: emailResult,
+          };
+        } else {
+          return {
+            success: false,
+            email: emailData.to,
+            type: emailData.type,
+            error: "Failed to send email - Resend returned no data",
+          };
+        }
+      } catch (error: any) {
+        const emailAddress = emailData?.to || "unknown";
+        console.error(`Error sending email to ${emailAddress}:`, error);
+        return {
+          success: false,
+          email: emailAddress,
+          type: emailData?.type || "unknown",
+          error: error.message || "Unknown error",
+        };
+      }
+    });
+
+    // Sleep 500ms after sending email to respect 2 req/sec limit
+     await step.sleep("rate-limit-delay", "500ms");
+
+    return sendEmailStep;
   }
 );

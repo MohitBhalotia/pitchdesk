@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth';
 import Participant from '@/models/Participant';
 import Competition from '@/models/Competition';
 import dbConnect from '@/lib/db';
-import resendInviteTeamMember from '@/lib/resend/resend-invite';
+import { sendInviteEmailEvent } from '@/lib/inngest/email-helpers';
 import crypto from 'crypto';
 import mongoose from 'mongoose';
 
@@ -56,11 +56,11 @@ export async function POST(request: NextRequest) {
       teamMembers: teamMembersWithInvite,
       teamStatus: minSize != 1 ? 'incomplete' : 'validated'
     });
-    // 2. Send emails via Resend to each invited member
+    // 2. Send emails via Inngest queue
     await Promise.all(
       teamMembersWithInvite.map(async (member) => {
         const inviteLink = `${inviteBaseUrl}${encodeURIComponent(member.inviteToken)}`;
-        await resendInviteTeamMember(
+        await sendInviteEmailEvent(
           member.name,
           member.email,
           participant.teamName,
@@ -122,10 +122,10 @@ export async function PUT(request: NextRequest) {
     const inviteToken = crypto.randomBytes(28).toString('base64url');
     participant.teamMembers.push({ name, email, status: 'pending', inviteToken });
     await participant.save();
-    // Resend invite
+    // Send invite via Inngest queue
     const inviteBaseUrl = `${process.env.NEXT_PUBLIC_APP_URL}/invite-competition?token=`;
     const inviteLink = `${inviteBaseUrl}${encodeURIComponent(inviteToken)}`;
-    await resendInviteTeamMember(
+    await sendInviteEmailEvent(
       name,
       email,
       participant.teamName,

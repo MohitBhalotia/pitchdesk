@@ -5,7 +5,7 @@ import CompanyModel from "@/models/CompanyModel";
 import bcrypt from "bcryptjs";
 import signupSchema from "@/schemas/signUpSchema";
 import { z } from "zod";
-import resendVerify from "@/lib/resend/resend-verification";
+import { sendVerificationEmailEvent } from "@/lib/inngest/email-helpers";
 import { createFreeUserPlan } from "@/lib/razorpayUtils";
 export async function POST(req: NextRequest){
   await dbConnect();
@@ -53,7 +53,8 @@ export async function POST(req: NextRequest){
     // Create free user plan for founder
     if(user.role === "founder"){
       await createFreeUserPlan(user._id.toString());
-      await resendVerify(user.verificationCode,user.fullName,user.email, user._id.toString());
+      // Send verification email via Inngest queue
+      await sendVerificationEmailEvent(user.verificationCode, user.fullName, user.email, user._id.toString());
     }
 
 
