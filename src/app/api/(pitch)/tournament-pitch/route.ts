@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import mongoose from 'mongoose';
 import PitchModel from '@/models/PitchModel';
+import { CompetitionPitchEval } from '@/models/CompetitionPitchEvalModel';
 import authOptions from '@/lib/auth';
 import dbConnect from '@/lib/db';
 
@@ -36,23 +37,42 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch the most recent pitch for this user and competition
-    const pitch = await PitchModel.findOne({
+    // Fetch ALL pitches for this user and competition, sorted by most recent first
+    const pitches = await PitchModel.find({
       userId: new mongoose.Types.ObjectId(userId),
       competitionId: new mongoose.Types.ObjectId(competitionId)
     })
-      .sort({ createdAt: -1 }) // Get the most recent one
+      .sort({ createdAt: -1 })
       .lean();
 
-    console.log(`Competition pitch found: ${!!pitch} for user ${userId} in competition ${competitionId}`);
+    // Fetch all evaluations for these pitches
+    const pitchIds = pitches.map(p => p._id);
+    const evaluations = await CompetitionPitchEval.find({
+      pitchId: { $in: pitchIds }
+    }).lean();
 
-    // Return the pitch (could be null if no pitch found)
-    return NextResponse.json({ pitch }, { status: 200 });
+    // Create a map of pitchId -> evaluation for quick lookup
+    const evaluationMap = new Map();
+    evaluations.forEach(evaluation => {
+      evaluationMap.set(evaluation.pitchId.toString(), evaluation);
+    });
+
+    // Attach evaluation status to each pitch
+    const pitchesWithStatus = pitches.map(pitch => ({
+      ...pitch,
+      hasEvaluation: evaluationMap.has(pitch._id.toString()),
+      evaluation: evaluationMap.get(pitch._id.toString()) || null
+    }));
+
+    console.log(`Found ${pitches.length} competition pitches for user ${userId} in competition ${competitionId}`);
+
+    // Return all pitches with their evaluation status
+    return NextResponse.json({ pitches: pitchesWithStatus }, { status: 200 });
 
   } catch (error) {
-    console.error("Error fetching competition pitch:", error);
+    console.error("Error fetching competition pitches:", error);
     return NextResponse.json(
-      { error: "Failed to fetch competition pitch" },
+      { error: "Failed to fetch competition pitches" },
       { status: 500 }
     );
   }

@@ -23,7 +23,7 @@ export const updatePitch = inngest.createFunction(
   { event: "pitch.update" },
   async ({ events, step }) => {
     let duration = 0;
-    let transcript = [];
+    let transcript: Array<{ role: string; content: string; timestamp: string }> = [];
     const step1 = await step.run("get-details", () => {
       for (const event of events) {
         if (
@@ -154,7 +154,7 @@ export const sendEmail = inngest.createFunction(
 
     const sendEmailStep = await step.run("send-email", async () => {
       try {
-        let emailResult;
+        let emailResult: { id: string } | null | undefined;
 
         switch (emailData.type) {
           case "invite": {
@@ -218,14 +218,15 @@ export const sendEmail = inngest.createFunction(
             error: "Failed to send email - Resend returned no data",
           };
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         const emailAddress = emailData?.to || "unknown";
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
         console.error(`Error sending email to ${emailAddress}:`, error);
         return {
           success: false,
           email: emailAddress,
           type: emailData?.type || "unknown",
-          error: error.message || "Unknown error",
+          error: errorMessage,
         };
       }
     });

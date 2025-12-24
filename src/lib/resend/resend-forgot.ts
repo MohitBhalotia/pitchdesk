@@ -3,7 +3,11 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const resendForgot =  async (resetPasswordToken:string,fullName:string,email:string) => {
+const resendForgot = async (
+  resetPasswordToken: string,
+  fullName: string,
+  email: string
+): Promise<{ id: string } | null | undefined> => {
   const { data, error } = await resend.emails.send({
     from: 'info@pitchdesk.in',
     to: email,

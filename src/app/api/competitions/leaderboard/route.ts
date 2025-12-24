@@ -30,7 +30,9 @@ export async function GET(request: NextRequest) {
     const totalRegisteredTeams = await Participant.countDocuments({ 
       competitionId: new mongoose.Types.ObjectId(competitionId)
     });
+    
     // Fetch leaderboard data with participant information
+    // Group by userId to get the best score per team
     const leaderboard = await CompetitionPitchEval.aggregate([
       {
         $match: {
@@ -67,9 +69,41 @@ export async function GET(request: NextRequest) {
           teamName: '$participant.teamName',
           teamLeaderName: '$participant.teamLeader.name',
           teamLeaderEmail: '$participant.teamLeader.email',
-          submissionTime: '$createdAt'
+          submissionTime: '$createdAt',
+          evaluationId: '$_id',
+          pitchId: '$pitchId'
         }
       },
+      // Sort by score descending, then by submission time ascending
+      // This ensures we get the best score first, and if tied, the earliest submission
+      {
+        $sort: { totalScore: -1, submissionTime: 1 }
+      },
+      // Group by userId to get only the best score per team
+      {
+        $group: {
+          _id: '$userId',
+          totalScore: { $first: '$totalScore' },
+          evaluationId: { $first: '$evaluationId' },
+          submissionTime: { $first: '$submissionTime' },
+          // Get team info from the best evaluation
+          teamName: { $first: '$teamName' },
+          teamLeaderName: { $first: '$teamLeaderName' },
+          teamLeaderEmail: { $first: '$teamLeaderEmail' }
+        }
+      },
+      {
+        $project: {
+          _id: '$evaluationId',
+          userId: '$_id',
+          totalScore: 1,
+          teamName: 1,
+          teamLeaderName: 1,
+          teamLeaderEmail: 1,
+          submissionTime: 1
+        }
+      },
+      // Re-sort by best score
       {
         $sort: { totalScore: -1, submissionTime: 1 }
       },
@@ -81,7 +115,8 @@ export async function GET(request: NextRequest) {
     // Add rank position
     const rankedLeaderboard = leaderboard.map((entry, index) => ({
       ...entry,
-      rank: index + 1
+      rank: index + 1,
+      evaluationDate: entry.submissionTime
     }));
 
     return NextResponse.json({rankedLeaderboard, totalRegisteredTeams});
