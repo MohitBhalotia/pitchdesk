@@ -34,6 +34,7 @@ declare global {
     endTime: Date | null;
     duration?: number;
     conversationHistory?: Message[];
+    creditsUsed?: number;
   }
 
   interface Agent {

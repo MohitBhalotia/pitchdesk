@@ -1,24 +1,29 @@
-// import { NextRequest, NextResponse } from "next/server";
-// import dbConnect from "../../../../../lib/db";
-// import PitchModel from "@/models/PitchModel";
-// import axios from "axios";
-// import { userPlanModel } from "@/models/UserPlanModel";
+import { NextRequest, NextResponse } from "next/server";
+import { inngest } from "@/lib/inngest/client";
 
-// export async function PATCH() {
-//   try {
-//     await dbConnect();
-//     console.log("Updating pitches");
-//     const {pitchId,sessionId,competitionId,userId,} = await req.json();
-
-//     return NextResponse.json(
-//       { success: true, message: "Pitches updated successfully" },
-//       { status: 200 }
-//     );
-//   } catch (error) {
-//     console.error("Error updating pitches", error);
-//     return NextResponse.json(
-//       { success: false, message: "Internal Server Error" },
-//       { status: 500 }
-//     );
-//   }
-// }
+export async function POST(req: NextRequest) {
+  try {
+    const { pitchId, sessionId, competitionId, userId, transcript, duration } = await req.json();
+    inngest.send({
+        name: "pitch.update",
+        data: {
+          pitchId: pitchId,
+          sessionId: sessionId,
+          competitionId: competitionId ?? null,
+          userId: userId,
+          transcript: transcript,
+          duration: duration,
+        },
+      });
+    return NextResponse.json(
+      { success: true, message: "Pitch updated successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error updating pitch", error);
+    return NextResponse.json(
+      { success: false, message: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}

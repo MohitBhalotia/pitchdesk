@@ -23,7 +23,11 @@ export const updatePitch = inngest.createFunction(
   { event: "pitch.update" },
   async ({ events, step }) => {
     let duration = 0;
-    let transcript: Array<{ role: string; content: string; timestamp: string }> = [];
+    let transcript: Array<{
+      role: string;
+      content: string;
+      timestamp: string;
+    }> = [];
     const step1 = await step.run("get-details", () => {
       for (const event of events) {
         if (
@@ -40,7 +44,12 @@ export const updatePitch = inngest.createFunction(
             transcript = event.data.transcript;
           }
         } else {
-          return { success: false, error: "Invalid event data", duration: null, transcript: null };
+          return {
+            success: false,
+            error: "Invalid event data",
+            duration: null,
+            transcript: null,
+          };
         }
       }
       return {
@@ -71,50 +80,68 @@ export const updatePitch = inngest.createFunction(
           const user = await userPlanModel.findOne({
             userId: events[0].data.userId,
           });
-          console.log("user", user);
           if (!user) {
             return { success: false, error: "User not found" };
           }
-          if (events[0].data.competitionId) {
-            console.log("Competition ID found");
-            const competition = await Competition.findById(
-              events[0].data.competitionId
-            );
-            if (!competition) {
-              return { success: false, error: "Competition not found" };
-            }
-            if (competition.isPractice) {
-              console.log("Practice competition");
-              user.pitchTimeRemaining -= Math.ceil(step1?.duration / 60);
-              const participant = await Participant.findOne({
-                userId: events[0].data.userId,
-                competitionId: events[0].data.competitionId,
-              });
-              if (!participant) {
-                return { success: false, error: "Participant not found" };
+          const pitch = await PitchModel.findById(events[0].data.pitchId);
+          if (!pitch) {
+            return { success: false, error: "Pitch not found" };
+          }
+          const usedMinutes = Math.ceil(step1?.duration / 60);
+
+          if (usedMinutes > pitch.creditsUsed) {
+            const newCreditsUsed=usedMinutes-(pitch.creditsUsed ?? 0);
+            pitch.creditsUsed = usedMinutes;
+            await pitch.save();
+            if (events[0].data.competitionId) {
+              console.log("Competition ID found");
+              const competition = await Competition.findById(
+                events[0].data.competitionId
+              );
+              if (!competition) {
+                return { success: false, error: "Competition not found" };
               }
-              participant.pitchSubmitted = true;
-              await participant.save();
-              await user.save();
-              return { success: true, message: "Practice competition pitch updated successfully" };
+              if (competition.isPractice) {
+                console.log("Practice competition");
+                user.pitchTimeRemaining -= newCreditsUsed;
+                const participant = await Participant.findOne({
+                  userId: events[0].data.userId,
+                  competitionId: events[0].data.competitionId,
+                });
+                if (!participant) {
+                  return { success: false, error: "Participant not found" };
+                }
+                participant.pitchSubmitted = true;
+                await participant.save();
+                await user.save();
+                return {
+                  success: true,
+                  message: "Practice competition pitch updated successfully",
+                };
+              } else {
+                console.log("Normal Competition found");
+                const participant = await Participant.findOne({
+                  userId: events[0].data.userId,
+                  competitionId: events[0].data.competitionId,
+                });
+                if (!participant) {
+                  return { success: false, error: "Participant not found" };
+                }
+                participant.pitchTime -= newCreditsUsed;
+                participant.pitchSubmitted = true;
+                await participant.save();
+                return {
+                  success: true,
+                  message: "Normal competition pitch updated successfully",
+                };
+              }
             } else {
-              console.log("Normal Competition found");
-              const participant = await Participant.findOne({
-                userId: events[0].data.userId,
-                competitionId: events[0].data.competitionId,
-              });
-              if (!participant) {
-                return { success: false, error: "Participant not found" };
-              }
-              participant.pitchTime -= Math.ceil(step1?.duration / 60);
-              participant.pitchSubmitted = true;
-              await participant.save();
-              return { success: true, message: "Normal competition pitch updated successfully" };
+              user.pitchTimeRemaining -= newCreditsUsed;
+              await user.save();
+              console.log("user after deduction", user.pitchTimeRemaining);
+              return { success: true, message: "Pitch updated successfully" };
             }
           } else {
-            user.pitchTimeRemaining -= Math.ceil(step1?.duration / 60);
-            await user.save();
-            console.log("user after deduction", user.pitchTimeRemaining);
             return { success: true, message: "Pitch updated successfully" };
           }
         });
@@ -199,7 +226,9 @@ export const sendEmail = inngest.createFunction(
           }
 
           default:
-            throw new Error(`Unknown email type: ${(emailData as EmailEventData).type}`);
+            throw new Error(
+              `Unknown email type: ${(emailData as EmailEventData).type}`
+            );
         }
 
         // Resend returns data object with id on success, null/undefined on error
@@ -220,7 +249,8 @@ export const sendEmail = inngest.createFunction(
         }
       } catch (error: unknown) {
         const emailAddress = emailData?.to || "unknown";
-        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
         console.error(`Error sending email to ${emailAddress}:`, error);
         return {
           success: false,
@@ -232,7 +262,7 @@ export const sendEmail = inngest.createFunction(
     });
 
     // Sleep 500ms after sending email to respect 2 req/sec limit
-     await step.sleep("rate-limit-delay", "500ms");
+    await step.sleep("rate-limit-delay", "500ms");
 
     return sendEmailStep;
   }

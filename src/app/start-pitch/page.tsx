@@ -29,7 +29,6 @@ import { getAgentConfig } from "@/lib/constants";
 import Image from "next/image";
 import axios from "axios";
 import { toast } from "sonner";
-import { inngest } from "@/lib/inngest/client";
 function HomeContent() {
   const {
     socket,
@@ -118,43 +117,33 @@ function HomeContent() {
   };
 
   useEffect(() => {
-    if (started) {
-      setInterval(() => {
-        console.log("🔒🔒🔒Updating pitch", {
-          pitchId: pitchId,
-          sessionId: sessionIdRef.current,
-          competitionId: competitionId ?? null,
-          userId: session?.user?._id,
-          transcript: transcriptRef.current,
-          duration: durationRef.current,
-        });
-        inngest.send({
-          name: "pitch.update",
-          data: {
-            pitchId: pitchId,
-            sessionId: sessionIdRef.current,
-            competitionId: competitionId ?? null,
-            userId: session?.user?._id,
-            transcript: transcriptRef.current,
-            duration: durationRef.current,
-          },
-        });
-      }, 20000);
-    }
-  }, [started]);
-
-  const handleStop = useCallback(async () => {
-    console.log("🔒🔒🔒Ending pitch");
-    await inngest.send({
-      name: "pitch.update",
-      data: {
+    const updatePitch = async () => {
+      await axios.post("/api/update-pitch", {
         pitchId: pitchId,
         sessionId: sessionIdRef.current,
         competitionId: competitionId ?? null,
         userId: session?.user?._id,
         transcript: transcriptRef.current,
         duration: durationRef.current,
-      },
+      });
+    };
+    if (started) {
+      setInterval(() => {
+        console.log("Updating pitch");
+        updatePitch();
+      }, 20000);
+    }
+  }, [started]);
+
+  const handleStop = useCallback(async () => {
+    console.log("🔒🔒🔒Ending pitch");
+    await axios.post("/api/update-pitch", {
+      pitchId: pitchId,
+      sessionId: sessionIdRef.current,
+      competitionId: competitionId ?? null,
+      userId: session?.user?._id,
+      transcript: transcriptRef.current,
+      duration: durationRef.current,
     });
     setStarted(false);
     setExit(true);
