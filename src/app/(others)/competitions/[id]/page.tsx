@@ -180,7 +180,10 @@ export default function CompetitionPage() {
       console.error("VC ID not found");
       return;
     }
-    window.open(`/start-pitch?agentId=${competition.vcId}&competitionId=${competition._id}${competition.isPractice ? "&practice=true" : ""}`, "_blank");
+    window.open(
+      `/start-pitch?agentId=${competition.vcId}&competitionId=${competition._id}${competition.isPractice ? "&practice=true" : ""}`,
+      "_blank"
+    );
   };
 
   const handleLeaderboardButton = () => {
@@ -794,7 +797,7 @@ function CompetitionSidebar({
                 currency: "INR",
               }).format(140)}
             </span>
-            <span >
+            <span>
               {new Intl.NumberFormat("en-IN", {
                 style: "currency",
                 currency: "INR",
@@ -804,13 +807,16 @@ function CompetitionSidebar({
         </AlertTitle>
 
         <AlertDescription className="p-2 py-4">
-              <ul className="list-disc list-inside ">
-                <li>Boost your preparation with our Mini Practice Plan.</li>
-                <li>Start practicing now and improve your performance!</li>
-              </ul>
-              <Button onClick={() => router.push("/payment")} className="mt-4 w-full">
-                View Plan
-              </Button>
+          <ul className="list-disc list-inside ">
+            <li>Boost your preparation with our Mini Practice Plan.</li>
+            <li>Start practicing now and improve your performance!</li>
+          </ul>
+          <Button
+            onClick={() => router.push("/payment")}
+            className="mt-4 w-full"
+          >
+            View Plan
+          </Button>
         </AlertDescription>
       </Alert>
 
@@ -1044,8 +1050,9 @@ function CompetitionSidebar({
                   })()}
 
                   {/* Conditional buttons based on pitch submission and evaluation status */}
-                  {!(localParticipant || participant)?.pitchSubmitted ? (
-                    // Start Pitch - shown only if validated AND pitch not submitted
+                  {/* Start Pitch - shown if pitch not submitted OR if it's a practice competition */}
+                  {(!(localParticipant || participant)?.pitchSubmitted ||
+                    competition.isPractice) &&
                     (() => {
                       const now = new Date();
                       const eventStart = competition.eventInterval?.start
@@ -1060,8 +1067,7 @@ function CompetitionSidebar({
                             <Button
                               className="w-full"
                               size="lg"
-                              // disabled
-                              onClick={()=>window.open(`${process.env.NEXT_PUBLIC_APP_URL}/start-pitch?agentId=691f96d941c3c5f27c4bcc01&competitionId=${competition._id}${competition.isPractice ? "&practice=true" : ""}`)}
+                              disabled
                               variant="outline"
                             >
                               <div className="flex sm:flex-row flex-col items-center sm:gap-2">
@@ -1099,55 +1105,48 @@ function CompetitionSidebar({
                           size="lg"
                           disabled={!isValidated}
                         >
-                          Start Pitch <ExternalLink/>
+                          Start Pitch <ExternalLink />
                         </Button>
                       );
-                    })()
-                  ) : !(localParticipant || participant)?.pitchEvaluated ? (
-                    /* Evaluate Pitch - shown if pitch submitted but not evaluated */
-                    <>
+                    })()}
+
+                  {/* Evaluate Pitch button - shown if pitch submitted OR if it's a practice competition */}
+                  {(localParticipant || participant)?.pitchSubmitted &&
+                    (!(localParticipant || participant)?.pitchEvaluated ? (
+                      /* Evaluate Pitch - shown if pitch submitted but not evaluated */
+                      <>
+                        <Button
+                          onClick={onPitchEvaluation}
+                          className="w-full"
+                          size="lg"
+                          variant="outline"
+                        >
+                          <BarChart3 className="w-4 h-4 mr-2" />
+                          Evaluate Pitch
+                        </Button>
+
+                        <div className="text-center">
+                          <Badge variant="destructive" className="text-xs">
+                            ⚠️ Evaluation pending - Complete evaluation to see
+                            your rank
+                          </Badge>
+                        </div>
+                      </>
+                    ) : (
+                      /* Pitch Evaluation - shown if pitch is evaluated */
                       <Button
                         onClick={onPitchEvaluation}
+                        variant="outline"
                         className="w-full"
                         size="lg"
-                        variant="destructive"
                       >
                         <BarChart3 className="w-4 h-4 mr-2" />
-                        Evaluate Pitch
+                        Pitch Evaluation
                       </Button>
-                      <div className="text-center">
-                        <Badge variant="destructive" className="text-xs">
-                          ⚠️ Evaluation pending - Complete evaluation to see
-                          your rank
-                        </Badge>
-                      </div>
-                    </>
-                  ) : (
-                    /* Pitch Evaluation - shown if pitch is evaluated */
-                    <Button
-                      onClick={onPitchEvaluation}
-                      variant="outline"
-                      className="w-full"
-                      size="lg"
-                    >
-                      <BarChart3 className="w-4 h-4 mr-2" />
-                      Pitch Evaluation
-                    </Button>
-                  )}
-                </div>
-              )}
+                    ))}
 
-              {/* Team member view: show team info only, no action buttons */}
-              {isTeamMember && !isLeader && (
-                <div className="text-center py-2">
-                  <p className="text-xs sm:text-sm text-muted-foreground">
-                    You are a team member. Team leader manages actions.
-                  </p>
-                </div>
-              )}
-              {localParticipant && (
-                <>
-                  {isLeader &&
+                  {/* Invite Another Member - only for leader if team not full */}
+                  {localParticipant &&
                     canAddMore &&
                     new Date() < new Date(competition.registrationDeadline) && (
                       <>
@@ -1216,7 +1215,16 @@ function CompetitionSidebar({
                         )}
                       </>
                     )}
-                </>
+                </div>
+              )}
+
+              {/* Team member view: show team info only, no action buttons */}
+              {isTeamMember && !isLeader && (
+                <div className="text-center py-2">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    You are a team member. Team leader manages actions.
+                  </p>
+                </div>
               )}
             </div>
           )}

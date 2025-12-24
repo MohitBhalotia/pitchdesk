@@ -31,15 +31,15 @@ export async function POST(req: NextRequest) {
           { status: 404 }
         );
       }
-      // if(new Date(Date.now())<competition.eventInterval?.start) {
-      //   return NextResponse.json(
-      //     {
-      //       success: false,
-      //       message: "Competition has not started yet",
-      //     },
-      //     { status: 400 }
-      //   );
-      // }
+      if(new Date(Date.now())<competition.eventInterval?.start) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Competition has not started yet",
+          },
+          { status: 400 }
+        );
+      }
       // If practice competition and user has no pitch time remaining throw error
       else if (competition.isPractice) {
         if (user?.pitchTimeRemaining <= 0) {
