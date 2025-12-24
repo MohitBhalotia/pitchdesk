@@ -152,14 +152,14 @@ const ScoreCard = ({
 }) => {
   return (
     <div className="bg-card rounded-lg border p-3 sm:p-4">
-      <div className="flex items-center justify-between mb-2 sm:mb-3">
-        <h3 className="text-xs sm:text-sm font-semibold text-card-foreground truncate flex-1 pr-2">{title}</h3>
+      <div className="flex flex-col items-center gap-3 mb-2 sm:mb-3">
+        <h3 className="text-xs sm:text-sm font-semibold text-card-foreground text-center w-full">{title}</h3>
         <PieChart
           score={score}
           maxScore={maxScore}
           label=""
           color={color}
-          size={50}
+          size={80}
         />
       </div>
       <div className="text-center">
@@ -198,11 +198,17 @@ export default function TournamentPitchEvaluation() {
 
         const pitchData = await pitchResponse.json();
         const pitchesData = pitchData.pitches || [];
-        setPitches(pitchesData);
+        // Ensure pitches are sorted by most recent first (API already does this, but ensure frontend maintains order)
+        const sortedPitches = [...pitchesData].sort((a: Pitch, b: Pitch) => {
+          const dateA = new Date(a.startTime || a.updatedAt || 0).getTime();
+          const dateB = new Date(b.startTime || b.updatedAt || 0).getTime();
+          return dateB - dateA; // Descending order (newest first)
+        });
+        setPitches(sortedPitches);
 
         // Pre-populate evaluations state with existing evaluations from backend
         const evaluationsMap = new Map<string, CompetitionEvaluation>();
-        pitchesData.forEach((pitch: Pitch) => {
+        sortedPitches.forEach((pitch: Pitch) => {
           if (pitch.hasEvaluation && pitch.evaluation) {
             evaluationsMap.set(pitch._id.toString(), pitch.evaluation);
           }
@@ -660,7 +666,7 @@ export default function TournamentPitchEvaluation() {
                     )}
                   </Card>
 
-                  {/* Evaluation Card */}
+                  {/* Evaluation Card - Only show when expanded or evaluating */}
                   {isEvaluating ? (
                     <Card className="overflow-hidden border-primary/20">
                       <CardHeader className="pb-3 bg-primary/5">
@@ -683,7 +689,7 @@ export default function TournamentPitchEvaluation() {
                         </div>
                       </CardContent>
                     </Card>
-                  ) : evaluation ? (
+                  ) : evaluation && isEvaluationExpanded ? (
                     <Card className="overflow-hidden border-primary/20">
                       <CardHeader className="pb-3 bg-primary/5 p-4 sm:p-6">
                         <div className="flex flex-col gap-3 sm:gap-4">
@@ -703,27 +709,19 @@ export default function TournamentPitchEvaluation() {
                               </div>
                               <div className="text-xs text-muted-foreground whitespace-nowrap">Total Score</div>
                             </div>
-                             <Button
-                               variant="outline"
-                               size="sm"
-                               onClick={() => toggleEvaluationExpansion(pitchId)}
-                               className="flex items-center gap-1 text-xs sm:text-sm"
-                             >
-                              {isEvaluationExpanded ? (
-                                <>
-                                  <ChevronUp className="h-3 w-3 sm:h-4 sm:w-4" /> Collapse
-                                </>
-                              ) : (
-                                <>
-                                  <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4" /> Expand
-                                </>
-                              )}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => toggleEvaluationExpansion(pitchId)}
+                              className="flex items-center gap-1 text-xs sm:text-sm"
+                            >
+                              <ChevronUp className="h-3 w-3 sm:h-4 sm:w-4" /> Collapse
                             </Button>
                           </div>
                         </div>
                       </CardHeader>
 
-                      {isEvaluationExpanded && (
+                      {/* <CardContent className="pt-4 sm:pt-6 space-y-4 sm:space-y-6 p-4 sm:p-6"> */}
                         <CardContent className="pt-4 sm:pt-6 space-y-4 sm:space-y-6 p-4 sm:p-6">
                           {/* Overall Score */}
                           <div className="bg-card rounded-lg border p-4 sm:p-6">
@@ -828,7 +826,6 @@ export default function TournamentPitchEvaluation() {
                             </div>
                           </div>
                         </CardContent>
-                      )}
                     </Card>
                   ) : null}
                 </div>
