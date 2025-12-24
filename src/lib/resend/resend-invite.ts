@@ -12,7 +12,7 @@ const resendInviteTeamMember = async (
   competitionTitle: string,
   inviteLink: string,
   teamId: string
-) => {
+): Promise<{ id: string } | null | undefined> => {
   const { data, error } = await resend.emails.send({
     from: 'info@pitchdesk.in',
     to: memberEmail,

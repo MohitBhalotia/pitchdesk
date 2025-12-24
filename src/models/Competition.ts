@@ -8,7 +8,6 @@ export interface IDetails {
 }
 
 export interface ICompetition extends Document {
-
   title: string;
   description: string;
   pitchTime: number;
@@ -51,6 +50,7 @@ export interface ICompetition extends Document {
   totalRegistered: number;
   createdAt: Date;
   updatedAt: Date;
+  isPractice: boolean;
 }
 
 const DetailsSchema = new Schema<IDetails>({
@@ -100,7 +100,8 @@ const CompetitionSchema = new Schema<ICompetition>({
   },
   isActive: { type: Boolean, default: true },
   approved: { type: Boolean, default: false },
-  totalRegistered: { type: Number, default: 0 }
+  totalRegistered: { type: Number, default: 0 },
+  isPractice: { type: Boolean, default: false }
 }, {
   timestamps: true
 });

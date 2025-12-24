@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import UserModel from "@/models/UserModel";
-import resendForgot from "@/lib/resend/resend-forgot";
+import { sendForgotPasswordEmailEvent } from "@/lib/inngest/email-helpers";
 import {v4 as uuidv4} from "uuid";
 import {addMinutes} from "date-fns";
 import {z} from "zod";
@@ -32,7 +32,8 @@ export  async function POST(req: NextRequest/*, res: NextResponse*/) {
 
         await user.save();
 
-        await resendForgot(resetToken, user.fullName, user.email);
+        // Send forgot password email via Inngest queue
+        await sendForgotPasswordEmailEvent(resetToken, user.fullName, user.email);
 
         return NextResponse.json({ message: "Password reset email sent" }, { status: 200 });
     } catch (error) {

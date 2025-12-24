@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
     // Check if evaluation already exists
     const existingEvaluation = await CompetitionPitchEval.findOne({
       pitchId: new mongoose.Types.ObjectId(pitchId),
-    });
+    }).lean();
 
     if (existingEvaluation) {
       return withCors(

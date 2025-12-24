@@ -41,7 +41,7 @@ const VCSummaryCard: React.FC<VCSummaryCardProps> = ({
     <div className="relative overflow-hidden bg-background rounded-2xl shadow-lg border border-border p-6 hover:shadow-2xl hover:scale-105 transition-all group cursor-pointer flex flex-col text-center items-center">
       {/* Ribbon */}
       {tags && tags.length > 0 && (
-        <div className={`absolute -left-10 top-5 -rotate-45 ${tags[0]==="Grilling Agent"?"bg-orange-800":"bg-secondary"} text-primary-foreground text-sm font-semibold py-1 px-10 shadow-md`}>
+        <div className={`absolute -left-10 top-5 -rotate-45 ${tags[0]==="Grilling Agent"?"bg-orange-800 text-white":"bg-secondary text-secondary-foreground"}  text-sm font-semibold py-1 px-10 shadow-md`}>
           {tags.join(", ")}
         </div>
       )}

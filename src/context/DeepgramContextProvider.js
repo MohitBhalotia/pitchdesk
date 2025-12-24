@@ -65,27 +65,6 @@ const DeepgramContextProvider = ({ children }) => {
     }
   }, [socketState]);
 
-  useEffect(() => {
-    const startPitch = async () => {
-      try {
-        if (sessionIdRef.current && session?.user?._id) {
-          const res = await axios.post("/api/start-pitch", {
-            userId: session?.user?._id,
-            sessionId: sessionIdRef.current,
-            competitionId,
-          });
-          console.log("res", res);
-        }
-      } catch (error) {
-        clearInterval(keepAlive.current);
-        setSocketState(3);
-        setReconnectAttempts((attempts) => attempts + 1);
-        console.error("Error starting pitch", error);
-      }
-    };
-    startPitch();
-  }, [sessionIdRef.current, competitionId, session?.user?._id]);
-
   const connectToDeepgram = async () => {
     console.log("userId", userId);
     if (reconnectAttempts >= maxReconnectAttempts) {
@@ -122,7 +101,6 @@ const DeepgramContextProvider = ({ children }) => {
       setReconnectAttempts(0); // reset reconnect attempts after a successful connection
       isConnecting.current = false; // Reset connection flag
       console.log("WebSocket connected.");
-
       keepAlive.current = setInterval(sendKeepAliveMessage(newSocket), 10000);
     };
 
@@ -134,30 +112,10 @@ const DeepgramContextProvider = ({ children }) => {
 
     const onClose = async () => {
       clearInterval(keepAlive.current);
-      console.log("Posting...");
-      let res;
       let resultData = { success: false };
 
       // Use the ref values which have the current data
-      if (sessionIdRef.current) {
-        try {
-          res = await axios.post("/api/end-pitch", {
-            sessionId: sessionIdRef.current,
-            userId: session?.user?._id,
-            conversationHistory: transcriptRef.current,
-            duration: durationRef.current,
-          });
-          console.log(res);
-          resultData = { success: true, data: res.data };
-        } catch (error) {
-          console.error("Error ending pitch:", error);
-          resultData = { success: false, error };
-        }
-        sessionIdRef.current = null;
-        transcriptRef.current = [];
-      } else {
-        console.warn("No sessionId available to end pitch");
-      }
+      
 
       setSocketState(3); // closed
       setReconnectAttempts((attempts) => attempts + 1);
@@ -207,8 +165,10 @@ const DeepgramContextProvider = ({ children }) => {
         closeSocket,
         addTranscriptMessage,
         sessionIdRef,
+        transcriptRef,
         setCompetitionId,
         duration,
+        durationRef,
         setUserId,
       }}
     >

@@ -10,6 +10,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     console.log("body", body);
     const validatedData = pitchSchema.parse(body);
+    const competitionId = validatedData.competitionId;
     const pitch = await PitchModel.findOne({
       sessionId: validatedData.sessionId,
     });
@@ -31,14 +32,14 @@ export async function POST(req: Request) {
         content: message.content,
         timestamp: message.timeStamp,
       }));
-      const res = await axios.get(
-        `https://api.deepgram.com/v1/projects/${process.env.DEEPGRAM_PROJECT_ID}/requests/${sessionId}`,
-        {
-          headers: {
-            Authorization: `Token ${process.env.DEEPGRAM_API_KEY}`,
-          },
-        }
-      );
+    const res = await axios.get(
+      `https://api.deepgram.com/v1/projects/${process.env.DEEPGRAM_PROJECT_ID}/requests/${sessionId}`,
+      {
+        headers: {
+          Authorization: `Token ${process.env.DEEPGRAM_API_KEY}`,
+        },
+      }
+    );
     const duration = res?.data?.response?.sts_details?.duration;
     if (isNaN(duration)) {
       pitch.duration = validatedData.duration;
@@ -60,9 +61,12 @@ export async function POST(req: Request) {
         { status: 404 }
       );
     }
-
-    user.pitchTimeRemaining -= Math.ceil(pitch.duration / 60);
-    await user.save();
+    if (competitionId) {
+      
+    } else {
+      user.pitchTimeRemaining -= Math.ceil(pitch.duration / 60);
+      await user.save();
+    }
 
     return NextResponse.json(
       {

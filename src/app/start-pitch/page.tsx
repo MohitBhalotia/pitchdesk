@@ -29,12 +29,16 @@ import { getAgentConfig } from "@/lib/constants";
 import Image from "next/image";
 import axios from "axios";
 import { toast } from "sonner";
+import { inngest } from "@/lib/inngest/client";
 function HomeContent() {
   const {
     socket,
     socketState,
     duration,
     setUserId,
+    durationRef,
+    sessionIdRef,
+    transcriptRef,
     closeSocket,
     setCompetitionId,
   } = useDeepgram();
@@ -42,14 +46,16 @@ function HomeContent() {
     useMicrophone();
 
   const [config, setConfig] = useState<object | null>(null);
-  const [exit,setExit]=useState(false);
+  const [exit, setExit] = useState(false);
   const searchParams = useSearchParams();
   const agentId = searchParams.get("agentId");
+  const isPractice = searchParams.get("practice");
   const competitionId = searchParams.get("competitionId");
   if (competitionId) {
     setCompetitionId(competitionId);
   }
   const [agent, setAgent] = useState<object | null>(null);
+  const [pitchId, setPitchId] = useState<string | null>(null);
   useEffect(() => {
     if (agentId) {
       getAgentConfig(agentId as string).then((agent) => {
@@ -64,52 +70,100 @@ function HomeContent() {
   const { data: session } = useSession();
 
   const handleStart = async () => {
-    setLoading(true);
-    if (socketState === -1) {
-      socket?.open();
-    }
-    setUserId(session?.user?._id);
-    const res = await axios.get(
-      `/api/users/stats?userId=${session?.user?._id}`
-    );
-    const data = res.data;
-    console.log(data);
+    try {
+      setLoading(true);
+      setUserId(session?.user?._id);
+      if (session?.user?._id) {
+        const res = await axios.post("/api/start-pitch", {
+          userId: session?.user?._id,
+          sessionId: "Pitchdesk" + Math.ceil(Math.random() * 1000000),
+          competitionId,
+        });
+        const data = res.data.data;
+        setRemainingTime((data?.remainingTime ?? 0) * 60);
+        setPitchId(data?.pitch?._id);
+        if (data?.remainingTime <= 0) {
+          console.log("Expired");
+          setStarted(false);
+          toast.error(
+            isPractice
+              ? "You have no practice pitch time remaining. Please Upgrade your plan! "
+              : "You have no remaining time. "
+          );
+          return;
+        } else {
+          if (socketState === -1) {
+            socket?.open();
+          }
+          await fetchConfig();
 
-    setRemainingTime((data?.remainingTime ?? 0) * 60);
-
-    if (data?.remainingTime <= 0) {
-      console.log("Expired");
-      setStarted(false);
-      toast.error("You have no remaining time. Please Upgrade your plan! ");
-      return;
-    }
-    await fetchConfig();
-
-    if (microphoneState === null) {
-      const result = await setupMicrophone();
-      if (result) {
-        startMicrophone();
+          if (microphoneState === null) {
+            const result = await setupMicrophone();
+            if (result) {
+              startMicrophone();
+            }
+          } else {
+            startMicrophone();
+          }
+        }
+      } else {
+        toast.error("Internal Server Error");
       }
-    } else {
-      startMicrophone();
+    } catch (error) {
+      console.error("Error starting pitch", error);
+      toast.error(error.response.data.message || "Failed to start pitch");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
+  useEffect(() => {
+    if (started) {
+      setInterval(() => {
+        console.log("🔒🔒🔒Updating pitch", {
+          pitchId: pitchId,
+          sessionId: sessionIdRef.current,
+          competitionId: competitionId ?? null,
+          userId: session?.user?._id,
+          transcript: transcriptRef.current,
+          duration: durationRef.current,
+        });
+        inngest.send({
+          name: "pitch.update",
+          data: {
+            pitchId: pitchId,
+            sessionId: sessionIdRef.current,
+            competitionId: competitionId ?? null,
+            userId: session?.user?._id,
+            transcript: transcriptRef.current,
+            duration: durationRef.current,
+          },
+        });
+      }, 20000);
+    }
+  }, [started]);
+
   const handleStop = useCallback(async () => {
+    console.log("🔒🔒🔒Ending pitch");
+    await inngest.send({
+      name: "pitch.update",
+      data: {
+        pitchId: pitchId,
+        sessionId: sessionIdRef.current,
+        competitionId: competitionId ?? null,
+        userId: session?.user?._id,
+        transcript: transcriptRef.current,
+        duration: durationRef.current,
+      },
+    });
     setStarted(false);
     setExit(true);
-    const result = await closeSocket();
-    console.log("result", result);
+    await closeSocket();
     await stopMicrophone();
-    if (result.success) {
-      toast.success("Session ended successfully!");
-      setTimeout(() => {
-        window.close();
-      }, 3000);
-    } else {
-      toast.error("Failed to end session properly");
-    }
+    toast.success("Session ended successfully!");
+    setTimeout(() => {
+      window.close();
+    }, 3000);
   }, [closeSocket, stopMicrophone]);
 
   // Automatically end session when duration exceeds remaining time
@@ -156,13 +210,15 @@ function HomeContent() {
       setConfig(null);
     }
   };
-  if(exit){
-    return (<div className="min-h-screen bg-black flex items-center justify-center">
-      <div className="text-white text-lg font-bold flex items-center">
-        <Loader2 className="animate-spin mr-2 inline-block" size={24} />
-        Ending session...
+  if (exit) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white text-lg font-bold flex items-center">
+          <Loader2 className="animate-spin mr-2 inline-block" size={24} />
+          Ending session...
+        </div>
       </div>
-    </div>);
+    );
   }
   return (
     <div className="min-h-screen bg-black">
@@ -263,43 +319,46 @@ function HomeContent() {
                         {started &&
                           remainingTime !== null &&
                           remainingTime > 0 && (
-                            <div className="flex justify-center gap-4 w-full mt-4 ">
+                            <div className="flex-col justify-center gap-4 w-full mt-4 ">
+                              <div className="flex justify-center gap-4 w-full mb-4">
+                                <Button
+                                  variant="outline"
+                                  size="lg"
+                                  className="border-2 flex items-center border-amber-300 text-accent-foreground hover:bg-amber-800"
+                                  onClick={() =>
+                                    socket.send(
+                                      JSON.stringify({
+                                        type: "InjectUserMessage",
+                                        content: "Negotiate",
+                                      })
+                                    )
+                                  }
+                                >
+                                  <Handshake />
+                                  <span>Negotiate</span>
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="lg"
+                                  className="border-2 flex items-center border-green-300 text-accent-foreground hover:bg-green-800"
+                                  onClick={() =>
+                                    socket.send(
+                                      JSON.stringify({
+                                        type: "InjectUserMessage",
+                                        content: "Get Verdict",
+                                      })
+                                    )
+                                  }
+                                >
+                                  <Target />
+                                  <span>Get Verdict</span>
+                                </Button>
+                              </div>
+
                               <Button
                                 variant="outline"
                                 size="lg"
-                                className="border-2 flex items-center border-amber-300 text-white hover:bg-amber-800"
-                                onClick={() =>
-                                  socket.send(
-                                    JSON.stringify({
-                                      type: "InjectUserMessage",
-                                      content: "Negotiate",
-                                    })
-                                  )
-                                }
-                              >
-                                <Handshake />
-                                <span>Negotiate</span>
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="lg"
-                                className="border-2 flex items-center border-green-300 text-white hover:bg-green-800"
-                                onClick={() =>
-                                  socket.send(
-                                    JSON.stringify({
-                                      type: "InjectUserMessage",
-                                      content: "Get Verdict",
-                                    })
-                                  )
-                                }
-                              >
-                                <Target />
-                                <span>Get Verdict</span>
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="lg"
-                                className="border-2 flex items-center border-red-600 hover:bg-red-800"
+                                className="border-2 w-full flex items-center border-red-600 text-accent-foreground hover:bg-red-800"
                                 type="button"
                                 onClick={async () => {
                                   await handleStop();
@@ -311,6 +370,7 @@ function HomeContent() {
                             </div>
                           )}
                         {started &&
+                          (!competitionId || isPractice) &&
                           (remainingTime == null || remainingTime <= 0) && (
                             <div className="flex flex-col items-center gap-4 text-center text-2xl font-bold text-red-500">
                               <p>Please Upgrade your plan!</p>
