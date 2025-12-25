@@ -28,6 +28,7 @@ import {
   BarChart3,
   CheckCircle2Icon,
   ExternalLink,
+  MoreVertical,
 } from "lucide-react";
 import RegistrationForm from "./registration-form";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -37,6 +38,12 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import Image from "next/image";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Competition {
   _id: string;
@@ -77,9 +84,16 @@ interface Competition {
     start: string;
     end: string;
   };
+  leaderboardConfig?: {
+    topQualifiers: number;
+    isFinalRound: boolean;
+    customMessage?: string;
+  };
   totalRegistered: number;
   pitchTime: number;
   isPractice: boolean;
+  isActive?: boolean;
+  approved?: boolean;
 }
 
 // Update the participant type
@@ -1047,7 +1061,7 @@ function CompetitionSidebar({
                               <div className="flex items-center gap-2">
                                 <Badge
                                   variant="secondary"
-                                  className="mt-1 text-xs"
+                                  className="mt-1 text-xs flex-shrink-0"
                                 >
                                   {member.status === "pending"
                                     ? "Pending"
@@ -1055,27 +1069,36 @@ function CompetitionSidebar({
                                       ? "Accepted"
                                       : "Declined"}
                                 </Badge>
-                                {isLeader && member.status === "pending" && (
-                                  <div className="flex gap-1">
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      className="h-6 px-2 text-xs"
-                                      onClick={() => handleResendInvite(member.email)}
-                                      disabled={resendLoading === member.email || removeLoading !== null}
-                                    >
-                                      {resendLoading === member.email ? "..." : "Resend"}
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="destructive"
-                                      className="h-6 px-2 text-xs"
-                                      onClick={() => handleRemoveMember(member.email)}
-                                      disabled={removeLoading === member.email || resendLoading !== null}
-                                    >
-                                      {removeLoading === member.email ? "..." : "Remove"}
-                                    </Button>
-                                  </div>
+                                {isLeader && (member.status === "pending" || member.status === "declined") && (
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-6 w-6 p-0 flex-shrink-0"
+                                        disabled={resendLoading === member.email || removeLoading === member.email}
+                                      >
+                                        <MoreVertical className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      {member.status === "pending" && (
+                                        <DropdownMenuItem
+                                          onClick={() => handleResendInvite(member.email)}
+                                          disabled={resendLoading === member.email || removeLoading !== null}
+                                        >
+                                          {resendLoading === member.email ? "Sending..." : "Resend Invite"}
+                                        </DropdownMenuItem>
+                                      )}
+                                      <DropdownMenuItem
+                                        onClick={() => handleRemoveMember(member.email)}
+                                        disabled={removeLoading === member.email || resendLoading !== null}
+                                        className="text-destructive focus:text-destructive"
+                                      >
+                                        {removeLoading === member.email ? "Removing..." : "Remove Member"}
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
                                 )}
                               </div>
                             </li>
@@ -1203,7 +1226,7 @@ function CompetitionSidebar({
                       );
                     })()}
 
-                  {/* Evaluate Pitch button - shown if pitch submitted OR if it's a practice competition */}
+                  {/* Evaluate Pitch button - shown if pitch submitted (at least one pitch has been submitted) */}
                   {(localParticipant || participant)?.pitchSubmitted &&
                     (!(localParticipant || participant)?.pitchEvaluated ? (
                       /* Evaluate Pitch - shown if pitch submitted but not evaluated */
