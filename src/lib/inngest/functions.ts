@@ -15,7 +15,7 @@ export const updatePitch = inngest.createFunction(
   {
     id: "update-pitch",
     batchEvents: {
-      maxSize: 10,
+      maxSize: 5,
       timeout: "60s",
       key: "event.data.pitchId", // Optional: batch events by user ID
     },
