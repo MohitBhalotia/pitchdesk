@@ -229,9 +229,12 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Member not found.' }, { status: 404 });
     }
     const member = participant.teamMembers[memberIndex];
-    // Only allow removing pending members
-    if (member.status !== 'pending') {
-      return NextResponse.json({ error: 'Can only remove members with pending invitations.' }, { status: 400 });
+    // Only allow removing pending or declined members (not accepted members)
+    if (member.status === 'accepted') {
+      return NextResponse.json({ error: 'Cannot remove accepted members. They must leave the team themselves.' }, { status: 400 });
+    }
+    if (member.status !== 'pending' && member.status !== 'declined') {
+      return NextResponse.json({ error: 'Can only remove members with pending or declined invitations.' }, { status: 400 });
     }
     // Remove member
     participant.teamMembers.splice(memberIndex, 1);

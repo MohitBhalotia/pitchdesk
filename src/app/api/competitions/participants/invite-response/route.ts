@@ -42,10 +42,6 @@ export async function POST(request: NextRequest) {
     // FIX
     const memberObjectId = new Types.ObjectId(String(user._id));
 
-    console.log('Member ID:', memberObjectId);
-    console.log('Member ID type:', typeof memberObjectId);
-    console.log('Member Email:', memberEmail);
-    
 
     // Duplicity check: Block only if user is already a leader or accepted member
     // Allow pending members to accept invites (users can have multiple pending invites)
@@ -65,7 +61,7 @@ export async function POST(request: NextRequest) {
       ],
       _id: { $ne: teamId }
     });
-    if (alreadyParticipant) {
+    if (alreadyParticipant && action === 'accept') {
       return NextResponse.json({ error: 'You are already part of another team for this competition. You cannot join multiple teams.' }, { status: 409 });
     }
     // Find the member in this participant
