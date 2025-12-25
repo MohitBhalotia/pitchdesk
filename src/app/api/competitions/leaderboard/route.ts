@@ -67,8 +67,6 @@ export async function GET(request: NextRequest) {
           totalScore: '$scores.TotalScore',
           userId: '$userId',
           teamName: '$participant.teamName',
-          teamLeaderName: '$participant.teamLeader.name',
-          teamLeaderEmail: '$participant.teamLeader.email',
           submissionTime: '$createdAt',
           evaluationId: '$_id',
           pitchId: '$pitchId'
@@ -87,9 +85,7 @@ export async function GET(request: NextRequest) {
           evaluationId: { $first: '$evaluationId' },
           submissionTime: { $first: '$submissionTime' },
           // Get team info from the best evaluation
-          teamName: { $first: '$teamName' },
-          teamLeaderName: { $first: '$teamLeaderName' },
-          teamLeaderEmail: { $first: '$teamLeaderEmail' }
+          teamName: { $first: '$teamName' }
         }
       },
       {
@@ -98,8 +94,6 @@ export async function GET(request: NextRequest) {
           userId: '$_id',
           totalScore: 1,
           teamName: 1,
-          teamLeaderName: 1,
-          teamLeaderEmail: 1,
           submissionTime: 1
         }
       },
