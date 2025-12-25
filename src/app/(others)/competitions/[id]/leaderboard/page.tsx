@@ -21,11 +21,9 @@ import {
   Search,
   ArrowLeft,
   Clock,
-  User,
   Award,
   Star,
   Calendar,
-  Mail,
   BarChart3,
 } from "lucide-react";
 
@@ -35,8 +33,6 @@ interface LeaderboardEntry {
   totalScore: number;
   userId: string;
   teamName: string;
-  teamLeaderName: string;
-  teamLeaderEmail: string;
   submissionTime: string;
   evaluationDate: string;
 }
@@ -94,20 +90,10 @@ const LeaderboardRow = ({ entry, isTopTeam }: { entry: LeaderboardEntry; isTopTe
 
         {/* Team Information */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2">
             <h3 className="font-semibold text-foreground truncate text-sm sm:text-base lg:text-lg">
               {entry.teamName}
             </h3>
-          </div>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <User className="h-3 w-3 flex-shrink-0" />
-              <span className="truncate">{entry.teamLeaderName}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Mail className="h-3 w-3 flex-shrink-0" />
-              <span className="truncate">{entry.teamLeaderEmail}</span>
-            </div>
           </div>
         </div>
       </div>
@@ -198,16 +184,14 @@ export default function TournamentLeaderboard() {
   }, [competitionId]);
 
   const filteredLeaderboard = leaderboard.filter(entry =>
-    entry.teamName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    entry.teamLeaderName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    entry.teamLeaderEmail.toLowerCase().includes(searchTerm.toLowerCase())
+    entry.teamName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const topTeams = filteredLeaderboard.slice(0, topQualifiers);
   const rest = filteredLeaderboard.slice(topQualifiers);
 
   const currentUserEntry = leaderboard.find(entry =>
-    session?.user?.email === entry.teamLeaderEmail
+    session?.user?._id && entry.userId && String(session.user._id) === String(entry.userId)
   );
 
   if (status === "loading") {
@@ -307,9 +291,8 @@ export default function TournamentLeaderboard() {
                     <Star className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
                   </div>
                   <div className="min-w-0">
-                    <div className="text-lg sm:text-xl lg:text-2xl font-bold">{topQualifiers}</div>
                     <div className="text-xs sm:text-sm text-muted-foreground truncate">
-                      {isFinalRound ? 'Will Be Awarded' : 'Qualify Next Round'}
+                      Top {topQualifiers} teams {isFinalRound ? 'will be awarded' : 'qualify for the next round'}
                     </div>
                   </div>
                 </div>
