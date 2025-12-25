@@ -126,7 +126,7 @@ function HomeContent() {
         transcript: transcriptRef.current,
         duration: durationRef.current,
       });
-    };
+    } ;
     if (started) {
       setInterval(() => {
         console.log("Updating pitch");
