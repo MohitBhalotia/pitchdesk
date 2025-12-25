@@ -131,7 +131,7 @@ function HomeContent() {
       setInterval(() => {
         console.log("Updating pitch");
         updatePitch();
-      }, 20000);
+      }, 10000);
     }
   }, [started]);
 
