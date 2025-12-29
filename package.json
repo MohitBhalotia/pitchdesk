@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@deepgram/sdk": "^4.11.2",
+    "@getbrevo/brevo": "^3.0.1",
     "@hookform/resolvers": "^5.2.0",
     "@lottiefiles/react-lottie-player": "^3.6.0",
     "@number-flow/react": "^0.5.10",
