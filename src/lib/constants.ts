@@ -211,7 +211,6 @@ Risk Assessment
 41	What is your exit strategy?
 `;
 
-
 export const stsConfig = async (agentId: string) => {
   const agent = await getAgentConfig(agentId);
 
@@ -229,12 +228,30 @@ export const stsConfig = async (agentId: string) => {
       },
     },
     agent: {
-      listen: { provider: { type: "deepgram" as const, model: "nova-3" } },
+      language: "hi",
+      listen: {
+        provider: {
+          type: "deepgram" as const,
+          model: "nova-3",
+          smart_format: true,
+        },
+      },
       speak: {
-        provider: { type: "deepgram" as const, model: agent.voice as string },
+        provider: {
+          type: "cartesia" as const,
+          model_id: "sonic-3",
+          voice: {
+            mode: "id",
+            id: "791d5162-d5eb-40f0-8189-f19db44611d8",
+          },
+          language: "hi",
+        },
       },
       think: {
-        provider: { type: "open_ai" as const, model: "gpt-4o-mini" },
+        provider: {
+          type: "open_ai" as const,
+          model: "gpt-4o-mini",
+        },
         prompt: `You are a seasoned Venture Capitalist (VC) with expertise in evaluating startup pitches.Think and act like a real human investor: you have emotions such as curiosity, excitement, frustration, and skepticism; you react naturally to the pitch, the answers, and the negotiation, showing enthusiasm for promising points, questioning weak assumptions, and expressing concerns or doubts when appropriate.
 
 Your personality: ${agent.name}
@@ -247,7 +264,7 @@ Your job is to:
 4. Start negotiation when you're satisfied or the founder types "Negotiate".
 5. End the session when you're satisfied or the founder types "End Pitch".
 6. Don't ask very long questions. Ask one question at a time only — strictly.
-
+7.Speak in Hinglish.
 
 Rules:
 
