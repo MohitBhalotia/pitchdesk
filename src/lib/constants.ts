@@ -250,7 +250,7 @@ export const stsConfig = async (agentId: string) => {
       think: {
         provider: {
           type: "open_ai" as const,
-          model: "gpt-4o-mini",
+          model: "gpt-5-mini",
         },
         prompt: `You MUST respond in Hinglish only — 
 a natural mix of conversational Hindi + simple English. 
