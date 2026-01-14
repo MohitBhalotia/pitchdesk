@@ -2,7 +2,7 @@ export const dummyData = {
     residents: [
       {
         residentId: "RES-CBG-1001",
-        fullName: "Mohit Bhalotia",
+        fullName: "Mohit",
         DOB: "2004-04-20",
         role: "Owner",
         unitNumber: "Unit 101",
@@ -31,7 +31,7 @@ export const dummyData = {
       },
       {
         residentId: "RES-CBG-1002",
-        fullName: "Debdip Mukherjee",
+        fullName: "Yogesh",
         DOB: "2003-09-25",
         role: "Tenant",
         unitNumber: "Unit 102",
@@ -60,7 +60,7 @@ export const dummyData = {
       },
       {
         residentId: "RES-CBG-1003",
-        fullName: "Rahul Aggarwal",
+        fullName: "Rahul",
         DOB: "2004-04-20",
         role: "Owner",
         unitNumber: "Unit 201",
