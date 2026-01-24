@@ -104,7 +104,59 @@ const UpgradeModal = ({ isOpen, onClose }) => {
 
 // VC Dashboard Component
 const VCDashboard = ({ userStats, session, router }) => {
+  const stats = [
+    {
+      title: "AI Judge Bots",
+      value: userStats?.totalBots ?? 0,
+      icon: <Users className="h-6 w-6" />,
+      color: "text-teal-600 dark:text-teal-300"
+    },
+    {
+      title: "Active Programs",
+      value: userStats?.activePrograms ?? 0,
+      icon: <Play className="h-6 w-6" />,
+      color: "text-blue-600 dark:text-blue-300"
+    },
+    {
+      title: "Pitches Reviewed",
+      value: userStats?.totalApplications ?? 0,
+      icon: <FileText className="h-6 w-6" />,
+      color: "text-violet-600 dark:text-violet-300"
+    },
+    {
+      title: "Pending Review",
+      value: userStats?.pendingReview ?? 0,
+      icon: <Clock className="h-6 w-6" />,
+      color: "text-orange-600 dark:text-orange-300"
+    }
+  ];
 
+  const quickActions = [
+    {
+      title: "Create AI Judge Bot",
+      description: "Build a custom AI evaluator for your programs",
+      icon: <Users className="h-6 w-6 text-teal-400" />,
+      onClick: () => router.push("/vc/bots/create"),
+    },
+    {
+      title: "Launch Incubation Program",
+      description: "Start accepting applications from founders",
+      icon: <Play className="h-6 w-6 text-blue-400" />,
+      onClick: () => router.push("/vc/incubations/create"),
+    },
+    {
+      title: "Review Pitch Submissions",
+      description: "Evaluate applications and communicate with founders",
+      icon: <BarChart3 className="h-6 w-6 text-violet-400" />,
+      onClick: () => router.push("/vc/pitches"),
+    },
+    {
+      title: "Manage Programs",
+      description: "View and edit your incubation programs",
+      icon: <FileText className="h-6 w-6 text-pink-400" />,
+      onClick: () => router.push("/vc/incubations"),
+    }
+  ];
 
   return (
     <div className="flex flex-col gap-8 items-center mx-auto px-2 py-5">
@@ -129,7 +181,29 @@ const VCDashboard = ({ userStats, session, router }) => {
         </div>
       </div>
 
-
+      {/* Stats Grid for VC */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-7xl mx-auto">
+        {stats.map((stat, index) => (
+          <div
+            className="rounded-xl flex items-center py-4 lg:py-8 shadow bg-white/80 dark:bg-card/90 p-4 lg:p-6 flex-col gap-1 border border-border/20 hover:shadow-lg transition-shadow"
+            key={index}
+          >
+            <div className="flex items-center gap-3 lg:gap-4 mb-1">
+              <div className="p-2 lg:p-4 rounded-lg bg-primary text-primary-foreground">
+                {stat.icon}
+              </div>
+              <div>
+                <p className="text-xs lg:text-base font-medium text-foreground">
+                  {stat.title}
+                </p>
+                <p className={`text-sm lg:text-xl font-bold ${stat.color}`}>
+                  {stat.value}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
 
       {/* Quick Actions for VC */}
       <div className="w-full max-w-7xl mx-auto mt-8">
@@ -137,24 +211,64 @@ const VCDashboard = ({ userStats, session, router }) => {
           Quick Actions
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div
-            className="rounded-xl border border-border/20 bg-white/70 dark:bg-card/90 shadow p-4 flex items-center gap-3 hover:shadow-lg transition-shadow group cursor-pointer"
-            onClick={() => router.push("/my-pitches")}
-          >
-            <div className="p-2 rounded-lg bg-muted/40 dark:bg-muted/10">
-              <Play className="h-6 w-6 text-teal-400" />
+          {quickActions.map((action, index) => (
+            <div
+              key={index}
+              className="rounded-xl border border-border/20 bg-white/70 dark:bg-card/90 shadow p-4 flex items-center gap-3 hover:shadow-lg transition-shadow group cursor-pointer"
+              onClick={action.onClick}
+            >
+              <div className="p-2 rounded-lg bg-muted/40 dark:bg-muted/10">
+                {action.icon}
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-base">{action.title}</h3>
+                <p className="text-muted-foreground text-xs mt-0.5">
+                  {action.description}
+                </p>
+              </div>
+              <ArrowUpRight className="h-5 w-5 text-muted-foreground cursor-pointer group-hover:text-blue-400 transition-colors" />
             </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-base">Browse top pitches</h3>
-              <p className="text-muted-foreground text-xs mt-0.5">
-                Discover promising startup pitches
-              </p>
-            </div>
-            <ArrowUpRight className="h-5 w-5 text-muted-foreground cursor-pointer group-hover:text-blue-400 transition-colors" />
-          </div>
-
+          ))}
         </div>
       </div>
+
+      {/* Recent Applications */}
+      {userStats?.recentApplications && userStats.recentApplications.length > 0 && (
+        <div className="w-full max-w-7xl mx-auto mt-8">
+          <h2 className="text-2xl font-bold mb-6 text-foreground text-left">
+            Recent Applications
+          </h2>
+          <div className="space-y-3">
+            {userStats.recentApplications.map((app: any) => (
+              <div
+                key={app._id}
+                className="rounded-xl border border-border/20 bg-white/70 dark:bg-card/90 shadow p-4 flex items-center gap-4 hover:shadow-lg transition-shadow cursor-pointer"
+                onClick={() => router.push(`/vc/pitches/${app._id}`)}
+              >
+                <div className="relative h-10 w-10 rounded-full overflow-hidden bg-muted">
+                  <img
+                    src={app.founderId?.profileImage || "/placeholder-avatar.png"}
+                    alt={app.founderId?.fullName}
+                    className="object-cover w-full h-full"
+                  />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-sm">{app.founderId?.fullName}</h3>
+                  <p className="text-xs text-muted-foreground">{app.programId?.title}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-bold text-teal-600 dark:text-teal-300">
+                    Score: {app.score || 0}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(app.submittedAt).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -334,7 +448,20 @@ export default function Index() {
     if (status === "loading" || !session?.user?._id) return; // wait until session is loaded
 
     if (session?.user?.role === 'vc') {
-      setIsLoading(false);
+      // Fetch VC stats
+      const fetchVCStats = async () => {
+        try {
+          setIsLoading(true);
+          const response = await axios.get("/api/vc/stats");
+          setUserStats(response.data);
+        } catch (err) {
+          toast.error("Error fetching VC stats.");
+          console.error("Error fetching VC stats:", err);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchVCStats();
       return;
     }
 
@@ -356,7 +483,7 @@ export default function Index() {
     };
 
     fetchUserPlan();
-  }, [session?.user?._id, status]); // re-run when user id becomes available
+  }, [session?.user?._id, session?.user?.role, status]); // re-run when user id becomes available
 
 
 

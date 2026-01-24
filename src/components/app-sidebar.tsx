@@ -16,6 +16,9 @@ import {
   HelpCircle,
   Handshake,
   Trophy,
+  Bot,
+  Briefcase,
+  FileCheck,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -135,6 +138,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: LayoutDashboard,
       },
       {
+        title: "Incubations",
+        url: "/incubations",
+        icon: Briefcase,
+      },
+      {
         title: "Pitch Evaluation",
         url: "/my-pitches",
         icon: History,
@@ -190,6 +198,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "Dashboard",
         url: "/dashboard",
         icon: LayoutDashboard,
+      },
+      {
+        title: "My Bots",
+        url: "/vc/bots",
+        icon: Bot,
+      },
+      {
+        title: "Incubation Programs",
+        url: "/vc/incubations",
+        icon: Briefcase,
+      },
+      {
+        title: "Pitch Reviews",
+        url: "/vc/pitches",
+        icon: FileCheck,
       },
       {
         title: "Browse pitches",

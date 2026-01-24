@@ -1,0 +1,377 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useRouter, useParams } from "next/navigation";
+import {
+    Users,
+    DollarSign,
+    CheckCircle2,
+    Bot,
+    ArrowLeft,
+    Loader2,
+    CalendarCheck,
+    AlertCircle
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
+import Image from "next/image";
+import { useSession } from "next-auth/react";
+
+interface IProgram {
+    _id: string;
+    title: string;
+    description: string;
+    eligibility: string;
+    stages: string;
+    fundingAmount: string;
+    cohortSize: number;
+    timeline: {
+        startDate: string;
+        endDate: string;
+        applicationDeadline: string;
+    };
+    vcId: {
+        fullName: string;
+        profileImage: string;
+    };
+    botId: {
+        name: string;
+        avatarUrl: string;
+        description: string;
+    };
+}
+
+interface IApplication {
+    status: string;
+}
+
+interface IPitch {
+    _id: string;
+    title: string;
+    createdAt: string;
+}
+
+export default function IncubationDetailPage() {
+    const router = useRouter();
+    const { id } = useParams();
+    const { data: session } = useSession();
+
+    const [program, setProgram] = useState<IProgram | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [application, setApplication] = useState<IApplication | null>(null);
+    const [myPitches, setMyPitches] = useState<IPitch[]>([]);
+    const [selectedPitch, setSelectedPitch] = useState<string>("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+    useEffect(() => {
+        if (id) {
+            fetchProgramDetails();
+            if (session) {
+                checkApplicationStatus();
+                fetchMyPitches();
+            }
+        }
+    }, [id, session]);
+
+    const fetchProgramDetails = async () => {
+        try {
+            const response = await axios.get(`/api/incubations/${id}`);
+            setProgram(response.data);
+        } catch (error) {
+            console.error("Error fetching program:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const checkApplicationStatus = async () => {
+        try {
+            const response = await axios.get(`/api/incubations/${id}/application`);
+            setApplication(response.data);
+        } catch (error) {
+            console.error("Error checking application status", error);
+        }
+    };
+
+    const fetchMyPitches = async () => {
+        try {
+            const response = await axios.get('/api/my-pitches'); // Assuming this exists and returns list
+            // Filter only valid pitches (e.g. ones with scores)
+            setMyPitches(response.data || []);
+        } catch (error) {
+            console.log("Could not fetch pitches, using mock or empty", error);
+        }
+    };
+
+    const handleApply = async () => {
+        if (!selectedPitch) {
+            toast.error("Please select a pitch to submit");
+            return;
+        }
+
+        try {
+            setIsSubmitting(true);
+            await axios.post(`/api/incubations/${id}/apply`, {
+                pitchId: selectedPitch
+            });
+            toast.success("Application submitted successfully!");
+            setIsDialogOpen(false);
+            checkApplicationStatus();
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            toast.error(error.response?.data?.error || "Failed to submit application");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    if (isLoading) {
+        return <div className="flex justify-center items-center min-h-[60vh]">
+            <Loader2 className="h-8 w-8 animate-spin" />
+        </div>;
+    }
+
+    if (!program) {
+        return <div className="container py-10 text-center">Program not found</div>;
+    }
+
+    return (
+        <div className="container mx-auto p-4 md:p-8 max-w-6xl">
+            <Button variant="ghost" className="mb-6 pl-0 hover:bg-transparent hover:text-primary" onClick={() => router.back()}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Incubations
+            </Button>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Main Content */}
+                <div className="lg:col-span-2 space-y-8">
+                    <div>
+                        <div className="flex items-center gap-3 mb-4">
+                            <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">
+                                Incubation Program
+                            </Badge>
+                            <span className="text-sm text-muted-foreground flex items-center gap-1">
+                                <CalendarCheck className="h-3 w-3" />
+                                Posted {new Date().toLocaleDateString()}
+                            </span>
+                        </div>
+                        <h1 className="text-4xl font-extrabold tracking-tight mb-4 text-foreground">
+                            {program.title}
+                        </h1>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
+                            <div className="flex items-center gap-2 bg-muted/50 px-3 py-1 rounded-full">
+                                <div className="relative h-6 w-6 rounded-full overflow-hidden">
+                                    <Image src={program.vcId?.profileImage || "/placeholder-avatar.png"} alt="VC" fill className="object-cover" />
+                                </div>
+                                <span className="font-medium text-foreground">{program.vcId?.fullName}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                                <Users className="h-4 w-4" />
+                                {program.cohortSize ? `${program.cohortSize} Spots` : "Open Cohort"}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Tabs */}
+                    <Tabs defaultValue="details" className="w-full">
+                        <TabsList className="mb-4">
+                            <TabsTrigger value="details">Program Details</TabsTrigger>
+                            <TabsTrigger value="stages">Stages & Timeline</TabsTrigger>
+                            <TabsTrigger value="eligibility">Eligibility</TabsTrigger>
+                        </TabsList>
+
+                        <TabsContent value="details" className="space-y-4">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>About the Program</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="leading-relaxed whitespace-pre-wrap">{program.description}</p>
+                                </CardContent>
+                            </Card>
+                            {program.fundingAmount && (
+                                <Card>
+                                    <CardContent className="flex items-center gap-4 py-6">
+                                        <div className="p-3 bg-green-100 dark:bg-green-900/20 rounded-full text-green-600">
+                                            <DollarSign className="h-6 w-6" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">Funding Available</p>
+                                            <p className="text-2xl font-bold">{program.fundingAmount}</p>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            )}
+                        </TabsContent>
+
+                        <TabsContent value="stages" className="space-y-4">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Stages</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="whitespace-pre-wrap">{program.stages}</p>
+                                </CardContent>
+                            </Card>
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Timeline</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="flex justify-between items-center border-b pb-2">
+                                        <span className="text-muted-foreground">Application Deadline</span>
+                                        <span className="font-medium">{new Date(program.timeline.applicationDeadline).toLocaleDateString()}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center border-b pb-2">
+                                        <span className="text-muted-foreground">Program Start</span>
+                                        <span className="font-medium">{new Date(program.timeline.startDate).toLocaleDateString()}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-muted-foreground">Program End</span>
+                                        <span className="font-medium">{new Date(program.timeline.endDate).toLocaleDateString()}</span>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+
+                        <TabsContent value="eligibility">
+                            <Card>
+                                <CardContent className="pt-6">
+                                    <p className="whitespace-pre-wrap">{program.eligibility}</p>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+                    </Tabs>
+                </div>
+
+                {/* Sidebar / Actions */}
+                <div className="space-y-6">
+                    {/* Bot Card */}
+                    <Card className="bg-gradient-to-b from-indigo-50 to-white dark:from-indigo-950/20 dark:to-background border-indigo-100 dark:border-indigo-800">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2 text-lg">
+                                <Bot className="h-5 w-5 text-indigo-600" />
+                                AI Evaluator
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="text-center">
+                            <div className="relative h-24 w-24 mx-auto mb-4 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                                <Image src={program.botId?.avatarUrl || "/placeholder-avatar.png"} alt="Bot" fill className="object-cover" />
+                            </div>
+                            <h3 className="font-bold text-lg mb-1">{program.botId?.name}</h3>
+                            <p className="text-xs text-muted-foreground mb-4">Official AI Judge</p>
+                            <p className="text-sm italic text-muted-foreground">
+                                &quot;{program.botId?.description || "I will be evaluating your pitch based on the criteria set for this program."}&quot;
+                            </p>
+                        </CardContent>
+                    </Card>
+
+                    {/* Application Status Card */}
+                    <Card className="shadow-lg border-2 border-primary/10">
+                        <CardHeader>
+                            <CardTitle>Application</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            {application ? (
+                                <div className="text-center py-4">
+                                    <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-600 mb-4">
+                                        <CheckCircle2 className="h-6 w-6" />
+                                    </div>
+                                    <h3 className="font-bold text-lg">Application Submitted</h3>
+                                    <p className="text-muted-foreground text-sm mt-1 mb-4">
+                                        Status: <span className="font-medium capitalize text-foreground">{application.status}</span>
+                                    </p>
+                                    <Button variant="outline" className="w-full" disabled>
+                                        View Submission
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="flex items-start gap-2 text-sm text-yellow-600 bg-yellow-50 p-3 rounded-md dark:bg-yellow-900/20 dark:text-yellow-400">
+                                        <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+                                        <p>Ensure you have a practiced pitch ready before applying.</p>
+                                    </div>
+
+                                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                                        <DialogTrigger asChild>
+                                            <Button className="w-full size-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md">
+                                                Apply Now
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogContent>
+                                            <DialogHeader>
+                                                <DialogTitle>Submit Your Application</DialogTitle>
+                                                <DialogDescription>
+                                                    Select one of your practiced pitches to submit to {program.title}.
+                                                </DialogDescription>
+                                            </DialogHeader>
+
+                                            <div className="py-4 space-y-4">
+                                                <div className="space-y-2">
+                                                    <label className="text-sm font-medium">Select Pitch</label>
+                                                    <Select onValueChange={setSelectedPitch} value={selectedPitch}>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select a pitch..." />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {myPitches.length > 0 ? (
+                                                                myPitches.map((pitch: IPitch) => (
+                                                                    <SelectItem key={pitch._id} value={pitch._id}>
+                                                                        {pitch.title || "Untitled Pitch"} - {new Date(pitch.createdAt).toLocaleDateString()}
+                                                                    </SelectItem>
+                                                                ))
+                                                            ) : (
+                                                                <div className="p-2 text-sm text-center text-muted-foreground">
+                                                                    No pitches found. <br />
+                                                                    <Button variant="link" onClick={() => router.push('/start-a-pitch')} className="h-auto p-0">Practice one now</Button>
+                                                                </div>
+                                                            )}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            </div>
+
+                                            <DialogFooter>
+                                                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+                                                <Button onClick={handleApply} disabled={isSubmitting || !selectedPitch}>
+                                                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                                    Submit Application
+                                                </Button>
+                                            </DialogFooter>
+                                        </DialogContent>
+                                    </Dialog>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        </div>
+    );
+}
