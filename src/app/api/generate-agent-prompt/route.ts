@@ -23,7 +23,7 @@ export async function POST(req: Request) {
         } = body;
 
         // Call FastAPI to generate system prompt
-        const fastApiUrl = process.env.FASTAPI_BASE_URL || 'http://localhost:8000';
+        const fastApiUrl = process.env.NEXT_PUBLIC_FASTAPI_BACKEND || 'http://localhost:8000';
 
         try {
             const response = await axios.post(`${fastApiUrl}/generate-bot-prompt`, {
@@ -38,10 +38,14 @@ export async function POST(req: Request) {
 
             const data = response.data;
 
-            return NextResponse.json({
-                systemPrompt: data.system_prompt,
-                firstMessage: "Hello founder", // Always set to "Hello founder"
-            });
+            if (data.success && data.system_prompt) {
+                return NextResponse.json({
+                    systemPrompt: data.system_prompt,
+                    firstMessage: "Hello founder", // Always set to "Hello founder"
+                });
+            } else {
+                throw new Error("Invalid response from FastAPI");
+            }
         } catch (fastApiError: any) {
             console.error("FastAPI call failed, using fallback:", fastApiError.message);
 

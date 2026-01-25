@@ -23,23 +23,29 @@ export async function POST(req: Request) {
         const fastApiFormData = new FormData();
         fastApiFormData.append('image', imageFile, 'input-image.jpg');
 
-        // Call FastAPI Gemini endpoint using Axios
-        const fastApiUrl = process.env.FASTAPI_BASE_URL || 'http://localhost:8000';
+        // Call FastAPI Gemini endpoint
+        const fastApiUrl = process.env.NEXT_PUBLIC_FASTAPI_BACKEND || 'http://localhost:8000';
 
-        const response = await axios.post(`${fastApiUrl}/generate-avatars`, fastApiFormData, {
-            // Axios should automatically handle Content-Type for FormData
+        const response = await axios.post(`${fastApiUrl}/image/regenerate`, fastApiFormData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
         });
 
         const data = response.data;
 
-        // Explicitly check for successful response format
-        if (!data.avatars || !Array.isArray(data.avatars)) {
+        // Check for successful response format
+        // FastAPI returns: { status: "success", data: { session_id, variations: [{ base64 }] } }
+        if (data.status !== 'success' || !data.data || !data.data.variations) {
             console.error("Invalid response from FastAPI:", data);
             return NextResponse.json({ error: "Invalid response format from AI service" }, { status: 502 });
         }
 
+        // Extract base64 images from variations
+        const avatars = data.data.variations.map((v: any) => v.base64);
+
         return NextResponse.json({
-            avatars: data.avatars, // Array of base64 strings
+            avatars: avatars, // Array of base64 strings
             success: true
         });
 
@@ -50,7 +56,7 @@ export async function POST(req: Request) {
         const status = error.response ? error.response.status : 500;
 
         return NextResponse.json(
-            { error: "Internal server error", details: errorDetails },
+            { error: "Avatar generation failed", details: errorDetails },
             { status }
         );
     }
