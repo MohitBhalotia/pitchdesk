@@ -222,22 +222,50 @@ export default function CreateBotPage() {
 
     // ===== CAMERA FUNCTIONS =====
     const startCamera = async () => {
-        // Stop any existing stream first to prevent leaks
-        if (videoRef.current && videoRef.current.srcObject) {
-            const oldStream = videoRef.current.srcObject as MediaStream;
-            oldStream.getTracks().forEach(track => track.stop());
-        }
+        console.log('📷 Starting camera...');
 
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-                setCameraActive(true);
+        // Set camera active FIRST so the video element renders
+        setCameraActive(true);
+
+        // Wait a tiny bit for React to render the video element
+        setTimeout(async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                        facingMode: 'user'
+                    }
+                });
+
+                console.log('📹 Got media stream:', stream);
+
+                if (videoRef.current) {
+                    console.log('✅ Setting stream to video element');
+                    videoRef.current.srcObject = stream;
+
+                    // Ensure video plays
+                    videoRef.current.onloadedmetadata = () => {
+                        console.log('📺 Video metadata loaded');
+                        videoRef.current?.play()
+                            .then(() => console.log('▶️ Video playing'))
+                            .catch(err => {
+                                console.error('❌ Error playing video:', err);
+                            });
+                    };
+
+                    toast.success('Camera activated!');
+                } else {
+                    console.error('❌ videoRef.current is still null after timeout!');
+                    setCameraActive(false);
+                    toast.error('Failed to initialize camera. Please try again.');
+                }
+            } catch (error) {
+                console.error("❌ Error accessing camera:", error);
+                setCameraActive(false);
+                toast.error("Failed to access camera. Please grant permission and try again.");
             }
-        } catch (error) {
-            console.error("Error accessing camera:", error);
-            toast.error("Failed to access camera. Please grant permission.");
-        }
+        }, 100); // 100ms delay to let React render
     };
 
     const capturePhoto = () => {
@@ -720,13 +748,17 @@ export default function CreateBotPage() {
 
                                                     {cameraActive ? (
                                                         <>
-                                                            <video
-                                                                ref={videoRef}
-                                                                autoPlay
-                                                                playsInline
-                                                                className="w-full max-w-md rounded-lg border"
-                                                            />
-                                                            <canvas ref={canvasRef} className="hidden" />
+                                                            <div className="w-full max-w-md mx-auto">
+                                                                <video
+                                                                    ref={videoRef}
+                                                                    autoPlay
+                                                                    playsInline
+                                                                    muted
+                                                                    className="w-full h-auto rounded-lg border-2 border-primary shadow-lg bg-black"
+                                                                    style={{ minHeight: '300px', maxHeight: '500px' }}
+                                                                />
+                                                                <canvas ref={canvasRef} className="hidden" />
+                                                            </div>
                                                             <div className="flex gap-3">
                                                                 <Button
                                                                     type="button"
