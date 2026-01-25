@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Loader2, User } from "lucide-react";
+import { Loader2, Mic, Camera, Check, Play, Pause, X } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 
@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -37,6 +36,8 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Slider } from "@/components/ui/slider";
+import { Progress } from "@/components/ui/progress";
 
 const formSchema = z.object({
     name: z.string().min(2, "Name must be at least 2 characters"),
@@ -51,10 +52,30 @@ const formSchema = z.object({
 export default function CreateBotPage() {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [step, setStep] = useState(1);
+    const [step, setStep] = useState(1); // 1: Form, 2: Voice, 3: Avatar
+
+    // Voice recording states
+    const [voiceRecording, setVoiceRecording] = useState(false);
+    const [voiceRecorded, setVoiceRecorded] = useState(false);
+    const [recordedAudioBlob, setRecordedAudioBlob] = useState<Blob | null>(null);
+    const [recordedAudioUrl, setRecordedAudioUrl] = useState("");
+    const [recordingTime, setRecordingTime] = useState(0);
+    const [clippingRange, setClippingRange] = useState([0, 10]);
+    const [isUploadingVoice, setIsUploadingVoice] = useState(false);
+    const [voiceId, setVoiceId] = useState("");
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Camera/Avatar states
+    const [cameraActive, setCameraActive] = useState(false);
+    const [capturedImage, setCapturedImage] = useState("");
     const [generatedAvatars, setGeneratedAvatars] = useState<string[]>([]);
-    const [selectedAvatar, setSelectedAvatar] = useState<string>("");
+    const [selectedAvatar, setSelectedAvatar] = useState("");
     const [isGeneratingAvatars, setIsGeneratingAvatars] = useState(false);
+    const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+    const [finalAvatarUrl, setFinalAvatarUrl] = useState("");
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -69,45 +90,232 @@ export default function CreateBotPage() {
         },
     });
 
-    const generateAvatars = async () => {
-        setIsGeneratingAvatars(true);
-        setTimeout(() => {
-            const botName = form.getValues("name") || "Bot";
-            setGeneratedAvatars([
-                `https://ui-avatars.com/api/?name=${encodeURIComponent(botName)}&background=0D8ABC&color=fff&size=256`,
-                `https://ui-avatars.com/api/?name=${encodeURIComponent(botName)}&background=667EEA&color=fff&size=256`,
-                `https://ui-avatars.com/api/?name=${encodeURIComponent(botName)}&background=F56565&color=fff&size=256`,
-            ]);
-            setIsGeneratingAvatars(false);
-        }, 1500);
+    // ===== VOICE RECORDING FUNCTIONS =====
+    const startVoiceRecording = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const mediaRecorder = new MediaRecorder(stream);
+            const audioChunks: Blob[] = [];
+
+            mediaRecorder.ondataavailable = (event) => {
+                audioChunks.push(event.data);
+            };
+
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                setRecordedAudioBlob(audioBlob);
+                setRecordedAudioUrl(URL.createObjectURL(audioBlob));
+                setVoiceRecorded(true);
+                stream.getTracks().forEach(track => track.stop());
+            };
+
+            mediaRecorderRef.current = mediaRecorder;
+            mediaRecorder.start();
+            setVoiceRecording(true);
+            setRecordingTime(0);
+
+            // Start timer
+            recordingIntervalRef.current = setInterval(() => {
+                setRecordingTime((prev) => {
+                    if (prev >= 30) {
+                        stopVoiceRecording();
+                        return 30;
+                    }
+                    return prev + 1;
+                });
+            }, 1000);
+        } catch (error) {
+            console.error("Error accessing microphone:", error);
+            toast.error("Failed to access microphone. Please grant permission.");
+        }
     };
 
+    const stopVoiceRecording = () => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+            mediaRecorderRef.current.stop();
+        }
+        if (recordingIntervalRef.current) {
+            clearInterval(recordingIntervalRef.current);
+        }
+        setVoiceRecording(false);
+    };
+
+    const uploadVoiceClip = async () => {
+        if (!recordedAudioBlob) {
+            toast.error("No audio recorded");
+            return;
+        }
+
+        try {
+            setIsUploadingVoice(true);
+
+            // Extract the 10-second clip based on slider selection
+            const startTime = clippingRange[0];
+            const endTime = clippingRange[1];
+
+            // For simplicity, we'll upload the full audio and let Cartesia handle clipping
+            // In production, you might want to trim the audio client-side
+
+            const formData = new FormData();
+            formData.append('audio', recordedAudioBlob);
+            formData.append('name', `${form.getValues('name')} Voice`);
+            formData.append('description', `Voice AI for ${form.getValues('name')}`);
+
+            const response = await axios.post('/api/voice/clone', formData);
+
+            if (response.data.success) {
+                setVoiceId(response.data.voiceId);
+                toast.success("Voice cloned successfully!");
+                setStep(3); // Move to avatar step
+            }
+        } catch (error) {
+            console.error("Voice upload error:", error);
+
+            // Extract error message from API response if available
+            const errorMessage = axios.isAxiosError(error) && error.response?.data?.error
+                ? error.response.data.error
+                : "Failed to clone voice. Please try again.";
+
+            toast.error(errorMessage);
+        } finally {
+            setIsUploadingVoice(false);
+        }
+    };
+
+    // ===== CAMERA FUNCTIONS =====
+    const startCamera = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+                setCameraActive(true);
+            }
+        } catch (error) {
+            console.error("Error accessing camera:", error);
+            toast.error("Failed to access camera. Please grant permission.");
+        }
+    };
+
+    const capturePhoto = () => {
+        if (videoRef.current && canvasRef.current) {
+            const canvas = canvasRef.current;
+            const video = videoRef.current;
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+                ctx.drawImage(video, 0, 0);
+                const imageDataUrl = canvas.toDataURL('image/jpeg');
+                setCapturedImage(imageDataUrl);
+
+                // Stop camera
+                const stream = video.srcObject as MediaStream;
+                stream.getTracks().forEach(track => track.stop());
+                setCameraActive(false);
+
+                // Generate avatars
+                generateAvatarsFromPhoto(imageDataUrl);
+            }
+        }
+    };
+
+    const generateAvatarsFromPhoto = async (imageBase64: string) => {
+        try {
+            setIsGeneratingAvatars(true);
+
+            // Convert base64 to Blob
+            const byteCharacters = atob(imageBase64.split(',')[1]);
+            const byteArrays = [];
+            for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+                const slice = byteCharacters.slice(offset, offset + 512);
+                const byteNumbers = new Array(slice.length);
+                for (let i = 0; i < slice.length; i++) {
+                    byteNumbers[i] = slice.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                byteArrays.push(byteArray);
+            }
+            const blob = new Blob(byteArrays, { type: 'image/jpeg' });
+
+            // Create FormData
+            const formData = new FormData();
+            formData.append('image', blob, 'avatar-capture.jpg');
+
+            // Send as multipart/form-data
+            // Axios automatically sets Content-Type with boundary for FormData
+            const response = await axios.post('/api/avatar/generate', formData);
+
+            if (response.data.success && response.data.avatars) {
+                // Convert base64 to data URLs
+                const avatarUrls = response.data.avatars.map((base64: string) =>
+                    base64.startsWith('data:') ? base64 : `data:image/png;base64,${base64}`
+                );
+                setGeneratedAvatars(avatarUrls);
+                toast.success("Avatars generated successfully!");
+            }
+        } catch (error) {
+            console.error("Avatar generation error:", error);
+            toast.error("Failed to generate avatars. Please try again.");
+        } finally {
+            setIsGeneratingAvatars(false);
+        }
+    };
+
+    const uploadSelectedAvatar = async (avatarBase64: string) => {
+        try {
+            setIsUploadingAvatar(true);
+
+            const response = await axios.post('/api/upload/cloudinary', {
+                imageBase64: avatarBase64,
+                fileName: `${form.getValues('name')}-avatar-${Date.now()}`
+            });
+
+            if (response.data.success) {
+                setFinalAvatarUrl(response.data.url);
+                setSelectedAvatar(response.data.url);
+                toast.success("Avatar uploaded successfully!");
+                return response.data.url;
+            }
+        } catch (error) {
+            console.error("Avatar upload error:", error);
+            toast.error("Failed to upload avatar. Please try again.");
+        } finally {
+            setIsUploadingAvatar(false);
+        }
+    };
+
+    // ===== FORM SUBMISSION =====
     async function onSubmit(values: z.infer<typeof formSchema>) {
         if (step === 1) {
-            setStep(2);
-            if (generatedAvatars.length === 0) generateAvatars();
+            setStep(2); // Move to voice recording
+            return;
+        }
+
+        // Final submission
+        if (!voiceId) {
+            toast.error("Please record and upload your voice");
             return;
         }
 
         if (!selectedAvatar) {
-            toast.error("Please select an avatar for your bot");
+            toast.error("Please capture photo and select an avatar");
             return;
         }
 
         try {
             setIsSubmitting(true);
 
-            // Generate system prompt via API
+            // Generate system prompt via FastAPI
             const promptResponse = await axios.post("/api/generate-agent-prompt", values);
-            const { systemPrompt, firstMessage, voice } = promptResponse.data;
+            const { systemPrompt, firstMessage } = promptResponse.data;
 
-            // Create bot with generated prompts
+            // Create bot
             await axios.post("/api/vc/bots", {
                 ...values,
                 systemPrompt,
                 firstMessage,
-                voice,
-                avatarUrl: selectedAvatar,
+                voice: voiceId, // Cartesia voice ID
+                avatarUrl: selectedAvatar, // Use 'avatarUrl' to match the backend API
             });
 
             toast.success("AI Judge Bot created successfully!");
@@ -122,36 +330,47 @@ export default function CreateBotPage() {
     }
 
     return (
-        <div className="container mx-auto p-6 max-w-3xl">
+        <div className="container mx-auto p-6 max-w-4xl">
             <div className="mb-8">
                 <h1 className="text-3xl font-bold tracking-tight">Create AI Judge Bot</h1>
                 <p className="text-muted-foreground mt-1">
-                    Design a custom AI persona to evaluate pitches for your incubation programs.
+                    Design a custom AI persona with your voice and appearance.
                 </p>
             </div>
 
             <div className="grid gap-6">
-                {/* Progress */}
+                {/* Progress Indicator */}
                 <div className="flex items-center gap-4 mb-4">
-                    <div className={`flex items-center justify-center w-8 h-8 rounded-full ${step >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted'} font-bold`}>1</div>
+                    <div className={`flex items-center justify-center w-10 h-10 rounded-full ${step >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted'} font-bold text-sm`}>1</div>
                     <div className="h-1 flex-1 bg-muted">
                         <div className={`h-full bg-primary transition-all ${step >= 2 ? 'w-full' : 'w-0'}`} />
                     </div>
-                    <div className={`flex items-center justify-center w-8 h-8 rounded-full ${step >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted'} font-bold`}>2</div>
+                    <div className={`flex items-center justify-center w-10 h-10 rounded-full ${step >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted'} font-bold text-sm`}>2</div>
+                    <div className="h-1 flex-1 bg-muted">
+                        <div className={`h-full bg-primary transition-all ${step >= 3 ? 'w-full' : 'w-0'}`} />
+                    </div>
+                    <div className={`flex items-center justify-center w-10 h-10 rounded-full ${step >= 3 ? 'bg-primary text-primary-foreground' : 'bg-muted'} font-bold text-sm`}>3</div>
                 </div>
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>{step === 1 ? "Investment Focus & Criteria" : "Bot Appearance"}</CardTitle>
+                        <CardTitle>
+                            {step === 1 && "Investment Focus & Criteria"}
+                            {step === 2 && "Record Your Voice"}
+                            {step === 3 && "Capture Your Avatar"}
+                        </CardTitle>
                         <CardDescription>
-                            {step === 1 ? "Define your investment preferences and evaluation approach." : "Select an avatar for your AI judge."}
+                            {step === 1 && "Define your investment preferences and evaluation approach."}
+                            {step === 2 && "Record 30 seconds of your voice, then select a 10-second clip."}
+                            {step === 3 && "Capture your photo to generate AI avatars."}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                                {/* STEP 1: INVESTMENT CRITERIA */}
                                 {step === 1 && (
-                                    <>
+                                    <div className="space-y-4">
                                         <FormField
                                             control={form.control}
                                             name="name"
@@ -198,14 +417,14 @@ export default function CreateBotPage() {
                                                                 </SelectTrigger>
                                                             </FormControl>
                                                             <SelectContent>
-                                                                <SelectItem value="SaaS">SaaS</SelectItem>
-                                                                <SelectItem value="Fintech">Fintech</SelectItem>
+                                                                <SelectItem value="AI/ML">AI/ML</SelectItem>
+                                                                <SelectItem value="FinTech">FinTech</SelectItem>
                                                                 <SelectItem value="HealthTech">HealthTech</SelectItem>
                                                                 <SelectItem value="EdTech">EdTech</SelectItem>
-                                                                <SelectItem value="DeepTech">DeepTech</SelectItem>
-                                                                <SelectItem value="Consumer">Consumer</SelectItem>
-                                                                <SelectItem value="Enterprise">Enterprise</SelectItem>
-                                                                <SelectItem value="Climate">Climate Tech</SelectItem>
+                                                                <SelectItem value="E-commerce">E-commerce</SelectItem>
+                                                                <SelectItem value="SaaS">SaaS</SelectItem>
+                                                                <SelectItem value="CleanTech">CleanTech</SelectItem>
+                                                                <SelectItem value="Other">Other</SelectItem>
                                                             </SelectContent>
                                                         </Select>
                                                         <FormMessage />
@@ -213,6 +432,22 @@ export default function CreateBotPage() {
                                                 )}
                                             />
 
+                                            <FormField
+                                                control={form.control}
+                                                name="fundSize"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Check Size</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder="e.g. $100K - $500K" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <FormField
                                                 control={form.control}
                                                 name="investmentStage"
@@ -226,37 +461,11 @@ export default function CreateBotPage() {
                                                                 </SelectTrigger>
                                                             </FormControl>
                                                             <SelectContent>
-                                                                <SelectItem value="Pre-Seed">Pre-Seed</SelectItem>
+                                                                <SelectItem value="Pre-seed">Pre-seed</SelectItem>
                                                                 <SelectItem value="Seed">Seed</SelectItem>
                                                                 <SelectItem value="Series A">Series A</SelectItem>
-                                                                <SelectItem value="Series B+">Series B+</SelectItem>
-                                                                <SelectItem value="Growth">Growth Stage</SelectItem>
-                                                            </SelectContent>
-                                                        </Select>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <FormField
-                                                control={form.control}
-                                                name="fundSize"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Typical Check Size</FormLabel>
-                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                            <FormControl>
-                                                                <SelectTrigger>
-                                                                    <SelectValue placeholder="Select range" />
-                                                                </SelectTrigger>
-                                                            </FormControl>
-                                                            <SelectContent>
-                                                                <SelectItem value="$50K - $250K">$50K - $250K</SelectItem>
-                                                                <SelectItem value="$250K - $1M">$250K - $1M</SelectItem>
-                                                                <SelectItem value="$1M - $5M">$1M - $5M</SelectItem>
-                                                                <SelectItem value="$5M+">$5M+</SelectItem>
+                                                                <SelectItem value="Series B">Series B</SelectItem>
+                                                                <SelectItem value="Growth">Growth</SelectItem>
                                                             </SelectContent>
                                                         </Select>
                                                         <FormMessage />
@@ -269,7 +478,7 @@ export default function CreateBotPage() {
                                                 name="geographicFocus"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Geographic Focus (Optional)</FormLabel>
+                                                        <FormLabel>Geographic Focus</FormLabel>
                                                         <FormControl>
                                                             <Input placeholder="e.g. North America, Global" {...field} />
                                                         </FormControl>
@@ -284,89 +493,283 @@ export default function CreateBotPage() {
                                             name="userInstructions"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Evaluation Criteria & Instructions</FormLabel>
+                                                    <FormLabel>Evaluation Criteria</FormLabel>
                                                     <FormControl>
                                                         <Textarea
-                                                            placeholder="Describe what you look for in startups, your evaluation approach, key questions you want the bot to ask, deal-breakers, etc..."
-                                                            className="min-h-[120px]"
+                                                            placeholder="Describe how this bot should evaluate pitches (e.g., focus on traction, team, market size)..."
+                                                            className="min-h-[100px]"
                                                             {...field}
                                                         />
                                                     </FormControl>
-                                                    <FormDescription>
-                                                        This will shape how your AI judge evaluates pitches. Be specific about priorities.
-                                                    </FormDescription>
                                                     <FormMessage />
                                                 </FormItem>
                                             )}
                                         />
-                                    </>
-                                )}
 
-                                {step === 2 && (
-                                    <div className="space-y-6">
-                                        <div className="space-y-4">
-                                            <div className="flex items-center justify-between">
-                                                <p className="text-sm font-medium">Select Avatar</p>
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={generateAvatars}
-                                                    disabled={isGeneratingAvatars}
-                                                >
-                                                    {isGeneratingAvatars ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <User className="h-4 w-4 mr-2" />}
-                                                    Regenerate
-                                                </Button>
-                                            </div>
-
-                                            {isGeneratingAvatars ? (
-                                                <div className="grid grid-cols-3 gap-4">
-                                                    {[1, 2, 3].map(i => <Skeleton key={i} className="aspect-square rounded-full w-full" />)}
-                                                </div>
-                                            ) : (
-                                                <div className="grid grid-cols-3 gap-6">
-                                                    {generatedAvatars.map((url, i) => (
-                                                        <div
-                                                            key={i}
-                                                            className={`relative aspect-square rounded-full overflow-hidden border-4 cursor-pointer transition-all ${selectedAvatar === url ? 'border-primary ring-4 ring-primary/20' : 'border-transparent hover:border-muted'}`}
-                                                            onClick={() => setSelectedAvatar(url)}
-                                                        >
-                                                            <Image src={url} alt={`Avatar ${i + 1}`} fill className="object-cover" />
-                                                            {selectedAvatar === url && (
-                                                                <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                                                                    <div className="bg-primary text-white p-2 rounded-full">
-                                                                        <User className="h-6 w-6" />
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
+                                        <Button type="submit" className="w-full">
+                                            Next: Record Voice
+                                        </Button>
                                     </div>
                                 )}
 
-                                <div className="flex justify-between pt-4">
-                                    {step === 2 ? (
-                                        <Button type="button" variant="outline" onClick={() => setStep(1)}>
+                                {/* STEP 2: VOICE RECORDING */}
+                                {step === 2 && (
+                                    <div className="space-y-6">
+                                        <div className="border rounded-lg p-6 bg-muted/20">
+                                            <div className="flex flex-col items-center gap-4">
+                                                {!voiceRecorded ? (
+                                                    <>
+                                                        <div className="text-center">
+                                                            <h3 className="font-semibold text-lg mb-2">Record Your Voice</h3>
+                                                            <p className="text-sm text-muted-foreground">
+                                                                Click the button below to record up to 30 seconds of your voice.
+                                                            </p>
+                                                        </div>
+
+                                                        {voiceRecording && (
+                                                            <div className="w-full max-w-md">
+                                                                <div className="text-center mb-4">
+                                                                    <div className="text-4xl font-bold text-primary">
+                                                                        {recordingTime}s / 30s
+                                                                    </div>
+                                                                    <Progress value={(recordingTime / 30) * 100} className="mt-2" />
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        <Button
+                                                            type="button"
+                                                            onClick={voiceRecording ? stopVoiceRecording : startVoiceRecording}
+                                                            variant={voiceRecording ? "destructive" : "default"}
+                                                            size="lg"
+                                                            className="gap-2"
+                                                        >
+                                                            {voiceRecording ? (
+                                                                <>
+                                                                    <Pause className="h-5 w-5" />
+                                                                    Stop Recording
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <Mic className="h-5 w-5" />
+                                                                    Start Recording
+                                                                </>
+                                                            )}
+                                                        </Button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <div className="text-center">
+                                                            <div className="flex items-center gap-2 justify-center mb-2">
+                                                                <Check className="h-5 w-5 text-green-500" />
+                                                                <h3 className="font-semibold text-lg">Recording Complete!</h3>
+                                                            </div>
+                                                            <p className="text-sm text-muted-foreground mb-4">
+                                                                {recordingTime} seconds recorded
+                                                            </p>
+
+                                                            {/* Audio Player */}
+                                                            <audio src={recordedAudioUrl} controls className="w-full max-w-md mb-4" />
+
+                                                            {/* Clip Selection */}
+                                                            <div className="w-full max-w-md mt-4">
+                                                                <label className="text-sm font-medium mb-2 block">
+                                                                    Select 10-second clip: {clippingRange[0]}s - {clippingRange[1]}s
+                                                                </label>
+                                                                <Slider
+                                                                    min={0}
+                                                                    max={Math.min(recordingTime - 10, 20)}
+                                                                    step={1}
+                                                                    value={[clippingRange[0]]}
+                                                                    onValueChange={(value) => setClippingRange([value[0], value[0] + 10])}
+                                                                    className="mb-4"
+                                                                />
+                                                                <p className="text-xs text-muted-foreground">
+                                                                    Cartesia AI requires a 5-10 second clip for optimal voice cloning.
+                                                                </p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="flex gap-3">
+                                                            <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                onClick={() => {
+                                                                    setVoiceRecorded(false);
+                                                                    setRecordedAudioBlob(null);
+                                                                    setRecordedAudioUrl("");
+                                                                }}
+                                                            >
+                                                                Re-record
+                                                            </Button>
+                                                            <Button
+                                                                type="button"
+                                                                onClick={uploadVoiceClip}
+                                                                disabled={isUploadingVoice}
+                                                                className="gap-2"
+                                                            >
+                                                                {isUploadingVoice && <Loader2 className="h-4 w-4 animate-spin" />}
+                                                                Clone Voice & Continue
+                                                            </Button>
+                                                        </div>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            onClick={() => setStep(1)}
+                                        >
                                             Back
                                         </Button>
-                                    ) : (
-                                        <div />
-                                    )}
+                                    </div>
+                                )}
 
-                                    {step === 1 ? (
-                                        <Button type="submit">
-                                            Next: Select Avatar
-                                        </Button>
-                                    ) : (
-                                        <Button type="submit" disabled={isSubmitting || !selectedAvatar}>
-                                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                            Create Bot
-                                        </Button>
-                                    )}
-                                </div>
+                                {/* STEP 3: AVATAR CAPTURE */}
+                                {step === 3 && (
+                                    <div className="space-y-6">
+                                        <div className="border rounded-lg p-6 bg-muted/20">
+                                            {!capturedImage ? (
+                                                <div className="flex flex-col items-center gap-4">
+                                                    <div className="text-center">
+                                                        <h3 className="font-semibold text-lg mb-2">Capture Your Photo</h3>
+                                                        <p className="text-sm text-muted-foreground">
+                                                            We'll use AI to generate professional avatars from your photo.
+                                                        </p>
+                                                    </div>
+
+                                                    {cameraActive ? (
+                                                        <>
+                                                            <video
+                                                                ref={videoRef}
+                                                                autoPlay
+                                                                playsInline
+                                                                className="w-full max-w-md rounded-lg border"
+                                                            />
+                                                            <canvas ref={canvasRef} className="hidden" />
+                                                            <div className="flex gap-3">
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="outline"
+                                                                    onClick={() => {
+                                                                        const stream = videoRef.current?.srcObject as MediaStream;
+                                                                        stream?.getTracks().forEach(track => track.stop());
+                                                                        setCameraActive(false);
+                                                                    }}
+                                                                >
+                                                                    <X className="h-4 w-4 mr-2" />
+                                                                    Cancel
+                                                                </Button>
+                                                                <Button type="button" onClick={capturePhoto} className="gap-2">
+                                                                    <Camera className="h-4 w-4" />
+                                                                    Capture Photo
+                                                                </Button>
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <Button type="button" onClick={startCamera} size="lg" className="gap-2">
+                                                            <Camera className="h-5 w-5" />
+                                                            Open Camera
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-4">
+                                                    <div className="flex items-center gap-2 mb-2">
+                                                        <Check className="h-5 w-5 text-green-500" />
+                                                        <h3 className="font-semibold">Photo Captured!</h3>
+                                                    </div>
+
+                                                    {isGeneratingAvatars ? (
+                                                        <div className="flex flex-col items-center gap-4 py-8">
+                                                            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                                                            <p className="text-sm text-muted-foreground">
+                                                                AI is generating your avatars...
+                                                            </p>
+                                                        </div>
+                                                    ) : generatedAvatars.length > 0 ? (
+                                                        <>
+                                                            <p className="text-sm text-muted-foreground mb-4">
+                                                                Select an avatar for your bot:
+                                                            </p>
+                                                            <div className="grid grid-cols-3 gap-4">
+                                                                {generatedAvatars.map((avatar, index) => (
+                                                                    <div
+                                                                        key={index}
+                                                                        className={`relative cursor-pointer rounded-lg border-2 transition-all ${finalAvatarUrl === avatar
+                                                                            ? 'border-primary ring-2 ring-primary'
+                                                                            : 'border-transparent hover:border-muted-foreground'
+                                                                            }`}
+                                                                        onClick={async () => {
+                                                                            const url = await uploadSelectedAvatar(avatar);
+                                                                            if (url) {
+                                                                                setFinalAvatarUrl(url);
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        <img
+                                                                            src={avatar}
+                                                                            alt={`Avatar ${index + 1}`}
+                                                                            className="w-full h-auto rounded-lg"
+                                                                        />
+                                                                        {finalAvatarUrl === avatar && (
+                                                                            <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
+                                                                                <Check className="h-4 w-4" />
+                                                                            </div>
+                                                                        )}
+                                                                        {isUploadingAvatar && finalAvatarUrl === avatar && (
+                                                                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
+                                                                                <Loader2 className="h-8 w-8 animate-spin text-white" />
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <p className="text-sm text-muted-foreground">
+                                                            Waiting for avatar generation...
+                                                        </p>
+                                                    )}
+
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        onClick={() => {
+                                                            setCapturedImage("");
+                                                            setGeneratedAvatars([]);
+                                                            setFinalAvatarUrl("");
+                                                        }}
+                                                        className="w-full"
+                                                    >
+                                                        Retake Photo
+                                                    </Button>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="flex gap-3">
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                onClick={() => setStep(2)}
+                                                disabled={isSubmitting}
+                                            >
+                                                Back
+                                            </Button>
+                                            <Button
+                                                type="submit"
+                                                disabled={isSubmitting || !finalAvatarUrl}
+                                                className="flex-1 gap-2"
+                                            >
+                                                {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                                                Create AI Judge Bot
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
                             </form>
                         </Form>
                     </CardContent>

@@ -1,13 +1,16 @@
+import { getServerSession } from "next-auth";
+import authOptions from "@/lib/auth";
 import { NextResponse } from "next/server";
+import axios from "axios";
 
-/**
- * This endpoint generates systemPrompt and firstMessage for a VC bot
- * based on provided context. Currently using simple template logic.
- * 
- * TODO: Replace with FastAPI endpoint call for AI-powered generation
- */
 export async function POST(req: Request) {
     try {
+        const session = await getServerSession(authOptions);
+
+        if (!session || session.user.role !== 'vc') {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const body = await req.json();
         const {
             name,
@@ -16,45 +19,66 @@ export async function POST(req: Request) {
             fundSize,
             investmentStage,
             geographicFocus,
-            userInstructions
+            userInstructions,
         } = body;
 
-        // Template-based generation (Replace with FastAPI call later)
-        const systemPrompt = `You are ${name}, an experienced venture capitalist evaluating startup pitches for your incubation program.
+        // Call FastAPI to generate system prompt
+        const fastApiUrl = process.env.FASTAPI_BASE_URL || 'http://localhost:8000';
 
-**Your Background:**
-${description}
+        try {
+            const response = await axios.post(`${fastApiUrl}/generate-bot-prompt`, {
+                name,
+                description,
+                sector,
+                fund_size: fundSize,
+                investment_stage: investmentStage,
+                geographic_focus: geographicFocus,
+                user_instructions: userInstructions,
+            });
 
-**Investment Focus:**
-- Sector: ${sector || "Technology"}
-- Fund Size: ${fundSize || "Flexible"}
-- Investment Stage: ${investmentStage || "Seed to Series A"}
-- Geographic Focus: ${geographicFocus || "Global"}
+            const data = response.data;
 
-**Evaluation Criteria:**
-${userInstructions || "Evaluate pitches based on team, market opportunity, traction, and business model viability."}
+            return NextResponse.json({
+                systemPrompt: data.system_prompt,
+                firstMessage: "Hello founder", // Always set to "Hello founder"
+            });
+        } catch (fastApiError: any) {
+            console.error("FastAPI call failed, using fallback:", fastApiError.message);
 
-**Your Role:**
-You are conducting a professional pitch evaluation session. Ask insightful questions one at a time, probe for clarity on business fundamentals, and provide constructive feedback. Be critical but fair, focusing on:
+            // Fallback template if FastAPI is not available
+            const fallbackPrompt = `You are ${name}, an AI VC judge specializing in ${sector || 'various sectors'}.
 
-1. Team capabilities and domain expertise
-2. Market size and competitive positioning
-3. Revenue model and unit economics
-4. Traction and validation metrics
-5. Capital efficiency and use of funds
+Investment Focus:
+- Sector: ${sector || 'Open to various sectors'}
+- Fund Size: ${fundSize || 'Flexible'}
+- Stage: ${investmentStage || 'Seed to Series A'}
+- Geography: ${geographicFocus || 'Global'}
 
-Maintain a professional, supportive tone while ensuring rigorous evaluation standards. When satisfied with the pitch or when the founder types "Negotiate", transition to discussing potential investment terms considering your fund size and investment stage.`;
+${description ? `About: ${description}` : ''}
 
-        const firstMessage = `Hello! I'm ${name}, and I'm excited to learn about your startup. I've reviewed your application to our ${sector || "technology-focused"} incubation program. Let's dive into your pitch. What problem are you solving, and why now?`;
+${userInstructions ? `Special Instructions: ${userInstructions}` : ''}
 
-        return NextResponse.json({
-            systemPrompt,
-            firstMessage,
-            voice: "aura-asteria-en", // Default voice
-        });
+Your role is to evaluate startup pitches based on:
+1. Team strength and experience
+2. Market opportunity and size
+3. Business model viability
+4. Competitive advantage
+5. Financial projections and traction
+6. Alignment with your investment thesis
 
+Be professional, thorough, and provide constructive feedback. Ask probing questions to understand the business deeply.`;
+
+            return NextResponse.json({
+                systemPrompt: fallbackPrompt,
+                firstMessage: "Hello founder",
+                fallback: true
+            });
+        }
     } catch (error) {
         console.error("Error generating agent prompt:", error);
-        return NextResponse.json({ error: "Failed to generate prompt" }, { status: 500 });
+        return NextResponse.json(
+            { error: "Internal Server Error" },
+            { status: 500 }
+        );
     }
 }
