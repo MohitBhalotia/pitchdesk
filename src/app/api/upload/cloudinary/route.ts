@@ -18,6 +18,11 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
+        if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+            console.error("Missing Cloudinary credentials");
+            return NextResponse.json({ error: "Server configuration error: Missing Cloudinary keys" }, { status: 500 });
+        }
+
         const body = await req.json();
         const { imageBase64, fileName } = body;
 

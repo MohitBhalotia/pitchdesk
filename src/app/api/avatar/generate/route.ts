@@ -45,7 +45,7 @@ export async function POST(req: Request) {
 
     } catch (error: any) {
         const errorDetails = error.response ? error.response.data : (error.message || 'Unknown error');
-        console.error("Avatar generation error:", errorDetails);
+        console.error("Avatar generation error:", typeof errorDetails === 'object' ? JSON.stringify(errorDetails) : errorDetails);
 
         const status = error.response ? error.response.status : 500;
 

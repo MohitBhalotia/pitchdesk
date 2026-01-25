@@ -63,6 +63,8 @@ export default function CreateBotPage() {
     const [clippingRange, setClippingRange] = useState([0, 10]);
     const [isUploadingVoice, setIsUploadingVoice] = useState(false);
     const [voiceId, setVoiceId] = useState("");
+    const [isPreviewingVoice, setIsPreviewingVoice] = useState(false);
+    const [previewAudioUrl, setPreviewAudioUrl] = useState("");
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -74,6 +76,8 @@ export default function CreateBotPage() {
     const [isGeneratingAvatars, setIsGeneratingAvatars] = useState(false);
     const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
     const [finalAvatarUrl, setFinalAvatarUrl] = useState("");
+    const [selectedAvatarBase64, setSelectedAvatarBase64] = useState("");
+    const [generationError, setGenerationError] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -165,8 +169,8 @@ export default function CreateBotPage() {
 
             if (response.data.success) {
                 setVoiceId(response.data.voiceId);
-                toast.success("Voice cloned successfully!");
-                setStep(3); // Move to avatar step
+                toast.success("Voice cloned successfully! You can now preview it or continue.");
+                // Don't auto-navigate - let user preview first
             }
         } catch (error) {
             console.error("Voice upload error:", error);
@@ -182,8 +186,48 @@ export default function CreateBotPage() {
         }
     };
 
+    const previewClonedVoice = async () => {
+        if (!voiceId) {
+            toast.error("No voice cloned yet");
+            return;
+        }
+
+        try {
+            setIsPreviewingVoice(true);
+
+            const response = await axios.post('/api/voice/preview', {
+                voiceId,
+                text: "This is how your AI judge will sound during pitch evaluations. I'm excited to hear your startup ideas!"
+            }, {
+                responseType: 'blob' // Important for audio
+            });
+
+            // Create audio URL from blob
+            const audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
+            const audioUrl = URL.createObjectURL(audioBlob);
+            setPreviewAudioUrl(audioUrl);
+
+            // Auto-play the preview
+            const audio = new Audio(audioUrl);
+            audio.play();
+
+            toast.success("Playing voice preview!");
+        } catch (error) {
+            console.error("Voice preview error:", error);
+            toast.error("Failed to preview voice. Please try again.");
+        } finally {
+            setIsPreviewingVoice(false);
+        }
+    };
+
     // ===== CAMERA FUNCTIONS =====
     const startCamera = async () => {
+        // Stop any existing stream first to prevent leaks
+        if (videoRef.current && videoRef.current.srcObject) {
+            const oldStream = videoRef.current.srcObject as MediaStream;
+            oldStream.getTracks().forEach(track => track.stop());
+        }
+
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true });
             if (videoRef.current) {
@@ -222,6 +266,7 @@ export default function CreateBotPage() {
     const generateAvatarsFromPhoto = async (imageBase64: string) => {
         try {
             setIsGeneratingAvatars(true);
+            setGenerationError(false);
 
             // Convert base64 to Blob
             const byteCharacters = atob(imageBase64.split(',')[1]);
@@ -255,6 +300,7 @@ export default function CreateBotPage() {
             }
         } catch (error) {
             console.error("Avatar generation error:", error);
+            setGenerationError(true);
             toast.error("Failed to generate avatars. Please try again.");
         } finally {
             setIsGeneratingAvatars(false);
@@ -262,6 +308,7 @@ export default function CreateBotPage() {
     };
 
     const uploadSelectedAvatar = async (avatarBase64: string) => {
+        setSelectedAvatarBase64(avatarBase64);
         try {
             setIsUploadingAvatar(true);
 
@@ -521,8 +568,16 @@ export default function CreateBotPage() {
                                                     <>
                                                         <div className="text-center">
                                                             <h3 className="font-semibold text-lg mb-2">Record Your Voice</h3>
-                                                            <p className="text-sm text-muted-foreground">
-                                                                Click the button below to record up to 30 seconds of your voice.
+                                                            <p className="text-sm text-muted-foreground mb-4">
+                                                                For best results, read the following script clearly and naturally:
+                                                            </p>
+                                                            <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mb-4 max-w-md mx-auto">
+                                                                <p className="text-sm font-medium italic text-foreground leading-relaxed">
+                                                                    "Hello, I'm excited to evaluate innovative startups. Please share your vision, traction, and how you plan to scale your business."
+                                                                </p>
+                                                            </div>
+                                                            <p className="text-xs text-muted-foreground">
+                                                                💡 Tip: Speak naturally as if talking to a founder. Repeat 2-3 times for best quality.
                                                             </p>
                                                         </div>
 
@@ -598,19 +653,42 @@ export default function CreateBotPage() {
                                                                     setVoiceRecorded(false);
                                                                     setRecordedAudioBlob(null);
                                                                     setRecordedAudioUrl("");
+                                                                    setVoiceId("");
                                                                 }}
                                                             >
                                                                 Re-record
                                                             </Button>
-                                                            <Button
-                                                                type="button"
-                                                                onClick={uploadVoiceClip}
-                                                                disabled={isUploadingVoice}
-                                                                className="gap-2"
-                                                            >
-                                                                {isUploadingVoice && <Loader2 className="h-4 w-4 animate-spin" />}
-                                                                Clone Voice & Continue
-                                                            </Button>
+                                                            {voiceId ? (
+                                                                <>
+                                                                    <Button
+                                                                        type="button"
+                                                                        variant="secondary"
+                                                                        onClick={previewClonedVoice}
+                                                                        disabled={isPreviewingVoice}
+                                                                        className="gap-2"
+                                                                    >
+                                                                        {isPreviewingVoice && <Loader2 className="h-4 w-4 animate-spin" />}
+                                                                        🔊 Preview Voice
+                                                                    </Button>
+                                                                    <Button
+                                                                        type="button"
+                                                                        onClick={() => setStep(3)}
+                                                                        className="gap-2"
+                                                                    >
+                                                                        Continue to Avatar
+                                                                    </Button>
+                                                                </>
+                                                            ) : (
+                                                                <Button
+                                                                    type="button"
+                                                                    onClick={uploadVoiceClip}
+                                                                    disabled={isUploadingVoice}
+                                                                    className="gap-2"
+                                                                >
+                                                                    {isUploadingVoice && <Loader2 className="h-4 w-4 animate-spin" />}
+                                                                    Clone Voice & Continue
+                                                                </Button>
+                                                            )}
                                                         </div>
                                                     </>
                                                 )}
@@ -698,7 +776,7 @@ export default function CreateBotPage() {
                                                                 {generatedAvatars.map((avatar, index) => (
                                                                     <div
                                                                         key={index}
-                                                                        className={`relative cursor-pointer rounded-lg border-2 transition-all ${finalAvatarUrl === avatar
+                                                                        className={`relative cursor-pointer rounded-lg border-2 transition-all ${selectedAvatarBase64 === avatar
                                                                             ? 'border-primary ring-2 ring-primary'
                                                                             : 'border-transparent hover:border-muted-foreground'
                                                                             }`}
@@ -714,12 +792,12 @@ export default function CreateBotPage() {
                                                                             alt={`Avatar ${index + 1}`}
                                                                             className="w-full h-auto rounded-lg"
                                                                         />
-                                                                        {finalAvatarUrl === avatar && (
+                                                                        {selectedAvatarBase64 === avatar && !isUploadingAvatar && finalAvatarUrl && (
                                                                             <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
                                                                                 <Check className="h-4 w-4" />
                                                                             </div>
                                                                         )}
-                                                                        {isUploadingAvatar && finalAvatarUrl === avatar && (
+                                                                        {isUploadingAvatar && selectedAvatarBase64 === avatar && (
                                                                             <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
                                                                                 <Loader2 className="h-8 w-8 animate-spin text-white" />
                                                                             </div>
@@ -728,6 +806,20 @@ export default function CreateBotPage() {
                                                                 ))}
                                                             </div>
                                                         </>
+                                                    ) : generationError ? (
+                                                        <div className="flex flex-col items-center py-4 space-y-3">
+                                                            <p className="text-sm text-destructive font-medium">
+                                                                Failed to generate avatars.
+                                                            </p>
+                                                            <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                onClick={() => generateAvatarsFromPhoto(capturedImage)}
+                                                                className="h-8"
+                                                            >
+                                                                Retry Generation
+                                                            </Button>
+                                                        </div>
                                                     ) : (
                                                         <p className="text-sm text-muted-foreground">
                                                             Waiting for avatar generation...
@@ -741,6 +833,8 @@ export default function CreateBotPage() {
                                                             setCapturedImage("");
                                                             setGeneratedAvatars([]);
                                                             setFinalAvatarUrl("");
+                                                            setSelectedAvatarBase64("");
+                                                            setGenerationError(false);
                                                         }}
                                                         className="w-full"
                                                     >
