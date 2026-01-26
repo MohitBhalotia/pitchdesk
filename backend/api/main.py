@@ -14,7 +14,7 @@ from typing import List, Optional, Dict
 from PIL import Image
 from google import genai
 
-from valuation_engine import (
+from api.valuation_engine import (
     UniversalValuationInput,
     run_valuation,
     run_projections
@@ -872,26 +872,37 @@ startup founders, executives, and corporate use.
 def regenerate_image_with_gemini(pil_image: Image.Image, session_id: str) -> Dict:
     """Generate professional avatar using Gemini AI"""
     logger = logging.getLogger("AvatarGeneration")
-    logger.info("🎨 Generating avatar using Gemini (flash-image)")
+    logger.info("🎨 Generating 3 avatar variations using Gemini (flash-image)")
     
     try:
-        response = gemini_client.models.generate_content(
-            model="gemini-2.5-flash-image",
-            contents=[AVATAR_PROMPT, pil_image],
-        )
-        
         variations: List[Dict] = []
         
-        for part in response.parts:
-            # Extract image bytes from Gemini response
-            if part.inline_data and part.inline_data.data:
-                out_bytes = part.inline_data.data
-                variations.append({
-                    "base64": base64.b64encode(out_bytes).decode()
-                })
+        # Generate 3 variations by calling Gemini 3 times
+        for i in range(3):
+            try:
+                logger.info(f"📸 Generating variation {i+1}/3...")
+                response = gemini_client.models.generate_content(
+                    model="gemini-2.5-flash-image",
+                    contents=[AVATAR_PROMPT, pil_image],
+                )
+                
+                for part in response.parts:
+                    # Extract image bytes from Gemini response
+                    if part.inline_data and part.inline_data.data:
+                        out_bytes = part.inline_data.data
+                        variations.append({
+                            "base64": base64.b64encode(out_bytes).decode()
+                        })
+                        break  # Only take first image from each call
+                        
+            except Exception as e:
+                logger.warning(f"⚠️ Failed to generate variation {i+1}: {e}")
+                # Continue to try generating remaining variations
         
         if not variations:
-            raise RuntimeError("Gemini returned no image")
+            raise RuntimeError("Gemini returned no images")
+        
+        logger.info(f"✅ Generated {len(variations)} avatar variation(s)")
         
         return {
             "session_id": session_id,

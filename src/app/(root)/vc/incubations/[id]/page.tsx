@@ -54,9 +54,11 @@ const formSchema = z.object({
         message: "Invalid date",
     }),
     fundingAmount: z.string().optional(),
-    cohortSize: z.preprocess((val) => (val ? Number(val) : undefined), z.number().min(1).optional()),
+    cohortSize: z.string().optional(),
     status: z.enum(["draft", "published", "closed"]),
 });
+
+type IncubationFormValues = z.infer<typeof formSchema>;
 
 interface IBot {
     _id: string;
@@ -72,7 +74,7 @@ export default function IncubationProgramDetailPage() {
     const [isEditing, setIsEditing] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const form = useForm<z.infer<typeof formSchema>>({
+    const form = useForm<IncubationFormValues>({
         resolver: zodResolver(formSchema),
     });
 
@@ -96,6 +98,8 @@ export default function IncubationProgramDetailPage() {
                 startDate: prog.timeline.startDate.split('T')[0],
                 endDate: prog.timeline.endDate.split('T')[0],
                 applicationDeadline: prog.timeline.applicationDeadline.split('T')[0],
+                cohortSize: prog.cohortSize?.toString() || "",
+                fundingAmount: prog.fundingAmount || "",
             });
         } catch (error) {
             console.error("Error fetching program:", error);
@@ -113,7 +117,7 @@ export default function IncubationProgramDetailPage() {
         }
     };
 
-    async function onSubmit(values: z.infer<typeof formSchema>) {
+    async function onSubmit(values: IncubationFormValues) {
         try {
             setIsSubmitting(true);
 
@@ -124,6 +128,7 @@ export default function IncubationProgramDetailPage() {
                     endDate: new Date(values.endDate),
                     applicationDeadline: new Date(values.applicationDeadline),
                 },
+                cohortSize: values.cohortSize ? Number(values.cohortSize) : undefined,
             };
 
             await axios.put(`/api/vc/incubations/${id}`, payload);

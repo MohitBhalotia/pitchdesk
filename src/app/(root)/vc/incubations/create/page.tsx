@@ -46,10 +46,12 @@ const formSchema = z.object({
     }),
     fundingAmount: z.string().optional(),
     equityExpectations: z.string().optional(),
-    cohortSize: z.preprocess((val) => Number(val), z.number().min(1).optional()),
+    cohortSize: z.string().optional(),
     notes: z.string().optional(),
     status: z.enum(["draft", "published"]),
 });
+
+type IncubationFormValues = z.infer<typeof formSchema>;
 
 interface IVCBot {
     _id: string;
@@ -61,17 +63,21 @@ export default function CreateIncubationPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [bots, setBots] = useState<IVCBot[]>([]);
 
-    const form = useForm<z.infer<typeof formSchema>>({
+    const form = useForm<IncubationFormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             title: "",
             description: "",
+            botId: "",
             eligibility: "",
             stages: "",
+            startDate: "",
+            endDate: "",
+            applicationDeadline: "",
             fundingAmount: "",
             equityExpectations: "",
             notes: "",
-            status: "draft",
+            status: "draft" as const,
         },
     });
 
@@ -82,10 +88,30 @@ export default function CreateIncubationPage() {
         }).catch(err => console.error(err));
     }, []);
 
-    async function onSubmit(values: z.infer<typeof formSchema>) {
+    async function onSubmit(values: IncubationFormValues) {
         try {
             setIsSubmitting(true);
-            await axios.post("/api/vc/incubations", values);
+
+            // Transform the data to match the API expected format
+            const payload = {
+                title: values.title,
+                description: values.description,
+                botId: values.botId,
+                eligibility: values.eligibility,
+                stages: values.stages,
+                timeline: {
+                    startDate: new Date(values.startDate),
+                    endDate: new Date(values.endDate),
+                    applicationDeadline: new Date(values.applicationDeadline),
+                },
+                fundingAmount: values.fundingAmount,
+                equityExpectations: values.equityExpectations,
+                cohortSize: values.cohortSize ? Number(values.cohortSize) : undefined,
+                notes: values.notes,
+                status: values.status,
+            };
+
+            await axios.post("/api/vc/incubations", payload);
             toast.success("Incubation program created successfully!");
             router.push("/vc/incubations");
             router.refresh();

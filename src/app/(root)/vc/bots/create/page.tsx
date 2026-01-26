@@ -285,10 +285,19 @@ export default function CreateBotPage() {
                 stream.getTracks().forEach(track => track.stop());
                 setCameraActive(false);
 
-                // Generate avatars
-                generateAvatarsFromPhoto(imageDataUrl);
+                console.log('📸 Photo captured, showing preview');
+                toast.success('Photo captured! Review and generate avatars.');
+
+                // DON'T auto-generate - let user review first
             }
         }
+    };
+
+    const retakePhoto = () => {
+        setCapturedImage('');
+        setGeneratedAvatars([]);
+        setGenerationError(false);
+        console.log('🔄 Retaking photo');
     };
 
     const generateAvatarsFromPhoto = async (imageBase64: string) => {
