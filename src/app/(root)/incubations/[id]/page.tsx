@@ -11,7 +11,9 @@ import {
     ArrowLeft,
     Loader2,
     CalendarCheck,
-    AlertCircle
+    AlertCircle,
+    FileText,
+    Send
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,25 +24,9 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-import { toast } from "sonner";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
+import ApplicationSubmissionDialog from "@/components/incubation/ApplicationSubmissionDialog";
 
 interface IProgram {
     _id: string;
@@ -60,10 +46,11 @@ interface IProgram {
         profileImage: string;
     };
     botId: {
+        _id: string;
         name: string;
-        avatarUrl: string;
+        image: string;
         description: string;
-    };
+    } | string;
 }
 
 interface IApplication {
@@ -73,7 +60,9 @@ interface IApplication {
 interface IPitch {
     _id: string;
     title: string;
-    createdAt: string;
+    startTime: string;
+    duration: number;
+    creditsUsed: number;
 }
 
 export default function IncubationDetailPage() {
@@ -84,9 +73,10 @@ export default function IncubationDetailPage() {
     const [program, setProgram] = useState<IProgram | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [application, setApplication] = useState<IApplication | null>(null);
-    const [myPitches, setMyPitches] = useState<IPitch[]>([]);
-    const [selectedPitch, setSelectedPitch] = useState<string>("");
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [pitches, setPitches] = useState<IPitch[]>([]);
+    const [isPitchesLoading, setIsPitchesLoading] = useState(false);
+    const [activeTab, setActiveTab] = useState("overview");
+    const [selectedPitchId, setSelectedPitchId] = useState<string | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     useEffect(() => {
@@ -121,35 +111,26 @@ export default function IncubationDetailPage() {
 
     const fetchMyPitches = async () => {
         try {
-            const response = await axios.get('/api/my-pitches'); // Assuming this exists and returns list
-            // Filter only valid pitches (e.g. ones with scores)
-            setMyPitches(response.data || []);
+            setIsPitchesLoading(true);
+            const response = await axios.get(`/api/incubations/${id}/pitches`);
+            setPitches(response.data);
         } catch (error) {
-            console.log("Could not fetch pitches, using mock or empty", error);
-        }
-    };
-
-    const handleApply = async () => {
-        if (!selectedPitch) {
-            toast.error("Please select a pitch to submit");
-            return;
-        }
-
-        try {
-            setIsSubmitting(true);
-            await axios.post(`/api/incubations/${id}/apply`, {
-                pitchId: selectedPitch
-            });
-            toast.success("Application submitted successfully!");
-            setIsDialogOpen(false);
-            checkApplicationStatus();
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (error: any) {
-            toast.error(error.response?.data?.error || "Failed to submit application");
+            console.error("Error fetching pitches:", error);
         } finally {
-            setIsSubmitting(false);
+            setIsPitchesLoading(false);
         }
     };
+
+    const handleApplicationSuccess = () => {
+        checkApplicationStatus();
+        fetchMyPitches();
+    };
+
+    const openApplicationDialog = (pitchId: string) => {
+        setSelectedPitchId(pitchId);
+        setIsDialogOpen(true);
+    };
+
 
     if (isLoading) {
         return <div className="flex justify-center items-center min-h-[60vh]">
@@ -204,6 +185,7 @@ export default function IncubationDetailPage() {
                             <TabsTrigger value="details">Program Details</TabsTrigger>
                             <TabsTrigger value="stages">Stages & Timeline</TabsTrigger>
                             <TabsTrigger value="eligibility">Eligibility</TabsTrigger>
+                            {session && <TabsTrigger value="pitches">My Pitches</TabsTrigger>}
                         </TabsList>
 
                         <TabsContent value="details" className="space-y-4">
@@ -267,6 +249,81 @@ export default function IncubationDetailPage() {
                                 </CardContent>
                             </Card>
                         </TabsContent>
+
+                        <TabsContent value="pitches" className="space-y-4">
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <FileText className="h-5 w-5" />
+                                        My Practice Pitches
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    {isPitchesLoading ? (
+                                        <div className="flex justify-center py-8">
+                                            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                                        </div>
+                                    ) : pitches.length === 0 ? (
+                                        <div className="text-center py-12">
+                                            <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-muted mb-4">
+                                                <FileText className="h-8 w-8 text-muted-foreground" />
+                                            </div>
+                                            <h3 className="font-semibold text-lg mb-2">No pitches yet</h3>
+                                            <p className="text-muted-foreground mb-6">
+                                                Start practicing your pitch with our AI judge!
+                                            </p>
+                                            <Button
+                                                onClick={() => router.push(`/start-pitch?agentId=${typeof program.botId === 'object' ? program.botId._id : program.botId}&incubationId=${id}`)}
+                                                className="gap-2"
+                                            >
+                                                Start Your First Pitch
+                                            </Button>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-3">
+                                            {pitches.map((pitch, index) => (
+                                                <div
+                                                    key={pitch._id}
+                                                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                                                >
+                                                    <div className="flex-1">
+                                                        <h4 className="font-semibold">{pitch.title}</h4>
+                                                        <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
+                                                            <span>
+                                                                {new Date(pitch.startTime).toLocaleDateString()} at{' '}
+                                                                {new Date(pitch.startTime).toLocaleTimeString()}
+                                                            </span>
+                                                            {pitch.duration && (
+                                                                <span>Duration: {Math.floor(pitch.duration / 60)}m {pitch.duration % 60}s</span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => router.push(`/evaluation/${pitch._id}`)}
+                                                        >
+                                                            View Evaluation
+                                                        </Button>
+                                                        {!application && (
+                                                            <Button
+                                                                size="sm"
+                                                                className="gap-2"
+                                                                onClick={() => openApplicationDialog(pitch._id)}
+                                                            >
+                                                                <Send className="h-4 w-4" />
+                                                                Submit Application
+                                                            </Button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
                     </Tabs>
                 </div>
 
@@ -282,12 +339,12 @@ export default function IncubationDetailPage() {
                         </CardHeader>
                         <CardContent className="text-center">
                             <div className="relative h-24 w-24 mx-auto mb-4 rounded-full overflow-hidden border-4 border-white shadow-lg">
-                                <Image src={program.botId?.avatarUrl || "/placeholder-avatar.png"} alt="Bot" fill className="object-cover" />
+                                <Image src={typeof program.botId === 'object' ? program.botId.image : "/placeholder-avatar.png"} alt="Bot" fill className="object-cover" />
                             </div>
-                            <h3 className="font-bold text-lg mb-1">{program.botId?.name}</h3>
+                            <h3 className="font-bold text-lg mb-1">{typeof program.botId === 'object' ? program.botId.name : 'AI Judge'}</h3>
                             <p className="text-xs text-muted-foreground mb-4">Official AI Judge</p>
                             <p className="text-sm italic text-muted-foreground">
-                                &quot;{program.botId?.description || "I will be evaluating your pitch based on the criteria set for this program."}&quot;
+                                &quot;{typeof program.botId === 'object' ? program.botId.description : "I will be evaluating your pitch based on the criteria set for this program."}&quot;
                             </p>
                         </CardContent>
                     </Card>
@@ -315,63 +372,36 @@ export default function IncubationDetailPage() {
                                 <div className="space-y-4">
                                     <div className="flex items-start gap-2 text-sm text-yellow-600 bg-yellow-50 p-3 rounded-md dark:bg-yellow-900/20 dark:text-yellow-400">
                                         <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
-                                        <p>Ensure you have a practiced pitch ready before applying.</p>
+                                        <p>Practice your pitch with our AI judge before applying to this program.</p>
                                     </div>
 
-                                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                                        <DialogTrigger asChild>
-                                            <Button className="w-full size-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md">
-                                                Apply Now
-                                            </Button>
-                                        </DialogTrigger>
-                                        <DialogContent>
-                                            <DialogHeader>
-                                                <DialogTitle>Submit Your Application</DialogTitle>
-                                                <DialogDescription>
-                                                    Select one of your practiced pitches to submit to {program.title}.
-                                                </DialogDescription>
-                                            </DialogHeader>
+                                    <Button
+                                        className="w-full size-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md"
+                                        onClick={() => router.push(`/start-pitch?agentId=${typeof program.botId === 'object' ? program.botId._id : program.botId}&incubationId=${id}`)}
+                                    >
+                                        Start Pitch
+                                    </Button>
 
-                                            <div className="py-4 space-y-4">
-                                                <div className="space-y-2">
-                                                    <label className="text-sm font-medium">Select Pitch</label>
-                                                    <Select onValueChange={setSelectedPitch} value={selectedPitch}>
-                                                        <SelectTrigger>
-                                                            <SelectValue placeholder="Select a pitch..." />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {myPitches.length > 0 ? (
-                                                                myPitches.map((pitch: IPitch) => (
-                                                                    <SelectItem key={pitch._id} value={pitch._id}>
-                                                                        {pitch.title || "Untitled Pitch"} - {new Date(pitch.createdAt).toLocaleDateString()}
-                                                                    </SelectItem>
-                                                                ))
-                                                            ) : (
-                                                                <div className="p-2 text-sm text-center text-muted-foreground">
-                                                                    No pitches found. <br />
-                                                                    <Button variant="link" onClick={() => router.push('/start-a-pitch')} className="h-auto p-0">Practice one now</Button>
-                                                                </div>
-                                                            )}
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                            </div>
-
-                                            <DialogFooter>
-                                                <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                                                <Button onClick={handleApply} disabled={isSubmitting || !selectedPitch}>
-                                                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                                    Submit Application
-                                                </Button>
-                                            </DialogFooter>
-                                        </DialogContent>
-                                    </Dialog>
+                                    <p className="text-xs text-center text-muted-foreground">
+                                        You'll practice your pitch and then fill out the application form
+                                    </p>
                                 </div>
                             )}
                         </CardContent>
                     </Card>
                 </div>
             </div>
+
+            {/* Application Submission Dialog */}
+            {selectedPitchId && (
+                <ApplicationSubmissionDialog
+                    open={isDialogOpen}
+                    onOpenChange={setIsDialogOpen}
+                    pitchId={selectedPitchId}
+                    programId={id as string}
+                    onSuccess={handleApplicationSuccess}
+                />
+            )}
         </div>
     );
 }

@@ -2,6 +2,7 @@ import mongoose, { Document, Model, Schema } from 'mongoose';
 
 export interface IIncubationProgram extends Document {
     title: string;
+    organizationName: string; // Incubation center/firm name
     vcId: mongoose.Types.ObjectId;
     botId: mongoose.Types.ObjectId; // The AI Judge (References Agent now)
     description: string;
@@ -23,6 +24,7 @@ export interface IIncubationProgram extends Document {
 
 const IncubationProgramSchema = new Schema<IIncubationProgram>({
     title: { type: String, required: true },
+    organizationName: { type: String, required: true },
     vcId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     botId: { type: Schema.Types.ObjectId, ref: 'Agent', required: true }, // REF UPDATED TO AGENT
     description: { type: String, required: true },

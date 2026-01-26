@@ -20,13 +20,10 @@ import Image from "next/image";
 interface IIncubationProgram {
     _id: string;
     title: string;
+    organizationName: string;
     description: string;
     timeline: {
         applicationDeadline: string;
-    };
-    vcId: {
-        fullName: string;
-        profileImage: string;
     };
     status: string;
 }
@@ -81,17 +78,12 @@ export default function IncubationListPage() {
                         <Card key={program._id} className="flex flex-col hover:shadow-lg transition-all duration-300 border-t-4 border-t-blue-500">
                             <CardHeader>
                                 <div className="flex items-center gap-3 mb-4">
-                                    <div className="relative h-10 w-10 rounded-full overflow-hidden border">
-                                        <Image
-                                            src={program.vcId?.profileImage || "/placeholder-avatar.png"}
-                                            alt={program.vcId?.fullName}
-                                            fill
-                                            className="object-cover"
-                                        />
+                                    <div className="p-2 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600">
+                                        <Briefcase className="h-5 w-5 text-white" />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium">{program.vcId?.fullName}</p>
-                                        <p className="text-xs text-muted-foreground">Program Director</p>
+                                        <p className="text-sm font-medium">{program.organizationName}</p>
+                                        <p className="text-xs text-muted-foreground">Incubation Center</p>
                                     </div>
                                 </div>
                                 <CardTitle className="text-xl">{program.title}</CardTitle>

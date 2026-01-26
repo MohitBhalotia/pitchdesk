@@ -172,9 +172,14 @@ export default function IncubationProgramDetailPage() {
                 </Button>
 
                 {!isEditing && (
-                    <Button onClick={() => setIsEditing(true)}>
-                        <Edit className="mr-2 h-4 w-4" /> Edit Program
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button variant="outline" onClick={() => router.push(`/vc/incubations/${id}/applications`)}>
+                            <Users className="mr-2 h-4 w-4" /> View Applications
+                        </Button>
+                        <Button onClick={() => setIsEditing(true)}>
+                            <Edit className="mr-2 h-4 w-4" /> Edit Program
+                        </Button>
+                    </div>
                 )}
             </div>
 

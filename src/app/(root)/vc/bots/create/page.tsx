@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Loader2, Mic, Camera, Check, Play, Pause, X } from "lucide-react";
+import { Loader2, Mic, Camera, Check, Play, Pause, X, Upload } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 
@@ -80,6 +80,7 @@ export default function CreateBotPage() {
     const [generationError, setGenerationError] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -300,6 +301,38 @@ export default function CreateBotPage() {
         console.log('🔄 Retaking photo');
     };
 
+    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        // Validate file type
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        if (!validTypes.includes(file.type)) {
+            toast.error('Please upload a valid image file (JPEG, PNG, or WebP)');
+            return;
+        }
+
+        // Validate file size (max 5MB)
+        const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+        if (file.size > maxSize) {
+            toast.error('Image size must be less than 5MB');
+            return;
+        }
+
+        // Convert to base64
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const base64String = e.target?.result as string;
+            setCapturedImage(base64String);
+            console.log('📁 File uploaded successfully');
+            toast.success('Photo uploaded! Review and generate avatars.');
+        };
+        reader.onerror = () => {
+            toast.error('Failed to read file. Please try again.');
+        };
+        reader.readAsDataURL(file);
+    };
+
     const generateAvatarsFromPhoto = async (imageBase64: string) => {
         try {
             setIsGeneratingAvatars(true);
@@ -441,12 +474,12 @@ export default function CreateBotPage() {
                         <CardTitle>
                             {step === 1 && "Investment Focus & Criteria"}
                             {step === 2 && "Record Your Voice"}
-                            {step === 3 && "Capture Your Avatar"}
+                            {step === 3 && "Create Your Avatar"}
                         </CardTitle>
                         <CardDescription>
                             {step === 1 && "Define your investment preferences and evaluation approach."}
                             {step === 2 && "Record 30 seconds of your voice, then select a 10-second clip."}
-                            {step === 3 && "Capture your photo to generate AI avatars."}
+                            {step === 3 && "Capture a photo or upload an image to generate AI avatars."}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -749,7 +782,7 @@ export default function CreateBotPage() {
                                             {!capturedImage ? (
                                                 <div className="flex flex-col items-center gap-4">
                                                     <div className="text-center">
-                                                        <h3 className="font-semibold text-lg mb-2">Capture Your Photo</h3>
+                                                        <h3 className="font-semibold text-lg mb-2">Capture or Upload Your Photo</h3>
                                                         <p className="text-sm text-muted-foreground">
                                                             We'll use AI to generate professional avatars from your photo.
                                                         </p>
@@ -788,10 +821,48 @@ export default function CreateBotPage() {
                                                             </div>
                                                         </>
                                                     ) : (
-                                                        <Button type="button" onClick={startCamera} size="lg" className="gap-2">
-                                                            <Camera className="h-5 w-5" />
-                                                            Open Camera
-                                                        </Button>
+                                                        <>
+                                                            <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
+                                                                <Button
+                                                                    type="button"
+                                                                    onClick={startCamera}
+                                                                    size="lg"
+                                                                    className="gap-2 flex-1"
+                                                                    variant="default"
+                                                                >
+                                                                    <Camera className="h-5 w-5" />
+                                                                    Open Camera
+                                                                </Button>
+
+                                                                <div className="flex items-center justify-center text-muted-foreground text-sm font-medium">
+                                                                    OR
+                                                                </div>
+
+                                                                <Button
+                                                                    type="button"
+                                                                    onClick={() => fileInputRef.current?.click()}
+                                                                    size="lg"
+                                                                    className="gap-2 flex-1"
+                                                                    variant="secondary"
+                                                                >
+                                                                    <Upload className="h-5 w-5" />
+                                                                    Upload Photo
+                                                                </Button>
+                                                            </div>
+
+                                                            {/* Hidden file input */}
+                                                            <input
+                                                                ref={fileInputRef}
+                                                                type="file"
+                                                                accept="image/jpeg,image/jpg,image/png,image/webp"
+                                                                onChange={handleFileUpload}
+                                                                className="hidden"
+                                                            />
+
+                                                            <p className="text-xs text-muted-foreground text-center max-w-md">
+                                                                📸 Take a photo or upload an existing one (JPEG, PNG, WebP • Max 5MB)
+                                                            </p>
+                                                        </>
                                                     )}
                                                 </div>
                                             ) : (
@@ -862,9 +933,29 @@ export default function CreateBotPage() {
                                                             </Button>
                                                         </div>
                                                     ) : (
-                                                        <p className="text-sm text-muted-foreground">
-                                                            Waiting for avatar generation...
-                                                        </p>
+                                                        <>
+                                                            {/* Show preview of captured/uploaded photo */}
+                                                            <div className="w-full max-w-md mx-auto mb-4">
+                                                                <img
+                                                                    src={capturedImage}
+                                                                    alt="Captured preview"
+                                                                    className="w-full h-auto rounded-lg border-2 border-primary shadow-lg"
+                                                                />
+                                                            </div>
+
+                                                            <p className="text-sm text-muted-foreground mb-4 text-center">
+                                                                Review your photo and generate AI avatars
+                                                            </p>
+
+                                                            <Button
+                                                                type="button"
+                                                                onClick={() => generateAvatarsFromPhoto(capturedImage)}
+                                                                className="w-full mb-3"
+                                                                size="lg"
+                                                            >
+                                                                Generate Avatars
+                                                            </Button>
+                                                        </>
                                                     )}
 
                                                     <Button

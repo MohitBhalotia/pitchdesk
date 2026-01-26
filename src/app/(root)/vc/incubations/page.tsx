@@ -27,7 +27,7 @@ interface IIncubationProgram {
     };
     botId: {
         name: string;
-        image: string; // Updated from avatarUrl
+        image: string;
     };
     cohortSize?: number;
 }

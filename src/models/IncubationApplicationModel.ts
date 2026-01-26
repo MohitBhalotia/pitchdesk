@@ -4,6 +4,23 @@ export interface IIncubationApplication extends Document {
     programId: mongoose.Types.ObjectId;
     founderId: mongoose.Types.ObjectId;
     pitchId: mongoose.Types.ObjectId;
+
+    // Registration/Application Data
+    registrationData: {
+        startupName: string;
+        founderName: string;
+        email: string;
+        phone: string;
+        industry: string;
+        stage: 'idea' | 'mvp' | 'early_revenue' | 'growth' | 'scaling';
+        teamSize: number;
+        description: string;
+        website?: string;
+        linkedin?: string;
+        fundingRaised?: string;
+        motivation: string;
+    };
+
     status: 'pending' | 'wishlist' | 'hold' | 'rejected' | 'accepted';
     score: number;
     botFeedback: string;
@@ -39,6 +56,24 @@ const IncubationApplicationSchema = new Schema<IIncubationApplication>({
         type: Schema.Types.ObjectId,
         ref: 'Pitch',
         required: true
+    },
+    registrationData: {
+        startupName: { type: String, required: true },
+        founderName: { type: String, required: true },
+        email: { type: String, required: true },
+        phone: { type: String, required: true },
+        industry: { type: String, required: true },
+        stage: {
+            type: String,
+            enum: ['idea', 'mvp', 'early_revenue', 'growth', 'scaling'],
+            required: true
+        },
+        teamSize: { type: Number, required: true },
+        description: { type: String, required: true, maxlength: 500 },
+        website: { type: String },
+        linkedin: { type: String },
+        fundingRaised: { type: String },
+        motivation: { type: String, required: true, maxlength: 300 }
     },
     status: {
         type: String,

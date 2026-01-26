@@ -31,18 +31,23 @@ const PitchSchema = new Schema<Pitch>(
             ref: 'Competition',
             default: null
         },
-        title:{
+        incubationId: {  // NEW FIELD to distinguish incubation pitches
+            type: Schema.Types.ObjectId,
+            ref: 'IncubationProgram',
+            default: null
+        },
+        title: {
             type: String
         },
         startTime: {
             type: Date,
             default: Date.now
         },
-        lastUpdated: {  
+        lastUpdated: {
             type: Date,
             default: null
         },
-        duration:{
+        duration: {
             type: Number,
             default: null
         },
@@ -52,10 +57,10 @@ const PitchSchema = new Schema<Pitch>(
         creditsUsed: {
             type: Number,
             default: 0
-        }   
+        }
     }
 )
 
-const PitchModel:Model<Pitch> =mongoose.models.Pitch || mongoose.model<Pitch>("Pitch", PitchSchema);
+const PitchModel: Model<Pitch> = mongoose.models.Pitch || mongoose.model<Pitch>("Pitch", PitchSchema);
 
 export default PitchModel

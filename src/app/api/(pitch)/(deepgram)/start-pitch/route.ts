@@ -8,7 +8,7 @@ import Participant from "@/models/Participant";
 export async function POST(req: NextRequest) {
   try {
     await dbConnect();
-    const { userId, sessionId, competitionId } = await req.json();
+    const { userId, sessionId, competitionId, incubationId } = await req.json();
     if (!userId)
       return NextResponse.json(
         {
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
           { status: 404 }
         );
       }
-      if(new Date(Date.now())<competition.eventInterval?.start) {
+      if (new Date(Date.now()) < competition.eventInterval?.start) {
         return NextResponse.json(
           {
             success: false,
@@ -60,6 +60,7 @@ export async function POST(req: NextRequest) {
             lastUpdated: Date.now(),
             startTime: Date.now(),
             competitionId: competitionId ?? null,
+            incubationId: incubationId ?? null,
           });
           return NextResponse.json(
             {
@@ -105,6 +106,7 @@ export async function POST(req: NextRequest) {
             lastUpdated: Date.now(),
             startTime: Date.now(),
             competitionId: competitionId ?? null,
+            incubationId: incubationId ?? null,
           });
           return NextResponse.json(
             {
@@ -120,6 +122,8 @@ export async function POST(req: NextRequest) {
         }
       }
     } else {
+      // Normal practice pitch (including incubation pitches)
+      // Incubation pitches use the same dashboard minutes as normal pitches
       const count = await PitchModel.countDocuments({ userId });
       const pitch = await PitchModel.create({
         userId,
@@ -128,6 +132,7 @@ export async function POST(req: NextRequest) {
         lastUpdated: Date.now(),
         startTime: Date.now(),
         competitionId: competitionId ?? null,
+        incubationId: incubationId ?? null,
       });
       return NextResponse.json(
         {

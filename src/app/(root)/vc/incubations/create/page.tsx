@@ -31,6 +31,7 @@ import {
 
 const formSchema = z.object({
     title: z.string().min(5, "Title must be at least 5 characters"),
+    organizationName: z.string().min(2, "Organization name is required"),
     description: z.string().min(20, "Description must be at least 20 characters"),
     botId: z.string().min(1, "Please select a bot"),
     eligibility: z.string().min(5, "Eligibility criteria is required"),
@@ -67,6 +68,7 @@ export default function CreateIncubationPage() {
         resolver: zodResolver(formSchema),
         defaultValues: {
             title: "",
+            organizationName: "",
             description: "",
             botId: "",
             eligibility: "",
@@ -95,6 +97,7 @@ export default function CreateIncubationPage() {
             // Transform the data to match the API expected format
             const payload = {
                 title: values.title,
+                organizationName: values.organizationName,
                 description: values.description,
                 botId: values.botId,
                 eligibility: values.eligibility,
@@ -146,6 +149,23 @@ export default function CreateIncubationPage() {
                                         <FormControl>
                                             <Input placeholder="e.g. Winter 2026 SaaS Cohort" {...field} />
                                         </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="organizationName"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Organization Name</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="e.g. Y Combinator, Techstars" {...field} />
+                                        </FormControl>
+                                        <FormDescription>
+                                            The name of your incubation center/firm (shown to founders for privacy)
+                                        </FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { Plus, Bot, MoreVertical } from "lucide-react";
+import { Plus, Bot } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -12,12 +12,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 
@@ -125,32 +119,6 @@ export default function VCBotsPage() {
                                         </CardDescription>
                                     </div>
                                 </div>
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="-mr-2 h-8 w-8"
-                                            onClick={(e) => e.stopPropagation()}
-                                        >
-                                            <MoreVertical className="h-4 w-4" />
-                                            <span className="sr-only">Open menu</span>
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuItem
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                router.push(`/vc/bots/${bot._id}`);
-                                            }}
-                                        >
-                                            View Details
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem className="text-red-600">
-                                            Disable Bot
-                                        </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
                             </CardHeader>
                             <CardContent className="mt-4">
                                 <p className="text-sm text-muted-foreground line-clamp-3">

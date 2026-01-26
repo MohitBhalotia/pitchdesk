@@ -14,7 +14,7 @@ export async function GET(req: Request) {
         }
 
         const programs = await IncubationProgram.find({ vcId: session.user._id })
-            .populate('botId', 'name avatarUrl')
+            .populate('botId', 'name image')
             .sort({ createdAt: -1 });
 
         return NextResponse.json(programs);
@@ -36,6 +36,7 @@ export async function POST(req: Request) {
         const body = await req.json();
         const {
             title,
+            organizationName,
             botId,
             description,
             eligibility,
@@ -51,6 +52,7 @@ export async function POST(req: Request) {
         const newProgram = await IncubationProgram.create({
             vcId: session.user._id,
             title,
+            organizationName,
             botId,
             description,
             eligibility,

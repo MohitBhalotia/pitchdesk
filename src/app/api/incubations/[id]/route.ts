@@ -9,7 +9,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
         const program = await IncubationProgram.findById(id)
             .populate('vcId', 'fullName profileImage')
-            .populate('botId', 'name avatarUrl description');
+            .populate('botId', 'name image description');
 
         if (!program) {
             return NextResponse.json({ error: "Program not found" }, { status: 404 });
