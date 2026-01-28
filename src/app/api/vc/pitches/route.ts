@@ -44,7 +44,15 @@ export async function GET(req: Request) {
                 }
             },
             { $unwind: '$founder' },
-            // Populate pitch if needed? Usually we render summary from application itself or separate call.
+            {
+                $lookup: {
+                    from: 'pitches',
+                    localField: 'pitchId',
+                    foreignField: '_id',
+                    as: 'pitchId'
+                }
+            },
+            { $unwind: { path: '$pitchId', preserveNullAndEmptyArrays: true } },
         ];
 
         if (status && status !== 'all') {

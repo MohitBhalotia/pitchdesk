@@ -5,12 +5,8 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import {
     Loader2,
-    CheckCircle2,
-    XCircle,
-    Clock,
-    TrendingUp,
-    TrendingDown,
-    Search
+    Search,
+    TrendingUp
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -39,17 +35,33 @@ interface IApplication {
     status: 'pending' | 'wishlist' | 'hold' | 'rejected' | 'accepted';
     score: number;
     submittedAt: string;
-    founder: {
+    founderId: {
         fullName: string;
         email: string;
         profileImage: string;
     };
     program: {
+        _id: string;
         title: string;
     };
     pitchId: {
+        _id: string;
         title: string;
         duration: number;
+    };
+    registrationData: {
+        startupName: string;
+        founderName: string;
+        email: string;
+        phone: string;
+        industry: string;
+        stage: string;
+        teamSize: number;
+        description: string;
+        website?: string;
+        linkedin?: string;
+        fundingRaised?: string;
+        motivation: string;
     };
     botFeedback: string;
 }
@@ -80,6 +92,7 @@ export default function VCPitchReviewPage() {
 
     const updateStatus = async (id: string, newStatus: string) => {
         try {
+            // Optimistically update UI
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             setApplications(prev => prev.map(app =>
                 app._id === id ? { ...app, status: newStatus as any } : app
@@ -95,10 +108,10 @@ export default function VCPitchReviewPage() {
     const getStatusBadge = (status: string) => {
         const styles = {
             pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300",
-            wishlist: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+            wishlist: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
             hold: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
             rejected: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
-            accepted: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
+            accepted: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
         };
         return (
             <Badge className={styles[status as keyof typeof styles] || "bg-gray-100"}>
@@ -107,13 +120,21 @@ export default function VCPitchReviewPage() {
         );
     };
 
+    const getScoreColor = (score: number) => {
+        if (score >= 80) return "text-green-600 dark:text-green-400";
+        if (score >= 60) return "text-blue-600 dark:text-blue-400";
+        if (score >= 40) return "text-yellow-600 dark:text-yellow-400";
+        return "text-red-600 dark:text-red-400";
+    };
+
     const filteredApplications = applications.filter(app => {
         if (!searchQuery) return true;
         const query = searchQuery.toLowerCase();
         return (
-            app.founder.fullName.toLowerCase().includes(query) ||
+            app.founderId.fullName.toLowerCase().includes(query) ||
             app.program.title.toLowerCase().includes(query) ||
-            app.pitchId?.title?.toLowerCase().includes(query)
+            app.pitchId?.title?.toLowerCase().includes(query) ||
+            app.registrationData?.startupName?.toLowerCase().includes(query)
         );
     });
 
@@ -122,7 +143,7 @@ export default function VCPitchReviewPage() {
             <div className="mb-8">
                 <h1 className="text-3xl font-bold tracking-tight mb-2">Pitch Reviews</h1>
                 <p className="text-muted-foreground">
-                    Review and manage pitch submissions from your incubation programs.
+                    Review and manage all pitch submissions across all your incubation programs.
                 </p>
             </div>
 
@@ -130,7 +151,7 @@ export default function VCPitchReviewPage() {
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
-                        placeholder="Search by founder, program, or pitch title..."
+                        placeholder="Search by founder, startup, program, or pitch title..."
                         className="pl-10"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -187,82 +208,89 @@ export default function VCPitchReviewPage() {
                                 <div className="flex items-center gap-3 mb-2">
                                     <div className="relative h-10 w-10 rounded-full overflow-hidden bg-muted">
                                         <Image
-                                            src={app.founder.profileImage || "/placeholder-avatar.png"}
-                                            alt={app.founder.fullName}
+                                            src={app.founderId.profileImage || "/placeholder-avatar.png"}
+                                            alt={app.founderId.fullName}
                                             fill
                                             className="object-cover"
                                         />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <CardTitle className="text-base truncate">{app.founder.fullName}</CardTitle>
-                                        <CardDescription className="text-xs truncate">{app.program.title}</CardDescription>
+                                        <CardTitle className="text-base truncate">
+                                            {app.registrationData?.startupName || app.founderId.fullName}
+                                        </CardTitle>
+                                        <CardDescription className="text-xs truncate">
+                                            {app.registrationData?.founderName || app.founderId.fullName}
+                                        </CardDescription>
                                     </div>
                                 </div>
-                                {app.pitchId?.title && (
-                                    <p className="text-sm font-medium text-muted-foreground truncate">
-                                        "{app.pitchId.title}"
-                                    </p>
-                                )}
+                                <p className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+                                    <TrendingUp className="h-3 w-3" />
+                                    {app.program.title}
+                                </p>
                             </CardHeader>
                             <CardContent className="flex-1 text-sm bg-muted/20 py-3 mx-4 rounded-lg mb-4">
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="font-medium text-muted-foreground">AI Score</span>
                                     <div className="flex items-center gap-1">
-                                        <span className={`font-bold text-xl ${app.score >= 80 ? 'text-green-600' :
-                                                app.score >= 50 ? 'text-yellow-600' : 'text-red-600'
-                                            }`}>
+                                        <span className={`font-bold text-xl ${getScoreColor(app.score)}`}>
                                             {app.score}
                                         </span>
                                         <span className="text-muted-foreground">/100</span>
                                     </div>
                                 </div>
-                                <p className="text-xs text-muted-foreground line-clamp-2 italic">
-                                    &quot;{app.botFeedback ? app.botFeedback.substring(0, 100) : "Evaluating"}...&quot;
-                                </p>
-                                {app.pitchId?.duration && (
-                                    <p className="text-xs text-muted-foreground mt-2">
-                                        Duration: {Math.floor(app.pitchId.duration / 60)}:{String(app.pitchId.duration % 60).padStart(2, '0')}
-                                    </p>
+                                {app.registrationData && (
+                                    <div className="text-xs text-muted-foreground space-y-1 mt-3 pt-3 border-t">
+                                        <p><span className="font-medium">Industry:</span> {app.registrationData.industry}</p>
+                                        <p><span className="font-medium">Stage:</span> {app.registrationData.stage.replace('_', ' ')}</p>
+                                    </div>
                                 )}
                             </CardContent>
                             <CardFooter
-                                className="border-t pt-4 grid grid-cols-3 gap-2"
+                                className="border-t pt-4 grid grid-cols-4 gap-2"
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 <Button
-                                    variant="outline"
+                                    variant={app.status === 'wishlist' ? 'default' : 'outline'}
                                     size="sm"
-                                    className="w-full text-green-600 hover:text-green-700 hover:bg-green-50"
+                                    className={`w-full text-xs ${app.status === 'wishlist' ? 'bg-purple-600 hover:bg-purple-700' : 'text-purple-600 hover:text-purple-700 hover:bg-purple-50'}`}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        updateStatus(app._id, 'wishlist');
+                                    }}
+                                >
+                                    Wishlist
+                                </Button>
+                                <Button
+                                    variant={app.status === 'accepted' ? 'default' : 'outline'}
+                                    size="sm"
+                                    className={`w-full text-xs ${app.status === 'accepted' ? 'bg-green-600 hover:bg-green-700' : 'text-green-600 hover:text-green-700 hover:bg-green-50'}`}
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         updateStatus(app._id, 'accepted');
                                     }}
                                 >
-                                    <CheckCircle2 className="h-4 w-4 mr-1" />
                                     Accept
                                 </Button>
                                 <Button
-                                    variant="outline"
+                                    variant={app.status === 'hold' ? 'default' : 'outline'}
                                     size="sm"
-                                    className="w-full text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                                    className={`w-full text-xs ${app.status === 'hold' ? 'bg-orange-600 hover:bg-orange-700' : 'text-orange-600 hover:text-orange-700 hover:bg-orange-50'}`}
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         updateStatus(app._id, 'hold');
                                     }}
                                 >
-                                    <Clock className="h-4 w-4 mr-1" />
                                     Hold
                                 </Button>
                                 <Button
-                                    variant="outline"
+                                    variant={app.status === 'rejected' ? 'default' : 'outline'}
                                     size="sm"
-                                    className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    className={`w-full text-xs ${app.status === 'rejected' ? 'bg-red-600 hover:bg-red-700' : 'text-red-600 hover:text-red-700 hover:bg-red-50'}`}
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         updateStatus(app._id, 'rejected');
                                     }}
                                 >
-                                    <XCircle className="h-4 w-4 mr-1" />
                                     Reject
                                 </Button>
                             </CardFooter>

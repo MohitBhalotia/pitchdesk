@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import authOptions from "@/lib/auth";
 import dbConnect from "@/lib/db";
 import IncubationApplication from "@/models/IncubationApplicationModel";
+import IncubationProgram from "@/models/IncubationProgramModel";
 import Pitch from "@/models/PitchModel";
 import { PitchEval } from "@/models/PitchEvalModel";
 import User from "@/models/UserModel";
@@ -54,7 +55,8 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
             founder: {
                 ...(application.founderId as any),
                 pitchesCount: founderPitchCount
-            }
+            },
+            program: application.programId
         };
 
         return NextResponse.json({
