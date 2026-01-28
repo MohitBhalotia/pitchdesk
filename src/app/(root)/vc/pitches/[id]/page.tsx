@@ -113,12 +113,9 @@ export default function VCPitchDetailPage() {
                             Submitted {new Date(application.submittedAt).toLocaleDateString()}
                         </span>
                     </div>
-                    <h1 className="text-3xl font-bold mb-1">
+                    <h1 className="text-3xl font-bold mb-3">
                         {application.registrationData?.startupName || pitch?.title || "Untitled Pitch"}
                     </h1>
-                    <p className="text-muted-foreground mb-3">
-                        {pitch?.title && application.registrationData?.startupName ? `"${pitch.title}"` : ''}
-                    </p>
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2">
                             <div className="relative h-8 w-8 rounded-full overflow-hidden">
@@ -387,11 +384,7 @@ export default function VCPitchDetailPage() {
                                     <p className="text-sm text-muted-foreground">{application.founder?.email}</p>
                                 </div>
                             </div>
-                            <Separator />
-                            <div>
-                                <p className="text-sm font-medium mb-1">Previous Pitches</p>
-                                <p className="text-xs text-muted-foreground">{application.founder?.pitchesCount || 0} sessions captured</p>
-                            </div>
+
                             {application.registrationData?.startupName && (
                                 <>
                                     <Separator />

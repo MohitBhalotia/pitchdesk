@@ -202,7 +202,7 @@ export default function IncubationProgramDetailPage() {
     return (
         <div className="container mx-auto p-6 max-w-6xl">
             <div className="flex items-center justify-between mb-6">
-                <Button variant="ghost" className="pl-0" onClick={() => router.back()}>
+                <Button variant="ghost" className="pl-0" onClick={() => router.push('/vc/incubations')}>
                     <ArrowLeft className="mr-2 h-4 w-4" /> Back to Programs
                 </Button>
 
