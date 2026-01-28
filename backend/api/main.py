@@ -664,7 +664,7 @@ async def evaluate_pitch_api(req: PitchRequest):
     """
     Generate a 5-minute summary of the startup pitch transcript.
     """
-
+    print(req.transcript)
     transcript_text = "\n".join(
         [f"{m.role}: {m.content}" for m in req.transcript]
     )
