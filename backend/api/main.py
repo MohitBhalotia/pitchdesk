@@ -14,7 +14,7 @@ from typing import List, Optional, Dict
 from PIL import Image
 from google import genai
 
-from api.valuation_engine import (
+from valuation_engine import (
     UniversalValuationInput,
     run_valuation,
     run_projections

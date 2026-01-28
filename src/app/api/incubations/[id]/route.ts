@@ -1,10 +1,18 @@
 import dbConnect from "@/lib/db";
 import IncubationProgram from "@/models/IncubationProgramModel";
+import AgentModel from "@/models/AgentModel"; // Import to register Agent schema
+import UserModel from "@/models/UserModel"; // Import to register User schema
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
     try {
         await dbConnect();
+
+        // Ensure Agent model is registered
+        if (!AgentModel) {
+            throw new Error("Agent model not loaded");
+        }
+
         const { id } = await params;
 
         const program = await IncubationProgram.findById(id)

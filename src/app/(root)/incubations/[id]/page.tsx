@@ -273,7 +273,7 @@ export default function IncubationDetailPage() {
                                                 Start practicing your pitch with our AI judge!
                                             </p>
                                             <Button
-                                                onClick={() => router.push(`/start-pitch?agentId=${typeof program.botId === 'object' ? program.botId._id : program.botId}&incubationId=${id}`)}
+                                                onClick={() => window.open(`/start-pitch?agentId=${typeof program.botId === 'object' ? program.botId._id : program.botId}&incubationId=${id}`, "_blank")}
                                                 className="gap-2"
                                             >
                                                 Start Your First Pitch
@@ -377,7 +377,7 @@ export default function IncubationDetailPage() {
 
                                     <Button
                                         className="w-full size-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md"
-                                        onClick={() => router.push(`/start-pitch?agentId=${typeof program.botId === 'object' ? program.botId._id : program.botId}&incubationId=${id}`)}
+                                        onClick={() => window.open(`/start-pitch?agentId=${typeof program.botId === 'object' ? program.botId._id : program.botId}&incubationId=${id}`, "_blank")}
                                     >
                                         Start Pitch
                                     </Button>
