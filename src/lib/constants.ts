@@ -299,10 +299,6 @@ Below are examples of good questions you may be inspired by:
 ${sample_questions}
 -----
 
-And here are some example founder pitches to guide your expectations:
------
-${sample_pitches}
------
 Now, begin the session.`,
       },
       greeting: agent.firstMessage as string,

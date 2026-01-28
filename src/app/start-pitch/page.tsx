@@ -155,6 +155,21 @@ function HomeContent() {
     }, 3000);
   }, [closeSocket, stopMicrophone]);
 
+  useEffect(() => {
+    const summary = async () => {
+      const summary = await axios.post(`${process.env.NEXT_PUBLIC_FASTAPI_BACKEND}/5minsummmary`, {
+        transcript: transcriptRef.current,
+      });
+      console.log("Summary:", summary);
+    }
+    if (started) {
+      console.log("Starting summary");
+      setInterval(() => {
+        console.log("Updating summary");
+        summary();
+      }, 1*60*1000);
+    }
+  }, [started]);
   // Automatically end session when duration exceeds remaining time
   useEffect(() => {
     if (

@@ -629,7 +629,48 @@ def valuation_report(data: UniversalValuationInput):
         "explanations": explanations
     }
 
+def five_min_summary(transcript_text: str) -> dict:
+    """
+    Generate a concise 5-minute summary of a startup pitch transcript.
+    Highlights main discussion points in a simple paragraph.
+    """
 
+    prompt = f"""
+    Summarize the following startup pitch discussion in one short, clear paragraph.
+    Highlight what was discussed, key ideas, product, market, problem, and any notable points.
+    Keep the language simple and non-technical.
+
+    Transcript:
+    {transcript_text}
+    """
+
+    response = client.chat.completions.create(
+        model=MODEL_NAME,
+        temperature=TEMPERATURE,
+        messages=[
+            {"role": "system", "content": "You are a helpful startup analyst."},
+            {"role": "user", "content": prompt}
+        ],
+    )
+
+    summary_text = response.choices[0].message.content.strip()
+
+    return {
+        "summary": summary_text
+    }
+
+@app.post("/5minsummmary")
+async def evaluate_pitch_api(req: PitchRequest):
+    """
+    Generate a 5-minute summary of the startup pitch transcript.
+    """
+
+    transcript_text = "\n".join(
+        [f"{m.role}: {m.content}" for m in req.transcript]
+    )
+
+    result = five_min_summary(transcript_text)
+    return result
 
 
 
