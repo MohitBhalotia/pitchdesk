@@ -50,12 +50,12 @@ export async function POST(req: Request) {
             console.error("FastAPI call failed, using fallback:", fastApiError.message);
 
             // Fallback template if FastAPI is not available
-            const fallbackPrompt = `You are ${name}, an AI VC judge specializing in ${sector || 'various sectors'}.
+            const fallbackPrompt = `You are ${name}, an AI VC judge specializing in ${Array.isArray(sector) ? sector.join(", ") : (sector || 'various sectors')}.
 
 Investment Focus:
-- Sector: ${sector || 'Open to various sectors'}
+- Sector: ${Array.isArray(sector) ? sector.join(", ") : (sector || 'Open to various sectors')}
 - Fund Size: ${fundSize || 'Flexible'}
-- Stage: ${investmentStage || 'Seed to Series A'}
+- Stage: ${Array.isArray(investmentStage) ? investmentStage.join(", ") : (investmentStage || 'Seed to Series A')}
 - Geography: ${geographicFocus || 'Global'}
 
 ${description ? `About: ${description}` : ''}

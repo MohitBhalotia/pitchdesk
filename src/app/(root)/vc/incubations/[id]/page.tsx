@@ -41,7 +41,7 @@ import Image from "next/image";
 const formSchema = z.object({
     title: z.string().min(5, "Title must be at least 5 characters"),
     description: z.string().min(20, "Description must be at least 20 characters"),
-    botId: z.string().min(1, "Please select a bot"),
+    botId: z.string().min(1, "Please select an agent"),
     eligibility: z.string().min(5, "Eligibility criteria is required"),
     stages: z.string().min(5, "Please describe the stages"),
     startDate: z.string().refine((val) => !isNaN(Date.parse(val)), {
@@ -261,7 +261,7 @@ export default function IncubationProgramDetailPage() {
                                                 <div className="relative h-16 w-16 rounded-full overflow-hidden border-2">
                                                     <Image
                                                         src={program.botId?.image || "/placeholder-avatar.png"}
-                                                        alt="Bot"
+                                                        alt="Agent"
                                                         fill
                                                         className="object-cover"
                                                     />
@@ -307,7 +307,7 @@ export default function IncubationProgramDetailPage() {
                                             name="botId"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>AI Judge Bot</FormLabel>
+                                                    <FormLabel>AI Judge Agent</FormLabel>
                                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                         <FormControl>
                                                             <SelectTrigger>

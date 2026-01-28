@@ -14,7 +14,7 @@ from typing import List, Optional, Dict
 from PIL import Image
 from google import genai
 
-from valuation_engine import (
+from api.valuation_engine import (
     UniversalValuationInput,
     run_valuation,
     run_projections
@@ -263,9 +263,9 @@ async def generate_pitch_form(
 class BotPromptRequest(BaseModel):
     name: str
     description: str
-    sector: str
+    sector: List[str]
     fund_size: str
-    investment_stage: str
+    investment_stage: List[str]
     geographic_focus: Optional[str] = None
     user_instructions: str
 
@@ -290,9 +290,9 @@ Create a comprehensive, professional system prompt for a VC bot named "{req.name
 **VC Profile:**
 - Name: {req.name}
 - Description: {req.description}
-- Sector Focus: {req.sector}
+- Sector Focus: {", ".join(req.sector)}
 - Fund Size: {req.fund_size}
-- Investment Stage: {req.investment_stage}
+- Investment Stage: {", ".join(req.investment_stage)}
 - Geographic Focus: {req.geographic_focus or "Global"}
 
 **Special Instructions from VC:**

@@ -16,9 +16,9 @@ export interface IAgent extends Document {
   domainFocus?: string;
 
   // Enhanced VC Info3
-  sector?: string;
+  sector?: string[];
   fundSize?: string;
-  investmentStage?: string; // Seed, Series A, etc.
+  investmentStage?: string[]; // Seed, Series A, etc.
   geographicFocus?: string;
   userInstructions?: string; // Raw input from VC
 
@@ -71,15 +71,15 @@ const agentSchema = new Schema({
   domainFocus: {
     type: String,
   },
-  sector: {
+  sector: [{
     type: String,
-  },
+  }],
   fundSize: {
     type: String,
   },
-  investmentStage: {
+  investmentStage: [{
     type: String,
-  },
+  }],
   geographicFocus: {
     type: String,
   },

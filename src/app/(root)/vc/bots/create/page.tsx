@@ -29,6 +29,15 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import {
+    DropdownMenu,
+    DropdownMenuCheckboxItem,
+    DropdownMenuContent,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import {
     Card,
     CardContent,
     CardDescription,
@@ -42,11 +51,11 @@ import { Progress } from "@/components/ui/progress";
 const formSchema = z.object({
     name: z.string().min(2, "Name must be at least 2 characters"),
     description: z.string().min(10, "Description must be at least 10 characters"),
-    sector: z.string().min(2, "Sector is required"),
+    sector: z.array(z.string()).min(1, "Select at least one sector"),
     fundSize: z.string().min(1, "Fund size is required"),
-    investmentStage: z.string().min(1, "Investment stage is required"),
+    investmentStage: z.array(z.string()).min(1, "Select at least one stage"),
     geographicFocus: z.string().optional(),
-    userInstructions: z.string().min(20, "Please provide detailed evaluation criteria"),
+    userInstructions: z.string().min(20, "Please provide detailed agent personality"),
 });
 
 export default function CreateBotPage() {
@@ -87,9 +96,9 @@ export default function CreateBotPage() {
         defaultValues: {
             name: "",
             description: "",
-            sector: "",
+            sector: [],
             fundSize: "",
-            investmentStage: "",
+            investmentStage: [],
             geographicFocus: "",
             userInstructions: "",
         },
@@ -435,7 +444,7 @@ export default function CreateBotPage() {
                 avatarUrl: selectedAvatar, // Use 'avatarUrl' to match the backend API
             });
 
-            toast.success("AI Judge Bot created successfully!");
+            toast.success("AI Judge Agent created successfully!");
             router.push("/vc/bots");
             router.refresh();
         } catch (error) {
@@ -449,7 +458,7 @@ export default function CreateBotPage() {
     return (
         <div className="container mx-auto p-6 max-w-4xl">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold tracking-tight">Create AI Judge Bot</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Create AI Judge Agent</h1>
                 <p className="text-muted-foreground mt-1">
                     Design a custom AI persona with your voice and appearance.
                 </p>
@@ -493,7 +502,7 @@ export default function CreateBotPage() {
                                             name="name"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Bot Name</FormLabel>
+                                                    <FormLabel>Agent Name</FormLabel>
                                                     <FormControl>
                                                         <Input placeholder="e.g. Strategic Growth Partner" {...field} />
                                                     </FormControl>
@@ -507,7 +516,7 @@ export default function CreateBotPage() {
                                             name="description"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Bot Bio</FormLabel>
+                                                    <FormLabel>Agent Bio</FormLabel>
                                                     <FormControl>
                                                         <Textarea
                                                             placeholder="Brief background of this VC persona..."
@@ -526,24 +535,38 @@ export default function CreateBotPage() {
                                                 name="sector"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Sector Focus</FormLabel>
-                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                            <FormControl>
-                                                                <SelectTrigger>
-                                                                    <SelectValue placeholder="Select sector" />
-                                                                </SelectTrigger>
-                                                            </FormControl>
-                                                            <SelectContent>
-                                                                <SelectItem value="AI/ML">AI/ML</SelectItem>
-                                                                <SelectItem value="FinTech">FinTech</SelectItem>
-                                                                <SelectItem value="HealthTech">HealthTech</SelectItem>
-                                                                <SelectItem value="EdTech">EdTech</SelectItem>
-                                                                <SelectItem value="E-commerce">E-commerce</SelectItem>
-                                                                <SelectItem value="SaaS">SaaS</SelectItem>
-                                                                <SelectItem value="CleanTech">CleanTech</SelectItem>
-                                                                <SelectItem value="Other">Other</SelectItem>
-                                                            </SelectContent>
-                                                        </Select>
+                                                        <FormLabel>Sector Focus (Multiple)</FormLabel>
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button variant="outline" className="w-full justify-between font-normal">
+                                                                    {field.value?.length > 0 ? (
+                                                                        <div className="flex gap-1 flex-wrap">
+                                                                            {field.value.slice(0, 2).map((s: string) => <Badge key={s} variant="secondary" className="mr-1">{s}</Badge>)}
+                                                                            {field.value.length > 2 && <span className="text-xs text-muted-foreground">+{field.value.length - 2} more</span>}
+                                                                        </div>
+                                                                    ) : "Select sectors"}
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent className="w-56" align="start">
+                                                                <DropdownMenuLabel>Sectors</DropdownMenuLabel>
+                                                                <DropdownMenuSeparator />
+                                                                {["AI/ML", "FinTech", "HealthTech", "EdTech", "E-commerce", "SaaS", "CleanTech", "DeepTech", "Agritech", "Logistics", "Consumer", "B2B Marketplace", "PropTech", "Web3/Blockchain", "Gaming", "Hardware", "Biotech", "Others"].map((sector) => (
+                                                                    <DropdownMenuCheckboxItem
+                                                                        key={sector}
+                                                                        checked={field.value?.includes(sector)}
+                                                                        onCheckedChange={(checked) => {
+                                                                            const current = field.value || [];
+                                                                            const updated = checked
+                                                                                ? [...current, sector]
+                                                                                : current.filter((val: string) => val !== sector);
+                                                                            field.onChange(updated);
+                                                                        }}
+                                                                    >
+                                                                        {sector}
+                                                                    </DropdownMenuCheckboxItem>
+                                                                ))}
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
                                                         <FormMessage />
                                                     </FormItem>
                                                 )}
@@ -554,9 +577,26 @@ export default function CreateBotPage() {
                                                 name="fundSize"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Check Size</FormLabel>
+                                                        <FormLabel>Check Size (in ₹)</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="e.g. $100K - $500K" {...field} />
+                                                            <Input
+                                                                placeholder="e.g. 5,00,000"
+                                                                {...field}
+                                                                onChange={(e) => {
+                                                                    const raw = e.target.value.replace(/[^0-9]/g, '');
+                                                                    if (raw) {
+                                                                        // Indian Number System Formatting
+                                                                        const lastThree = raw.substring(raw.length - 3);
+                                                                        const otherNumbers = raw.substring(0, raw.length - 3);
+                                                                        const formatted = otherNumbers !== ''
+                                                                            ? otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") + "," + lastThree
+                                                                            : lastThree;
+                                                                        field.onChange(formatted);
+                                                                    } else {
+                                                                        field.onChange("");
+                                                                    }
+                                                                }}
+                                                            />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -570,21 +610,38 @@ export default function CreateBotPage() {
                                                 name="investmentStage"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Investment Stage</FormLabel>
-                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                            <FormControl>
-                                                                <SelectTrigger>
-                                                                    <SelectValue placeholder="Select stage" />
-                                                                </SelectTrigger>
-                                                            </FormControl>
-                                                            <SelectContent>
-                                                                <SelectItem value="Pre-seed">Pre-seed</SelectItem>
-                                                                <SelectItem value="Seed">Seed</SelectItem>
-                                                                <SelectItem value="Series A">Series A</SelectItem>
-                                                                <SelectItem value="Series B">Series B</SelectItem>
-                                                                <SelectItem value="Growth">Growth</SelectItem>
-                                                            </SelectContent>
-                                                        </Select>
+                                                        <FormLabel>Investment Stage (Multiple)</FormLabel>
+                                                        <DropdownMenu>
+                                                            <DropdownMenuTrigger asChild>
+                                                                <Button variant="outline" className="w-full justify-between font-normal">
+                                                                    {field.value?.length > 0 ? (
+                                                                        <div className="flex gap-1 flex-wrap">
+                                                                            {field.value.slice(0, 2).map((s: string) => <Badge key={s} variant="secondary" className="mr-1">{s}</Badge>)}
+                                                                            {field.value.length > 2 && <span className="text-xs text-muted-foreground">+{field.value.length - 2} more</span>}
+                                                                        </div>
+                                                                    ) : "Select stages"}
+                                                                </Button>
+                                                            </DropdownMenuTrigger>
+                                                            <DropdownMenuContent className="w-56" align="start">
+                                                                <DropdownMenuLabel>Stages</DropdownMenuLabel>
+                                                                <DropdownMenuSeparator />
+                                                                {["Pre-seed", "Seed", "Pre-Series A", "Series A", "Series B", "Series C+", "Growth"].map((stage) => (
+                                                                    <DropdownMenuCheckboxItem
+                                                                        key={stage}
+                                                                        checked={field.value?.includes(stage)}
+                                                                        onCheckedChange={(checked) => {
+                                                                            const current = field.value || [];
+                                                                            const updated = checked
+                                                                                ? [...current, stage]
+                                                                                : current.filter((val: string) => val !== stage);
+                                                                            field.onChange(updated);
+                                                                        }}
+                                                                    >
+                                                                        {stage}
+                                                                    </DropdownMenuCheckboxItem>
+                                                                ))}
+                                                            </DropdownMenuContent>
+                                                        </DropdownMenu>
                                                         <FormMessage />
                                                     </FormItem>
                                                 )}
@@ -610,10 +667,10 @@ export default function CreateBotPage() {
                                             name="userInstructions"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Evaluation Criteria</FormLabel>
+                                                    <FormLabel>Agent Personality & Evaluation Criteria</FormLabel>
                                                     <FormControl>
                                                         <Textarea
-                                                            placeholder="Describe how this bot should evaluate pitches (e.g., focus on traction, team, market size)..."
+                                                            placeholder="Describe how this agent should behave and evaluate pitches..."
                                                             className="min-h-[100px]"
                                                             {...field}
                                                         />

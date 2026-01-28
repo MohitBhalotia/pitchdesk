@@ -20,16 +20,16 @@ interface IAgent {
     name: string;
     description: string;
     image: string;
-    sector: string;
+    sector: string[];
     fundSize: string;
-    investmentStage: string;
+    investmentStage: string[];
     geographicFocus?: string;
     userInstructions: string;
     isActive: boolean;
     createdAt: string;
 }
 
-export default function BotDetailPage() {
+export default function AgentDetailPage() {
     const router = useRouter();
     const { id } = useParams();
     const [bot, setBot] = useState<IAgent | null>(null);
@@ -61,13 +61,13 @@ export default function BotDetailPage() {
     }
 
     if (!bot) {
-        return <div className="container py-10 text-center">Bot not found</div>;
+        return <div className="container py-10 text-center">Agent not found</div>;
     }
 
     return (
         <div className="container mx-auto p-6 max-w-4xl">
             <Button variant="ghost" className="mb-6 pl-0" onClick={() => router.back()}>
-                <ArrowLeft className="mr-2 h-4 w-4" /> Back to My Bots
+                <ArrowLeft className="mr-2 h-4 w-4" /> Back to My Agents
             </Button>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -84,7 +84,7 @@ export default function BotDetailPage() {
                                         <Badge variant={bot.isActive ? "default" : "secondary"}>
                                             {bot.isActive ? "Active" : "Inactive"}
                                         </Badge>
-                                        <Badge variant="outline">{bot.sector}</Badge>
+                                        {bot.sector && bot.sector.map((s) => <Badge key={s} variant="outline">{s}</Badge>)}
                                     </div>
                                 </div>
                             </div>
@@ -102,11 +102,11 @@ export default function BotDetailPage() {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <p className="text-sm text-muted-foreground">Sector</p>
-                                        <p className="font-medium">{bot.sector}</p>
+                                        <p className="font-medium">{Array.isArray(bot.sector) ? bot.sector.join(", ") : bot.sector}</p>
                                     </div>
                                     <div>
                                         <p className="text-sm text-muted-foreground">Stage</p>
-                                        <p className="font-medium">{bot.investmentStage}</p>
+                                        <p className="font-medium">{Array.isArray(bot.investmentStage) ? bot.investmentStage.join(", ") : bot.investmentStage}</p>
                                     </div>
                                     <div>
                                         <p className="text-sm text-muted-foreground">Check Size</p>
@@ -124,7 +124,7 @@ export default function BotDetailPage() {
                             <Separator />
 
                             <div>
-                                <h3 className="font-semibold mb-2">Evaluation Criteria</h3>
+                                <h3 className="font-semibold mb-2">Agent Personality</h3>
                                 <p className="text-muted-foreground whitespace-pre-wrap">{bot.userInstructions}</p>
                             </div>
                         </CardContent>
@@ -134,7 +134,7 @@ export default function BotDetailPage() {
                 <div className="space-y-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="text-base">Bot Stats</CardTitle>
+                            <CardTitle className="text-base">Agent Stats</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div>
@@ -160,7 +160,7 @@ export default function BotDetailPage() {
                         </CardHeader>
                         <CardContent>
                             <p className="text-sm text-muted-foreground">
-                                This bot uses an AI-generated personality optimized for {bot.sector} startups at the {bot.investmentStage} stage.
+                                This agent uses an AI-generated personality optimized for {Array.isArray(bot.sector) ? bot.sector.join(", ") : bot.sector} startups at the {Array.isArray(bot.investmentStage) ? bot.investmentStage.join(", ") : bot.investmentStage} stage.
                             </p>
                         </CardContent>
                     </Card>

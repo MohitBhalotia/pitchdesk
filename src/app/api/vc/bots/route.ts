@@ -60,10 +60,13 @@ export async function POST(req: Request) {
             investmentStage,
             geographicFocus,
             userInstructions,
-            domainFocus: sector,
+            domainFocus: Array.isArray(sector) ? sector.join(", ") : sector,
             generatedAvatars: [avatarUrl],
             isActive: true,
-            tags: [sector, investmentStage].filter(Boolean),
+            tags: [
+                ...(Array.isArray(sector) ? sector : [sector]),
+                ...(Array.isArray(investmentStage) ? investmentStage : [investmentStage])
+            ].filter(Boolean),
         });
 
         return NextResponse.json(newBot, { status: 201 });

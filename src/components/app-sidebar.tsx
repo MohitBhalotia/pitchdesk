@@ -200,7 +200,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: LayoutDashboard,
       },
       {
-        title: "My Bots",
+        title: "My Agents",
         url: "/vc/bots",
         icon: Bot,
       },

@@ -48,14 +48,14 @@ export default function VCBotsPage() {
         <div className="container mx-auto p-6 max-w-7xl">
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">My AI VC Bots</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">My AI VC Agents</h1>
                     <p className="text-muted-foreground mt-1">
                         Create and manage your custom AI judge personalities.
                     </p>
                 </div>
                 <Button onClick={() => router.push("/vc/bots/create")}>
                     <Plus className="mr-2 h-4 w-4" />
-                    Create New Bot
+                    Create New Agent
                 </Button>
             </div>
 
@@ -83,13 +83,13 @@ export default function VCBotsPage() {
                     <div className="p-4 rounded-full bg-muted mb-4">
                         <Bot className="h-8 w-8 text-muted-foreground" />
                     </div>
-                    <h3 className="text-lg font-semibold">No bots created yet</h3>
+                    <h3 className="text-lg font-semibold">No agents created yet</h3>
                     <p className="text-muted-foreground max-w-sm mt-2 mb-6">
-                        Get started by creating your first AI VC judge bot to evaluate pitches automatically.
+                        Get started by creating your first AI VC judge to evaluate pitches automatically.
                     </p>
                     <Button onClick={() => router.push("/vc/bots/create")}>
                         <Plus className="mr-2 h-4 w-4" />
-                        Create Bot
+                        Create Agent
                     </Button>
                 </div>
             ) : (
