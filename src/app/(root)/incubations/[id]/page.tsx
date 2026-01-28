@@ -5,7 +5,7 @@ import axios from "axios";
 import { useRouter, useParams } from "next/navigation";
 import {
     Users,
-    DollarSign,
+    IndianRupee,
     CheckCircle2,
     Bot,
     ArrowLeft,
@@ -32,9 +32,15 @@ interface IProgram {
     _id: string;
     title: string;
     description: string;
-    eligibility: string;
-    stages: string;
-    fundingAmount: string;
+    eligibility: string[];
+    rulesAndGuidelines: string[];
+    stages: {
+        title: string;
+        description: string;
+        startDate: string;
+        endDate: string;
+    }[];
+    fundingAmount: number;
     cohortSize: number;
     timeline: {
         startDate: string;
@@ -201,11 +207,11 @@ export default function IncubationDetailPage() {
                                 <Card>
                                     <CardContent className="flex items-center gap-4 py-6">
                                         <div className="p-3 bg-green-100 dark:bg-green-900/20 rounded-full text-green-600">
-                                            <DollarSign className="h-6 w-6" />
+                                            <IndianRupee className="h-6 w-6" />
                                         </div>
                                         <div>
                                             <p className="text-sm text-muted-foreground">Funding Available</p>
-                                            <p className="text-2xl font-bold">{program.fundingAmount}</p>
+                                            <p className="text-2xl font-bold">₹{program.fundingAmount.toLocaleString('en-IN')}</p>
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -218,7 +224,18 @@ export default function IncubationDetailPage() {
                                     <CardTitle>Stages</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <p className="whitespace-pre-wrap">{program.stages}</p>
+                                    <div className="space-y-4">
+                                        {Array.isArray(program.stages) ? program.stages.map((stage: any, i: number) => (
+                                            <div key={i} className="border p-4 rounded-lg bg-muted/20">
+                                                <h4 className="font-bold mb-1">Stage {i + 1}: {stage.title}</h4>
+                                                <p className="text-sm text-muted-foreground mb-2">{stage.description}</p>
+                                                <div className="text-sm text-muted-foreground flex gap-4">
+                                                    <span>Start: {new Date(stage.startDate).toLocaleDateString()}</span>
+                                                    <span>End: {new Date(stage.endDate).toLocaleDateString()}</span>
+                                                </div>
+                                            </div>
+                                        )) : <p className="whitespace-pre-wrap">{program.stages}</p>}
+                                    </div>
                                 </CardContent>
                             </Card>
                             <Card>
@@ -244,8 +261,26 @@ export default function IncubationDetailPage() {
 
                         <TabsContent value="eligibility">
                             <Card>
-                                <CardContent className="pt-6">
-                                    <p className="whitespace-pre-wrap">{program.eligibility}</p>
+                                <CardContent className="pt-6 space-y-6">
+                                    <div>
+                                        <h3 className="font-semibold mb-2">Eligibility Criteria</h3>
+                                        <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                                            {Array.isArray(program.eligibility) ? program.eligibility.map((item: string, i: number) => (
+                                                <li key={i}>{item}</li>
+                                            )) : <p>{program.eligibility}</p>}
+                                        </ul>
+                                    </div>
+
+                                    {program.rulesAndGuidelines && program.rulesAndGuidelines.length > 0 && (
+                                        <div>
+                                            <h3 className="font-semibold mb-2">Rules & Guidelines</h3>
+                                            <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                                                {program.rulesAndGuidelines.map((item: string, i: number) => (
+                                                    <li key={i}>{item}</li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
                                 </CardContent>
                             </Card>
                         </TabsContent>

@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Loader2, DollarSign, Users } from "lucide-react";
+import { Loader2, IndianRupee, Users, Plus, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -29,13 +29,21 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
+const stageSchema = z.object({
+    title: z.string().min(2, "Stage title is required"),
+    description: z.string().min(5, "Stage description is required"),
+    startDate: z.string(), // We will validate date format separately or trust the date input
+    endDate: z.string(),
+});
+
 const formSchema = z.object({
     title: z.string().min(5, "Title must be at least 5 characters"),
     organizationName: z.string().min(2, "Organization name is required"),
     description: z.string().min(20, "Description must be at least 20 characters"),
     botId: z.string().min(1, "Please select an agent"),
-    eligibility: z.string().min(5, "Eligibility criteria is required"),
-    stages: z.string().min(5, "Please describe the stages"),
+    eligibility: z.array(z.object({ value: z.string().min(5, "Criteria must be at least 5 chars") })),
+    rulesAndGuidelines: z.array(z.object({ value: z.string().min(5, "Rule must be at least 5 chars") })),
+    stages: z.array(stageSchema).min(1, "At least one stage is required"),
     startDate: z.string().refine((val) => !isNaN(Date.parse(val)), {
         message: "Invalid date",
     }),
@@ -45,7 +53,7 @@ const formSchema = z.object({
     applicationDeadline: z.string().refine((val) => !isNaN(Date.parse(val)), {
         message: "Invalid date",
     }),
-    fundingAmount: z.string().optional(),
+    fundingAmount: z.string().refine((val) => !isNaN(Number(val)), { message: "Must be a valid number" }).optional(),
     equityExpectations: z.string().optional(),
     cohortSize: z.string().optional(),
     notes: z.string().optional(),
@@ -71,8 +79,9 @@ export default function CreateIncubationPage() {
             organizationName: "",
             description: "",
             botId: "",
-            eligibility: "",
-            stages: "",
+            eligibility: [{ value: "" }],
+            rulesAndGuidelines: [{ value: "" }],
+            stages: [{ title: "", description: "", startDate: "", endDate: "" }],
             startDate: "",
             endDate: "",
             applicationDeadline: "",
@@ -81,6 +90,21 @@ export default function CreateIncubationPage() {
             notes: "",
             status: "draft" as const,
         },
+    });
+
+    const { fields: eligibilityFields, append: appendEligibility, remove: removeEligibility } = useFieldArray({
+        control: form.control,
+        name: "eligibility",
+    });
+
+    const { fields: ruleFields, append: appendRule, remove: removeRule } = useFieldArray({
+        control: form.control,
+        name: "rulesAndGuidelines",
+    });
+
+    const { fields: stageFields, append: appendStage, remove: removeStage } = useFieldArray({
+        control: form.control,
+        name: "stages",
     });
 
     useEffect(() => {
@@ -100,14 +124,15 @@ export default function CreateIncubationPage() {
                 organizationName: values.organizationName,
                 description: values.description,
                 botId: values.botId,
-                eligibility: values.eligibility,
+                eligibility: values.eligibility.map((e) => e.value),
+                rulesAndGuidelines: values.rulesAndGuidelines.map((r) => r.value),
                 stages: values.stages,
                 timeline: {
                     startDate: new Date(values.startDate),
                     endDate: new Date(values.endDate),
                     applicationDeadline: new Date(values.applicationDeadline),
                 },
-                fundingAmount: values.fundingAmount,
+                fundingAmount: values.fundingAmount ? Number(values.fundingAmount) : undefined,
                 equityExpectations: values.equityExpectations,
                 cohortSize: values.cohortSize ? Number(values.cohortSize) : undefined,
                 notes: values.notes,
@@ -217,22 +242,88 @@ export default function CreateIncubationPage() {
                                 )}
                             />
 
-                            <FormField
-                                control={form.control}
-                                name="eligibility"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Eligibility Criteria</FormLabel>
-                                        <FormControl>
-                                            <Textarea
-                                                placeholder="Who can apply?"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                            <div>
+                                <div className="flex items-center justify-between mb-2">
+                                    <FormLabel>Eligibility Criteria</FormLabel>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => appendEligibility({ value: "" })}
+                                    >
+                                        <Plus className="h-4 w-4 mr-2" />
+                                        Add Point
+                                    </Button>
+                                </div>
+                                <div className="space-y-2">
+                                    {eligibilityFields.map((field, index) => (
+                                        <FormField
+                                            key={field.id}
+                                            control={form.control}
+                                            name={`eligibility.${index}.value`}
+                                            render={({ field }) => (
+                                                <FormItem className="flex items-center gap-2 space-y-0">
+                                                    <FormControl>
+                                                        <Input placeholder="Criteria..." {...field} />
+                                                    </FormControl>
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => removeEligibility(index)}
+                                                        disabled={eligibilityFields.length === 1}
+                                                    >
+                                                        <Trash2 className="h-4 w-4 text-red-500" />
+                                                    </Button>
+                                                </FormItem>
+                                            )}
+                                        />
+                                    ))}
+                                    <FormMessage>
+                                        {form.formState.errors.eligibility?.root?.message}
+                                    </FormMessage>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div className="flex items-center justify-between mb-2">
+                                    <FormLabel>Rules & Guidelines</FormLabel>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => appendRule({ value: "" })}
+                                    >
+                                        <Plus className="h-4 w-4 mr-2" />
+                                        Add Rule
+                                    </Button>
+                                </div>
+                                <div className="space-y-2">
+                                    {ruleFields.map((field, index) => (
+                                        <FormField
+                                            key={field.id}
+                                            control={form.control}
+                                            name={`rulesAndGuidelines.${index}.value`}
+                                            render={({ field }) => (
+                                                <FormItem className="flex items-center gap-2 space-y-0">
+                                                    <FormControl>
+                                                        <Input placeholder="Rule..." {...field} />
+                                                    </FormControl>
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => removeRule(index)}
+                                                        disabled={ruleFields.length === 1}
+                                                    >
+                                                        <Trash2 className="h-4 w-4 text-red-500" />
+                                                    </Button>
+                                                </FormItem>
+                                            )}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
                         </div>
 
                         <div className="space-y-6">
@@ -290,8 +381,8 @@ export default function CreateIncubationPage() {
                                             <FormLabel>Funding Amount</FormLabel>
                                             <FormControl>
                                                 <div className="relative">
-                                                    <DollarSign className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                                                    <Input placeholder="100000" className="pl-8" {...field} />
+                                                    <IndianRupee className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                                                    <Input type="number" placeholder="100000" className="pl-8" {...field} />
                                                 </div>
                                             </FormControl>
                                             <FormMessage />
@@ -316,34 +407,127 @@ export default function CreateIncubationPage() {
                                 />
                             </div>
 
-                            <FormField
-                                control={form.control}
-                                name="stages"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Program Stages</FormLabel>
-                                        <FormControl>
-                                            <Textarea
-                                                placeholder="Describe the interview rounds or program phases..."
-                                                className="min-h-[100px]"
-                                                {...field}
+                            <div>
+                                <div className="flex items-center justify-between mb-2">
+                                    <FormLabel>Program Stages</FormLabel>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => appendStage({ title: "", description: "", startDate: "", endDate: "" })}
+                                    >
+                                        <Plus className="h-4 w-4 mr-2" />
+                                        Add Stage
+                                    </Button>
+                                </div>
+                                <div className="space-y-4">
+                                    {stageFields.map((field, index) => (
+                                        <div key={field.id} className="p-4 border rounded-lg space-y-4 bg-muted/20">
+                                            <div className="flex justify-between items-start">
+                                                <span className="text-sm font-medium">Stage {index + 1}</span>
+                                                <Button
+                                                    type="button"
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-6 w-6"
+                                                    onClick={() => removeStage(index)}
+                                                    disabled={stageFields.length === 1}
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+
+                                            <FormField
+                                                control={form.control}
+                                                name={`stages.${index}.title`}
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormControl>
+                                                            <Input placeholder="Stage Title (e.g. Registration)" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
                                             />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+
+                                            <FormField
+                                                control={form.control}
+                                                name={`stages.${index}.description`}
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormControl>
+                                                            <Input placeholder="Stage Description (e.g. Initial Screening)" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <FormField
+                                                    control={form.control}
+                                                    name={`stages.${index}.startDate`}
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel className="text-xs">Start Date</FormLabel>
+                                                            <FormControl>
+                                                                <Input type="date" {...field} />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                                <FormField
+                                                    control={form.control}
+                                                    name={`stages.${index}.endDate`}
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel className="text-xs">End Date</FormLabel>
+                                                            <FormControl>
+                                                                <Input type="date" {...field} />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="flex justify-end gap-4">
-                        <Button type="button" variant="outline" onClick={() => router.back()}>
-                            Cancel
-                        </Button>
-                        <Button type="submit" disabled={isSubmitting}>
-                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Create Program
-                        </Button>
+                    <div className="flex items-center justify-between pt-4 border-t">
+                        <FormField
+                            control={form.control}
+                            name="status"
+                            render={({ field }) => (
+                                <FormItem className="w-[200px]">
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select status" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="draft">Save as Draft</SelectItem>
+                                            <SelectItem value="published">Publish Now</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <div className="flex gap-4">
+                            <Button type="button" variant="outline" onClick={() => router.back()}>
+                                Cancel
+                            </Button>
+                            <Button type="submit" disabled={isSubmitting}>
+                                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Create Program
+                            </Button>
+                        </div>
                     </div>
 
                 </form>
