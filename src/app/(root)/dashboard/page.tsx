@@ -233,7 +233,7 @@ const VCDashboard = ({ userStats, session, router }) => {
       </div>
 
       {/* Recent Applications */}
-      {userStats?.recentApplications && userStats.recentApplications.length > 0 && (
+      {/* {userStats?.recentApplications && userStats.recentApplications.length > 0 && (
         <div className="w-full max-w-7xl mx-auto mt-8">
           <h2 className="text-2xl font-bold mb-6 text-foreground text-left">
             Recent Applications
@@ -268,7 +268,7 @@ const VCDashboard = ({ userStats, session, router }) => {
             ))}
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 };
