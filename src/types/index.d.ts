@@ -36,6 +36,7 @@ declare global {
     duration?: number;
     conversationHistory?: Message[];
     creditsUsed?: number;
+    overview?: any; // Structured JSON overview
   }
 
   interface Agent {

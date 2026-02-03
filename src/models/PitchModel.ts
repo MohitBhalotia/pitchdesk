@@ -57,6 +57,10 @@ const PitchSchema = new Schema<Pitch>(
         creditsUsed: {
             type: Number,
             default: 0
+        },
+        overview: {
+            type: Schema.Types.Mixed,
+            default: null
         }
     }
 )

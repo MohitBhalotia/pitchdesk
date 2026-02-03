@@ -665,6 +665,34 @@ TONE:
 """
 
 
+
+SYSTEM_PROMPT_OVERVIEW = """
+You are an expert Venture Capital Analyst.
+Your task is to analyze a startup pitch transcript and generate a structured "Pitch Overview".
+
+You must extract key information into a valid JSON object.
+
+**JSON Structure:**
+{
+  "oneLiner": "A single, impactful sentence describing what the startup does.",
+  "problem": "What pain point are they solving?",
+  "solution": "How does their product/service solve it?",
+  "market": "Target market and industry sector.",
+  "keyMetrics": "Revenue, Users, Growth, etc. (or 'No specific metrics mentioned')",
+  "businessModel": "How they make money.",
+  "ask": "Funding ask and valuation (or 'Not mentioned').",
+  "team": "Founder background or team info (or 'Not mentioned').",
+  "analystTake": "Your 1-2 sentence professional assessment."
+}
+
+**Rules:**
+- Return ONLY valid JSON.
+- Do not include markdown code blocks (```json).
+- Be concise and professional.
+- Do NOT hallucinate information.
+"""
+
+
 # --------------------- CORE FUNCTION ---------------------
 def evaluate_pitch_tournament(transcript_text: str) -> dict:
     """Send pitch transcript to GPT model and get structured evaluation."""
@@ -711,6 +739,43 @@ async def evaluate_pitch_api(req: PitchRequest):
 
     result = evaluate_pitch_tournament(transcript_text)
     return result
+
+
+@app.post("/generate-overview")
+async def generate_pitch_overview(req: PitchRequest):
+    """
+    Generate a VC-focused overview of a pitch transcript.
+    Returns: JSON with "overview" field containing markdown summary.
+    """
+    try:
+        logging.info("📝 Generating pitch overview...")
+        transcript_text = "\n".join([f"{m.role}: {m.content}" for m in req.transcript])
+
+        completion = client.chat.completions.create(
+            model=MODEL_NAME,
+            temperature=0.2,
+            response_format={"type": "json_object"},
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT_OVERVIEW},
+                {
+                    "role": "user",
+                    "content": f"Analyze the following transcript and generate the overview JSON:\n\n{transcript_text}",
+                },
+            ],
+        )
+
+        overview_json = completion.choices[0].message.content.strip()
+        # Parse text to ensure it's valid dict, though client should return string
+        try:
+             overview_data = json.loads(overview_json)
+        except:
+             overview_data = {"error": "Failed to parse overview"}
+
+        return {"overview": overview_data}
+
+    except Exception as e:
+        logging.exception("❌ Pitch overview generation failed.")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 

@@ -9,7 +9,6 @@ import {
     XCircle,
     Clock,
     FileText,
-    Bot,
     Star,
     Mail,
     Phone,
@@ -17,7 +16,14 @@ import {
     TrendingUp,
     Users as UsersIcon,
     Calendar,
-    ExternalLink
+    ExternalLink,
+    Target,
+    Zap,
+    Users,
+    DollarSign,
+    Briefcase,
+    Lightbulb,
+    Loader2
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -72,6 +78,8 @@ export default function VCPitchDetailPage() {
         summary?: string;
     } | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [overview, setOverview] = useState<any>(null);
+    const [isOverviewLoading, setIsOverviewLoading] = useState(false);
 
     useEffect(() => {
         if (id) {
@@ -89,6 +97,19 @@ export default function VCPitchDetailPage() {
             console.error("Error fetching pitch details:", error);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const fetchOverview = async (pitchId: string) => {
+        if (overview || isOverviewLoading) return;
+        try {
+            setIsOverviewLoading(true);
+            const res = await axios.get(`/api/vc/pitch/${pitchId}/overview`);
+            setOverview(res.data.overview);
+        } catch (error) {
+            console.error("Error fetching overview:", error);
+        } finally {
+            setIsOverviewLoading(false);
         }
     };
 
@@ -315,31 +336,128 @@ export default function VCPitchDetailPage() {
                                         )}
                                     </TabsContent>
 
-                                    <TabsContent value="pitch" className="space-y-4 mt-4">
-                                        <div>
-                                            <p className="text-sm font-medium mb-2">Pitch Title</p>
-                                            <p className="text-sm text-muted-foreground">{pitch?.title || 'N/A'}</p>
-                                        </div>
-                                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                            <span className="flex items-center gap-1">
-                                                <Calendar className="h-4 w-4" />
+                                    <TabsContent value="pitch" className="space-y-6 mt-4">
+                                        <div className="flex items-center gap-4 text-sm text-muted-foreground p-3 bg-muted/40 rounded-lg">
+                                            <span className="flex items-center gap-1.5 font-medium text-foreground">
+                                                <Calendar className="h-4 w-4 text-primary" />
                                                 {pitch?.startTime ? new Date(pitch.startTime).toLocaleDateString() : 'N/A'}
                                             </span>
-                                            {pitch?.duration && (
-                                                <span>
-                                                    Duration: {Math.floor(pitch.duration / 60)}m {pitch.duration % 60}s
-                                                </span>
-                                            )}
+                                            <Separator orientation="vertical" className="h-4" />
+                                            <span className="flex items-center gap-1.5 font-medium text-foreground">
+                                                <Clock className="h-4 w-4 text-primary" />
+                                                Duration: {pitch?.duration ? `${Math.floor(pitch.duration / 60)}m ${pitch.duration % 60}s` : 'N/A'}
+                                            </span>
                                         </div>
-                                        <div>
-                                            <p className="text-sm font-medium mb-2">AI Feedback</p>
-                                            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                                                {application.botFeedback || 'No feedback available'}
-                                            </p>
+
+                                        {/* Overview Component */}
+                                        <div className="border rounded-lg bg-card text-card-foreground shadow-sm">
+                                            <div className="p-4 border-b bg-muted/20 flex justify-between items-center">
+                                                <div className="flex items-center gap-2 font-semibold">
+                                                    <FileText className="h-4 w-4 text-primary" />
+                                                    Pitch Overview
+                                                </div>
+                                                {pitch?._id && !overview && !isOverviewLoading && (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-8 text-xs"
+                                                        onClick={() => fetchOverview(pitch._id)}
+                                                    >
+                                                        Load Overview
+                                                    </Button>
+                                                )}
+                                            </div>
+
+                                            <div className="p-4">
+                                                {isOverviewLoading ? (
+                                                    <div className="flex flex-col items-center justify-center py-8 space-y-3">
+                                                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                                        <p className="text-sm text-muted-foreground">Analyzing pitch transcript...</p>
+                                                    </div>
+                                                ) : overview ? (
+                                                    <div className="space-y-4">
+                                                        <div className="bg-primary/5 p-3 rounded-md border border-primary/10">
+                                                            <p className="text-sm font-medium text-primary mb-1">One-Liner</p>
+                                                            <p className="text-sm italic">{overview.oneLiner || "N/A"}</p>
+                                                        </div>
+
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            <div className="space-y-1">
+                                                                <p className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
+                                                                    <Target className="h-3 w-3" /> Problem
+                                                                </p>
+                                                                <p className="text-sm">{overview.problem || "N/A"}</p>
+                                                            </div>
+                                                            <div className="space-y-1">
+                                                                <p className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
+                                                                    <Lightbulb className="h-3 w-3" /> Solution
+                                                                </p>
+                                                                <p className="text-sm">{overview.solution || "N/A"}</p>
+                                                            </div>
+                                                        </div>
+
+                                                        <Separator />
+
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            <div className="space-y-1">
+                                                                <p className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
+                                                                    <Users className="h-3 w-3" /> Market
+                                                                </p>
+                                                                <p className="text-sm">{overview.market || "N/A"}</p>
+                                                            </div>
+                                                            <div className="space-y-1">
+                                                                <p className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
+                                                                    <Zap className="h-3 w-3" /> Key Metrics
+                                                                </p>
+                                                                <p className="text-sm">{overview.keyMetrics || "N/A"}</p>
+                                                            </div>
+                                                        </div>
+
+                                                        <Separator />
+
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            <div className="space-y-1">
+                                                                <p className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
+                                                                    <Briefcase className="h-3 w-3" /> Business Model
+                                                                </p>
+                                                                <p className="text-sm">{overview.businessModel || "N/A"}</p>
+                                                            </div>
+                                                            <div className="space-y-1">
+                                                                <p className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
+                                                                    <DollarSign className="h-3 w-3" /> Ask
+                                                                </p>
+                                                                <p className="text-sm">{overview.ask || "N/A"}</p>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="bg-yellow-50 dark:bg-yellow-900/10 p-3 rounded-md border border-yellow-200 dark:border-yellow-800/30">
+                                                            <p className="text-xs font-bold text-yellow-700 dark:text-yellow-400 uppercase mb-1">Analyst Take</p>
+                                                            <p className="text-sm text-foreground/90">{overview.analystTake || "N/A"}</p>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="text-center py-6 text-muted-foreground">
+                                                        <p className="text-sm mb-2">Detailed overview not loaded.</p>
+                                                        {pitch?._id && (
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() => fetchOverview(pitch._id)}
+                                                            >
+                                                                Load AI Overview
+                                                            </Button>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
+
                                         {pitch?._id && (
-                                            <Button onClick={() => router.push(`/evaluation/${pitch._id}`)}>
-                                                View Full Evaluation
+                                            <Button
+                                                className="w-full"
+                                                onClick={() => router.push(`/evaluation/${pitch._id}`)}
+                                            >
+                                                View Full Evaluation Report
                                             </Button>
                                         )}
                                     </TabsContent>
@@ -348,23 +466,7 @@ export default function VCPitchDetailPage() {
                         </Card>
                     )}
 
-                    {/* Summary */}
-                    {evaluation?.summary && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2">
-                                    <Bot className="h-5 w-5" /> Executive Summary
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="prose dark:prose-invert max-w-none">
-                                    <p className="whitespace-pre-wrap leading-relaxed text-sm">
-                                        {evaluation.summary}
-                                    </p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
+
 
                     {/* Transcript */}
                     <Card>

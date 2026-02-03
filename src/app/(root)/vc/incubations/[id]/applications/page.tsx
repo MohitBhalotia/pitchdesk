@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft, Loader2, User, FileText, Calendar, TrendingUp, Mail, Phone, Building2, Users as UsersIcon } from "lucide-react";
+import { ArrowLeft, Loader2, User, FileText, Calendar, TrendingUp, Mail, Phone, Building2, Users as UsersIcon, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -12,7 +12,30 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Separator } from "@/components/ui/separator";
+import {
+    CheckCircle,
+    Target,
+    Zap,
+    Users,
+    DollarSign,
+    Briefcase,
+    Lightbulb
+} from "lucide-react";
 import {
     Select,
     SelectContent,
@@ -63,6 +86,8 @@ export default function ApplicationsPage() {
     const [applications, setApplications] = useState<IApplication[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [filterStatus, setFilterStatus] = useState("all");
+    const [loadingOverviews, setLoadingOverviews] = useState<{ [key: string]: boolean }>({});
+    const [pitchOverviews, setPitchOverviews] = useState<{ [key: string]: any }>({});
 
     useEffect(() => {
         if (id) {
@@ -94,6 +119,24 @@ export default function ApplicationsPage() {
         } catch (error) {
             console.error("Error updating status:", error);
             toast.error("Failed to update status");
+        }
+    };
+
+
+
+
+    const fetchPitchOverview = async (pitchId: string) => {
+        if (pitchOverviews[pitchId] || loadingOverviews[pitchId]) return;
+
+        try {
+            setLoadingOverviews(prev => ({ ...prev, [pitchId]: true }));
+            const response = await axios.get(`/api/vc/pitch/${pitchId}/overview`);
+            setPitchOverviews(prev => ({ ...prev, [pitchId]: response.data.overview }));
+        } catch (error) {
+            console.error("Error fetching overview:", error);
+            // toast.error("Failed to load pitch overview"); 
+        } finally {
+            setLoadingOverviews(prev => ({ ...prev, [pitchId]: false }));
         }
     };
 
@@ -366,28 +409,125 @@ export default function ApplicationsPage() {
                                     </TabsContent>
 
                                     <TabsContent value="pitch" className="space-y-4 mt-4">
-                                        <div className="space-y-4">
-                                            <div>
-                                                <p className="text-sm font-medium mb-2">Pitch Title</p>
-                                                <p className="text-sm text-muted-foreground">{application.pitchId.title}</p>
-                                            </div>
-                                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                                <span className="flex items-center gap-1">
-                                                    <Calendar className="h-4 w-4" />
+                                        <div className="space-y-6">
+                                            <div className="flex items-center gap-4 text-sm text-muted-foreground p-3 bg-muted/40 rounded-lg">
+                                                <span className="flex items-center gap-1.5 font-medium text-foreground">
+                                                    <Calendar className="h-4 w-4 text-primary" />
                                                     {new Date(application.pitchId.startTime).toLocaleDateString()}
                                                 </span>
-                                                <span>
+                                                <Separator orientation="vertical" className="h-4" />
+                                                <span className="flex items-center gap-1.5 font-medium text-foreground">
+                                                    <Clock className="h-4 w-4 text-primary" />
                                                     Duration: {Math.floor(application.pitchId.duration / 60)}m {application.pitchId.duration % 60}s
                                                 </span>
                                             </div>
-                                            <div>
-                                                <p className="text-sm font-medium mb-2">AI Feedback</p>
-                                                <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                                                    {application.botFeedback}
-                                                </p>
+
+                                            {/* Overview Component */}
+                                            <div className="border rounded-lg bg-card text-card-foreground shadow-sm">
+                                                <div className="p-4 border-b bg-muted/20 flex justify-between items-center">
+                                                    <div className="flex items-center gap-2 font-semibold">
+                                                        <FileText className="h-4 w-4 text-primary" />
+                                                        Pitch Overview
+                                                    </div>
+                                                    {!pitchOverviews[application.pitchId._id] && !loadingOverviews[application.pitchId._id] && (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="h-8 text-xs"
+                                                            onClick={() => fetchPitchOverview(application.pitchId._id)}
+                                                        >
+                                                            Load Overview
+                                                        </Button>
+                                                    )}
+                                                </div>
+
+                                                <div className="p-4">
+                                                    {loadingOverviews[application.pitchId._id] ? (
+                                                        <div className="flex flex-col items-center justify-center py-8 space-y-3">
+                                                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                                            <p className="text-sm text-muted-foreground">Analyzing pitch transcript...</p>
+                                                        </div>
+                                                    ) : pitchOverviews[application.pitchId._id] ? (
+                                                        <div className="space-y-4">
+                                                            <div className="bg-primary/5 p-3 rounded-md border border-primary/10">
+                                                                <p className="text-sm font-medium text-primary mb-1">One-Liner</p>
+                                                                <p className="text-sm italic">{pitchOverviews[application.pitchId._id].oneLiner || "N/A"}</p>
+                                                            </div>
+
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                <div className="space-y-1">
+                                                                    <p className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
+                                                                        <Target className="h-3 w-3" /> Problem
+                                                                    </p>
+                                                                    <p className="text-sm">{pitchOverviews[application.pitchId._id].problem || "N/A"}</p>
+                                                                </div>
+                                                                <div className="space-y-1">
+                                                                    <p className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
+                                                                        <Lightbulb className="h-3 w-3" /> Solution
+                                                                    </p>
+                                                                    <p className="text-sm">{pitchOverviews[application.pitchId._id].solution || "N/A"}</p>
+                                                                </div>
+                                                            </div>
+
+                                                            <Separator />
+
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                <div className="space-y-1">
+                                                                    <p className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
+                                                                        <Users className="h-3 w-3" /> Market
+                                                                    </p>
+                                                                    <p className="text-sm">{pitchOverviews[application.pitchId._id].market || "N/A"}</p>
+                                                                </div>
+                                                                <div className="space-y-1">
+                                                                    <p className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
+                                                                        <Zap className="h-3 w-3" /> Key Metrics
+                                                                    </p>
+                                                                    <p className="text-sm">{pitchOverviews[application.pitchId._id].keyMetrics || "N/A"}</p>
+                                                                </div>
+                                                            </div>
+
+                                                            <Separator />
+
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                <div className="space-y-1">
+                                                                    <p className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
+                                                                        <Briefcase className="h-3 w-3" /> Business Model
+                                                                    </p>
+                                                                    <p className="text-sm">{pitchOverviews[application.pitchId._id].businessModel || "N/A"}</p>
+                                                                </div>
+                                                                <div className="space-y-1">
+                                                                    <p className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
+                                                                        <DollarSign className="h-3 w-3" /> Ask
+                                                                    </p>
+                                                                    <p className="text-sm">{pitchOverviews[application.pitchId._id].ask || "N/A"}</p>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="bg-yellow-50 dark:bg-yellow-900/10 p-3 rounded-md border border-yellow-200 dark:border-yellow-800/30">
+                                                                <p className="text-xs font-bold text-yellow-700 dark:text-yellow-400 uppercase mb-1">Analyst Take</p>
+                                                                <p className="text-sm text-foreground/90">{pitchOverviews[application.pitchId._id].analystTake || "N/A"}</p>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-center py-6 text-muted-foreground">
+                                                            <p className="text-sm mb-2">Detailed overview not loaded.</p>
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() => fetchPitchOverview(application.pitchId._id)}
+                                                            >
+                                                                Load AI Overview
+                                                            </Button>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <Button onClick={() => router.push(`/evaluation/${application.pitchId._id}`)}>
-                                                View Full Evaluation
+
+                                            <Button
+                                                className="w-full"
+                                                onClick={() => router.push(`/evaluation/${application.pitchId._id}`)}
+                                            >
+                                                View Full Evaluation Report
                                             </Button>
                                         </div>
                                     </TabsContent>
@@ -443,6 +583,8 @@ export default function ApplicationsPage() {
                     ))}
                 </div>
             )}
-        </div>
+
+
+        </div >
     );
 }
