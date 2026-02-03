@@ -1,5 +1,4 @@
 "use client";
-import axios from "axios";
 import { createContext, useContext, useState, useRef, useEffect } from "react";
 import { getAuthToken, sendKeepAliveMessage } from "../utils/deepgramUtils";
 import { useSession } from "next-auth/react";

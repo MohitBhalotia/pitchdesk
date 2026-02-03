@@ -14,8 +14,10 @@ import {
   Crown,
   MessageSquare,
   HelpCircle,
-  Handshake,
   Trophy,
+  Bot,
+  Briefcase,
+  FileCheck,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -37,7 +39,6 @@ import {
 
 import { useSession } from "next-auth/react";
 import { Session } from "next-auth";
-import { title } from "process";
 
 const getUserFromSession = (session: Session) => ({
   name: session?.user?.fullName || "User",
@@ -135,6 +136,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: LayoutDashboard,
       },
       {
+        title: "Investment Programs",
+        url: "/incubations",
+        icon: Briefcase,
+      },
+      {
         title: "Pitch Evaluation",
         url: "/my-pitches",
         icon: History,
@@ -192,10 +198,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: LayoutDashboard,
       },
       {
-        title: "Browse pitches",
-        url: "/my-pitches",
-        icon: History,
+        title: "My Agents",
+        url: "/vc/bots",
+        icon: Bot,
       },
+      {
+        title: "Investment Programs",
+        url: "/vc/incubations",
+        icon: Briefcase,
+      },
+      {
+        title: "Pitch Reviews",
+        url: "/vc/pitches",
+        icon: FileCheck,
+      },
+      // {
+      //   title: "Browse pitches",
+      //   url: "/my-pitches",
+      //   icon: History,
+      // },
     ],
     navSecondary: [
       {

@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import NumberFlow from "@number-flow/react";
+// import NumberFlow from "@number-flow/react";
 import { BadgeCheck, IndianRupee, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
@@ -160,7 +160,7 @@ const PricingCard = ({
   submitPayment: (planId: string) => void;
   loading: boolean;
 }) => {
-  const price = tier.price;
+  // const price = tier.price;
   const isPopular = tier.popular;
 
   return (
@@ -250,9 +250,9 @@ export default function PricingSection() {
   const [loading, setLoading] = useState(false);
   const { data: session, update } = useSession();
   const router = useRouter();
-  const userId = session?.user?._id;
-  const userName = session?.user?.fullName || "User";
-  const userEmail = session?.user?.email || "user@email.com";
+  // const userId = session?.user?._id;
+  // const userName = session?.user?.fullName || "User";
+  // const userEmail = session?.user?.email || "user@email.com";
 
   useEffect(() => {
     const script = document.createElement("script");

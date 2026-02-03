@@ -213,7 +213,14 @@ Risk Assessment
 
 export const stsConfig = async (agentId: string) => {
   const agent = await getAgentConfig(agentId);
-
+  const tts=agent.vcId? {type: "cartesia" as const,
+          model_id: "sonic-3",
+          voice: {
+            mode: "id",
+            id: agent.voice,
+          },
+          language: "en",
+        }: {type: "deepgram" as const, model: agent.voice as string}
   return {
     type: "Settings" as const,
     audio: {
@@ -237,15 +244,7 @@ export const stsConfig = async (agentId: string) => {
         },
       },
       speak: {
-        provider: {
-          type: "cartesia" as const,
-          model_id: "sonic-3",
-          voice: {
-            mode: "id",
-            id: "791d5162-d5eb-40f0-8189-f19db44611d8",
-          },
-          language: "hi",
-        },
+        provider: tts,
       },
       think: {
         provider: {

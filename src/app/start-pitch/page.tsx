@@ -12,9 +12,7 @@ import Conversation from "../../components/Conversation";
 import { isMobile } from "react-device-detect";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  ArrowBigUp,
   Handshake,
-  Link,
   Loader2,
   LogOut,
   MoveUpRight,
@@ -50,6 +48,7 @@ function HomeContent() {
   const agentId = searchParams.get("agentId");
   const isPractice = searchParams.get("practice");
   const competitionId = searchParams.get("competitionId");
+  const incubationId = searchParams.get("incubationId");
   if (competitionId) {
     setCompetitionId(competitionId);
   }
@@ -77,6 +76,7 @@ function HomeContent() {
           userId: session?.user?._id,
           sessionId: "Pitchdesk" + Math.ceil(Math.random() * 1000000),
           competitionId,
+          incubationId,
         });
         const data = res.data.data;
         setRemainingTime((data?.remainingTime ?? 0) * 60);
@@ -122,11 +122,12 @@ function HomeContent() {
         pitchId: pitchId,
         sessionId: sessionIdRef.current,
         competitionId: competitionId ?? null,
+        incubationId: incubationId ?? null,
         userId: session?.user?._id,
         transcript: transcriptRef.current,
         duration: durationRef.current,
       });
-    } ;
+    };
     if (started) {
       setInterval(() => {
         console.log("Updating pitch");
@@ -141,6 +142,7 @@ function HomeContent() {
       pitchId: pitchId,
       sessionId: sessionIdRef.current,
       competitionId: competitionId ?? null,
+      incubationId: incubationId ?? null,
       userId: session?.user?._id,
       transcript: transcriptRef.current,
       duration: durationRef.current,
@@ -229,15 +231,14 @@ function HomeContent() {
                 </div>
                 {/* Remaining Time */}
                 <div
-                  className={`text-white px-4 py-2 rounded-lg shadow-lg transition-colors ${
-                    remainingTime - duration <= 10
+                  className={`text-white px-4 py-2 rounded-lg shadow-lg transition-colors ${remainingTime - duration <= 10
                       ? "border-2 border-red-600 animate-pulse"
                       : remainingTime - duration <= 30
                         ? "border-2 border-red-500"
                         : remainingTime - duration <= 60
                           ? "border-2 border-orange-500"
                           : "border-2 border-green-500"
-                  }`}
+                    }`}
                 >
                   <div className="text-xs font-semibold">Remaining</div>
                   <div className="text-lg font-bold">

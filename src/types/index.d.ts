@@ -24,10 +24,22 @@ declare global {
     updatedAt: Date;
   }
 
+  export interface PitchOverview {
+    oneLiner?: string;
+    problem?: string;
+    solution?: string;
+    market?: string;
+    keyMetrics?: string;
+    businessModel?: string;
+    ask?: string;
+    analystTake?: string;
+  }
+
   export interface Pitch extends Document {
     sessionId: string;
     userId: mongoose.Schema.Types.ObjectId | null;
     competitionId: mongoose.Schema.Types.ObjectId | null;
+    incubationId: mongoose.Schema.Types.ObjectId | null;
     title: string
     lastUpdated: Date;
     startTime: Date;
@@ -35,6 +47,7 @@ declare global {
     duration?: number;
     conversationHistory?: Message[];
     creditsUsed?: number;
+    overview?: PitchOverview;
   }
 
   interface Agent {
@@ -71,7 +84,7 @@ declare global {
   }
 
   export interface IUserPlan extends Document {
-    userId: mongoose.Schema.Types.ObjectId 
+    userId: mongoose.Schema.Types.ObjectId
     planId: mongoose.Schema.Types.ObjectId
     isActive: boolean
     pitchTimeRemaining: number
