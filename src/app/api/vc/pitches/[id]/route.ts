@@ -39,7 +39,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
             application.statusHistory.push({
                 status: action,
                 changedAt: new Date(),
-                changedBy: session.user._id as any,
+                changedBy: session.user._id as unknown as typeof application.statusHistory[0]['changedBy'],
             });
 
             // Auto-message on acceptance

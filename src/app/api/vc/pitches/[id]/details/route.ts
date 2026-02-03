@@ -53,7 +53,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
         const enhancedApplication = {
             ...application,
             founder: {
-                ...(application.founderId as any),
+                ...(application.founderId as unknown as { fullName: string; email: string; profileImage: string }),
                 pitchesCount: founderPitchCount
             },
             program: application.programId

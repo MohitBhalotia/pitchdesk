@@ -76,7 +76,18 @@ interface IBot {
 export default function IncubationProgramDetailPage() {
     const router = useRouter();
     const { id } = useParams();
-    const [program, setProgram] = useState<any>(null);
+    const [program, setProgram] = useState<{
+        title: string;
+        description: string;
+        botId: { _id: string; name: string; image: string } | string;
+        eligibility: string[];
+        rulesAndGuidelines: string[];
+        stages: { title: string; description: string; startDate: string; endDate: string }[];
+        timeline: { startDate: string; endDate: string; applicationDeadline: string };
+        fundingAmount?: number;
+        cohortSize?: number;
+        status: string;
+    } | null>(null);
     const [bots, setBots] = useState<IBot[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
@@ -126,7 +137,7 @@ export default function IncubationProgramDetailPage() {
                 fundingAmount: prog.fundingAmount?.toString() || "",
                 eligibility: prog.eligibility?.map((e: string) => ({ value: e })) || [{ value: "" }],
                 rulesAndGuidelines: prog.rulesAndGuidelines?.map((r: string) => ({ value: r })) || [{ value: "" }],
-                stages: prog.stages && prog.stages.length > 0 ? prog.stages.map((s: any) => ({
+                stages: prog.stages && prog.stages.length > 0 ? prog.stages.map((s: { title?: string; description: string; startDate: string; endDate: string }) => ({
                     title: s.title || "",
                     description: s.description,
                     startDate: s.startDate ? new Date(s.startDate).toISOString().split('T')[0] : "",
@@ -287,7 +298,7 @@ export default function IncubationProgramDetailPage() {
                                     <div>
                                         <h3 className="font-semibold mb-2">Program Stages</h3>
                                         <div className="space-y-4">
-                                            {Array.isArray(program.stages) ? program.stages.map((stage: any, i: number) => (
+                                            {Array.isArray(program.stages) ? program.stages.map((stage: { title: string; description: string; startDate: string; endDate: string }, i: number) => (
                                                 <div key={i} className="border p-4 rounded-lg bg-muted/20">
                                                     <h4 className="font-bold mb-1">Stage {i + 1}: {stage.title}</h4>
                                                     <p className="text-sm text-muted-foreground mb-2">{stage.description}</p>
@@ -320,14 +331,14 @@ export default function IncubationProgramDetailPage() {
                                             <div className="flex items-center gap-4">
                                                 <div className="relative h-16 w-16 rounded-full overflow-hidden border-2">
                                                     <Image
-                                                        src={program.botId?.image || "/placeholder-avatar.png"}
+                                                        src={typeof program.botId === 'object' ? program.botId.image : "/placeholder-avatar.png"}
                                                         alt="Agent"
                                                         fill
                                                         className="object-cover"
                                                     />
                                                 </div>
                                                 <div>
-                                                    <h3 className="font-bold text-lg">{program.botId?.name}</h3>
+                                                    <h3 className="font-bold text-lg">{typeof program.botId === 'object' ? program.botId.name : 'AI Judge'}</h3>
                                                     <p className="text-sm text-muted-foreground">AI Evaluation Judge</p>
                                                 </div>
                                             </div>

@@ -109,9 +109,10 @@ export default function ApplicationSubmissionDialog({
             form.reset();
             onOpenChange(false);
             onSuccess();
-        } catch (error: any) {
-            console.error("Error submitting application:", error);
-            toast.error(error.response?.data?.error || "Failed to submit application");
+        } catch (error: unknown) {
+            const err = error as { response?: { data?: { error?: string } } };
+            console.error("Error submitting application:", err);
+            toast.error(err.response?.data?.error || "Failed to submit application");
         } finally {
             setIsSubmitting(false);
         }

@@ -42,18 +42,19 @@ export async function POST(req: Request) {
         }
 
         // Extract base64 images from variations
-        const avatars = data.data.variations.map((v: any) => v.base64);
+        const avatars = data.data.variations.map((v: { base64: string }) => v.base64);
 
         return NextResponse.json({
             avatars: avatars, // Array of base64 strings
             success: true
         });
 
-    } catch (error: any) {
-        const errorDetails = error.response ? error.response.data : (error.message || 'Unknown error');
+    } catch (error: unknown) {
+        const err = error as { response?: { data: unknown; status: number }; message?: string };
+        const errorDetails = err.response ? err.response.data : (err.message || 'Unknown error');
         console.error("Avatar generation error:", typeof errorDetails === 'object' ? JSON.stringify(errorDetails) : errorDetails);
 
-        const status = error.response ? error.response.status : 500;
+        const status = err.response ? err.response.status : 500;
 
         return NextResponse.json(
             { error: "Avatar generation failed", details: errorDetails },

@@ -225,7 +225,7 @@ export default function IncubationDetailPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="space-y-4">
-                                        {Array.isArray(program.stages) ? program.stages.map((stage: any, i: number) => (
+                                        {Array.isArray(program.stages) ? program.stages.map((stage: { title: string; description: string; startDate: string; endDate: string }, i: number) => (
                                             <div key={i} className="border p-4 rounded-lg bg-muted/20">
                                                 <h4 className="font-bold mb-1">Stage {i + 1}: {stage.title}</h4>
                                                 <p className="text-sm text-muted-foreground mb-2">{stage.description}</p>
@@ -418,7 +418,7 @@ export default function IncubationDetailPage() {
                                     </Button>
 
                                     <p className="text-xs text-center text-muted-foreground">
-                                        You'll practice your pitch and then fill out the application form
+                                        You&apos;ll practice your pitch and then fill out the application form
                                     </p>
                                 </div>
                             )}

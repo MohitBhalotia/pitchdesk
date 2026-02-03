@@ -46,8 +46,9 @@ export async function POST(req: Request) {
             } else {
                 throw new Error("Invalid response from FastAPI");
             }
-        } catch (fastApiError: any) {
-            console.error("FastAPI call failed, using fallback:", fastApiError.message);
+        } catch (fastApiError: unknown) {
+            const err = fastApiError as { message?: string };
+            console.error("FastAPI call failed, using fallback:", err.message);
 
             // Fallback template if FastAPI is not available
             const fallbackPrompt = `You are ${name}, an AI VC judge specializing in ${Array.isArray(sector) ? sector.join(", ") : (sector || 'various sectors')}.

@@ -700,7 +700,7 @@ export default function CreateBotPage() {
                                                             </p>
                                                             <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mb-4 max-w-md mx-auto">
                                                                 <p className="text-sm font-medium italic text-foreground leading-relaxed">
-                                                                    "Hello, I'm excited to evaluate innovative startups. Please share your vision, traction, and how you plan to scale your business."
+                                                                    &quot;Hello, I&apos;m excited to evaluate innovative startups. Please share your vision, traction, and how you plan to scale your business.&quot;
                                                                 </p>
                                                             </div>
                                                             <p className="text-xs text-muted-foreground">
@@ -841,7 +841,7 @@ export default function CreateBotPage() {
                                                     <div className="text-center">
                                                         <h3 className="font-semibold text-lg mb-2">Capture or Upload Your Photo</h3>
                                                         <p className="text-sm text-muted-foreground">
-                                                            We'll use AI to generate professional avatars from your photo.
+                                                            We&apos;ll use AI to generate professional avatars from your photo.
                                                         </p>
                                                     </div>
 

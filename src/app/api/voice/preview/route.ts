@@ -59,11 +59,12 @@ export async function POST(req: Request) {
             }
         });
 
-    } catch (error: any) {
-        const errorDetails = error.response ? error.response.data : (error.message || 'Unknown error');
+    } catch (error: unknown) {
+        const err = error as { response?: { data: unknown; status: number }; message?: string };
+        const errorDetails = err.response ? err.response.data : (err.message || 'Unknown error');
         console.error('Voice preview error:', typeof errorDetails === 'object' ? JSON.stringify(errorDetails) : errorDetails);
 
-        const status = error.response ? error.response.status : 500;
+        const status = err.response ? err.response.status : 500;
 
         return NextResponse.json(
             { error: "Voice preview failed", details: errorDetails },

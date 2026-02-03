@@ -93,9 +93,8 @@ export default function VCPitchReviewPage() {
     const updateStatus = async (id: string, newStatus: string) => {
         try {
             // Optimistically update UI
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             setApplications(prev => prev.map(app =>
-                app._id === id ? { ...app, status: newStatus as any } : app
+                app._id === id ? { ...app, status: newStatus as IApplication['status'] } : app
             ));
 
             await axios.put(`/api/vc/pitches/${id}`, { action: newStatus });

@@ -72,18 +72,23 @@ export async function POST(req: Request) {
             language: voiceData.language,
             success: true
         });
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const err = error as {
+            message?: string;
+            response?: { status?: number; statusText?: string; data?: unknown };
+            config?: { url?: string; headers?: unknown }
+        };
         console.error('❌ Cartesia API error:', {
-            message: error.message,
-            status: error.response?.status,
-            statusText: error.response?.statusText,
-            data: error.response?.data,
-            url: error.config?.url,
-            headers: error.config?.headers,
+            message: err.message,
+            status: err.response?.status,
+            statusText: err.response?.statusText,
+            data: err.response?.data,
+            url: err.config?.url,
+            headers: err.config?.headers,
         });
 
-        const errorDetails = error.response?.data || error.message || 'Unknown error';
-        const status = error.response?.status || 500;
+        const errorDetails = err.response?.data || err.message || 'Unknown error';
+        const status = err.response?.status || 500;
 
         // Provide more helpful error messages
         let userMessage = "Voice cloning failed";

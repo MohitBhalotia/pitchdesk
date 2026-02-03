@@ -10,7 +10,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     try {
         await dbConnect();
         const session = await getServerSession(authOptions);
-        const { id: programId } = await params;
+        const { id: programId } = params;
 
         if (!session) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

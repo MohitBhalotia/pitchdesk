@@ -38,9 +38,39 @@ import { toast } from "sonner";
 export default function VCPitchDetailPage() {
     const router = useRouter();
     const { id } = useParams();
-    const [application, setApplication] = useState<any>(null);
-    const [pitch, setPitch] = useState<any>(null);
-    const [evaluation, setEvaluation] = useState<any>(null);
+    const [application, setApplication] = useState<{
+        _id: string;
+        status: string;
+        score: number;
+        submittedAt: string;
+        founder?: { fullName: string; email: string; profileImage: string };
+        program?: { title: string };
+        registrationData?: {
+            startupName: string;
+            founderName: string;
+            email: string;
+            phone: string;
+            industry: string;
+            stage: string;
+            teamSize: number;
+            description: string;
+            website?: string;
+            linkedin?: string;
+            fundingRaised?: string;
+            motivation: string;
+        };
+        botFeedback?: string;
+    } | null>(null);
+    const [pitch, setPitch] = useState<{
+        _id: string;
+        title: string;
+        startTime: string;
+        duration: number;
+        conversationHistory?: { role: string; content: string }[];
+    } | null>(null);
+    const [evaluation, setEvaluation] = useState<{
+        summary?: string;
+    } | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -348,7 +378,7 @@ export default function VCPitchDetailPage() {
                             <ScrollArea className="h-[400px]">
                                 <div className="space-y-4">
                                     {pitch?.conversationHistory?.length > 0 ? (
-                                        pitch.conversationHistory.map((msg: any, i: number) => (
+                                        pitch.conversationHistory.map((msg: { role: string; content: string }, i: number) => (
                                             <div key={i} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
                                                 <div className={`flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center ${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                                                     {msg.role === 'user' ? 'U' : 'AI'}
