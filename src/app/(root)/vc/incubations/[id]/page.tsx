@@ -211,7 +211,7 @@ export default function IncubationProgramDetailPage() {
 
     return (
         <div className="container mx-auto p-6 max-w-6xl">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                 <Button variant="ghost" className="pl-0" onClick={() => router.push('/vc/incubations')}>
                     <ArrowLeft className="mr-2 h-4 w-4" /> Back to Programs
                 </Button>
@@ -247,7 +247,7 @@ export default function IncubationProgramDetailPage() {
                         </CardHeader>
                         <CardContent>
                             <Tabs defaultValue="overview">
-                                <TabsList>
+                                <TabsList className="w-full justify-start overflow-x-auto">
                                     <TabsTrigger value="overview">Overview</TabsTrigger>
                                     <TabsTrigger value="details">Details</TabsTrigger>
                                     <TabsTrigger value="bot">AI Judge</TabsTrigger>
@@ -263,7 +263,7 @@ export default function IncubationProgramDetailPage() {
                                         {program.fundingAmount && (
                                             <div className="p-4 bg-muted/30 rounded-lg">
                                                 <p className="text-sm text-muted-foreground mb-1">Funding</p>
-                                                <p className="text-xl font-bold">₹{program.fundingAmount.toLocaleString('en-IN')}</p>
+                                                <p className="text-xl font-bold break-words">₹{program.fundingAmount.toLocaleString('en-IN')}</p>
                                             </div>
                                         )}
                                         {program.cohortSize && (

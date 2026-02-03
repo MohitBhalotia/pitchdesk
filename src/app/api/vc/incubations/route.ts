@@ -2,6 +2,8 @@ import { getServerSession } from "next-auth";
 import authOptions from "@/lib/auth";
 import dbConnect from "@/lib/db";
 import IncubationProgram from "@/models/IncubationProgramModel";
+//regitser schema for model agent
+import "@/models/AgentModel";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {

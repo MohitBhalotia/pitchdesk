@@ -191,7 +191,7 @@ export default function IncubationDetailPage() {
 
                     {/* Tabs */}
                     <Tabs defaultValue="details" className="w-full">
-                        <TabsList className="mb-4">
+                        <TabsList className="mb-4 w-full justify-start overflow-x-auto">
                             <TabsTrigger value="details">Program Details</TabsTrigger>
                             <TabsTrigger value="stages">Stages & Timeline</TabsTrigger>
                             <TabsTrigger value="eligibility">Eligibility</TabsTrigger>

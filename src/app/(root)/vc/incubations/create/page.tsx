@@ -498,7 +498,7 @@ export default function CreateIncubationPage() {
                         </div>
                     </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between pt-4 border-t gap-4">
                         <FormField
                             control={form.control}
                             name="status"

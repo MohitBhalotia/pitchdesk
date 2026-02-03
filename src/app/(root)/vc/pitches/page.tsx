@@ -169,7 +169,7 @@ export default function VCPitchReviewPage() {
             </div>
 
             <Tabs defaultValue="all" onValueChange={setFilter} className="w-full mb-8">
-                <TabsList>
+                <TabsList className="w-full justify-start overflow-x-auto">
                     <TabsTrigger value="all">All ({applications.length})</TabsTrigger>
                     <TabsTrigger value="pending">Pending</TabsTrigger>
                     <TabsTrigger value="wishlist">Wishlist</TabsTrigger>
@@ -249,7 +249,7 @@ export default function VCPitchReviewPage() {
                                 <Button
                                     variant={app.status === 'wishlist' ? 'default' : 'outline'}
                                     size="sm"
-                                    className={`w-full text-xs ${app.status === 'wishlist' ? 'bg-purple-600 hover:bg-purple-700' : 'text-purple-600 hover:text-purple-700 hover:bg-purple-50'}`}
+                                    className={`w-full text-xs ${app.status === 'wishlist' ? 'bg-purple-600 hover:bg-purple-700 text-white hover:text-white' : 'bg-transparent text-purple-600 border-purple-200 hover:bg-purple-50 hover:text-purple-700'}`}
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         updateStatus(app._id, 'wishlist');
@@ -260,7 +260,7 @@ export default function VCPitchReviewPage() {
                                 <Button
                                     variant={app.status === 'accepted' ? 'default' : 'outline'}
                                     size="sm"
-                                    className={`w-full text-xs ${app.status === 'accepted' ? 'bg-green-600 hover:bg-green-700' : 'text-green-600 hover:text-green-700 hover:bg-green-50'}`}
+                                    className={`w-full text-xs ${app.status === 'accepted' ? 'bg-green-600 hover:bg-green-700 text-white hover:text-white' : 'bg-transparent text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700'}`}
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         updateStatus(app._id, 'accepted');
@@ -271,7 +271,7 @@ export default function VCPitchReviewPage() {
                                 <Button
                                     variant={app.status === 'hold' ? 'default' : 'outline'}
                                     size="sm"
-                                    className={`w-full text-xs ${app.status === 'hold' ? 'bg-orange-600 hover:bg-orange-700' : 'text-orange-600 hover:text-orange-700 hover:bg-orange-50'}`}
+                                    className={`w-full text-xs ${app.status === 'hold' ? 'bg-orange-600 hover:bg-orange-700 text-white hover:text-white' : 'bg-transparent text-orange-600 border-orange-200 hover:bg-orange-50 hover:text-orange-700'}`}
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         updateStatus(app._id, 'hold');
@@ -282,7 +282,7 @@ export default function VCPitchReviewPage() {
                                 <Button
                                     variant={app.status === 'rejected' ? 'default' : 'outline'}
                                     size="sm"
-                                    className={`w-full text-xs ${app.status === 'rejected' ? 'bg-red-600 hover:bg-red-700' : 'text-red-600 hover:text-red-700 hover:bg-red-50'}`}
+                                    className={`w-full text-xs ${app.status === 'rejected' ? 'bg-red-600 hover:bg-red-700 text-white hover:text-white' : 'bg-transparent text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700'}`}
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         updateStatus(app._id, 'rejected');

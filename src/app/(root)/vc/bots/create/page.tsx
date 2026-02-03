@@ -1096,7 +1096,7 @@ export default function CreateBotPage() {
                                                     Quick option: Select a professional avatar without uploading
                                                 </p>
                                             </div>
-                                            <div className="grid grid-cols-5 gap-4 mb-4">
+                                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-4">
                                                 {DEFAULT_AVATARS.map((avatarUrl, index) => (
                                                     <div
                                                         key={index}
@@ -1248,7 +1248,7 @@ export default function CreateBotPage() {
                                                             <p className="text-sm text-muted-foreground mb-4">
                                                                 Select an avatar for your bot:
                                                             </p>
-                                                            <div className="grid grid-cols-3 gap-4">
+                                                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                                                 {generatedAvatars.map((avatar, index) => (
                                                                     <div
                                                                         key={index}
@@ -1342,7 +1342,7 @@ export default function CreateBotPage() {
                                             )}
                                         </div>
 
-                                        <div className="flex gap-3">
+                                        <div className="flex flex-col-reverse sm:flex-row gap-3">
                                             <Button
                                                 type="button"
                                                 variant="ghost"

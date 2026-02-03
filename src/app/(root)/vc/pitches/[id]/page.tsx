@@ -194,32 +194,32 @@ export default function VCPitchDetailPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center gap-3 mb-8 p-4 bg-muted/30 rounded-lg">
+            <div className="flex flex-wrap items-center gap-3 mb-8 p-4 bg-muted/30 rounded-lg">
                 <span className="text-sm font-medium mr-2">Actions:</span>
                 <Button
                     variant={application.status === 'wishlist' ? 'default' : 'outline'}
-                    className={application.status === 'wishlist' ? 'bg-purple-600 hover:bg-purple-700' : 'text-purple-600 border-purple-200 hover:bg-purple-50'}
+                    className={application.status === 'wishlist' ? 'bg-purple-600 hover:bg-purple-700 text-white hover:text-white' : 'bg-transparent text-purple-600 border-purple-200 hover:bg-purple-50 hover:text-purple-700'}
                     onClick={() => updateStatus('wishlist')}
                 >
                     <Star className="mr-2 h-4 w-4" /> Wishlist
                 </Button>
                 <Button
                     variant={application.status === 'accepted' ? 'default' : 'outline'}
-                    className={application.status === 'accepted' ? 'bg-green-600 hover:bg-green-700' : 'text-green-600 border-green-200 hover:bg-green-50'}
+                    className={application.status === 'accepted' ? 'bg-green-600 hover:bg-green-700 text-white hover:text-white' : 'bg-transparent text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700'}
                     onClick={() => updateStatus('accepted')}
                 >
                     <CheckCircle2 className="mr-2 h-4 w-4" /> Accept
                 </Button>
                 <Button
                     variant={application.status === 'hold' ? 'default' : 'outline'}
-                    className={application.status === 'hold' ? 'bg-orange-600 hover:bg-orange-700' : 'text-orange-600 border-orange-200 hover:bg-orange-50'}
+                    className={application.status === 'hold' ? 'bg-orange-600 hover:bg-orange-700 text-white hover:text-white' : 'bg-transparent text-orange-600 border-orange-200 hover:bg-orange-50 hover:text-orange-700'}
                     onClick={() => updateStatus('hold')}
                 >
                     <Clock className="mr-2 h-4 w-4" /> Hold
                 </Button>
                 <Button
                     variant={application.status === 'rejected' ? 'default' : 'outline'}
-                    className={application.status === 'rejected' ? 'bg-red-600 hover:bg-red-700' : 'text-red-600 border-red-200 hover:bg-red-50'}
+                    className={application.status === 'rejected' ? 'bg-red-600 hover:bg-red-700 text-white hover:text-white' : 'bg-transparent text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700'}
                     onClick={() => updateStatus('rejected')}
                 >
                     <XCircle className="mr-2 h-4 w-4" /> Reject

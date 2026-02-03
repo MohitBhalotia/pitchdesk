@@ -525,7 +525,7 @@ export default function ApplicationsPage() {
                                                 <Button
                                                     variant={application.status === "wishlist" ? "default" : "outline"}
                                                     size="sm"
-                                                    className={application.status === "wishlist" ? "bg-purple-600 hover:bg-purple-700 text-white" : "text-purple-600 border-purple-300 hover:bg-purple-50"}
+                                                    className={application.status === "wishlist" ? "bg-purple-600 hover:bg-purple-700 text-white hover:text-white" : "bg-transparent text-purple-600 border-purple-300 hover:bg-purple-50 hover:text-purple-700"}
                                                     onClick={() => updateApplicationStatus(application._id, "wishlist")}
                                                 >
                                                     Wishlist
@@ -533,7 +533,7 @@ export default function ApplicationsPage() {
                                                 <Button
                                                     variant={application.status === "hold" ? "default" : "outline"}
                                                     size="sm"
-                                                    className={application.status === "hold" ? "bg-orange-600 hover:bg-orange-700 text-white" : "text-orange-600 border-orange-300 hover:bg-orange-50"}
+                                                    className={application.status === "hold" ? "bg-orange-600 hover:bg-orange-700 text-white hover:text-white" : "bg-transparent text-orange-600 border-orange-300 hover:bg-orange-50 hover:text-orange-700"}
                                                     onClick={() => updateApplicationStatus(application._id, "hold")}
                                                 >
                                                     Hold
@@ -541,7 +541,7 @@ export default function ApplicationsPage() {
                                                 <Button
                                                     variant={application.status === "accepted" ? "default" : "outline"}
                                                     size="sm"
-                                                    className={application.status === "accepted" ? "bg-green-600 hover:bg-green-700 text-white" : "text-green-600 border-green-300 hover:bg-green-50"}
+                                                    className={application.status === "accepted" ? "bg-green-600 hover:bg-green-700 text-white hover:text-white" : "bg-transparent text-green-600 border-green-300 hover:bg-green-50 hover:text-green-700"}
                                                     onClick={() => updateApplicationStatus(application._id, "accepted")}
                                                 >
                                                     Accept
@@ -549,7 +549,7 @@ export default function ApplicationsPage() {
                                                 <Button
                                                     variant={application.status === "rejected" ? "default" : "outline"}
                                                     size="sm"
-                                                    className={application.status === "rejected" ? "bg-red-600 hover:bg-red-700 text-white" : "text-red-600 border-red-300 hover:bg-red-50"}
+                                                    className={application.status === "rejected" ? "bg-red-600 hover:bg-red-700 text-white hover:text-white" : "bg-transparent text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700"}
                                                     onClick={() => updateApplicationStatus(application._id, "rejected")}
                                                 >
                                                     Reject
