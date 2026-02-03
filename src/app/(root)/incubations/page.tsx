@@ -42,7 +42,7 @@ export default function IncubationListPage() {
             const response = await axios.get("/api/incubations");
             setPrograms(response.data);
         } catch (error) {
-            console.error("Error fetching incubations:", error);
+            console.error("Error fetching investment programs:", error);
         } finally {
             setIsLoading(false);
         }
@@ -52,10 +52,10 @@ export default function IncubationListPage() {
         <div className="container mx-auto p-6 max-w-7xl">
             <div className="mb-8 text-center max-w-2xl mx-auto">
                 <h1 className="text-4xl font-extrabold tracking-tight mb-4 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                    Incubation Programs
+                    Investment Programs
                 </h1>
                 <p className="text-lg text-muted-foreground">
-                    Fast track your startup journey. Apply to top incubation programs and get evaluated by AI VC judges instantly.
+                    Fast track your startup journey. Apply to top investment programs and get evaluated by AI VC judges instantly.
                 </p>
             </div>
 
@@ -70,7 +70,7 @@ export default function IncubationListPage() {
                 </div>
             ) : programs.length === 0 ? (
                 <div className="text-center py-12">
-                    <p className="text-muted-foreground">No active incubation programs found at the moment.</p>
+                    <p className="text-muted-foreground">No active investment programs found at the moment.</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -83,7 +83,7 @@ export default function IncubationListPage() {
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium">{program.organizationName}</p>
-                                        <p className="text-xs text-muted-foreground">Incubation Center</p>
+                                        <p className="text-xs text-muted-foreground">Investment Center</p>
                                     </div>
                                 </div>
                                 <CardTitle className="text-xl">{program.title}</CardTitle>

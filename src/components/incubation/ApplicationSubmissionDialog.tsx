@@ -298,7 +298,7 @@ export default function ApplicationSubmissionDialog({
                                     <FormLabel>Why this program? *</FormLabel>
                                     <FormControl>
                                         <Textarea
-                                            placeholder="Why are you interested in this incubation program? What do you hope to achieve?"
+                                            placeholder="Why are you interested in this investment program? What do you hope to achieve?"
                                             className="min-h-[80px]"
                                             {...field}
                                         />

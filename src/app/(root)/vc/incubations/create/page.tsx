@@ -140,12 +140,12 @@ export default function CreateIncubationPage() {
             };
 
             await axios.post("/api/vc/incubations", payload);
-            toast.success("Incubation program created successfully!");
+            toast.success("Investment program created successfully!");
             router.push("/vc/incubations");
             router.refresh();
         } catch (error) {
-            console.error("Error creating incubation:", error);
-            toast.error("Failed to create incubation program.");
+            console.error("Error creating investment program:", error);
+            toast.error("Failed to create investment program.");
         } finally {
             setIsSubmitting(false);
         }
@@ -154,7 +154,7 @@ export default function CreateIncubationPage() {
     return (
         <div className="container mx-auto p-6 max-w-4xl">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold tracking-tight">Create Incubation Program</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Create Investment Program</h1>
                 <p className="text-muted-foreground mt-1">
                     Launch a new program to find and support the next big startups.
                 </p>
@@ -189,7 +189,7 @@ export default function CreateIncubationPage() {
                                             <Input placeholder="e.g. Y Combinator, Techstars" {...field} />
                                         </FormControl>
                                         <FormDescription>
-                                            The name of your incubation center/firm (shown to founders for privacy)
+                                            The name of your investment firm
                                         </FormDescription>
                                         <FormMessage />
                                     </FormItem>

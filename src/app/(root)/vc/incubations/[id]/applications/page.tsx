@@ -190,7 +190,7 @@ export default function ApplicationsPage() {
             <div className="mb-8">
                 <h1 className="text-3xl font-bold tracking-tight">Applications</h1>
                 <p className="text-muted-foreground mt-1">
-                    Review and manage applications for this incubation program
+                    Review and manage applications for this investment program
                 </p>
             </div>
 

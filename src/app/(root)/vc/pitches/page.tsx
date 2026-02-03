@@ -142,7 +142,7 @@ export default function VCPitchReviewPage() {
             <div className="mb-8">
                 <h1 className="text-3xl font-bold tracking-tight mb-2">Pitch Reviews</h1>
                 <p className="text-muted-foreground">
-                    Review and manage all pitch submissions across all your incubation programs.
+                    Review and manage all pitch submissions across all your investment programs.
                 </p>
             </div>
 

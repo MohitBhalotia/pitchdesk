@@ -65,9 +65,9 @@ export default function VCIncubationsPage() {
         <div className="container mx-auto p-6 max-w-7xl">
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Incubation Programs</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">Investment Programs</h1>
                     <p className="text-muted-foreground mt-1">
-                        Manage your incubation cohorts, applications, and timelines.
+                        Manage your investment programs, applications, and timelines.
                     </p>
                 </div>
                 <Button onClick={() => router.push("/vc/incubations/create")}>
@@ -90,9 +90,9 @@ export default function VCIncubationsPage() {
                     <div className="p-4 rounded-full bg-muted mb-4">
                         <Briefcase className="h-8 w-8 text-muted-foreground" />
                     </div>
-                    <h3 className="text-lg font-semibold">No incubation programs found</h3>
+                    <h3 className="text-lg font-semibold">No investment programs found</h3>
                     <p className="text-muted-foreground max-w-sm mt-2 mb-6">
-                        Launch your first incubation program and start accepting pitches from founders.
+                        Launch your first investment program and start accepting pitches from founders.
                     </p>
                     <Button onClick={() => router.push("/vc/incubations/create")}>
                         <Plus className="mr-2 h-4 w-4" />

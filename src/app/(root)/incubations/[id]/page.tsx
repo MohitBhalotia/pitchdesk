@@ -152,7 +152,7 @@ export default function IncubationDetailPage() {
         <div className="container mx-auto p-4 md:p-8 max-w-6xl">
             <Button variant="ghost" className="mb-6 pl-0 hover:bg-transparent hover:text-primary" onClick={() => router.back()}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Incubations
+                Back to Investment Programs
             </Button>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -161,7 +161,7 @@ export default function IncubationDetailPage() {
                     <div>
                         <div className="flex items-center gap-3 mb-4">
                             <Badge variant="secondary" className="bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">
-                                Incubation Program
+                                Investment Program
                             </Badge>
                             <span className="text-sm text-muted-foreground flex items-center gap-1">
                                 <CalendarCheck className="h-3 w-3" />

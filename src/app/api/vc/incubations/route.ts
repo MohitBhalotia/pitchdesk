@@ -19,7 +19,7 @@ export async function GET(req: Request) {
 
         return NextResponse.json(programs);
     } catch (error) {
-        console.error("Error fetching incubation programs:", error);
+        console.error("Error fetching investment programs:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }

@@ -138,7 +138,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: LayoutDashboard,
       },
       {
-        title: "Incubations",
+        title: "Investment Programs",
         url: "/incubations",
         icon: Briefcase,
       },
@@ -205,7 +205,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: Bot,
       },
       {
-        title: "Incubation Programs",
+        title: "Investment Programs",
         url: "/vc/incubations",
         icon: Briefcase,
       },

@@ -139,7 +139,7 @@ const VCDashboard = ({ userStats, session, router }) => {
       onClick: () => router.push("/vc/bots/create"),
     },
     {
-      title: "Launch Incubation Program",
+      title: "Launch Investment Program",
       description: "Start accepting applications from founders",
       icon: <Play className="h-6 w-6 text-blue-400" />,
       onClick: () => router.push("/vc/incubations/create"),
@@ -152,7 +152,7 @@ const VCDashboard = ({ userStats, session, router }) => {
     },
     {
       title: "Manage Programs",
-      description: "View and edit your incubation programs",
+      description: "View and edit your investment programs",
       icon: <FileText className="h-6 w-6 text-pink-400" />,
       onClick: () => router.push("/vc/incubations"),
     }
