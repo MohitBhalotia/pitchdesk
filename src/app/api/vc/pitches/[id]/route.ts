@@ -8,7 +8,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
     try {
         await dbConnect();
         const session = await getServerSession(authOptions);
-        const { id } = await params;
+        const { id } = params;
 
         if (!session) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

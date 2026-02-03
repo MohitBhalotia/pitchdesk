@@ -12,7 +12,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     try {
         await dbConnect();
         const session = await getServerSession(authOptions);
-        const { id } = await params;
+        const { id } = params;
 
         if (!session || session.user.role !== 'vc') {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

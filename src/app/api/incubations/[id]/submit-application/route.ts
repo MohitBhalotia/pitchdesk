@@ -15,7 +15,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const { id: programId } = await params;
+        const { id: programId } = params;
         const body = await req.json();
         const { pitchId, registrationData } = body;
 

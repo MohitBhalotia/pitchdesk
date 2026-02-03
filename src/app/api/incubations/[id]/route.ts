@@ -13,7 +13,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
             throw new Error("Agent model not loaded");
         }
 
-        const { id } = await params;
+        const { id } = params;
 
         const program = await IncubationProgram.findById(id)
             .populate('vcId', 'fullName profileImage')

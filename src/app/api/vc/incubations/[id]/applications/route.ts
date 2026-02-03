@@ -14,7 +14,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const { id: programId } = await params;
+        const { id: programId } =  params;
 
         // Verify the program belongs to this VC
         const program = await IncubationProgram.findOne({

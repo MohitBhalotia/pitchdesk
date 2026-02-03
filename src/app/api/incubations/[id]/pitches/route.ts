@@ -13,7 +13,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const { id } = await params;
+        const { id } = params;
 
         // Get all pitches for this incubation by this founder
         const pitches = await PitchModel.find({

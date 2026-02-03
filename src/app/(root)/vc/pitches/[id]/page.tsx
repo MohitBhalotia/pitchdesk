@@ -78,7 +78,7 @@ export default function VCPitchDetailPage() {
         summary?: string;
     } | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [overview, setOverview] = useState<any>(null);
+    const [overview, setOverview] = useState<PitchOverview | null>(null);
     const [isOverviewLoading, setIsOverviewLoading] = useState(false);
 
     useEffect(() => {
