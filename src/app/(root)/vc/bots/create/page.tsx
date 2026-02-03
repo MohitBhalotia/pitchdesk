@@ -1,14 +1,15 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Loader2, Mic, Camera, Check, Play, Pause, X, Upload } from "lucide-react";
+import { Loader2, Mic, Camera, Check, Play, Pause, X, Upload, Volume2 } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
+import { DEFAULT_AVATARS, DEFAULT_VOICES, VOICE_PREVIEW_TEXT } from "@/lib/default-assets";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -74,8 +75,11 @@ export default function CreateBotPage() {
     const [voiceId, setVoiceId] = useState("");
     const [isPreviewingVoice, setIsPreviewingVoice] = useState(false);
     const [previewAudioUrl, setPreviewAudioUrl] = useState("");
+    const [selectedDefaultVoice, setSelectedDefaultVoice] = useState<string>("");
+    const [previewingVoiceId, setPreviewingVoiceId] = useState<string | null>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
 
     // Camera/Avatar states
     const [cameraActive, setCameraActive] = useState(false);
@@ -86,6 +90,7 @@ export default function CreateBotPage() {
     const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
     const [finalAvatarUrl, setFinalAvatarUrl] = useState("");
     const [selectedAvatarBase64, setSelectedAvatarBase64] = useState("");
+    const [selectedDefaultAvatar, setSelectedDefaultAvatar] = useState<string>("");
     const [generationError, setGenerationError] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -104,9 +109,49 @@ export default function CreateBotPage() {
         },
     });
 
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            // Cleanup audio
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
+            }
+            // Cleanup media recorder
+            if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+                mediaRecorderRef.current.stop();
+            }
+            // Cleanup recording interval
+            if (recordingIntervalRef.current) {
+                clearInterval(recordingIntervalRef.current);
+            }
+            // Cleanup video stream
+            if (videoRef.current?.srcObject) {
+                const stream = videoRef.current.srcObject as MediaStream;
+                stream.getTracks().forEach(track => track.stop());
+            }
+            // Cleanup audio URLs
+            if (previewAudioUrl) {
+                URL.revokeObjectURL(previewAudioUrl);
+            }
+            if (recordedAudioUrl) {
+                URL.revokeObjectURL(recordedAudioUrl);
+            }
+        };
+    }, [previewAudioUrl, recordedAudioUrl]);
+
     // ===== VOICE RECORDING FUNCTIONS =====
     const startVoiceRecording = async () => {
         try {
+            // Clear default voice selection when starting to record
+            setSelectedDefaultVoice("");
+            // Stop any playing audio
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
+            }
+            setPreviewingVoiceId(null);
+            
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             const mediaRecorder = new MediaRecorder(stream);
             const audioChunks: Blob[] = [];
@@ -204,10 +249,15 @@ export default function CreateBotPage() {
 
         try {
             setIsPreviewingVoice(true);
+            // Stop any currently playing audio
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
+            }
 
             const response = await axios.post('/api/voice/preview', {
                 voiceId,
-                text: "This is how your AI judge will sound during pitch evaluations. I'm excited to hear your startup ideas!"
+                text: VOICE_PREVIEW_TEXT
             }, {
                 responseType: 'blob' // Important for audio
             });
@@ -219,14 +269,75 @@ export default function CreateBotPage() {
 
             // Auto-play the preview
             const audio = new Audio(audioUrl);
-            audio.play();
+            audioRef.current = audio;
+            
+            audio.onended = () => {
+                URL.revokeObjectURL(audioUrl);
+                audioRef.current = null;
+                setIsPreviewingVoice(false);
+            };
+            
+            audio.onerror = () => {
+                console.error("Audio playback error");
+                URL.revokeObjectURL(audioUrl);
+                audioRef.current = null;
+                setIsPreviewingVoice(false);
+                toast.error("Failed to play audio preview");
+            };
 
+            await audio.play();
             toast.success("Playing voice preview!");
         } catch (error) {
             console.error("Voice preview error:", error);
             toast.error("Failed to preview voice. Please try again.");
-        } finally {
             setIsPreviewingVoice(false);
+        }
+    };
+
+    const previewDefaultVoice = async (voiceIdToPreview: string) => {
+        try {
+            setPreviewingVoiceId(voiceIdToPreview);
+            // Stop any currently playing audio
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current = null;
+            }
+
+            const response = await axios.post('/api/voice/preview', {
+                voiceId: voiceIdToPreview,
+                text: VOICE_PREVIEW_TEXT
+            }, {
+                responseType: 'blob'
+            });
+
+            // Create audio URL from blob
+            const audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
+            const audioUrl = URL.createObjectURL(audioBlob);
+
+            // Auto-play the preview
+            const audio = new Audio(audioUrl);
+            audioRef.current = audio;
+            
+            audio.onended = () => {
+                URL.revokeObjectURL(audioUrl);
+                audioRef.current = null;
+                setPreviewingVoiceId(null);
+            };
+            
+            audio.onerror = () => {
+                console.error("Audio playback error");
+                URL.revokeObjectURL(audioUrl);
+                audioRef.current = null;
+                setPreviewingVoiceId(null);
+                toast.error("Failed to play audio preview");
+            };
+
+            await audio.play();
+            toast.success("Playing voice preview!");
+        } catch (error) {
+            console.error("Voice preview error:", error);
+            toast.error("Failed to preview voice. Please try again.");
+            setPreviewingVoiceId(null);
         }
     };
 
@@ -289,6 +400,10 @@ export default function CreateBotPage() {
                 ctx.drawImage(video, 0, 0);
                 const imageDataUrl = canvas.toDataURL('image/jpeg');
                 setCapturedImage(imageDataUrl);
+                // Clear default avatar selection when capturing custom photo
+                setSelectedDefaultAvatar("");
+                setSelectedAvatar("");
+                setFinalAvatarUrl("");
 
                 // Stop camera
                 const stream = video.srcObject as MediaStream;
@@ -333,6 +448,10 @@ export default function CreateBotPage() {
         reader.onload = (e) => {
             const base64String = e.target?.result as string;
             setCapturedImage(base64String);
+            // Clear default avatar selection when uploading custom image
+            setSelectedDefaultAvatar("");
+            setSelectedAvatar("");
+            setFinalAvatarUrl("");
             console.log('📁 File uploaded successfully');
             toast.success('Photo uploaded! Review and generate avatars.');
         };
@@ -388,6 +507,8 @@ export default function CreateBotPage() {
 
     const uploadSelectedAvatar = async (avatarBase64: string) => {
         setSelectedAvatarBase64(avatarBase64);
+        // Clear default avatar selection when custom avatar is selected
+        setSelectedDefaultAvatar("");
         try {
             setIsUploadingAvatar(true);
 
@@ -418,13 +539,15 @@ export default function CreateBotPage() {
         }
 
         // Final submission
-        if (!voiceId) {
-            toast.error("Please record and upload your voice");
+        const finalVoiceId = voiceId || selectedDefaultVoice;
+        if (!finalVoiceId) {
+            toast.error("Please record and upload your voice or select a default voice");
             return;
         }
 
-        if (!selectedAvatar) {
-            toast.error("Please capture photo and select an avatar");
+        const finalAvatarUrl = selectedAvatar || selectedDefaultAvatar;
+        if (!finalAvatarUrl) {
+            toast.error("Please capture photo and select an avatar or choose a default avatar");
             return;
         }
 
@@ -436,13 +559,21 @@ export default function CreateBotPage() {
             const { systemPrompt, firstMessage } = promptResponse.data;
 
             // Create bot
-            await axios.post("/api/vc/bots", {
+            const botData = {
                 ...values,
                 systemPrompt,
                 firstMessage,
-                voice: voiceId, // Cartesia voice ID
-                avatarUrl: selectedAvatar, // Use 'avatarUrl' to match the backend API
+                voice: finalVoiceId, // Cartesia voice ID (cloned or default)
+                avatarUrl: finalAvatarUrl, // Use 'avatarUrl' to match the backend API
+            };
+
+            console.log("Creating bot with data:", {
+                ...botData,
+                voice: finalVoiceId,
+                avatarUrl: finalAvatarUrl
             });
+
+            await axios.post("/api/vc/bots", botData);
 
             toast.success("AI Judge Agent created successfully!");
             router.push("/vc/bots");
@@ -689,12 +820,90 @@ export default function CreateBotPage() {
                                 {/* STEP 2: VOICE RECORDING */}
                                 {step === 2 && (
                                     <div className="space-y-6">
+                                        {/* Default Voices Section */}
+                                        <div className="border rounded-lg p-6 bg-muted/20">
+                                            <div className="text-center mb-4">
+                                                <h3 className="font-semibold text-lg mb-2">Choose a Default Voice</h3>
+                                                <p className="text-sm text-muted-foreground">
+                                                    Quick option: Select a professional voice without recording
+                                                </p>
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                                {DEFAULT_VOICES.map((voice) => (
+                                                    <div
+                                                        key={voice.id}
+                                                        className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                                                            selectedDefaultVoice === voice.id
+                                                                ? 'border-primary bg-primary/5 ring-2 ring-primary'
+                                                                : 'border-muted hover:border-primary/50'
+                                                        }`}
+                                                        onClick={() => {
+                                                            setSelectedDefaultVoice(voice.id);
+                                                            // Clear cloned voice states if default is selected
+                                                            setVoiceId("");
+                                                            setVoiceRecorded(false);
+                                                            setRecordedAudioBlob(null);
+                                                            setRecordedAudioUrl("");
+                                                            setPreviewAudioUrl("");
+                                                            // Stop any playing audio
+                                                            if (audioRef.current) {
+                                                                audioRef.current.pause();
+                                                                audioRef.current = null;
+                                                            }
+                                                        }}
+                                                    >
+                                                        <div className="flex items-start justify-between mb-2">
+                                                            <div>
+                                                                <h4 className="font-semibold text-sm">{voice.name}</h4>
+                                                                <p className="text-xs text-muted-foreground">{voice.gender}</p>
+                                                            </div>
+                                                            {selectedDefaultVoice === voice.id && (
+                                                                <Check className="h-5 w-5 text-primary" />
+                                                            )}
+                                                        </div>
+                                                        <p className="text-xs text-muted-foreground mb-3">{voice.description}</p>
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="w-full gap-2"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                previewDefaultVoice(voice.id);
+                                                            }}
+                                                            disabled={previewingVoiceId === voice.id}
+                                                        >
+                                                            {previewingVoiceId === voice.id ? (
+                                                                <>
+                                                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                                                    Playing...
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <Volume2 className="h-3 w-3" />
+                                                                    Preview
+                                                                </>
+                                                            )}
+                                                        </Button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Divider */}
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex-1 h-px bg-border"></div>
+                                            <span className="text-sm text-muted-foreground font-medium">OR</span>
+                                            <div className="flex-1 h-px bg-border"></div>
+                                        </div>
+
+                                        {/* Voice Recording Section */}
                                         <div className="border rounded-lg p-6 bg-muted/20">
                                             <div className="flex flex-col items-center gap-4">
                                                 {!voiceRecorded ? (
                                                     <>
                                                         <div className="text-center">
-                                                            <h3 className="font-semibold text-lg mb-2">Record Your Voice</h3>
+                                                            <h3 className="font-semibold text-lg mb-2">Record Your Own Voice</h3>
                                                             <p className="text-sm text-muted-foreground mb-4">
                                                                 For best results, read the following script clearly and naturally:
                                                             </p>
@@ -781,6 +990,13 @@ export default function CreateBotPage() {
                                                                     setRecordedAudioBlob(null);
                                                                     setRecordedAudioUrl("");
                                                                     setVoiceId("");
+                                                                    setSelectedDefaultVoice(""); // Clear default selection
+                                                                    setPreviewAudioUrl("");
+                                                                    // Stop any playing audio
+                                                                    if (audioRef.current) {
+                                                                        audioRef.current.pause();
+                                                                        audioRef.current = null;
+                                                                    }
                                                                 }}
                                                             >
                                                                 Re-record
@@ -799,7 +1015,11 @@ export default function CreateBotPage() {
                                                                     </Button>
                                                                     <Button
                                                                         type="button"
-                                                                        onClick={() => setStep(3)}
+                                                                        onClick={() => {
+                                                                            setSelectedDefaultVoice(""); // Clear default when using cloned
+                                                                            setPreviewingVoiceId(null); // Clear preview state
+                                                                            setStep(3);
+                                                                        }}
                                                                         className="gap-2"
                                                                     >
                                                                         Continue to Avatar
@@ -822,10 +1042,37 @@ export default function CreateBotPage() {
                                             </div>
                                         </div>
 
+                                        {/* Continue Button */}
+                                        {(selectedDefaultVoice || voiceId) && (
+                                            <Button
+                                                type="button"
+                                                onClick={() => {
+                                                    setPreviewingVoiceId(null); // Clear preview state
+                                                    // Stop any playing audio
+                                                    if (audioRef.current) {
+                                                        audioRef.current.pause();
+                                                        audioRef.current = null;
+                                                    }
+                                                    setStep(3);
+                                                }}
+                                                className="w-full"
+                                            >
+                                                Continue to Avatar
+                                            </Button>
+                                        )}
+
                                         <Button
                                             type="button"
                                             variant="ghost"
-                                            onClick={() => setStep(1)}
+                                            onClick={() => {
+                                                // Stop any playing audio when going back
+                                                if (audioRef.current) {
+                                                    audioRef.current.pause();
+                                                    audioRef.current = null;
+                                                }
+                                                setPreviewingVoiceId(null);
+                                                setStep(1);
+                                            }}
                                         >
                                             Back
                                         </Button>
@@ -835,6 +1082,61 @@ export default function CreateBotPage() {
                                 {/* STEP 3: AVATAR CAPTURE */}
                                 {step === 3 && (
                                     <div className="space-y-6">
+                                        {/* Default Avatars Section */}
+                                        <div className="border rounded-lg p-6 bg-muted/20">
+                                            <div className="text-center mb-4">
+                                                <h3 className="font-semibold text-lg mb-2">Choose a Default Avatar</h3>
+                                                <p className="text-sm text-muted-foreground">
+                                                    Quick option: Select a professional avatar without uploading
+                                                </p>
+                                            </div>
+                                            <div className="grid grid-cols-5 gap-4 mb-4">
+                                                {DEFAULT_AVATARS.map((avatarUrl, index) => (
+                                                    <div
+                                                        key={index}
+                                                        className={`relative cursor-pointer rounded-lg border-2 transition-all overflow-hidden ${
+                                                            selectedDefaultAvatar === avatarUrl
+                                                                ? 'border-primary ring-2 ring-primary'
+                                                                : 'border-muted hover:border-primary/50'
+                                                        }`}
+                                                        onClick={() => {
+                                                            setSelectedDefaultAvatar(avatarUrl);
+                                                            setSelectedAvatar(avatarUrl);
+                                                            setFinalAvatarUrl(avatarUrl);
+                                                            // Clear custom avatar selections
+                                                            setCapturedImage("");
+                                                            setGeneratedAvatars([]);
+                                                            setSelectedAvatarBase64("");
+                                                            setGenerationError(false);
+                                                        }}
+                                                    >
+                                                        <img
+                                                            src={avatarUrl}
+                                                            alt={`Default Avatar ${index + 1}`}
+                                                            className="w-full h-auto aspect-square object-cover"
+                                                            onError={(e) => {
+                                                                // Fallback if image fails to load
+                                                                (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=Avatar+${index + 1}&size=512&background=random`;
+                                                            }}
+                                                        />
+                                                        {selectedDefaultAvatar === avatarUrl && (
+                                                            <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
+                                                                <Check className="h-4 w-4" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Divider */}
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex-1 h-px bg-border"></div>
+                                            <span className="text-sm text-muted-foreground font-medium">OR</span>
+                                            <div className="flex-1 h-px bg-border"></div>
+                                        </div>
+
+                                        {/* Custom Avatar Section */}
                                         <div className="border rounded-lg p-6 bg-muted/20">
                                             {!capturedImage ? (
                                                 <div className="flex flex-col items-center gap-4">
@@ -1022,7 +1324,9 @@ export default function CreateBotPage() {
                                                             setCapturedImage("");
                                                             setGeneratedAvatars([]);
                                                             setFinalAvatarUrl("");
+                                                            setSelectedAvatar("");
                                                             setSelectedAvatarBase64("");
+                                                            setSelectedDefaultAvatar(""); // Clear default selection
                                                             setGenerationError(false);
                                                         }}
                                                         className="w-full"
@@ -1037,14 +1341,17 @@ export default function CreateBotPage() {
                                             <Button
                                                 type="button"
                                                 variant="ghost"
-                                                onClick={() => setStep(2)}
+                                                onClick={() => {
+                                                    // Don't clear selections when going back, just navigate
+                                                    setStep(2);
+                                                }}
                                                 disabled={isSubmitting}
                                             >
                                                 Back
                                             </Button>
                                             <Button
                                                 type="submit"
-                                                disabled={isSubmitting || !finalAvatarUrl}
+                                                disabled={isSubmitting || (!finalAvatarUrl && !selectedDefaultAvatar)}
                                                 className="flex-1 gap-2"
                                             >
                                                 {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}

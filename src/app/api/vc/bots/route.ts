@@ -45,6 +45,20 @@ export async function POST(req: Request) {
             avatarUrl
         } = body;
 
+        // Validate required fields
+        if (!name || !systemPrompt || !firstMessage) {
+            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+        }
+
+        // Validate voice and avatar
+        if (!voice) {
+            return NextResponse.json({ error: "Voice is required" }, { status: 400 });
+        }
+
+        if (!avatarUrl) {
+            return NextResponse.json({ error: "Avatar URL is required" }, { status: 400 });
+        }
+
         const newBot = await Agent.create({
             vcId: session.user._id,
             name,
@@ -52,7 +66,7 @@ export async function POST(req: Request) {
             systemPrompt,
             firstMessage,
             image: avatarUrl,
-            voice: voice || "aura-asteria-en",
+            voice: voice, // Use provided voice (default or cloned)
 
             // VC-specific fields
             sector,

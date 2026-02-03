@@ -28,7 +28,7 @@ export async function POST(req: Request) {
         const cartesiaResponse = await axios.post(
             'https://api.cartesia.ai/tts/bytes',
             {
-                model_id: "sonic-english",
+                model_id: "sonic-3",
                 voice: {
                     mode: "id",
                     id: voiceId
