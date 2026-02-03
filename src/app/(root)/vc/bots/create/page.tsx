@@ -6,9 +6,8 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Loader2, Mic, Camera, Check, Play, Pause, X, Upload, Volume2 } from "lucide-react";
+import { Loader2, Mic, Camera, Check, Pause, X, Upload, Volume2 } from "lucide-react";
 import { toast } from "sonner";
-import Image from "next/image";
 import { DEFAULT_AVATARS, DEFAULT_VOICES, VOICE_PREVIEW_TEXT } from "@/lib/default-assets";
 
 import { Button } from "@/components/ui/button";
@@ -22,13 +21,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
@@ -45,7 +38,6 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Slider } from "@/components/ui/slider";
 import { Progress } from "@/components/ui/progress";
 
@@ -219,11 +211,12 @@ export default function CreateBotPage() {
             setIsUploadingVoice(true);
 
             // Extract the 10-second clip based on slider selection
-            const startTime = clippingRange[0];
-            const endTime = clippingRange[1];
+            // const startTime = clippingRange[0];
+            // const endTime = clippingRange[1];
 
             // For simplicity, we'll upload the full audio and let Cartesia handle clipping
             // In production, you might want to trim the audio client-side
+            // TODO: Implement audio trimming
 
             const formData = new FormData();
             formData.append('audio', recordedAudioBlob);

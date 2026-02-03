@@ -14,7 +14,6 @@ import {
   Crown,
   MessageSquare,
   HelpCircle,
-  Handshake,
   Trophy,
   Bot,
   Briefcase,
@@ -40,7 +39,6 @@ import {
 
 import { useSession } from "next-auth/react";
 import { Session } from "next-auth";
-import { title } from "process";
 
 const getUserFromSession = (session: Session) => ({
   name: session?.user?.fullName || "User",
@@ -214,11 +212,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: "/vc/pitches",
         icon: FileCheck,
       },
-      {
-        title: "Browse pitches",
-        url: "/my-pitches",
-        icon: History,
-      },
+      // {
+      //   title: "Browse pitches",
+      //   url: "/my-pitches",
+      //   icon: History,
+      // },
     ],
     navSecondary: [
       {

@@ -25,6 +25,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Image from "next/image";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useSession } from "next-auth/react";
 import ApplicationSubmissionDialog from "@/components/incubation/ApplicationSubmissionDialog";
 
@@ -81,7 +82,7 @@ export default function IncubationDetailPage() {
     const [application, setApplication] = useState<IApplication | null>(null);
     const [pitches, setPitches] = useState<IPitch[]>([]);
     const [isPitchesLoading, setIsPitchesLoading] = useState(false);
-    const [activeTab, setActiveTab] = useState("overview");
+    // const [activeTab, setActiveTab] = useState("overview");
     const [selectedPitchId, setSelectedPitchId] = useState<string | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -173,9 +174,12 @@ export default function IncubationDetailPage() {
                         </h1>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
                             <div className="flex items-center gap-2 bg-muted/50 px-3 py-1 rounded-full">
-                                <div className="relative h-6 w-6 rounded-full overflow-hidden">
-                                    <Image src={program.vcId?.profileImage || "/placeholder-avatar.png"} alt="VC" fill className="object-cover" />
-                                </div>
+                                <Avatar className="h-6 w-6">
+                                    <AvatarImage src={program.vcId?.profileImage} alt="VC" />
+                                    <AvatarFallback className="text-[10px] font-bold bg-primary/10 text-primary">
+                                        {program.vcId?.fullName?.charAt(0).toUpperCase() || "I"}
+                                    </AvatarFallback>
+                                </Avatar>
                                 <span className="font-medium text-foreground">{program.vcId?.fullName}</span>
                             </div>
                             <div className="flex items-center gap-1">
@@ -316,7 +320,7 @@ export default function IncubationDetailPage() {
                                         </div>
                                     ) : (
                                         <div className="space-y-3">
-                                            {pitches.map((pitch, index) => (
+                                            {pitches.map((pitch) => (
                                                 <div
                                                     key={pitch._id}
                                                     className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"

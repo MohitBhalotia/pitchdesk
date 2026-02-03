@@ -1,6 +1,6 @@
 "use client";
 import { useSearchParams, useRouter } from "next/navigation";
-import { useSession, signIn } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ function InviteCompetitionContent() {
   const searchParams = useSearchParams();
   const token = searchParams?.get("token") ?? null;
   const teamId = searchParams?.get("teamId") ?? null;
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);

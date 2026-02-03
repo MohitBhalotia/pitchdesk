@@ -5,12 +5,6 @@ import TextGenerateEffect from "@/components/ui/typewriter";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
-  Marquee,
-  MarqueeContent,
-  MarqueeFade,
-  MarqueeItem,
-} from "../kibo-ui/marquee";
-import {
   Banner,
   BannerAction,
   BannerClose,

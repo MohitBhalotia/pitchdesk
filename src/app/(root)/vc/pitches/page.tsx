@@ -28,7 +28,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import Image from "next/image";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface IApplication {
     _id: string;
@@ -205,14 +205,12 @@ export default function VCPitchReviewPage() {
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-3 mb-2">
-                                    <div className="relative h-10 w-10 rounded-full overflow-hidden bg-muted">
-                                        <Image
-                                            src={app.founderId.profileImage || "/placeholder-avatar.png"}
-                                            alt={app.founderId.fullName}
-                                            fill
-                                            className="object-cover"
-                                        />
-                                    </div>
+                                    <Avatar className="h-10 w-10">
+                                        <AvatarImage src={app.founderId.profileImage} alt={app.founderId.fullName} />
+                                        <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                                            {app.founderId.fullName?.charAt(0).toUpperCase() || "U"}
+                                        </AvatarFallback>
+                                    </Avatar>
                                     <div className="flex-1 min-w-0">
                                         <CardTitle className="text-base truncate">
                                             {app.registrationData?.startupName || app.founderId.fullName}

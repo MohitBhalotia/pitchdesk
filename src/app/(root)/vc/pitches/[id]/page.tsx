@@ -37,7 +37,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import Image from "next/image";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 
@@ -169,9 +169,12 @@ export default function VCPitchDetailPage() {
                     </h1>
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2">
-                            <div className="relative h-8 w-8 rounded-full overflow-hidden">
-                                <Image src={application.founder?.profileImage || "/placeholder-avatar.png"} alt="Founder" fill className="object-cover" />
-                            </div>
+                            <Avatar className="h-8 w-8">
+                                <AvatarImage src={application.founder?.profileImage} alt="Founder" />
+                                <AvatarFallback className="text-xs font-bold bg-primary/10 text-primary">
+                                    {application.founder?.fullName?.charAt(0).toUpperCase() || "F"}
+                                </AvatarFallback>
+                            </Avatar>
                             <span className="font-medium">{application.registrationData?.founderName || application.founder?.fullName}</span>
                         </div>
                         <Separator orientation="vertical" className="h-4" />
@@ -508,9 +511,12 @@ export default function VCPitchDetailPage() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="flex items-center gap-3">
-                                <div className="h-12 w-12 relative bg-muted rounded-full overflow-hidden">
-                                    <Image src={application.founder?.profileImage || "/placeholder-avatar.png"} alt="Profile" fill className="object-cover" />
-                                </div>
+                                <Avatar className="h-12 w-12">
+                                    <AvatarImage src={application.founder?.profileImage} alt="Profile" />
+                                    <AvatarFallback className="text-lg font-bold bg-primary/10 text-primary">
+                                        {application.founder?.fullName?.charAt(0).toUpperCase() || "U"}
+                                    </AvatarFallback>
+                                </Avatar>
                                 <div>
                                     <p className="font-medium">{application.founder?.fullName}</p>
                                     <p className="text-sm text-muted-foreground">{application.founder?.email}</p>

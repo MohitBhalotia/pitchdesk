@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft, Loader2, User, FileText, Calendar, TrendingUp, Mail, Phone, Building2, Users as UsersIcon, Clock } from "lucide-react";
+import { ArrowLeft, Loader2, FileText, Calendar, TrendingUp, Mail, Phone, Building2, Users as UsersIcon, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -12,23 +12,11 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
+
 import { Badge } from "@/components/ui/badge";
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from "@/components/ui/accordion";
+
 import { Separator } from "@/components/ui/separator";
 import {
-    CheckCircle,
     Target,
     Zap,
     Users,
@@ -44,7 +32,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Image from "next/image";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 
 interface IApplication {
@@ -87,7 +75,7 @@ export default function ApplicationsPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [filterStatus, setFilterStatus] = useState("all");
     const [loadingOverviews, setLoadingOverviews] = useState<{ [key: string]: boolean }>({});
-    const [pitchOverviews, setPitchOverviews] = useState<{ [key: string]: any }>({});
+    const [pitchOverviews, setPitchOverviews] = useState<{ [key: string]: PitchOverview }>({});
 
     useEffect(() => {
         if (id) {
@@ -276,14 +264,12 @@ export default function ApplicationsPage() {
                             <CardHeader className="bg-muted/30">
                                 <div className="flex items-start justify-between">
                                     <div className="flex items-center gap-4">
-                                        <div className="relative h-12 w-12 rounded-full overflow-hidden border-2">
-                                            <Image
-                                                src={application.founderId.profileImage || "/placeholder-avatar.png"}
-                                                alt={application.founderId.fullName}
-                                                fill
-                                                className="object-cover"
-                                            />
-                                        </div>
+                                        <Avatar className="h-12 w-12 border-2">
+                                            <AvatarImage src={application.founderId.profileImage} alt={application.founderId.fullName} />
+                                            <AvatarFallback className="text-lg font-bold bg-primary/10 text-primary">
+                                                {application.founderId.fullName?.charAt(0).toUpperCase() || "U"}
+                                            </AvatarFallback>
+                                        </Avatar>
                                         <div>
                                             <CardTitle className="text-lg">
                                                 {application.registrationData.startupName}

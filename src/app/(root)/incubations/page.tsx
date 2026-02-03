@@ -8,14 +8,11 @@ import { Button } from "@/components/ui/button";
 import {
     Card,
     CardContent,
-    CardDescription,
     CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import Image from "next/image";
 
 interface IIncubationProgram {
     _id: string;

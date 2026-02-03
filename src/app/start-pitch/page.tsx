@@ -12,9 +12,7 @@ import Conversation from "../../components/Conversation";
 import { isMobile } from "react-device-detect";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  ArrowBigUp,
   Handshake,
-  Link,
   Loader2,
   LogOut,
   MoveUpRight,

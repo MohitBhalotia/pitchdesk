@@ -24,6 +24,17 @@ declare global {
     updatedAt: Date;
   }
 
+  export interface PitchOverview {
+    oneLiner?: string;
+    problem?: string;
+    solution?: string;
+    market?: string;
+    keyMetrics?: string;
+    businessModel?: string;
+    ask?: string;
+    analystTake?: string;
+  }
+
   export interface Pitch extends Document {
     sessionId: string;
     userId: mongoose.Schema.Types.ObjectId | null;
@@ -36,7 +47,7 @@ declare global {
     duration?: number;
     conversationHistory?: Message[];
     creditsUsed?: number;
-    overview?: any; // Structured JSON overview
+    overview?: PitchOverview;
   }
 
   interface Agent {
