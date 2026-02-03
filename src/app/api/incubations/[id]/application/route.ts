@@ -3,12 +3,13 @@ import authOptions from "@/lib/auth";
 import dbConnect from "@/lib/db";
 import IncubationApplication from "@/models/IncubationApplicationModel";
 import { NextResponse } from "next/server";
+import { RouteContext } from "@/types/route-context";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, context: RouteContext) {
     try {
         await dbConnect();
         const session = await getServerSession(authOptions);
-        const { id: programId } = params;
+        const { id: programId } = await context.params;
 
         if (!session) {
             return NextResponse.json(null); // No session, no application

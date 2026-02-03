@@ -5,8 +5,9 @@ import dbConnect from "@/lib/db";
 import PitchModel from "@/models/PitchModel";
 import { NextResponse } from "next/server";
 import axios from "axios";
+import { RouteContext } from "@/types/route-context";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, context: RouteContext) {
     try {
         await dbConnect();
         const session = await getServerSession(authOptions);
@@ -15,7 +16,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const { id: pitchId } = params;
+        const { id: pitchId } = await context.params;
 
         const pitch = await PitchModel.findById(pitchId);
         if (!pitch) {

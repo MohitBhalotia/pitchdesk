@@ -3,12 +3,13 @@ import authOptions from "@/lib/auth";
 import dbConnect from "@/lib/db";
 import IncubationApplication from "@/models/IncubationApplicationModel";
 import { NextResponse } from "next/server";
+import { RouteContext } from "@/types/route-context";
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, context: RouteContext) {
     try {
         await dbConnect();
         const session = await getServerSession(authOptions);
-        const { id } = params;
+        const { id } = await context.params;
 
         if (!session) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

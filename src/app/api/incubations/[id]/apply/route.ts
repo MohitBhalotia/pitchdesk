@@ -5,12 +5,13 @@ import IncubationApplication from "@/models/IncubationApplicationModel";
 import IncubationProgram from "@/models/IncubationProgramModel";
 import { NextResponse } from "next/server";
 import { PitchEval } from "@/models/PitchEvalModel";
+import { RouteContext } from "@/types/route-context";
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, context: RouteContext) {
     try {
         await dbConnect();
         const session = await getServerSession(authOptions);
-        const { id: programId } = params;
+        const { id: programId } = await context.params;
 
         if (!session) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

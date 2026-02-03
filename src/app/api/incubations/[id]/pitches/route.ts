@@ -3,8 +3,9 @@ import authOptions from "@/lib/auth";
 import dbConnect from "@/lib/db";
 import PitchModel from "@/models/PitchModel";
 import { NextResponse } from "next/server";
+import { RouteContext } from "@/types/route-context";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, context: RouteContext) {
     try {
         await dbConnect();
         const session = await getServerSession(authOptions);
@@ -13,7 +14,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const { id } = params;
+        const { id } = await context.params;
 
         // Get all pitches for this incubation by this founder
         const pitches = await PitchModel.find({

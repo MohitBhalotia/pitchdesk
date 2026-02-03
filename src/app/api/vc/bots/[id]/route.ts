@@ -3,12 +3,13 @@ import Agent from "@/models/AgentModel";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import authOptions from "@/lib/auth";
+import { RouteContext } from "@/types/route-context";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, context: RouteContext) {
     try {
         await dbConnect();
         const session = await getServerSession(authOptions);
-        const { id } =  params;
+        const { id } = await context.params;
 
         if (!session || session.user.role !== 'vc') {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

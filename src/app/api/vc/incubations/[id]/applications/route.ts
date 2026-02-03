@@ -4,8 +4,9 @@ import dbConnect from "@/lib/db";
 import IncubationApplication from "@/models/IncubationApplicationModel";
 import IncubationProgram from "@/models/IncubationProgramModel";
 import { NextResponse } from "next/server";
+import { RouteContext } from "@/types/route-context";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, context: RouteContext) {
     try {
         await dbConnect();
         const session = await getServerSession(authOptions);
@@ -14,7 +15,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const { id: programId } =  params;
+        const { id: programId } = await context.params;
 
         // Verify the program belongs to this VC
         const program = await IncubationProgram.findOne({
@@ -40,7 +41,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 }
 
 // Update application status
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(req: Request, context: RouteContext) {
     try {
         await dbConnect();
         const session = await getServerSession(authOptions);
@@ -49,7 +50,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const { id: programId } = await params;
+        const { id: programId } = await context.params;
         const body = await req.json();
         const { applicationId, status } = body;
 

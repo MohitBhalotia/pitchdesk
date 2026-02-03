@@ -5,8 +5,9 @@ import IncubationApplication from "@/models/IncubationApplicationModel";
 import PitchModel from "@/models/PitchModel";
 import { PitchEval } from "@/models/PitchEvalModel";
 import { NextResponse } from "next/server";
+import { RouteContext } from "@/types/route-context";
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, context: RouteContext) {
     try {
         await dbConnect();
         const session = await getServerSession(authOptions);
@@ -15,7 +16,7 @@ export async function POST(req: Request, { params }: { params: { id: string } })
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const { id: programId } = params;
+        const { id: programId } = await context.params;
         const body = await req.json();
         const { pitchId, registrationData } = body;
 

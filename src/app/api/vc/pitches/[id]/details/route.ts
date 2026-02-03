@@ -7,12 +7,13 @@ import Pitch from "@/models/PitchModel";
 import { PitchEval } from "@/models/PitchEvalModel";
 import User from "@/models/UserModel";
 import { NextResponse } from "next/server";
+import { RouteContext } from "@/types/route-context";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, context: RouteContext) {
     try {
         await dbConnect();
         const session = await getServerSession(authOptions);
-        const { id } = params;
+        const { id } = await context.params;
 
         if (!session || session.user.role !== 'vc') {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
