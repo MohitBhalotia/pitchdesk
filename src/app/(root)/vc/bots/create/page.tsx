@@ -109,7 +109,7 @@ export default function CreateBotPage() {
         },
     });
 
-    // Cleanup on unmount
+    // Cleanup on unmount only
     useEffect(() => {
         return () => {
             // Cleanup audio
@@ -130,15 +130,25 @@ export default function CreateBotPage() {
                 const stream = videoRef.current.srcObject as MediaStream;
                 stream.getTracks().forEach(track => track.stop());
             }
-            // Cleanup audio URLs
+        };
+    }, []); // Empty dependency array - only run on mount/unmount
+
+    // Cleanup audio URLs when they change
+    useEffect(() => {
+        return () => {
             if (previewAudioUrl) {
                 URL.revokeObjectURL(previewAudioUrl);
             }
+        };
+    }, [previewAudioUrl]);
+
+    useEffect(() => {
+        return () => {
             if (recordedAudioUrl) {
                 URL.revokeObjectURL(recordedAudioUrl);
             }
         };
-    }, [previewAudioUrl, recordedAudioUrl]);
+    }, [recordedAudioUrl]);
 
     // ===== VOICE RECORDING FUNCTIONS =====
     const startVoiceRecording = async () => {
@@ -151,7 +161,7 @@ export default function CreateBotPage() {
                 audioRef.current = null;
             }
             setPreviewingVoiceId(null);
-            
+
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             const mediaRecorder = new MediaRecorder(stream);
             const audioChunks: Blob[] = [];
@@ -265,32 +275,36 @@ export default function CreateBotPage() {
             // Create audio URL from blob
             const audioBlob = new Blob([response.data], { type: 'audio/mpeg' });
             const audioUrl = URL.createObjectURL(audioBlob);
-            setPreviewAudioUrl(audioUrl);
 
             // Auto-play the preview
             const audio = new Audio(audioUrl);
             audioRef.current = audio;
-            
+
             audio.onended = () => {
                 URL.revokeObjectURL(audioUrl);
                 audioRef.current = null;
                 setIsPreviewingVoice(false);
+                setPreviewAudioUrl(""); // Clear after playback
             };
-            
-            audio.onerror = () => {
-                console.error("Audio playback error");
+
+            audio.onerror = (e) => {
+                console.error("Audio playback error:", e);
                 URL.revokeObjectURL(audioUrl);
                 audioRef.current = null;
                 setIsPreviewingVoice(false);
+                setPreviewAudioUrl(""); // Clear on error
                 toast.error("Failed to play audio preview");
             };
 
+            // Play audio first, then update state
             await audio.play();
+            setPreviewAudioUrl(audioUrl); // Set state AFTER play succeeds
             toast.success("Playing voice preview!");
         } catch (error) {
             console.error("Voice preview error:", error);
             toast.error("Failed to preview voice. Please try again.");
             setIsPreviewingVoice(false);
+            setPreviewAudioUrl(""); // Clear on error
         }
     };
 
@@ -317,15 +331,15 @@ export default function CreateBotPage() {
             // Auto-play the preview
             const audio = new Audio(audioUrl);
             audioRef.current = audio;
-            
+
             audio.onended = () => {
                 URL.revokeObjectURL(audioUrl);
                 audioRef.current = null;
                 setPreviewingVoiceId(null);
             };
-            
-            audio.onerror = () => {
-                console.error("Audio playback error");
+
+            audio.onerror = (e) => {
+                console.error("Audio playback error:", e);
                 URL.revokeObjectURL(audioUrl);
                 audioRef.current = null;
                 setPreviewingVoiceId(null);
@@ -832,11 +846,10 @@ export default function CreateBotPage() {
                                                 {DEFAULT_VOICES.map((voice) => (
                                                     <div
                                                         key={voice.id}
-                                                        className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                                                            selectedDefaultVoice === voice.id
-                                                                ? 'border-primary bg-primary/5 ring-2 ring-primary'
-                                                                : 'border-muted hover:border-primary/50'
-                                                        }`}
+                                                        className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${selectedDefaultVoice === voice.id
+                                                            ? 'border-primary bg-primary/5 ring-2 ring-primary'
+                                                            : 'border-muted hover:border-primary/50'
+                                                            }`}
                                                         onClick={() => {
                                                             setSelectedDefaultVoice(voice.id);
                                                             // Clear cloned voice states if default is selected
@@ -1094,11 +1107,10 @@ export default function CreateBotPage() {
                                                 {DEFAULT_AVATARS.map((avatarUrl, index) => (
                                                     <div
                                                         key={index}
-                                                        className={`relative cursor-pointer rounded-lg border-2 transition-all overflow-hidden ${
-                                                            selectedDefaultAvatar === avatarUrl
-                                                                ? 'border-primary ring-2 ring-primary'
-                                                                : 'border-muted hover:border-primary/50'
-                                                        }`}
+                                                        className={`relative cursor-pointer rounded-lg border-2 transition-all overflow-hidden ${selectedDefaultAvatar === avatarUrl
+                                                            ? 'border-primary ring-2 ring-primary'
+                                                            : 'border-muted hover:border-primary/50'
+                                                            }`}
                                                         onClick={() => {
                                                             setSelectedDefaultAvatar(avatarUrl);
                                                             setSelectedAvatar(avatarUrl);

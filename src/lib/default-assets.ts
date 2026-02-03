@@ -3,16 +3,13 @@
  * These provide quick options for VCs who want to skip custom recording/upload
  */
 
-// Default avatar images (Cloudinary URLs)
-// These are professional, generic avatars suitable for VC bots
-// TODO: Replace these with your actual Cloudinary URLs hosting professional avatar images
-// For now using placeholder service - replace with actual Cloudinary URLs
+
 export const DEFAULT_AVATARS = [
-  "https://res.cloudinary.com/demo/image/upload/w_512,h_512,c_fill,g_face,r_max/v1/default-avatars/professional-avatar-1.jpg",
-  "https://res.cloudinary.com/demo/image/upload/w_512,h_512,c_fill,g_face,r_max/v1/default-avatars/professional-avatar-2.jpg",
-  "https://res.cloudinary.com/demo/image/upload/w_512,h_512,c_fill,g_face,r_max/v1/default-avatars/professional-avatar-3.jpg",
-  "https://res.cloudinary.com/demo/image/upload/w_512,h_512,c_fill,g_face,r_max/v1/default-avatars/professional-avatar-4.jpg",
-  "https://res.cloudinary.com/demo/image/upload/w_512,h_512,c_fill,g_face,r_max/v1/default-avatars/professional-avatar-5.jpg",
+  "https://res.cloudinary.com/mohitbhalotia/image/upload/v1765818140/WhatsApp_Image_2025-12-14_at_4.28.04_PM_dhtfej.jpg",
+  "https://res.cloudinary.com/df40dztju/image/upload/v1769513400/vc-bot-avatars/Pavan%20Raut-avatar-1769513395337.jpg",
+  "https://res.cloudinary.com/df40dztju/image/upload/v1769600308/vc-bot-avatars/fvghjk-avatar-1769600304571.jpg",
+  "https://res.cloudinary.com/mohitbhalotia/image/upload/v1765818140/WhatsApp_Image_2025-12-14_at_4.28.04_PM_dhtfej.jpg",
+  "https://res.cloudinary.com/df40dztju/image/upload/v1769513400/vc-bot-avatars/Pavan%20Raut-avatar-1769513395337.jpg"
 ];
 
 // Default Cartesia voices with metadata
@@ -25,21 +22,21 @@ export interface DefaultVoice {
 
 export const DEFAULT_VOICES: DefaultVoice[] = [
   {
-    id: "aura-asteria-en",
-    name: "Asteria",
-    description: "Professional female voice, warm and confident",
-    gender: "Female",
-  },
-  {
-    id: "aura-orion-en",
-    name: "Orion",
-    description: "Professional male voice, authoritative and clear",
+    id: "81db94f2-ea76-4e5a-94bf-c92be997270d",
+    name: "Jeff",
+    description: "A deep, resonating American male voice great for narrating content.",
     gender: "Male",
   },
   {
-    id: "aura-luna-en",
-    name: "Luna",
-    description: "Professional female voice, friendly and approachable",
+    id: "5c29d7e3-a133-4c7e-804a-1d9c6dea83f6",
+    name: "Marta",
+    description: "A smooth, casual South American Spanish-speaking woman.",
+    gender: "Female",
+  },
+  {
+    id: "0afd8614-31cb-438c-8a46-80650e19c29c",
+    name: "Teresa",
+    description: "A casual Spanish voice, great for phone calls.",
     gender: "Female",
   },
 ];
