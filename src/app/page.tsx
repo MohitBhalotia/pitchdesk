@@ -10,7 +10,7 @@ import PrivacyPreview from "@/components/mvpblocks/privacy-preview";
 export default function Home() {
   return (
     <>
-      <Header1 />
+      <Header1  />
       <AppHero />
       <FeatureSteps />
       <TestimonialsCarousel />
