@@ -5,11 +5,17 @@
 
 
 export const DEFAULT_AVATARS = [
-  "https://res.cloudinary.com/mohitbhalotia/image/upload/v1765818140/WhatsApp_Image_2025-12-14_at_4.28.04_PM_dhtfej.jpg",
-  "https://res.cloudinary.com/df40dztju/image/upload/v1769513400/vc-bot-avatars/Pavan%20Raut-avatar-1769513395337.jpg",
-  "https://res.cloudinary.com/df40dztju/image/upload/v1769600308/vc-bot-avatars/fvghjk-avatar-1769600304571.jpg",
-  "https://res.cloudinary.com/mohitbhalotia/image/upload/v1765818140/WhatsApp_Image_2025-12-14_at_4.28.04_PM_dhtfej.jpg",
-  "https://res.cloudinary.com/df40dztju/image/upload/v1769513400/vc-bot-avatars/Pavan%20Raut-avatar-1769513395337.jpg"
+  
+"https://res.cloudinary.com/mohitbhalotia/image/upload/v1770204662/Image1_j7tkg8.jpg" ,
+
+"https://res.cloudinary.com/mohitbhalotia/image/upload/v1770204662/Image3_uq2juj.jpg" ,
+
+"https://res.cloudinary.com/mohitbhalotia/image/upload/v1770204662/Image2_qhz13v.jpg" ,
+
+"https://res.cloudinary.com/mohitbhalotia/image/upload/v1770204663/Image5_fftodo.jpg" ,
+
+"https://res.cloudinary.com/mohitbhalotia/image/upload/v1770204663/Image4_d2wuqf.jpg" ,
+
 ];
 
 // Default Cartesia voices with metadata
