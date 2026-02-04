@@ -16,6 +16,7 @@ export default function SessionWrapper({
       <Snowfall color="green" snowflakeCount={isMobile ? 100 : 50} wind={[-0.5, 0.5]} style={{position: 'fixed'}} />
       <Snowfall snowflakeCount={isMobile ? 100 : 50} wind={[-0.5, 0.5]} style={{position: 'fixed'}} /> */}
       {children}
+      
     </SessionProvider>
   );
 }
