@@ -416,8 +416,42 @@ class TranscriptMessage(BaseModel):
         populate_by_name = True
 
 
+
 class PitchRequest(BaseModel):
     transcript: List[TranscriptMessage]
+
+
+class RefineRequest(BaseModel):
+    description: str
+
+
+@app.post("/refine-description")
+async def refine_description(req: RefineRequest):
+    """
+    Refine the startup description using AI to make it more professional and compelling.
+    """
+    try:
+        logging.info("✨ Refining startup description...")
+        
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system", 
+                    "content": "You are an expert startup advisor specializing in incubation, grant applications, and early-stage venture evaluation. Rewrite the startup description to be professional, precise, and compelling for formal applications. Emphasize the core problem, solution, target market, and impact in a clear and neutral tone. Avoid marketing hype, vague claims, or informal language. Do not introduce new information.Limit the response to 500 characters.Return only the refined description without any additional text."
+                },
+                {"role": "user", "content": req.description}
+            ],
+            temperature=0.7,
+        )
+        
+        refined_text = response.choices[0].message.content.strip()
+        return {"refined_description": refined_text}
+        
+    except Exception as e:
+        logging.exception("❌ Failed to refine description")
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 
 # --------------------- MAX SCORES ---------------------

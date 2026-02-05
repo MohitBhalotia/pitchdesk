@@ -18,7 +18,6 @@ export interface IIncubationApplication extends Document {
         website?: string;
         linkedin?: string;
         fundingRaised?: string;
-        motivation: string;
     };
 
     status: 'pending' | 'wishlist' | 'hold' | 'rejected' | 'accepted';
@@ -72,8 +71,7 @@ const IncubationApplicationSchema = new Schema<IIncubationApplication>({
         description: { type: String, required: true, maxlength: 500 },
         website: { type: String },
         linkedin: { type: String },
-        fundingRaised: { type: String },
-        motivation: { type: String, required: true, maxlength: 300 }
+        fundingRaised: { type: String }
     },
     status: {
         type: String,

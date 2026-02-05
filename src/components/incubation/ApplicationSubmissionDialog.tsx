@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import axios from "axios";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 
 import {
     Dialog,
@@ -49,9 +49,6 @@ const applicationSchema = z.object({
     website: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
     linkedin: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
     fundingRaised: z.string().optional(),
-    motivation: z.string()
-        .min(50, "Motivation must be at least 50 characters")
-        .max(300, "Motivation must not exceed 300 characters"),
 });
 
 type ApplicationFormValues = z.infer<typeof applicationSchema>;
@@ -72,6 +69,27 @@ export default function ApplicationSubmissionDialog({
     onSuccess,
 }: ApplicationDialogProps) {
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isRefining, setIsRefining] = useState(false);
+
+    const handleRefine = async () => {
+        const currentDesc = form.getValues("description");
+        if (!currentDesc || currentDesc.length < 20) {
+            toast.error("Please enter at least a rough description first");
+            return;
+        }
+
+        try {
+            setIsRefining(true);
+            const res = await axios.post("/api/refine-description", { description: currentDesc });
+            form.setValue("description", res.data.refined_description);
+            toast.success("Description refined with AI!");
+        } catch (error) {
+            console.error("Error refining description:", error);
+            toast.error("Failed to refine description");
+        } finally {
+            setIsRefining(false);
+        }
+    };
 
     const form = useForm<ApplicationFormValues>({
         resolver: zodResolver(applicationSchema),
@@ -87,7 +105,6 @@ export default function ApplicationSubmissionDialog({
             website: "",
             linkedin: "",
             fundingRaised: "",
-            motivation: "",
         },
     });
 
@@ -267,17 +284,33 @@ export default function ApplicationSubmissionDialog({
                             />
                         </div>
 
-                        {/* Description */}
                         <FormField
                             control={form.control}
                             name="description"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Startup Description *</FormLabel>
+                                    <div className="flex justify-between items-center">
+                                        <FormLabel>Startup Description *</FormLabel>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={handleRefine}
+                                            disabled={isRefining}
+                                            className="h-8 text-xs text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 border-purple-200"
+                                        >
+                                            {isRefining ? (
+                                                <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                                            ) : (
+                                                <Sparkles className="h-3 w-3 mr-1" />
+                                            )}
+                                            Refine with AI
+                                        </Button>
+                                    </div>
                                     <FormControl>
                                         <Textarea
                                             placeholder="Describe your startup, what problem you're solving, and your solution..."
-                                            className="min-h-[100px]"
+                                            className="min-h-[150px]"
                                             {...field}
                                         />
                                     </FormControl>
@@ -289,27 +322,7 @@ export default function ApplicationSubmissionDialog({
                             )}
                         />
 
-                        {/* Motivation */}
-                        <FormField
-                            control={form.control}
-                            name="motivation"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Why this program? *</FormLabel>
-                                    <FormControl>
-                                        <Textarea
-                                            placeholder="Why are you interested in this investment program? What do you hope to achieve?"
-                                            className="min-h-[80px]"
-                                            {...field}
-                                        />
-                                    </FormControl>
-                                    <FormDescription>
-                                        {field.value?.length || 0}/300 characters (min 50)
-                                    </FormDescription>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+
 
                         {/* Website */}
                         <FormField

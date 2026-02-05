@@ -60,7 +60,6 @@ interface IApplication {
         website?: string;
         linkedin?: string;
         fundingRaised?: string;
-        motivation: string;
     };
     status: string;
     score: number;
@@ -293,7 +292,9 @@ export default function ApplicationsPage() {
                                 </div>
                             </CardHeader>
                             <CardContent className="pt-6">
-                                <Tabs defaultValue="details" className="w-full">
+                                <Tabs defaultValue="details" className="w-full" onValueChange={(val) => {
+                                    if (val === 'pitch') fetchPitchOverview(application.pitchId._id);
+                                }}>
                                     <TabsList>
                                         <TabsTrigger value="details">Details</TabsTrigger>
                                         <TabsTrigger value="pitch">Pitch</TabsTrigger>
@@ -367,12 +368,7 @@ export default function ApplicationsPage() {
                                             </p>
                                         </div>
 
-                                        <div>
-                                            <p className="text-sm font-medium mb-2">Motivation</p>
-                                            <p className="text-sm text-muted-foreground">
-                                                {application.registrationData.motivation}
-                                            </p>
-                                        </div>
+
 
                                         {(application.registrationData.website || application.registrationData.linkedin) && (
                                             <div className="flex gap-4">

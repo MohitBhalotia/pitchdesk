@@ -79,6 +79,7 @@ export default function IncubationDetailPage() {
 
     const [program, setProgram] = useState<IProgram | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [application, setApplication] = useState<IApplication | null>(null);
     const [pitches, setPitches] = useState<IPitch[]>([]);
     const [isPitchesLoading, setIsPitchesLoading] = useState(false);
@@ -98,10 +99,13 @@ export default function IncubationDetailPage() {
 
     const fetchProgramDetails = async () => {
         try {
+            setIsLoading(true);
+            setError(null);
             const response = await axios.get(`/api/incubations/${id}`);
             setProgram(response.data);
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error fetching program:", error);
+            setError(error.response?.data?.error || "Failed to load program details. Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -143,6 +147,21 @@ export default function IncubationDetailPage() {
         return <div className="flex justify-center items-center min-h-[60vh]">
             <Loader2 className="h-8 w-8 animate-spin" />
         </div>;
+    }
+
+    if (error) {
+        return (
+            <div className="container py-20 text-center">
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600 mb-4">
+                    <AlertCircle className="h-6 w-6" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Error Loading Program</h3>
+                <p className="text-muted-foreground mb-6">{error}</p>
+                <Button onClick={fetchProgramDetails} variant="outline">
+                    Retry
+                </Button>
+            </div>
+        );
     }
 
     if (!program) {

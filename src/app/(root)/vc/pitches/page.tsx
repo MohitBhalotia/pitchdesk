@@ -61,7 +61,6 @@ interface IApplication {
         website?: string;
         linkedin?: string;
         fundingRaised?: string;
-        motivation: string;
     };
     botFeedback: string;
 }

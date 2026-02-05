@@ -63,7 +63,6 @@ export default function VCPitchDetailPage() {
             website?: string;
             linkedin?: string;
             fundingRaised?: string;
-            motivation: string;
         };
         botFeedback?: string;
     } | null>(null);
@@ -99,6 +98,13 @@ export default function VCPitchDetailPage() {
             setIsLoading(false);
         }
     };
+
+    useEffect(() => {
+        if (pitch?._id && !overview && !isOverviewLoading) {
+            fetchOverview(pitch._id);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [pitch?._id]);
 
     const fetchOverview = async (pitchId: string) => {
         if (overview || isOverviewLoading) return;
@@ -310,12 +316,7 @@ export default function VCPitchDetailPage() {
                                             </p>
                                         </div>
 
-                                        <div>
-                                            <p className="text-sm font-medium mb-2">Motivation</p>
-                                            <p className="text-sm text-muted-foreground">
-                                                {application.registrationData.motivation}
-                                            </p>
-                                        </div>
+
 
                                         {(application.registrationData.website || application.registrationData.linkedin) && (
                                             <div className="flex gap-4">

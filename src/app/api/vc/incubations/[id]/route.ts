@@ -1,5 +1,7 @@
 import dbConnect from "@/lib/db";
 import IncubationProgram from "@/models/IncubationProgramModel";
+import "@/models/AgentModel"; // Register Agent schema
+import "@/models/UserModel"; // Register User schema
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import authOptions from "@/lib/auth";

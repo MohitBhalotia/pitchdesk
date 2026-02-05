@@ -89,6 +89,7 @@ export default function IncubationProgramDetailPage() {
     } | null>(null);
     const [bots, setBots] = useState<IBot[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -120,18 +121,19 @@ export default function IncubationProgramDetailPage() {
 
     const fetchProgram = async () => {
         try {
+            setIsLoading(true);
+            setError(null);
             const response = await axios.get(`/api/vc/incubations/${id}`);
             const prog = response.data;
             setProgram(prog);
 
             // Format dates for input fields
-            // Format dates for input fields
             form.reset({
                 ...prog,
-                botId: prog.botId._id || prog.botId,
-                startDate: prog.timeline.startDate.split('T')[0],
-                endDate: prog.timeline.endDate.split('T')[0],
-                applicationDeadline: prog.timeline.applicationDeadline.split('T')[0],
+                botId: prog.botId?._id || prog.botId,
+                startDate: prog.timeline?.startDate ? prog.timeline.startDate.split('T')[0] : "",
+                endDate: prog.timeline?.endDate ? prog.timeline.endDate.split('T')[0] : "",
+                applicationDeadline: prog.timeline?.applicationDeadline ? prog.timeline.applicationDeadline.split('T')[0] : "",
                 cohortSize: prog.cohortSize?.toString() || "",
                 fundingAmount: prog.fundingAmount?.toString() || "",
                 eligibility: prog.eligibility?.map((e: string) => ({ value: e })) || [{ value: "" }],
@@ -143,8 +145,9 @@ export default function IncubationProgramDetailPage() {
                     endDate: s.endDate ? new Date(s.endDate).toISOString().split('T')[0] : ""
                 })) : [{ title: "", description: "", startDate: "", endDate: "" }],
             });
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error fetching program:", error);
+            setError(error.response?.data?.error || "Failed to load program details. Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -192,6 +195,21 @@ export default function IncubationProgramDetailPage() {
         return (
             <div className="flex justify-center items-center min-h-[60vh]">
                 <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="container py-20 text-center">
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600 mb-4">
+                    <X className="h-6 w-6" />
+                </div>
+                <h3 className="text-lg font-semibold mb-2">Error Loading Program</h3>
+                <p className="text-muted-foreground mb-6">{error}</p>
+                <Button onClick={fetchProgram} variant="outline">
+                    Retry
+                </Button>
             </div>
         );
     }
