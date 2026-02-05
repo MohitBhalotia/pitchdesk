@@ -12,9 +12,9 @@ export default function SessionWrapper({
   const isMobile = useIsMobile();
   return (
     <SessionProvider>
-      <Snowfall color="orange" snowflakeCount={isMobile ? 100 : 50} wind={[-0.5, 0.5]} style={{position: 'fixed'}} />
+      {/* <Snowfall color="orange" snowflakeCount={isMobile ? 100 : 50} wind={[-0.5, 0.5]} style={{position: 'fixed'}} />
       <Snowfall color="green" snowflakeCount={isMobile ? 100 : 50} wind={[-0.5, 0.5]} style={{position: 'fixed'}} />
-      <Snowfall snowflakeCount={isMobile ? 100 : 50} wind={[-0.5, 0.5]} style={{position: 'fixed'}} />
+      <Snowfall snowflakeCount={isMobile ? 100 : 50} wind={[-0.5, 0.5]} style={{position: 'fixed'}} /> */}
       {children}
     </SessionProvider>
   );
