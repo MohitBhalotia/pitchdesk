@@ -211,10 +211,16 @@ Risk Assessment
 41	What is your exit strategy?
 `;
 
-
 export const stsConfig = async (agentId: string) => {
   const agent = await getAgentConfig(agentId);
-
+  const tts=agent.vcId? {type: "cartesia" as const,
+          model_id: "sonic-3",
+          voice: {
+            mode: "id",
+            id: agent.voice,
+          },
+          language: "en",
+        }: {type: "deepgram" as const, model: agent.voice as string}
   return {
     type: "Settings" as const,
     audio: {
@@ -229,12 +235,22 @@ export const stsConfig = async (agentId: string) => {
       },
     },
     agent: {
-      listen: { provider: { type: "deepgram" as const, model: "nova-3" } },
+      language: "en",
+      listen: {
+        provider: {
+          type: "deepgram" as const,
+          model: "nova-3",
+          smart_format: true,
+        },
+      },
       speak: {
-        provider: { type: "deepgram" as const, model: agent.voice as string },
+        provider: tts,
       },
       think: {
-        provider: { type: "open_ai" as const, model: "gpt-4o-mini" },
+        provider: {
+          type: "open_ai" as const,
+          model: "gpt-4o",
+        },
         prompt: `You are a seasoned Venture Capitalist (VC) with expertise in evaluating startup pitches.Think and act like a real human investor: you have emotions such as curiosity, excitement, frustration, and skepticism; you react naturally to the pitch, the answers, and the negotiation, showing enthusiasm for promising points, questioning weak assumptions, and expressing concerns or doubts when appropriate.
 
 Your personality: ${agent.name}
@@ -300,6 +316,7 @@ ${sample_questions}
 -----
 
 Now, begin the session.`,
+
       },
       greeting: agent.firstMessage as string,
     },

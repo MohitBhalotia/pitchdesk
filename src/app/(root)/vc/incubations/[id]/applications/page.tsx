@@ -1,0 +1,572 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useRouter, useParams } from "next/navigation";
+import { ArrowLeft, Loader2, FileText, Calendar, TrendingUp, Mail, Phone, Building2, Users as UsersIcon, Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+
+import { Badge } from "@/components/ui/badge";
+
+import { Separator } from "@/components/ui/separator";
+import {
+    Target,
+    Zap,
+    Users,
+    DollarSign,
+    Briefcase,
+    Lightbulb
+} from "lucide-react";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "sonner";
+
+interface IApplication {
+    _id: string;
+    founderId: {
+        fullName: string;
+        email: string;
+        profileImage: string;
+    };
+    pitchId: {
+        _id: string;
+        title: string;
+        startTime: string;
+        duration: number;
+    };
+    registrationData: {
+        startupName: string;
+        founderName: string;
+        email: string;
+        phone: string;
+        industry: string;
+        stage: string;
+        teamSize: number;
+        description: string;
+        website?: string;
+        linkedin?: string;
+        fundingRaised?: string;
+    };
+    status: string;
+    score: number;
+    botFeedback: string;
+    submittedAt: string;
+}
+
+export default function ApplicationsPage() {
+    const router = useRouter();
+    const { id } = useParams();
+    const [applications, setApplications] = useState<IApplication[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [filterStatus, setFilterStatus] = useState("all");
+    const [loadingOverviews, setLoadingOverviews] = useState<{ [key: string]: boolean }>({});
+    const [pitchOverviews, setPitchOverviews] = useState<{ [key: string]: PitchOverview }>({});
+
+    useEffect(() => {
+        if (id) {
+            fetchApplications();
+        }
+    }, [id]);
+
+    const fetchApplications = async () => {
+        try {
+            setIsLoading(true);
+            const response = await axios.get(`/api/vc/incubations/${id}/applications`);
+            setApplications(response.data);
+        } catch (error) {
+            console.error("Error fetching applications:", error);
+            toast.error("Failed to fetch applications");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const updateApplicationStatus = async (applicationId: string, newStatus: string) => {
+        try {
+            await axios.patch(`/api/vc/incubations/${id}/applications`, {
+                applicationId,
+                status: newStatus,
+            });
+            toast.success("Status updated successfully");
+            fetchApplications();
+        } catch (error) {
+            console.error("Error updating status:", error);
+            toast.error("Failed to update status");
+        }
+    };
+
+
+
+
+    const fetchPitchOverview = async (pitchId: string) => {
+        if (pitchOverviews[pitchId] || loadingOverviews[pitchId]) return;
+
+        try {
+            setLoadingOverviews(prev => ({ ...prev, [pitchId]: true }));
+            const response = await axios.get(`/api/vc/pitch/${pitchId}/overview`);
+            setPitchOverviews(prev => ({ ...prev, [pitchId]: response.data.overview }));
+        } catch (error) {
+            console.error("Error fetching overview:", error);
+            // toast.error("Failed to load pitch overview"); 
+        } finally {
+            setLoadingOverviews(prev => ({ ...prev, [pitchId]: false }));
+        }
+    };
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case "pending":
+                return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300";
+            case "wishlist":
+                return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
+            case "accepted":
+                return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
+            case "rejected":
+                return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
+            case "hold":
+                return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300";
+            default:
+                return "bg-gray-100 text-gray-800";
+        }
+    };
+
+    const getScoreColor = (score: number) => {
+        if (score >= 80) return "text-green-600 dark:text-green-400";
+        if (score >= 60) return "text-blue-600 dark:text-blue-400";
+        if (score >= 40) return "text-yellow-600 dark:text-yellow-400";
+        return "text-red-600 dark:text-red-400";
+    };
+
+    const filteredApplications = applications.filter((app) =>
+        filterStatus === "all" ? true : app.status === filterStatus
+    );
+
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center min-h-[60vh]">
+                <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+        );
+    }
+
+    return (
+        <div className="container mx-auto p-6 max-w-7xl">
+            <Button
+                variant="ghost"
+                className="mb-6 pl-0 hover:bg-transparent hover:text-primary"
+                onClick={() => router.push(`/vc/incubations/${id}`)}
+            >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Program
+            </Button>
+
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold tracking-tight">Applications</h1>
+                <p className="text-muted-foreground mt-1">
+                    Review and manage applications for this investment program
+                </p>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+                <Card>
+                    <CardContent className="pt-6">
+                        <div className="text-2xl font-bold">{applications.length}</div>
+                        <p className="text-xs text-muted-foreground">Total</p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardContent className="pt-6">
+                        <div className="text-2xl font-bold text-yellow-600">
+                            {applications.filter((a) => a.status === "pending").length}
+                        </div>
+                        <p className="text-xs text-muted-foreground">Pending</p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardContent className="pt-6">
+                        <div className="text-2xl font-bold text-blue-600">
+                            {applications.filter((a) => a.status === "wishlist").length}
+                        </div>
+                        <p className="text-xs text-muted-foreground">Wishlist</p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardContent className="pt-6">
+                        <div className="text-2xl font-bold text-green-600">
+                            {applications.filter((a) => a.status === "accepted").length}
+                        </div>
+                        <p className="text-xs text-muted-foreground">Accepted</p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardContent className="pt-6">
+                        <div className="text-2xl font-bold text-red-600">
+                            {applications.filter((a) => a.status === "rejected").length}
+                        </div>
+                        <p className="text-xs text-muted-foreground">Rejected</p>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {/* Filter */}
+            <div className="mb-6 flex items-center gap-4">
+                <label className="text-sm font-medium">Filter by status:</label>
+                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Applications</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="wishlist">Wishlist</SelectItem>
+                        <SelectItem value="hold">Hold</SelectItem>
+                        <SelectItem value="accepted">Accepted</SelectItem>
+                        <SelectItem value="rejected">Rejected</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+
+            {/* Applications List */}
+            {filteredApplications.length === 0 ? (
+                <Card>
+                    <CardContent className="pt-6">
+                        <div className="text-center py-12">
+                            <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                            <h3 className="text-lg font-semibold mb-2">No applications found</h3>
+                            <p className="text-muted-foreground">
+                                {filterStatus === "all"
+                                    ? "No applications have been submitted yet"
+                                    : `No ${filterStatus} applications`}
+                            </p>
+                        </div>
+                    </CardContent>
+                </Card>
+            ) : (
+                <div className="space-y-4">
+                    {filteredApplications.map((application) => (
+                        <Card key={application._id} className="overflow-hidden">
+                            <CardHeader className="bg-muted/30">
+                                <div className="flex items-start justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <Avatar className="h-12 w-12 border-2">
+                                            <AvatarImage src={application.founderId.profileImage} alt={application.founderId.fullName} />
+                                            <AvatarFallback className="text-lg font-bold bg-primary/10 text-primary">
+                                                {application.founderId.fullName?.charAt(0).toUpperCase() || "U"}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div>
+                                            <CardTitle className="text-lg">
+                                                {application.registrationData.startupName}
+                                            </CardTitle>
+                                            <CardDescription>
+                                                by {application.registrationData.founderName}
+                                            </CardDescription>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="text-right">
+                                            <div className={`text-3xl font-bold ${getScoreColor(application.score)}`}>
+                                                {application.score}
+                                            </div>
+                                            <p className="text-xs text-muted-foreground">AI Score</p>
+                                        </div>
+                                        <Badge className={getStatusColor(application.status)}>
+                                            {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                                        </Badge>
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="pt-6">
+                                <Tabs defaultValue="details" className="w-full" onValueChange={(val) => {
+                                    if (val === 'pitch') fetchPitchOverview(application.pitchId._id);
+                                }}>
+                                    <TabsList>
+                                        <TabsTrigger value="details">Details</TabsTrigger>
+                                        <TabsTrigger value="pitch">Pitch</TabsTrigger>
+                                        <TabsTrigger value="actions">Actions</TabsTrigger>
+                                    </TabsList>
+
+                                    <TabsContent value="details" className="space-y-4 mt-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="flex items-start gap-2">
+                                                <Mail className="h-4 w-4 mt-1 text-muted-foreground" />
+                                                <div>
+                                                    <p className="text-sm font-medium">Email</p>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {application.registrationData.email}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-start gap-2">
+                                                <Phone className="h-4 w-4 mt-1 text-muted-foreground" />
+                                                <div>
+                                                    <p className="text-sm font-medium">Phone</p>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {application.registrationData.phone}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-start gap-2">
+                                                <Building2 className="h-4 w-4 mt-1 text-muted-foreground" />
+                                                <div>
+                                                    <p className="text-sm font-medium">Industry</p>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {application.registrationData.industry}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-start gap-2">
+                                                <TrendingUp className="h-4 w-4 mt-1 text-muted-foreground" />
+                                                <div>
+                                                    <p className="text-sm font-medium">Stage</p>
+                                                    <p className="text-sm text-muted-foreground capitalize">
+                                                        {application.registrationData.stage.replace("_", " ")}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-start gap-2">
+                                                <UsersIcon className="h-4 w-4 mt-1 text-muted-foreground" />
+                                                <div>
+                                                    <p className="text-sm font-medium">Team Size</p>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {application.registrationData.teamSize} members
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            {application.registrationData.fundingRaised && (
+                                                <div className="flex items-start gap-2">
+                                                    <TrendingUp className="h-4 w-4 mt-1 text-muted-foreground" />
+                                                    <div>
+                                                        <p className="text-sm font-medium">Funding Raised</p>
+                                                        <p className="text-sm text-muted-foreground">
+                                                            {application.registrationData.fundingRaised}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <p className="text-sm font-medium mb-2">Description</p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {application.registrationData.description}
+                                            </p>
+                                        </div>
+
+
+
+                                        {(application.registrationData.website || application.registrationData.linkedin) && (
+                                            <div className="flex gap-4">
+                                                {application.registrationData.website && (
+                                                    <Button variant="outline" size="sm" asChild>
+                                                        <a href={application.registrationData.website} target="_blank" rel="noopener noreferrer">
+                                                            Visit Website
+                                                        </a>
+                                                    </Button>
+                                                )}
+                                                {application.registrationData.linkedin && (
+                                                    <Button variant="outline" size="sm" asChild>
+                                                        <a href={application.registrationData.linkedin} target="_blank" rel="noopener noreferrer">
+                                                            LinkedIn Profile
+                                                        </a>
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </TabsContent>
+
+                                    <TabsContent value="pitch" className="space-y-4 mt-4">
+                                        <div className="space-y-6">
+                                            <div className="flex items-center gap-4 text-sm text-muted-foreground p-3 bg-muted/40 rounded-lg">
+                                                <span className="flex items-center gap-1.5 font-medium text-foreground">
+                                                    <Calendar className="h-4 w-4 text-primary" />
+                                                    {new Date(application.pitchId.startTime).toLocaleDateString()}
+                                                </span>
+                                                <Separator orientation="vertical" className="h-4" />
+                                                <span className="flex items-center gap-1.5 font-medium text-foreground">
+                                                    <Clock className="h-4 w-4 text-primary" />
+                                                    Duration: {Math.floor(application.pitchId.duration / 60)}m {application.pitchId.duration % 60}s
+                                                </span>
+                                            </div>
+
+                                            {/* Overview Component */}
+                                            <div className="border rounded-lg bg-card text-card-foreground shadow-sm">
+                                                <div className="p-4 border-b bg-muted/20 flex justify-between items-center">
+                                                    <div className="flex items-center gap-2 font-semibold">
+                                                        <FileText className="h-4 w-4 text-primary" />
+                                                        Pitch Overview
+                                                    </div>
+                                                    {!pitchOverviews[application.pitchId._id] && !loadingOverviews[application.pitchId._id] && (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="h-8 text-xs"
+                                                            onClick={() => fetchPitchOverview(application.pitchId._id)}
+                                                        >
+                                                            Load Overview
+                                                        </Button>
+                                                    )}
+                                                </div>
+
+                                                <div className="p-4">
+                                                    {loadingOverviews[application.pitchId._id] ? (
+                                                        <div className="flex flex-col items-center justify-center py-8 space-y-3">
+                                                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                                            <p className="text-sm text-muted-foreground">Analyzing pitch transcript...</p>
+                                                        </div>
+                                                    ) : pitchOverviews[application.pitchId._id] ? (
+                                                        <div className="space-y-4">
+                                                            <div className="bg-primary/5 p-3 rounded-md border border-primary/10">
+                                                                <p className="text-sm font-medium text-primary mb-1">One-Liner</p>
+                                                                <p className="text-sm italic">{pitchOverviews[application.pitchId._id].oneLiner || "N/A"}</p>
+                                                            </div>
+
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                <div className="space-y-1">
+                                                                    <p className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
+                                                                        <Target className="h-3 w-3" /> Problem
+                                                                    </p>
+                                                                    <p className="text-sm">{pitchOverviews[application.pitchId._id].problem || "N/A"}</p>
+                                                                </div>
+                                                                <div className="space-y-1">
+                                                                    <p className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
+                                                                        <Lightbulb className="h-3 w-3" /> Solution
+                                                                    </p>
+                                                                    <p className="text-sm">{pitchOverviews[application.pitchId._id].solution || "N/A"}</p>
+                                                                </div>
+                                                            </div>
+
+                                                            <Separator />
+
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                <div className="space-y-1">
+                                                                    <p className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
+                                                                        <Users className="h-3 w-3" /> Market
+                                                                    </p>
+                                                                    <p className="text-sm">{pitchOverviews[application.pitchId._id].market || "N/A"}</p>
+                                                                </div>
+                                                                <div className="space-y-1">
+                                                                    <p className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
+                                                                        <Zap className="h-3 w-3" /> Key Metrics
+                                                                    </p>
+                                                                    <p className="text-sm">{pitchOverviews[application.pitchId._id].keyMetrics || "N/A"}</p>
+                                                                </div>
+                                                            </div>
+
+                                                            <Separator />
+
+                                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                <div className="space-y-1">
+                                                                    <p className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
+                                                                        <Briefcase className="h-3 w-3" /> Business Model
+                                                                    </p>
+                                                                    <p className="text-sm">{pitchOverviews[application.pitchId._id].businessModel || "N/A"}</p>
+                                                                </div>
+                                                                <div className="space-y-1">
+                                                                    <p className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
+                                                                        <DollarSign className="h-3 w-3" /> Ask
+                                                                    </p>
+                                                                    <p className="text-sm">{pitchOverviews[application.pitchId._id].ask || "N/A"}</p>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="bg-yellow-50 dark:bg-yellow-900/10 p-3 rounded-md border border-yellow-200 dark:border-yellow-800/30">
+                                                                <p className="text-xs font-bold text-yellow-700 dark:text-yellow-400 uppercase mb-1">Analyst Take</p>
+                                                                <p className="text-sm text-foreground/90">{pitchOverviews[application.pitchId._id].analystTake || "N/A"}</p>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-center py-6 text-muted-foreground">
+                                                            <p className="text-sm mb-2">Detailed overview not loaded.</p>
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() => fetchPitchOverview(application.pitchId._id)}
+                                                            >
+                                                                Load AI Overview
+                                                            </Button>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <Button
+                                                className="w-full"
+                                                onClick={() => router.push(`/evaluation/${application.pitchId._id}`)}
+                                            >
+                                                View Full Evaluation Report
+                                            </Button>
+                                        </div>
+                                    </TabsContent>
+
+                                    <TabsContent value="actions" className="space-y-4 mt-4">
+                                        <div>
+                                            <p className="text-sm font-medium mb-3">Change Application Status</p>
+                                            <div className="flex flex-wrap gap-2">
+                                                <Button
+                                                    variant={application.status === "wishlist" ? "default" : "outline"}
+                                                    size="sm"
+                                                    className={application.status === "wishlist" ? "bg-purple-600 hover:bg-purple-700 text-white hover:text-white" : "bg-transparent text-purple-600 border-purple-300 hover:bg-purple-50 hover:text-purple-700"}
+                                                    onClick={() => updateApplicationStatus(application._id, "wishlist")}
+                                                >
+                                                    Wishlist
+                                                </Button>
+                                                <Button
+                                                    variant={application.status === "hold" ? "default" : "outline"}
+                                                    size="sm"
+                                                    className={application.status === "hold" ? "bg-orange-600 hover:bg-orange-700 text-white hover:text-white" : "bg-transparent text-orange-600 border-orange-300 hover:bg-orange-50 hover:text-orange-700"}
+                                                    onClick={() => updateApplicationStatus(application._id, "hold")}
+                                                >
+                                                    Hold
+                                                </Button>
+                                                <Button
+                                                    variant={application.status === "accepted" ? "default" : "outline"}
+                                                    size="sm"
+                                                    className={application.status === "accepted" ? "bg-green-600 hover:bg-green-700 text-white hover:text-white" : "bg-transparent text-green-600 border-green-300 hover:bg-green-50 hover:text-green-700"}
+                                                    onClick={() => updateApplicationStatus(application._id, "accepted")}
+                                                >
+                                                    Accept
+                                                </Button>
+                                                <Button
+                                                    variant={application.status === "rejected" ? "default" : "outline"}
+                                                    size="sm"
+                                                    className={application.status === "rejected" ? "bg-red-600 hover:bg-red-700 text-white hover:text-white" : "bg-transparent text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700"}
+                                                    onClick={() => updateApplicationStatus(application._id, "rejected")}
+                                                >
+                                                    Reject
+                                                </Button>
+                                            </div>
+                                        </div>
+                                        <div className="pt-4 border-t">
+                                            <p className="text-sm font-medium mb-2">Submitted</p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {new Date(application.submittedAt).toLocaleString()}
+                                            </p>
+                                        </div>
+                                    </TabsContent>
+                                </Tabs>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            )}
+
+
+        </div >
+    );
+}

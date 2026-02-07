@@ -1,5 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
-export { default } from "next-auth/middleware";
+import { NextResponse, NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 const protectedRoutes = [
@@ -12,8 +11,37 @@ const protectedRoutes = [
   "/payment",
   "/investors",
 ];
-// This function can be marked `async` if using `await` inside
+
+// ⭐ Basic Auth Check (only for staging / preview)
+function checkBasicAuth(request: NextRequest) {
+  const enable = process.env.ENABLE_STAGING_PASSWORD === "true";
+  if (!enable) return null;
+
+  const authHeader = request.headers.get("authorization");
+  const USERNAME = process.env.STAGING_BASIC_USER!;
+  const PASSWORD = process.env.STAGING_BASIC_PASS!;
+
+  if (authHeader) {
+    const encoded = authHeader.split(" ")[1];
+    const decoded = atob(encoded);
+    const [user, pass] = decoded.split(":");
+
+    if (user === USERNAME && pass === PASSWORD) {
+      return null; // allow request -> go to nextAuth logic
+    }
+  }
+
+  return new Response("Auth Required (Staging)", {
+    status: 401,
+    headers: {
+      "WWW-Authenticate": 'Basic realm="Secure Area"',
+    },
+  });
+}
+
 export async function middleware(request: NextRequest) {
+  const basicAuthResult = checkBasicAuth(request);
+  if (basicAuthResult) return basicAuthResult;
   const token = await getToken({ req: request });
   const url = request.nextUrl;
 

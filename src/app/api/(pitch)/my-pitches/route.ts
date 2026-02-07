@@ -18,9 +18,19 @@ export async function GET(/*req: NextRequest*/) {
 
     const pitches = await PitchModel.find({
       userId: new mongoose.Types.ObjectId(userId),
-      $or: [
-        { competitionId: null },
-        { competitionId: { $exists: false } }
+      $and: [
+        {
+          $or: [
+            { competitionId: null },
+            { competitionId: { $exists: false } }
+          ]
+        },
+        {
+          $or: [
+            { incubationId: null },
+            { incubationId: { $exists: false } }
+          ]
+        }
       ]
     }).sort({ createdAt: -1 });
 

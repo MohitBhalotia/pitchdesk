@@ -3,18 +3,19 @@ import { inngest } from "@/lib/inngest/client";
 
 export async function POST(req: NextRequest) {
   try {
-    const { pitchId, sessionId, competitionId, userId, transcript, duration } = await req.json();
+    const { pitchId, sessionId, competitionId, incubationId, userId, transcript, duration } = await req.json();
     inngest.send({
-        name: "pitch.update",
-        data: {
-          pitchId: pitchId,
-          sessionId: sessionId,
-          competitionId: competitionId ?? null,
-          userId: userId,
-          transcript: transcript,
-          duration: duration,
-        },
-      });
+      name: "pitch.update",
+      data: {
+        pitchId: pitchId,
+        sessionId: sessionId,
+        competitionId: competitionId ?? null,
+        incubationId: incubationId ?? null,
+        userId: userId,
+        transcript: transcript,
+        duration: duration,
+      },
+    });
     return NextResponse.json(
       { success: true, message: "Pitch updated successfully" },
       { status: 200 }

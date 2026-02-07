@@ -68,16 +68,16 @@ interface CompetitionEvaluation {
   createdAt: string;
 }
 
-const MAX_SCORES = {
-  ProblemMarketOpportunity: 20,
-  SolutionInnovation: 20,
-  BusinessModelScalability: 15,
-  TeamExecutionCapability: 20,
-  TractionValidation: 15,
-  PitchQualityCommunication: 10,
-  TotalScore: 100,
-  BusinessInvestabilityConfidence: 100,
-};
+// const MAX_SCORES = {
+//   ProblemMarketOpportunity: 20,
+//   SolutionInnovation: 20,
+//   BusinessModelScalability: 15,
+//   TeamExecutionCapability: 20,
+//   TractionValidation: 15,
+//   PitchQualityCommunication: 10,
+//   TotalScore: 100,
+//   BusinessInvestabilityConfidence: 100,
+// };
 
 const PieChart = ({
   score,

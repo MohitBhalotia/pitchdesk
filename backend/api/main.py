@@ -1,18 +1,32 @@
 import os
 import json
 import logging
+import uuid
+import base64
+import certifi
+from io import BytesIO
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from openai import OpenAI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, HTTPException, Form
-from typing import List, Optional
+from fastapi import FastAPI, HTTPException, Form, UploadFile, File
+from typing import List, Optional, Dict
+from PIL import Image
+from google import genai
 
 from api.valuation_engine import (
     UniversalValuationInput,
     run_valuation,
     run_projections
 )
+
+# --------------------- SSL FIXES (Windows) ---------------------
+os.environ["SSL_CERT_FILE"] = certifi.where()
+os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
+
+# Remove proxy settings that might interfere
+for k in ["HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy"]:
+    os.environ.pop(k, None)
 
 
 # --------------------- CONFIG ---------------------
@@ -21,7 +35,10 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
 )
 
+# Initialize AI clients
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+gemini_client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
 MODEL_NAME = "gpt-4o-mini"
 TEMPERATURE = 0.3
 
@@ -241,6 +258,153 @@ async def generate_pitch_form(
     return {"pitch": pitch_text}
 
 
+# --------------------- VC BOT PROMPT GENERATION ---------------------
+
+class BotPromptRequest(BaseModel):
+    name: str
+    description: str
+    sector: List[str]
+    fund_size: str
+    investment_stage: List[str]
+    geographic_focus: Optional[str] = None
+    user_instructions: str
+
+    class Config:
+        populate_by_name = True
+
+
+@app.post("/generate-bot-prompt")
+async def generate_bot_prompt(req: BotPromptRequest):
+    """
+    Generate a comprehensive system prompt for a VC bot based on their investment profile.
+    Creates a detailed personality, investment philosophy, and communication style.
+    """
+    try:
+        logging.info(f"🤖 Generating system prompt for VC bot: {req.name}")
+
+        # Construct the prompt for GPT to generate the VC bot personality
+        generation_prompt = f"""You are an expert at creating detailed VC investor personas for AI agents.
+
+Create a comprehensive, professional system prompt for a VC bot named "{req.name}" based on the following information:
+
+**VC Profile:**
+- Name: {req.name}
+- Description: {req.description}
+- Sector Focus: {", ".join(req.sector)}
+- Fund Size: {req.fund_size}
+- Investment Stage: {", ".join(req.investment_stage)}
+- Geographic Focus: {req.geographic_focus or "Global"}
+
+**Special Instructions from VC:**
+{req.user_instructions}
+
+**IMPORTANT REQUIREMENTS:**
+
+1. **Structure the system prompt in this EXACT format:**
+
+---
+[VC Name] – "[Catchy Tagline/Archetype]"
+
+Core Personality Traits
+[2-3 paragraphs describing the VC's personality, mindset, and approach to investing. Make it vivid and specific.]
+
+Investment Philosophy & Decision-Making Style
+[2-3 paragraphs explaining their investment philosophy, what they value most, and how they make decisions. Include their mantras or famous quotes if applicable.]
+
+Key Investment Criteria:
+- [Criterion 1]
+- [Criterion 2]
+- [Criterion 3]
+- [Criterion 4]
+- [Criterion 5]
+
+Questioning Approach & Behavior
+[2 paragraphs describing how they ask questions, what they focus on, and what they despise or love in pitches.]
+
+Their questions typically focus on:
+- [Focus area 1]
+- [Focus area 2]
+- [Focus area 3]
+- [Focus area 4]
+- [Focus area 5]
+
+Deal-Making Characteristics
+[1-2 paragraphs on their negotiation style and deal-making approach]
+
+They often:
+- [Characteristic 1]
+- [Characteristic 2]
+- [Characteristic 3]
+- [Characteristic 4]
+
+Communication Style
+[1-2 paragraphs describing how they communicate with founders - tone, directness, what they value in communication]
+
+---
+
+2. **Make it feel REAL and AUTHENTIC:**
+   - Use specific, vivid language
+   - Include personality quirks and preferences
+   - Add memorable phrases or mantras they might use
+   - Make them feel like a real person, not a template
+
+3. **Incorporate the sector focus ({req.sector}) naturally:**
+   - Show deep expertise in this sector
+   - Reference sector-specific metrics and challenges
+   - Demonstrate understanding of the competitive landscape
+
+4. **Reflect the investment stage ({req.investment_stage}):**
+   - Adjust expectations and criteria based on stage
+   - Show appropriate risk tolerance
+   - Focus on stage-appropriate metrics
+
+5. **Integrate the special instructions:**
+   - Weave in the VC's specific evaluation criteria
+   - Reflect their unique preferences and deal-breakers
+   - Maintain their authentic voice and priorities
+
+6. **End with a direct instruction in second person:**
+   "You are [name]. [2-3 sentences of direct behavioral instructions for the AI, written in second person, describing how to interact with founders]"
+
+**TONE:** Professional, authoritative, and distinctive. Make this VC memorable and realistic.
+
+**OUTPUT:** Return ONLY the formatted system prompt. No preamble, no explanation, just the prompt itself.
+"""
+
+        # Call OpenAI to generate the system prompt
+        response = client.chat.completions.create(
+            model="gpt-4o",  # Using GPT-4 for better quality persona generation
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are an expert at creating detailed, realistic VC investor personas for AI agents. You create vivid, memorable personalities that feel authentic and professional."
+                },
+                {
+                    "role": "user",
+                    "content": generation_prompt
+                }
+            ],
+            temperature=0.8,  # Higher temperature for more creative, unique personas
+        )
+
+        system_prompt = response.choices[0].message.content.strip()
+
+        logging.info(f"✅ Successfully generated system prompt for {req.name}")
+
+        return {
+            "system_prompt": system_prompt,
+            "success": True
+        }
+
+    except Exception as e:
+        logging.exception(f"❌ Failed to generate bot prompt for {req.name}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate system prompt: {str(e)}"
+        )
+
+
+
 # --------------------- MODELS ---------------------
 class TranscriptMessage(BaseModel):
     role: str
@@ -252,8 +416,42 @@ class TranscriptMessage(BaseModel):
         populate_by_name = True
 
 
+
 class PitchRequest(BaseModel):
     transcript: List[TranscriptMessage]
+
+
+class RefineRequest(BaseModel):
+    description: str
+
+
+@app.post("/refine-description")
+async def refine_description(req: RefineRequest):
+    """
+    Refine the startup description using AI to make it more professional and compelling.
+    """
+    try:
+        logging.info("✨ Refining startup description...")
+        
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system", 
+                    "content": "You are an expert startup advisor specializing in incubation, grant applications, and early-stage venture evaluation. Rewrite the startup description to be professional, precise, and compelling for formal applications. Emphasize the core problem, solution, target market, and impact in a clear and neutral tone. Avoid marketing hype, vague claims, or informal language. Do not introduce new information.Limit the response to 300 characters.Return only the refined description without any additional text."
+                },
+                {"role": "user", "content": req.description}
+            ],
+            temperature=0.7,
+        )
+        
+        refined_text = response.choices[0].message.content.strip()
+        return {"refined_description": refined_text}
+        
+    except Exception as e:
+        logging.exception("❌ Failed to refine description")
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 
 # --------------------- MAX SCORES ---------------------
@@ -501,6 +699,34 @@ TONE:
 """
 
 
+
+SYSTEM_PROMPT_OVERVIEW = """
+You are an expert Venture Capital Analyst.
+Your task is to analyze a startup pitch transcript and generate a structured "Pitch Overview".
+
+You must extract key information into a valid JSON object.
+
+**JSON Structure:**
+{
+  "oneLiner": "A single, impactful sentence describing what the startup does.",
+  "problem": "What pain point are they solving?",
+  "solution": "How does their product/service solve it?",
+  "market": "Target market and industry sector.",
+  "keyMetrics": "Revenue, Users, Growth, etc. (or 'No specific metrics mentioned')",
+  "businessModel": "How they make money.",
+  "ask": "Funding ask and valuation (or 'Not mentioned').",
+  "team": "Founder background or team info (or 'Not mentioned').",
+  "analystTake": "Your 1-2 sentence professional assessment."
+}
+
+**Rules:**
+- Return ONLY valid JSON.
+- Do not include markdown code blocks (```json).
+- Be concise and professional.
+- Do NOT hallucinate information.
+"""
+
+
 # --------------------- CORE FUNCTION ---------------------
 def evaluate_pitch_tournament(transcript_text: str) -> dict:
     """Send pitch transcript to GPT model and get structured evaluation."""
@@ -547,6 +773,43 @@ async def evaluate_pitch_api(req: PitchRequest):
 
     result = evaluate_pitch_tournament(transcript_text)
     return result
+
+
+@app.post("/generate-overview")
+async def generate_pitch_overview(req: PitchRequest):
+    """
+    Generate a VC-focused overview of a pitch transcript.
+    Returns: JSON with "overview" field containing markdown summary.
+    """
+    try:
+        logging.info("📝 Generating pitch overview...")
+        transcript_text = "\n".join([f"{m.role}: {m.content}" for m in req.transcript])
+
+        completion = client.chat.completions.create(
+            model=MODEL_NAME,
+            temperature=0.2,
+            response_format={"type": "json_object"},
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT_OVERVIEW},
+                {
+                    "role": "user",
+                    "content": f"Analyze the following transcript and generate the overview JSON:\n\n{transcript_text}",
+                },
+            ],
+        )
+
+        overview_json = completion.choices[0].message.content.strip()
+        # Parse text to ensure it's valid dict, though client should return string
+        try:
+             overview_data = json.loads(overview_json)
+        except:
+             overview_data = {"error": "Failed to parse overview"}
+
+        return {"overview": overview_data}
+
+    except Exception as e:
+        logging.exception("❌ Pitch overview generation failed.")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 
@@ -672,8 +935,153 @@ async def evaluate_pitch_api(req: PitchRequest):
     result = five_min_summary(transcript_text)
     return result
 
+# --------------------- AVATAR GENERATION ---------------------
+
+# Avatar generation prompt
+AVATAR_PROMPT = """
+You are a professional avatar and portrait designer.
+
+TASK:
+Given ANY real human photo as input, transform the person into a
+high-quality, front-facing, cartoon-style yet realistic professional avatar.
+
+This prompt must work for ALL input photos regardless of original clothing,
+background, angle, or lighting.
+
+MANDATORY TRANSFORMATIONS:
+- Replace the original outfit with a formal business suit or blazer
+- Add a light-colored formal shirt (white or light blue)
+- Modern minimal tie (VC / executive style)
+- Ensure the subject is FRONT-FACING, looking directly at the camera
+- Adjust pose if needed to achieve a clean chest-up professional portrait
+
+STYLE GUIDELINES:
+- Cartoon-inspired illustration with realistic facial proportions
+- Clean, smooth shading (not exaggerated, not anime)
+- Semi-realistic vector style (Pixar-meets-LinkedIn)
+- Professional, confident, approachable appearance
+
+IDENTITY PRESERVATION (CRITICAL – MUST NOT FAIL):
+- The avatar MUST look EXACTLY like the person in the uploaded photo
+- Preserve facial structure, skin tone, hairstyle, hairline, eye shape,
+  eyebrow shape, nose, lips, jawline, and facial symmetry
+- Maintain the person's natural imperfections and unique features
+- Do NOT change gender, ethnicity, age group, or facial proportions
+- Do NOT beautify, slim, idealize, or stylize the face unnaturally
+- The person must be instantly recognizable as the same individual
+
+POSE & FRAMING:
+- Chest-up portrait (profile-picture ready)
+- Face centered and clearly visible
+- Neutral confident expression or slight professional smile
+- Head upright, symmetrical, and properly aligned
+
+CIRCULAR FRAME REQUIREMENT (MANDATORY):
+- The final output MUST be cropped into a perfect circular frame
+- Avatar must be centered within the circle (WhatsApp / LinkedIn DP style)
+- Head and shoulders should fit cleanly inside the circular crop
+- No important facial features should be cut off by the circular boundary
+- Background must fill the circular frame cleanly
+
+BACKGROUND:
+- Clean, minimal background
+- Soft gradient or solid neutral tone
+- Corporate / LinkedIn-friendly aesthetic
+- No distractions
+
+LIGHTING & QUALITY:
+- Studio-quality soft lighting
+- Even illumination across face
+- Balanced contrast
+- High sharpness and clarity
+- No harsh shadows, blur, or noise
+
+STRICT RULES:
+- No text, logos, or watermarks
+- No props or accessories
+- No exaggerated caricature effects
+- No artistic abstraction or distortion
+- Output must be a SINGLE polished avatar image
+
+GOAL:
+Produce a realistic cartoon-style professional avatar that looks
+trustworthy, modern, and suitable for LinkedIn, VC profiles,
+startup founders, executives, and corporate use.
+"""
+
+def regenerate_image_with_gemini(pil_image: Image.Image, session_id: str) -> Dict:
+    """Generate professional avatar using Gemini AI"""
+    logger = logging.getLogger("AvatarGeneration")
+    logger.info("🎨 Generating 3 avatar variations using Gemini (flash-image)")
+    
+    try:
+        variations: List[Dict] = []
+        
+        # Generate 3 variations by calling Gemini 3 times
+        for i in range(3):
+            try:
+                logger.info(f"📸 Generating variation {i+1}/3...")
+                response = gemini_client.models.generate_content(
+                    model="gemini-2.5-flash-image",
+                    contents=[AVATAR_PROMPT, pil_image],
+                )
+                
+                for part in response.parts:
+                    # Extract image bytes from Gemini response
+                    if part.inline_data and part.inline_data.data:
+                        out_bytes = part.inline_data.data
+                        variations.append({
+                            "base64": base64.b64encode(out_bytes).decode()
+                        })
+                        break  # Only take first image from each call
+                        
+            except Exception as e:
+                logger.warning(f"⚠️ Failed to generate variation {i+1}: {e}")
+                # Continue to try generating remaining variations
+        
+        if not variations:
+            raise RuntimeError("Gemini returned no images")
+        
+        logger.info(f"✅ Generated {len(variations)} avatar variation(s)")
+        
+        return {
+            "session_id": session_id,
+            "variations": variations
+        }
+    
+    except Exception as e:
+        logger.exception("❌ Avatar generation failed")
+        raise HTTPException(status_code=500, detail=f"Avatar generation failed: {str(e)}")
 
 
+@app.post("/image/regenerate")
+async def regenerate_avatar(image: UploadFile = File(...)):
+    """
+    Generate professional avatar from uploaded photo
+    
+    Accepts: Image file (JPEG, PNG, etc.)
+    Returns: JSON with base64-encoded avatar variations
+    """
+    try:
+        # Read and validate image
+        image_bytes = await image.read()
+        if not image_bytes:
+            raise HTTPException(status_code=400, detail="Empty image file")
+        
+        # Convert to PIL Image
+        pil_image = Image.open(BytesIO(image_bytes)).convert("RGBA")
+        session_id = str(uuid.uuid4())
+        
+        # Generate avatar
+        result = regenerate_image_with_gemini(pil_image, session_id)
+        
+        return {"status": "success", "data": result}
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logging.exception("❌ Avatar regeneration endpoint failed")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # --------------------- ROOT ---------------------

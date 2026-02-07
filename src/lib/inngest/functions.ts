@@ -10,6 +10,7 @@ import resendInviteTeamMember from "@/lib/resend/resend-invite";
 import resendVerify from "@/lib/resend/resend-verification";
 import resendForgot from "@/lib/resend/resend-forgot";
 import resendContactUs from "@/lib/resend/resend-contactUs";
+import IncubationParticipant from "@/models/IncubationParticipant";
 
 export const updatePitch = inngest.createFunction(
   {
@@ -90,7 +91,7 @@ export const updatePitch = inngest.createFunction(
           const usedMinutes = Math.ceil(step1?.duration / 60);
 
           if (usedMinutes > pitch.creditsUsed) {
-            const newCreditsUsed=usedMinutes-(pitch.creditsUsed ?? 0);
+            const newCreditsUsed = usedMinutes - (pitch.creditsUsed ?? 0);
             pitch.creditsUsed = usedMinutes;
             await pitch.save();
             if (events[0].data.competitionId) {
@@ -135,7 +136,26 @@ export const updatePitch = inngest.createFunction(
                   message: "Normal competition pitch updated successfully",
                 };
               }
-            } else {
+            } 
+            // Handle incubation program pitches
+            else if (events[0].data.incubationId) {
+              console.log("Incubation ID found");
+              const incubationParticipant = await IncubationParticipant.findOne({
+                founderId: events[0].data.userId,
+                programId: events[0].data.incubationId,
+              });
+              if (!incubationParticipant) {
+                return { success: false, error: "Incubation participant not found" };
+              }
+              incubationParticipant.pitchTime -= newCreditsUsed;
+              incubationParticipant.pitchSubmitted = true;
+              await incubationParticipant.save();
+              return {
+                success: true,
+                message: "Incubation pitch updated successfully",
+              };
+            }
+            else {
               user.pitchTimeRemaining -= newCreditsUsed;
               await user.save();
               console.log("user after deduction", user.pitchTimeRemaining);

@@ -8,9 +8,6 @@ import {
   ChevronDown,
   ChevronsUpDown,
   Sparkles,
-  BadgeCheck,
-  CreditCard,
-  Bell,
   LogOut,
 } from "lucide-react";
 import Link from "next/link";

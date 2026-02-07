@@ -4,11 +4,12 @@ import PitchModel from "@/models/PitchModel";
 import { userPlanModel } from "@/models/UserPlanModel";
 import Competition from "@/models/Competition";
 import Participant from "@/models/Participant";
+import IncubationParticipant from "@/models/IncubationParticipant";
 
 export async function POST(req: NextRequest) {
   try {
     await dbConnect();
-    const { userId, sessionId, competitionId } = await req.json();
+    const { userId, sessionId, competitionId, incubationId } = await req.json();
     if (!userId)
       return NextResponse.json(
         {
@@ -19,6 +20,58 @@ export async function POST(req: NextRequest) {
       );
 
     const user = await userPlanModel.findOne({ userId });
+
+    // If incubation program, use dedicated incubation participant time
+    if (incubationId) {
+      const incubationParticipant = await IncubationParticipant.findOne({
+        founderId: userId,
+        programId: incubationId,
+      });
+
+      if (!incubationParticipant) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "You are not registered for this investment program. Please register first.",
+          },
+          { status: 404 }
+        );
+      }
+
+      if (incubationParticipant.pitchSubmitted) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "You have already submitted your pitch for this program",
+          },
+          { status: 400 }
+        );
+      }
+
+      const count = await PitchModel.countDocuments({ userId });
+      const pitch = await PitchModel.create({
+        userId,
+        title: `Pitch ${count + 1}`,
+        sessionId,
+        lastUpdated: Date.now(),
+        startTime: Date.now(),
+        competitionId: competitionId ?? null,
+        incubationId: incubationId ?? null,
+      });
+
+      return NextResponse.json(
+        {
+          success: true,
+          message: "Pitch started successfully",
+          data: {
+            pitch,
+            remainingTime: incubationParticipant.pitchTime,
+          },
+        },
+        { status: 200 }
+      );
+    }
+
     // If competition then, check if it is a practice competition and if the user has no pitch time remaining throw error
     if (competitionId) {
       const competition = await Competition.findOne({ _id: competitionId });
@@ -31,7 +84,7 @@ export async function POST(req: NextRequest) {
           { status: 404 }
         );
       }
-      if(new Date(Date.now())<competition.eventInterval?.start) {
+      if (new Date(Date.now()) < competition.eventInterval?.start) {
         return NextResponse.json(
           {
             success: false,
@@ -120,6 +173,7 @@ export async function POST(req: NextRequest) {
         }
       }
     } else {
+      // Normal practice pitch - uses dashboard minutes
       const count = await PitchModel.countDocuments({ userId });
       const pitch = await PitchModel.create({
         userId,
