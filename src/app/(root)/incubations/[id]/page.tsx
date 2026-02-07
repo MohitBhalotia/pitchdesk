@@ -74,10 +74,23 @@ interface IPitch {
     hasEvaluation?: boolean;
 }
 
+interface IIncubationParticipant {
+    _id: string;
+    programId: string;
+    founderId: string;
+    registrationDate: string;
+    pitchTime: number;
+    pitchSubmitted: boolean;
+    pitchEvaluated: boolean;
+    applicationSubmitted: boolean;
+    createdAt: string;
+    updatedAt: string;
+}
+
 export default function IncubationDetailPage() {
     const router = useRouter();
     const { id } = useParams();
-    const { data: session,status } = useSession();
+    const { data: session, status } = useSession();
 
     const [program, setProgram] = useState<IProgram | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -90,18 +103,19 @@ export default function IncubationDetailPage() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isRegistered, setIsRegistered] = useState(false);
     const [isRegistering, setIsRegistering] = useState(false);
-    const [registrationData, setRegistrationData] = useState<any>(null);
+    const [registrationData, setRegistrationData] = useState<IIncubationParticipant | null>(null);
 
     useEffect(() => {
         if (id) {
             fetchProgramDetails();
-            if (status  !== "loading") {
-            checkRegistrationStatus();
-            checkApplicationStatus();
-            fetchMyPitches();
+            if (status !== "loading") {
+                checkRegistrationStatus();
+                checkApplicationStatus();
+                fetchMyPitches();
             }
         }
-    }, [id,status]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [id, status]);
 
     const fetchProgramDetails = async () => {
         try {
@@ -109,7 +123,7 @@ export default function IncubationDetailPage() {
             setError(null);
             const response = await axios.get(`/api/incubations/${id}`);
             setProgram(response.data);
-        } catch (error: any) {
+        } catch (error) {
             console.error("Error fetching program:", error);
             setError(error.response?.data?.error || "Failed to load program details. Please try again.");
         } finally {
@@ -135,7 +149,7 @@ export default function IncubationDetailPage() {
                 setIsRegistered(true);
                 setRegistrationData(response.data.participant);
             }
-        } catch (error: any) {
+        } catch (error) {
             console.error("Error registering:", error);
             alert(error.response?.data?.error || "Failed to register. Please try again.");
         } finally {
@@ -528,7 +542,7 @@ export default function IncubationDetailPage() {
                                                 className="w-full mb-3"
                                                 onClick={() => router.push('/start-a-pitch')}
                                             >
-                                                Practice 
+                                                Practice
                                             </Button>
 
                                             <Button

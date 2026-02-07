@@ -117,6 +117,7 @@ export default function IncubationProgramDetailPage() {
             fetchProgram();
             fetchBots();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
     const fetchProgram = async () => {
@@ -145,9 +146,12 @@ export default function IncubationProgramDetailPage() {
                     endDate: s.endDate ? new Date(s.endDate).toISOString().split('T')[0] : ""
                 })) : [{ title: "", description: "", startDate: "", endDate: "" }],
             });
-        } catch (error: any) {
+        } catch (error) {
             console.error("Error fetching program:", error);
-            setError(error.response?.data?.error || "Failed to load program details. Please try again.");
+            const errorMessage = axios.isAxiosError(error) && error.response?.data?.error
+                ? error.response.data.error
+                : "Failed to load program details. Please try again.";
+            setError(errorMessage);
         } finally {
             setIsLoading(false);
         }

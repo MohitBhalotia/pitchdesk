@@ -42,7 +42,7 @@ export async function POST(req: Request, context: RouteContext) {
         const participant = await IncubationParticipant.create({
             programId,
             founderId: session.user._id,
-            pitchTime:15,
+            pitchTime: 15,
             pitchSubmitted: false,
             pitchEvaluated: false,
             applicationSubmitted: false
@@ -53,7 +53,7 @@ export async function POST(req: Request, context: RouteContext) {
             participant
         }, { status: 201 });
 
-    } catch (error: any) {
+    } catch (error) {
         console.error("Error registering for program:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
