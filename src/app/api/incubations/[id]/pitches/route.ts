@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import authOptions from "@/lib/auth";
 import dbConnect from "@/lib/db";
 import PitchModel from "@/models/PitchModel";
+import { PitchEval } from "@/models/PitchEvalModel";
 import { NextResponse } from "next/server";
 import { RouteContext } from "@/types/route-context";
 
@@ -24,7 +25,18 @@ export async function GET(req: Request, context: RouteContext) {
             .sort({ startTime: -1 })
             .select('title startTime duration creditsUsed');
 
-        return NextResponse.json(pitches);
+        // Check if each pitch has an evaluation
+        const pitchesWithEvalStatus = await Promise.all(
+            pitches.map(async (pitch) => {
+                const evaluation = await PitchEval.findOne({ pitchId: pitch._id });
+                return {
+                    ...pitch.toObject(),
+                    hasEvaluation: !!evaluation
+                };
+            })
+        );
+
+        return NextResponse.json(pitchesWithEvalStatus);
     } catch (error) {
         console.error("Error fetching incubation pitches:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });

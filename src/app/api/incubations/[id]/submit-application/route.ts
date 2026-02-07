@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import authOptions from "@/lib/auth";
 import dbConnect from "@/lib/db";
 import IncubationApplication from "@/models/IncubationApplicationModel";
+import IncubationParticipant from "@/models/IncubationParticipant";
 import PitchModel from "@/models/PitchModel";
 import { PitchEval } from "@/models/PitchEvalModel";
 import { NextResponse } from "next/server";
@@ -64,6 +65,17 @@ export async function POST(req: Request, context: RouteContext) {
             }]
         });
 
+        // Update participant to mark application as submitted
+        await IncubationParticipant.findOneAndUpdate(
+            {
+                programId,
+                founderId: session.user._id
+            },
+            {
+                applicationSubmitted: true
+            }
+        );
+
         return NextResponse.json({
             success: true,
             applicationId: application._id,
@@ -75,3 +87,4 @@ export async function POST(req: Request, context: RouteContext) {
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
+

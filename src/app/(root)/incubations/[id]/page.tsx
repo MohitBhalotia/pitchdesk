@@ -13,7 +13,8 @@ import {
     CalendarCheck,
     AlertCircle,
     FileText,
-    Send
+    Send,
+    AlertTriangle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -70,12 +71,13 @@ interface IPitch {
     startTime: string;
     duration: number;
     creditsUsed: number;
+    hasEvaluation?: boolean;
 }
 
 export default function IncubationDetailPage() {
     const router = useRouter();
     const { id } = useParams();
-    const { data: session } = useSession();
+    const { data: session,status } = useSession();
 
     const [program, setProgram] = useState<IProgram | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -86,16 +88,20 @@ export default function IncubationDetailPage() {
     // const [activeTab, setActiveTab] = useState("overview");
     const [selectedPitchId, setSelectedPitchId] = useState<string | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isRegistered, setIsRegistered] = useState(false);
+    const [isRegistering, setIsRegistering] = useState(false);
+    const [registrationData, setRegistrationData] = useState<any>(null);
 
     useEffect(() => {
         if (id) {
             fetchProgramDetails();
-            if (session) {
-                checkApplicationStatus();
-                fetchMyPitches();
+            if (status  !== "loading") {
+            checkRegistrationStatus();
+            checkApplicationStatus();
+            fetchMyPitches();
             }
         }
-    }, [id, session]);
+    }, [id,status]);
 
     const fetchProgramDetails = async () => {
         try {
@@ -108,6 +114,32 @@ export default function IncubationDetailPage() {
             setError(error.response?.data?.error || "Failed to load program details. Please try again.");
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const checkRegistrationStatus = async () => {
+        try {
+            const response = await axios.get(`/api/incubations/${id}/register`);
+            setIsRegistered(response.data.registered);
+            setRegistrationData(response.data.participant || null);
+        } catch (error) {
+            console.error("Error checking registration status:", error);
+        }
+    };
+
+    const handleRegister = async () => {
+        try {
+            setIsRegistering(true);
+            const response = await axios.post(`/api/incubations/${id}/register`);
+            if (response.data.success) {
+                setIsRegistered(true);
+                setRegistrationData(response.data.participant);
+            }
+        } catch (error: any) {
+            console.error("Error registering:", error);
+            alert(error.response?.data?.error || "Failed to register. Please try again.");
+        } finally {
+            setIsRegistering(false);
         }
     };
 
@@ -143,7 +175,7 @@ export default function IncubationDetailPage() {
     };
 
 
-    if (isLoading) {
+    if (isLoading || status === "loading") {
         return <div className="flex justify-center items-center min-h-[60vh]">
             <Loader2 className="h-8 w-8 animate-spin" />
         </div>;
@@ -327,15 +359,20 @@ export default function IncubationDetailPage() {
                                                 <FileText className="h-8 w-8 text-muted-foreground" />
                                             </div>
                                             <h3 className="font-semibold text-lg mb-2">No pitches yet</h3>
-                                            <p className="text-muted-foreground mb-6">
-                                                Start practicing your pitch with our AI judge!
-                                            </p>
-                                            <Button
-                                                onClick={() => window.open(`/start-pitch?agentId=${typeof program.botId === 'object' ? program.botId._id : program.botId}&incubationId=${id}`, "_blank")}
-                                                className="gap-2"
-                                            >
-                                                Start Your First Pitch
-                                            </Button>
+                                            {!isRegistered && (
+                                                <>
+                                                    <p className="text-muted-foreground mb-6">
+                                                        Please register for this program first to start pitching.
+                                                    </p>
+                                                    <Button
+                                                        onClick={handleRegister}
+                                                        disabled={isRegistering}
+                                                        className="gap-2"
+                                                    >
+                                                        {isRegistering ? "Registering..." : "Register Now"}
+                                                    </Button>
+                                                </>
+                                            )}
                                         </div>
                                     ) : (
                                         <div className="space-y-3">
@@ -357,18 +394,29 @@ export default function IncubationDetailPage() {
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-2">
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={() => router.push(`/evaluation/${pitch._id}`)}
-                                                        >
-                                                            View Evaluation
-                                                        </Button>
-                                                        {!application && (
+                                                        {!pitch.hasEvaluation ? (
+                                                            <Button
+                                                                size="sm"
+                                                                onClick={() => router.push(`/evaluation/${pitch._id}`)}
+                                                            >
+                                                                Evaluate Pitch
+                                                            </Button>
+                                                        ) : (
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() => router.push(`/evaluation/${pitch._id}`)}
+                                                            >
+                                                                View Evaluation
+                                                            </Button>
+                                                        )}
+                                                        {!application && isRegistered && !registrationData?.applicationSubmitted && (
                                                             <Button
                                                                 size="sm"
                                                                 className="gap-2"
                                                                 onClick={() => openApplicationDialog(pitch._id)}
+                                                                disabled={!pitch.hasEvaluation}
+                                                                title={!pitch.hasEvaluation ? "Please evaluate your pitch first" : ""}
                                                             >
                                                                 <Send className="h-4 w-4" />
                                                                 Submit Application
@@ -422,27 +470,79 @@ export default function IncubationDetailPage() {
                                     <p className="text-muted-foreground text-sm mt-1 mb-4">
                                         Status: <span className="font-medium capitalize text-foreground">{application.status}</span>
                                     </p>
-                                    <Button variant="outline" className="w-full" disabled>
+                                    {/* <Button variant="outline" className="w-full" disabled>
                                         View Submission
-                                    </Button>
+                                    </Button> */}
                                 </div>
-                            ) : (
+                            ) : !isRegistered ? (
                                 <div className="space-y-4">
-                                    <div className="flex items-start gap-2 text-sm text-yellow-600 bg-yellow-50 p-3 rounded-md dark:bg-yellow-900/20 dark:text-yellow-400">
+                                    <div className="flex items-start gap-2 text-sm text-blue-600 bg-blue-50 p-3 rounded-md dark:bg-blue-900/20 dark:text-blue-400">
                                         <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
-                                        <p>Practice your pitch with our AI judge before applying to this program.</p>
+                                        <p>Register for this program to get 15 minutes of dedicated pitch time!</p>
                                     </div>
 
                                     <Button
-                                        className="w-full size-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md"
-                                        onClick={() => window.open(`/start-pitch?agentId=${typeof program.botId === 'object' ? program.botId._id : program.botId}&incubationId=${id}`, "_blank")}
+                                        className="w-full size-lg bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-md"
+                                        onClick={handleRegister}
+                                        disabled={isRegistering}
                                     >
-                                        Start Pitch
+                                        {isRegistering ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Registering...
+                                            </>
+                                        ) : (
+                                            "Register Now"
+                                        )}
                                     </Button>
 
                                     <p className="text-xs text-center text-muted-foreground">
-                                        You&apos;ll practice your pitch and then fill out the application form
+                                        One-click registration • No form required
                                     </p>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 p-3 rounded-md dark:bg-green-900/20 dark:text-green-400 mb-4">
+                                        <CheckCircle2 className="h-4 w-4 shrink-0" />
+                                        <p>Registered! You have 15 minutes of dedicated pitch time.</p>
+                                    </div>
+
+                                    {registrationData?.pitchSubmitted ? (
+                                        <div className="text-center py-2">
+                                            <p className="text-sm text-muted-foreground mb-4">
+                                                You&apos;ve already submitted your pitch for this program. Check the &quot;My Pitches&quot; tab to submit your application.
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className="flex items-start gap-2 text-sm text-black bg-red-300 p-3 rounded-md dark:bg-destructive dark:text-white mb-3">
+                                                <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                                                <div>
+                                                    <p className="font-semibold">One-Time Opportunity</p>
+                                                    <p className="text-xs mt-1">You can only pitch once for this program. Practice first using your dashboard minutes!</p>
+                                                </div>
+                                            </div>
+
+                                            <Button
+                                                variant="outline"
+                                                className="w-full mb-3"
+                                                onClick={() => router.push('/start-a-pitch')}
+                                            >
+                                                Practice 
+                                            </Button>
+
+                                            <Button
+                                                className="w-full size-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md"
+                                                onClick={() => window.open(`/start-pitch?agentId=${typeof program.botId === 'object' ? program.botId._id : program.botId}&incubationId=${id}`, "_blank")}
+                                            >
+                                                Start Pitch
+                                            </Button>
+
+                                            <p className="text-xs text-center text-muted-foreground">
+                                                After pitching, evaluate it and submit your application
+                                            </p>
+                                        </>
+                                    )}
                                 </div>
                             )}
                         </CardContent>
