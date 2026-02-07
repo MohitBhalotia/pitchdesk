@@ -438,7 +438,7 @@ async def refine_description(req: RefineRequest):
             messages=[
                 {
                     "role": "system", 
-                    "content": "You are an expert startup advisor specializing in incubation, grant applications, and early-stage venture evaluation. Rewrite the startup description to be professional, precise, and compelling for formal applications. Emphasize the core problem, solution, target market, and impact in a clear and neutral tone. Avoid marketing hype, vague claims, or informal language. Do not introduce new information.Limit the response to 500 characters.Return only the refined description without any additional text."
+                    "content": "You are an expert startup advisor specializing in incubation, grant applications, and early-stage venture evaluation. Rewrite the startup description to be professional, precise, and compelling for formal applications. Emphasize the core problem, solution, target market, and impact in a clear and neutral tone. Avoid marketing hype, vague claims, or informal language. Do not introduce new information.Limit the response to 300 characters.Return only the refined description without any additional text."
                 },
                 {"role": "user", "content": req.description}
             ],

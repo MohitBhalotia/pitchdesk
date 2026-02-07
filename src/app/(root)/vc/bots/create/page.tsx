@@ -688,7 +688,7 @@ export default function CreateBotPage() {
                                                             <DropdownMenuContent className="w-56" align="start">
                                                                 <DropdownMenuLabel>Sectors</DropdownMenuLabel>
                                                                 <DropdownMenuSeparator />
-                                                                {["AI/ML", "FinTech", "HealthTech", "EdTech", "E-commerce", "SaaS", "CleanTech", "DeepTech", "Agritech", "Logistics", "Consumer", "B2B Marketplace", "PropTech", "Web3/Blockchain", "Gaming", "Hardware", "Biotech", "Others"].map((sector) => (
+                                                                {["FinTech", "HealthTech", "EdTech", "E-commerce", "SaaS", "Sports & Fitness", "Agritech", "Logistics", "Consumer", "B2B Marketplace", "Gaming","Hardware", "Biotech", "Others"].map((sector) => (
                                                                     <DropdownMenuCheckboxItem
                                                                         key={sector}
                                                                         checked={field.value?.includes(sector)}
