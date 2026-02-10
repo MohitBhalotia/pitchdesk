@@ -759,15 +759,15 @@ def finalize_scores(scores: dict) -> dict:
 @app.post("/evaluate")
 async def evaluate_pitch(req: PitchRequest):
     try:
-        logging.info("🎯 Evaluating pitch transcript...")
+        # logging.info("🎯 Evaluating pitch transcript...")
 
         # Convert transcript to text format - using the correct field names
         transcript_text = "\n".join([f"{m.role}: {m.content}" for m in req.transcript])
-        logging.info(f"Transcript length: {len(transcript_text)} characters")
-        logging.info(f"Number of messages: {len(req.transcript)}")
-        logging.info(
-            f"Sample message: role={req.transcript[0].role}, content={req.transcript[0].content[:50]}..."
-        )
+        # logging.info(f"Transcript length: {len(transcript_text)} characters")
+        # logging.info(f"Number of messages: {len(req.transcript)}")
+        # logging.info(
+        #     f"Sample message: role={req.transcript[0].role}, content={req.transcript[0].content[:50]}..."
+        # )
 
         # Call OpenAI API
         completion = client.chat.completions.create(
@@ -784,7 +784,7 @@ async def evaluate_pitch(req: PitchRequest):
         )
 
         content = completion.choices[0].message.content.strip()
-        logging.info(f"Raw API response: {content}")
+        # logging.info(f"Raw API response: {content}")
 
         result = json.loads(content)
 

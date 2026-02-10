@@ -10,7 +10,6 @@ interface FastAPIResponse {
     Introduction: Record<string, number>;
     "Pitch Content": Record<string, number>;
     "Q&A Handling": Record<string, number>;
-    "Delivery & Style": Record<string, number>;
     "Business Investability": Record<string, number>;
     "Total Score": number;
     "Business Investability Confidence": number;
@@ -24,7 +23,6 @@ function transformFastAPIResponse(fastAPIResponse: FastAPIResponse) {
       Introduction: fastAPIResponse.scores.Introduction,
       PitchContent: fastAPIResponse.scores["Pitch Content"],
       QandAHandling: fastAPIResponse.scores["Q&A Handling"],
-      DeliveryAndStyle: fastAPIResponse.scores["Delivery & Style"],
       BusinessInvestability: fastAPIResponse.scores["Business Investability"],
       TotalScore: fastAPIResponse.scores["Total Score"],
       BusinessInvestabilityConfidence: fastAPIResponse.scores["Business Investability Confidence"],

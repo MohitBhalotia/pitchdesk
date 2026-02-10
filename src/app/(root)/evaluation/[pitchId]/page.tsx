@@ -4,11 +4,10 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 
 interface EvaluationScores {
-  Introduction: number;
-  PitchContent: number;
-  QandAHandling: number;
-  DeliveryAndStyle: number;
-  BusinessInvestability: number;
+  Introduction: Record<string, number>;
+  PitchContent: Record<string, number>;
+  QandAHandling: Record<string, number>;
+  BusinessInvestability: Record<string, number>;
   TotalScore: number;
   BusinessInvestabilityConfidence: number;
 }
@@ -22,55 +21,92 @@ interface PitchEvaluation {
   createdAt: string;
 }
 
-const MAX_PER_ITEM = 5;
+// Exact max scores from backend system prompt
+const MICRO_MAX_SCORES: Record<string, Record<string, number>> = {
+  "Introduction": {
+    "Clarity of Speech": 2,
+    "Confidence & Presence": 2,
+    "Hook / Attention Grabber": 2,
+    "Relevance to Audience": 2,
+    "Personal Branding / Credibility": 2,
+  },
+  "Pitch Content": {
+    "Structure & Flow": 5,
+    "Clarity & Conciseness": 5,
+    "Value Proposition": 5,
+    "Supporting Evidence": 5,
+    "Audience Engagement": 4,
+    "Storytelling / Narrative": 3,
+    "Persuasiveness": 4,
+    "Creativity / Originality": 4,
+  },
+  "Q&A Handling": {
+    "Comprehension of Questions": 5,
+    "Clarity of Answers": 5,
+    "Accuracy / Knowledge Depth": 5,
+    "Problem-Solving Ability": 5,
+    "Handling Challenging Questions": 5,
+  },
+  "Business Investability": {
+    "Market Opportunity & TAM/SAM/SOM": 5,
+    "Unit Economics & Profitability": 5,
+    "Revenue Model & Scalability": 5,
+    "Competitive Advantage / Moat": 4,
+    "Traction & KPIs": 4,
+    "Team & Execution Capability": 4,
+    "Funding Ask & Use of Proceeds": 2,
+    "Risk Mitigation & Barriers": 2,
+  },
+};
+
+// Section max scores (sum of all criteria in each section)
+const SECTION_MAX_SCORES: Record<string, number> = {
+  "Introduction": 10,
+  "Pitch Content": 35,
+  "Q&A Handling": 25,
+  "Business Investability": 30,
+};
 
 const clamp = (n: number, min: number, max: number) =>
   Math.min(Math.max(n, min), max);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getNumericCriteria = (section: any): number[] => {
-  if (!section || typeof section !== "object") return [];
-  return Object.entries(section)
-    .filter(
-      ([k, v]) => k !== "Subtotal" && typeof v === "number" && !Number.isNaN(v)
-    )
-    .map(([, v]) => clamp(v as number, 0, MAX_PER_ITEM));
+// Get the max score for a specific criterion
+const getCriterionMax = (sectionName: string, criterionName: string): number => {
+  return MICRO_MAX_SCORES[sectionName]?.[criterionName] || 5;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const computeSectionSubtotal = (section: any): number => {
-  const values = getNumericCriteria(section);
+  if (!section || typeof section !== "object") return 0;
+
+  // Use the Subtotal if it exists (from backend)
+  if (typeof section.Subtotal === "number") {
+    return Number.parseFloat(section.Subtotal.toFixed(1));
+  }
+
+  // Otherwise calculate from individual scores
+  const values = Object.entries(section)
+    .filter(([k, v]) => k !== "Subtotal" && typeof v === "number" && !Number.isNaN(v))
+    .map(([, v]) => v as number);
+
   if (values.length === 0) return 0;
   const sum = values.reduce((a, b) => a + b, 0);
-  return Number.parseFloat(sum.toFixed(2));
+  return Number.parseFloat(sum.toFixed(1));
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getSectionMax = (section: any): number =>
-  getNumericCriteria(section).length * MAX_PER_ITEM;
-
-const getTotalMax = (scores: EvaluationScores): number =>
-  getSectionMax(scores.Introduction) +
-  getSectionMax(scores.PitchContent) +
-  getSectionMax(scores.QandAHandling) +
-  getSectionMax(scores.DeliveryAndStyle) +
-  getSectionMax(scores.BusinessInvestability);
+// Get section max score
+const getSectionMax = (sectionName: string): number => {
+  return SECTION_MAX_SCORES[sectionName] || 0;
+};
 
 const computeRawTotal = (scores: EvaluationScores): number => {
   const subs = [
     computeSectionSubtotal(scores.Introduction),
     computeSectionSubtotal(scores.PitchContent),
     computeSectionSubtotal(scores.QandAHandling),
-    computeSectionSubtotal(scores.DeliveryAndStyle),
     computeSectionSubtotal(scores.BusinessInvestability),
   ];
-  return Number.parseFloat(subs.reduce((s, n) => s + n, 0).toFixed(2));
-};
-
-const calculateTotalScore = (scores: EvaluationScores): number => {
-  const rawTotal = computeRawTotal(scores);
-  const totalMax = getTotalMax(scores) || 1;
-  return Math.round((rawTotal / totalMax) * 100);
+  return Number.parseFloat(subs.reduce((s, n) => s + n, 0).toFixed(1));
 };
 
 const getPerformanceLabel = (p: number) =>
@@ -151,32 +187,26 @@ const ScoreBreakdownChart = ({ scores }: { scores: EvaluationScores }) => {
     {
       label: "Introduction",
       score: computeSectionSubtotal(scores.Introduction),
-      maxScore: getSectionMax(scores.Introduction),
+      maxScore: getSectionMax("Introduction"),
       color: "var(--color-chart-1)",
     },
     {
       label: "Pitch Content",
       score: computeSectionSubtotal(scores.PitchContent),
-      maxScore: getSectionMax(scores.PitchContent),
+      maxScore: getSectionMax("Pitch Content"),
       color: "var(--color-chart-2)",
     },
     {
       label: "Q&A Handling",
       score: computeSectionSubtotal(scores.QandAHandling),
-      maxScore: getSectionMax(scores.QandAHandling),
+      maxScore: getSectionMax("Q&A Handling"),
       color: "var(--color-chart-3)",
-    },
-    {
-      label: "Delivery & Style",
-      score: computeSectionSubtotal(scores.DeliveryAndStyle),
-      maxScore: getSectionMax(scores.DeliveryAndStyle),
-      color: "var(--color-chart-4)",
     },
     {
       label: "Business & Investability",
       score: computeSectionSubtotal(scores.BusinessInvestability),
-      maxScore: getSectionMax(scores.BusinessInvestability),
-      color: "var(--color-chart-5)",
+      maxScore: getSectionMax("Business Investability"),
+      color: "var(--color-chart-4)",
     },
   ];
 
@@ -205,19 +235,19 @@ const ScoreBreakdownChart = ({ scores }: { scores: EvaluationScores }) => {
 const ScoreCard = ({
   title,
   data,
-  //maxScore = 5,
+  sectionName,
   color,
 }: {
   title: string;
-  data: number;
-  maxScore?: number;
+  data: Record<string, number>;
+  sectionName: string;
   color: string;
 }) => {
   if (!data || typeof data !== "object") return null;
 
   const subtotal = computeSectionSubtotal(data);
-  const criteria = getNumericCriteria(data);
-  const sectionMax = getSectionMax(data);
+  const sectionMax = getSectionMax(sectionName);
+  const criteriaCount = Object.keys(data).filter(k => k !== "Subtotal").length;
 
   return (
     <div className="bg-card rounded-lg border shadow-sm p-6">
@@ -234,6 +264,7 @@ const ScoreCard = ({
       <div className="space-y-3">
         {Object.entries(data).map(([key, value]) => {
           if (key !== "Subtotal" && typeof value === "number") {
+            const criterionMax = getCriterionMax(sectionName, key);
             return (
               <div key={key} className="flex justify-between items-center">
                 <span className="text-muted-foreground text-sm capitalize">
@@ -244,7 +275,7 @@ const ScoreCard = ({
                     {(value as number).toFixed(1)}
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    / {MAX_PER_ITEM}
+                    / {criterionMax}
                   </span>
                 </div>
               </div>
@@ -261,7 +292,7 @@ const ScoreCard = ({
         </div>
       </div>
       <div className="mt-2 text-xs text-muted-foreground">
-        {criteria.length} criteria
+        {criteriaCount} criteria
       </div>
     </div>
   );
@@ -372,9 +403,7 @@ export default function EvaluationPage() {
     );
   }
 
-  const totalScore = evaluation ? calculateTotalScore(evaluation.scores) : 0;
   const rawTotal = evaluation ? computeRawTotal(evaluation.scores) : 0;
-  const totalMax = evaluation ? getTotalMax(evaluation.scores) : 0;
   //const performanceLabel = evaluation ? getPerformanceLabel(totalScore) : ""
 
   return (
@@ -462,7 +491,7 @@ export default function EvaluationPage() {
                     Based on comprehensive analysis of all sections (each
                     criterion scored out of 5)
                   </p>
-                  <div className="mt-4 grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
+                  <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-chart-1"></div>
                       <span className="text-muted-foreground">
@@ -483,41 +512,22 @@ export default function EvaluationPage() {
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-chart-4"></div>
-                      <span className="text-muted-foreground">
-                        Delivery & Style
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-chart-5"></div>
                       <span className="text-muted-foreground">Business</span>
                     </div>
                   </div>
-                  <div className="mt-4 p-3 bg-muted rounded-lg">
-                    <div className="text-sm text-muted-foreground">
-                      <strong>Scoring System:</strong> Each criterion is out of
-                      5 points. A section&apos;s maximum equals its criteria
-                      count × 5. Overall maximum equals the sum of all
-                      sections&apos; maximums.
-                    </div>
-                  </div>
+                  
                 </div>
                 <div className="flex items-center gap-8">
                   <PieChart
-                    score={totalScore}
+                    score={rawTotal}
                     maxScore={100}
                     label="Total Score"
                     color="var(--color-primary)"
                     size={120}
                   />
                   <div className="text-center">
-                    <div className="mt-2 text-lg text-bold">
-                      {`${rawTotal.toFixed(1)} / ${totalMax || 0} points`}
-                    </div>
-                    <div className="text-sm text-muted-foreground mt-1">
-                      Overall Performance
-                    </div>
                     <div className="mt-3 inline-flex items-center rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">
-                      {getPerformanceLabel(totalScore)}
+                      {getPerformanceLabel(rawTotal)}
                     </div>
                   </div>
                 </div>
@@ -562,32 +572,26 @@ export default function EvaluationPage() {
               <ScoreCard
                 title="Introduction"
                 data={evaluation.scores.Introduction}
-                maxScore={5}
+                sectionName="Introduction"
                 color="var(--color-chart-1)"
               />
               <ScoreCard
                 title="Pitch Content"
                 data={evaluation.scores.PitchContent}
-                maxScore={5}
+                sectionName="Pitch Content"
                 color="var(--color-chart-2)"
               />
               <ScoreCard
                 title="Q&A Handling"
                 data={evaluation.scores.QandAHandling}
-                maxScore={5}
+                sectionName="Q&A Handling"
                 color="var(--color-chart-3)"
-              />
-              <ScoreCard
-                title="Delivery & Style"
-                data={evaluation.scores.DeliveryAndStyle}
-                maxScore={5}
-                color="var(--color-chart-4)"
               />
               <ScoreCard
                 title="Business Investability"
                 data={evaluation.scores.BusinessInvestability}
-                maxScore={5}
-                color="var(--color-chart-5)"
+                sectionName="Business Investability"
+                color="var(--color-chart-4)"
               />
             </div>
 

@@ -9,15 +9,15 @@ interface SectionScores {
   Introduction: MicroScores;
   PitchContent: MicroScores;
   QandAHandling: MicroScores;
-  DeliveryAndStyle: MicroScores;
+  DeliveryAndStyle?: MicroScores; // Optional for backward compatibility
   BusinessInvestability: MicroScores;
   TotalScore: number;
   BusinessInvestabilityConfidence: number;
 }
 
 export interface IPitchEvaluation extends Document {
-  userId: mongoose.Types.ObjectId;   
-  pitchId: mongoose.Types.ObjectId;  
+  userId: mongoose.Types.ObjectId;
+  pitchId: mongoose.Types.ObjectId;
   scores: SectionScores;
   summary: string;
   createdAt: Date;
@@ -26,7 +26,7 @@ export interface IPitchEvaluation extends Document {
 
 const MicroScoresSchema = new Schema(
   {},
-  { strict: false, _id: false } 
+  { strict: false, _id: false }
 );
 
 const SectionScoresSchema = new Schema<SectionScores>(
@@ -34,7 +34,7 @@ const SectionScoresSchema = new Schema<SectionScores>(
     Introduction: { type: MicroScoresSchema, required: true },
     PitchContent: { type: MicroScoresSchema, required: true },
     QandAHandling: { type: MicroScoresSchema, required: true },
-    DeliveryAndStyle: { type: MicroScoresSchema, required: true },
+    DeliveryAndStyle: { type: MicroScoresSchema, required: false }, // Optional for backward compatibility
     BusinessInvestability: { type: MicroScoresSchema, required: true },
     TotalScore: { type: Number, required: true },
     BusinessInvestabilityConfidence: { type: Number, required: true },
