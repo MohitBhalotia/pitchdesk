@@ -1271,6 +1271,50 @@ async def regenerate_avatar(image: UploadFile = File(...)):
         logging.exception("❌ Avatar regeneration endpoint failed")
         raise HTTPException(status_code=500, detail=str(e))
 
+from api.tools.improvement_engine import generate_section_improvement
+@app.post("/pitch/improvements")
+async def pitch_improvements(
+    transcript: str = Form(...),
+    scores: str = Form(...)
+):
+    """
+    multipart/form-data
+    transcript -> JSON string
+    scores     -> JSON string
+    """
+
+    try:
+        transcript_data = json.loads(transcript)
+        scores_data = json.loads(scores)
+    except json.JSONDecodeError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid JSON in transcript or scores"
+        )
+
+    if "transcript" not in transcript_data:
+        raise HTTPException(
+            status_code=400,
+            detail="transcript field missing inside transcript JSON"
+        )
+
+    results = {}
+
+    for section, criteria in scores_data.get("scores", {}).items():
+        if section in ["Total Score", "Business Investability Confidence"]:
+            continue
+
+        improvement = generate_section_improvement(
+            transcript=transcript_data["transcript"],
+            section=section,
+            criteria=criteria
+        )
+
+        results[section] = improvement
+
+    return {
+        "section_wise_improvements": results
+    }
 
 # --------------------- ROOT ---------------------
 @app.get("/")
