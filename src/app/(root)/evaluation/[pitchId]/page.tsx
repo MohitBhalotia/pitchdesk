@@ -21,6 +21,34 @@ interface PitchEvaluation {
   createdAt: string;
 }
 
+interface CriterionFeedback {
+  score_received: number;
+  max_score: number;
+  marks_lost: number;
+  reason: string;
+  how_to_improve: string;
+}
+
+interface SectionSummary {
+  strengths: string[];
+  gaps: string[];
+  improvements: string[];
+}
+
+interface SectionImprovement {
+  criteria_feedback: Record<string, CriterionFeedback>;
+  summary: SectionSummary;
+}
+
+interface PitchImprovement {
+  _id: string;
+  userId: string;
+  pitchId: string;
+  evaluationId: string;
+  section_wise_improvements: Record<string, SectionImprovement>;
+  createdAt: string;
+}
+
 // Exact max scores from backend system prompt
 const MICRO_MAX_SCORES: Record<string, Record<string, number>> = {
   "Introduction": {
@@ -308,10 +336,20 @@ export default function EvaluationPage() {
     pitchId = pitchId.replace("pitchId=", "");
   }
 
+  // Tab state
+  const [activeTab, setActiveTab] = useState<"evaluation" | "analysis">("evaluation");
+
+  // Evaluation state
   const [evaluation, setEvaluation] = useState<PitchEvaluation | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+
+  // Improvement state
+  const [improvement, setImprovement] = useState<PitchImprovement | null>(null);
+  const [improvementLoading, setImprovementLoading] = useState(false);
+  const [improvementError, setImprovementError] = useState<string | null>(null);
+  const [generatingImprovement, setGeneratingImprovement] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -381,6 +419,74 @@ export default function EvaluationPage() {
     }
   };
 
+  // Fetch improvement analysis
+  const fetchImprovement = async () => {
+    if (!pitchId) return;
+
+    try {
+      setImprovementLoading(true);
+      setImprovementError(null);
+
+      const response = await fetch("/api/pitch-improvements", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pitchId }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to fetch improvement analysis");
+      }
+
+      if (data.improvement) {
+        setImprovement(data.improvement);
+      }
+    } catch (err) {
+      setImprovementError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setImprovementLoading(false);
+    }
+  };
+
+  // Generate improvement analysis
+  const generateImprovement = async () => {
+    if (!pitchId) return;
+
+    try {
+      setGeneratingImprovement(true);
+      setImprovementError(null);
+
+      const response = await fetch("/api/pitch-improvements", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pitchId }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to generate improvement analysis");
+      }
+
+      setImprovement(data.improvement);
+    } catch (err) {
+      setImprovementError(
+        err instanceof Error ? err.message : "Failed to generate improvement analysis"
+      );
+    } finally {
+      setGeneratingImprovement(false);
+    }
+  };
+
+  // Fetch improvement when switching to analysis tab
+  useEffect(() => {
+    if (activeTab === "analysis" && !improvement && !improvementLoading && evaluation) {
+      fetchImprovement();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, evaluation]);
+
   if (!mounted) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -418,6 +524,30 @@ export default function EvaluationPage() {
             Detailed analysis of your pitch performance
           </p>
         </div>
+
+        {/* Tab Toggle */}
+        {evaluation && (
+          <div className="mb-6 bg-card rounded-lg border shadow-sm p-1 inline-flex">
+            <button
+              onClick={() => setActiveTab("evaluation")}
+              className={`px-6 py-2 rounded-md font-medium transition-all ${activeTab === "evaluation"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+                }`}
+            >
+              Evaluation
+            </button>
+            <button
+              onClick={() => setActiveTab("analysis")}
+              className={`px-6 py-2 rounded-md font-medium transition-all ${activeTab === "analysis"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+                }`}
+            >
+              Analysis & Improvements
+            </button>
+          </div>
+        )}
 
         {error && (
           <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 mb-6">
@@ -478,7 +608,7 @@ export default function EvaluationPage() {
         )}
 
         {/* Evaluation Results */}
-        {evaluation && (
+        {evaluation && activeTab === "evaluation" && (
           <div className="space-y-6">
             {/* Overall Score Card with Pie Chart */}
             <div className="bg-card rounded-lg border shadow-sm p-6">
@@ -515,7 +645,7 @@ export default function EvaluationPage() {
                       <span className="text-muted-foreground">Business</span>
                     </div>
                   </div>
-                  
+
                 </div>
                 <div className="flex items-center gap-8">
                   <PieChart
@@ -613,6 +743,232 @@ export default function EvaluationPage() {
                 {new Date(evaluation.createdAt).toLocaleTimeString()}
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Improvement Analysis View */}
+        {evaluation && activeTab === "analysis" && (
+          <div className="space-y-6">
+            {improvementError && (
+              <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+                <div className="flex items-center">
+                  <div className="text-destructive">
+                    <svg
+                      className="w-5 h-5"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 001.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <p className="ml-3 text-destructive">{improvementError}</p>
+                </div>
+              </div>
+            )}
+
+            {improvementLoading && (
+              <div className="text-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                <p className="mt-4 text-muted-foreground">Loading improvement analysis...</p>
+              </div>
+            )}
+
+            {!improvement && !improvementLoading && !improvementError && (
+              <div className="text-center py-12">
+                <div className="bg-card rounded-lg border shadow-sm p-8">
+                  <svg
+                    className="w-16 h-16 text-muted-foreground mx-auto mb-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  <h3 className="text-lg font-medium text-card-foreground mb-2">
+                    No Improvement Analysis Found
+                  </h3>
+                  <p className="text-muted-foreground mb-6">
+                    Generate an improvement analysis to see detailed feedback and suggestions.
+                  </p>
+                  <button
+                    onClick={generateImprovement}
+                    disabled={generatingImprovement}
+                    className="bg-primary hover:bg-primary/90 disabled:bg-primary/50 text-primary-foreground px-6 py-3 rounded-lg font-medium transition-colors"
+                  >
+                    {generatingImprovement
+                      ? "Generating Analysis..."
+                      : "Generate Improvement Analysis"}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {improvement && (
+              <div className="space-y-6">
+                {/* Header */}
+                <div className="bg-card rounded-lg border shadow-sm p-6">
+                  <h2 className="text-xl font-semibold text-card-foreground">
+                    Pitch Improvement Analysis
+                  </h2>
+                  <p className="text-muted-foreground mt-1">
+                    Detailed feedback on each criterion with actionable improvement suggestions
+                  </p>
+                </div>
+
+                {/* Section-wise Improvements */}
+                {Object.entries(improvement.section_wise_improvements).map(([sectionName, sectionData]) => {
+                  const sectionColor =
+                    sectionName === "Introduction" ? "var(--color-chart-1)" :
+                      sectionName === "Pitch Content" ? "var(--color-chart-2)" :
+                        sectionName === "Q&A Handling" ? "var(--color-chart-3)" :
+                          "var(--color-chart-4)";
+
+                  return (
+                    <div key={sectionName} className="bg-card rounded-lg border shadow-sm p-6">
+                      {/* Section Header */}
+                      <div className="flex items-center gap-3 mb-6">
+                        <div
+                          className="w-1 h-8 rounded-full"
+                          style={{ backgroundColor: sectionColor }}
+                        ></div>
+                        <h3 className="text-lg font-semibold text-card-foreground">
+                          {sectionName}
+                        </h3>
+                      </div>
+
+                      {/* Criteria Feedback */}
+                      <div className="space-y-4 mb-6">
+                        {Object.entries(sectionData.criteria_feedback).map(([criterionName, feedback]) => (
+                          <div key={criterionName} className="bg-muted/50 rounded-lg p-4">
+                            <div className="flex items-start justify-between mb-3">
+                              <h4 className="font-medium text-card-foreground">
+                                {criterionName}
+                              </h4>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-medium text-card-foreground">
+                                  {feedback.score_received.toFixed(1)}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  / {feedback.max_score}
+                                </span>
+                                {feedback.marks_lost > 0 && (
+                                  <span className="ml-2 text-xs bg-destructive/10 text-destructive px-2 py-0.5 rounded-full">
+                                    -{feedback.marks_lost.toFixed(1)} marks lost
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Progress Bar */}
+                            <div className="w-full bg-muted rounded-full h-2 mb-3">
+                              <div
+                                className="h-2 rounded-full transition-all duration-500"
+                                style={{
+                                  width: `${(feedback.score_received / feedback.max_score) * 100}%`,
+                                  backgroundColor: sectionColor,
+                                }}
+                              ></div>
+                            </div>
+
+                            {/* Reason */}
+                            <div className="mb-3">
+                              <p className="text-sm font-medium text-muted-foreground mb-1">
+                                Why marks were lost:
+                              </p>
+                              <p className="text-sm text-card-foreground/80">
+                                {feedback.reason}
+                              </p>
+                            </div>
+
+                            {/* How to Improve */}
+                            <div className="bg-primary/5 border border-primary/10 rounded-md p-3">
+                              <p className="text-sm font-medium text-primary mb-1">
+                                💡 How to improve:
+                              </p>
+                              <p className="text-sm text-card-foreground/80">
+                                {feedback.how_to_improve}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Section Summary */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-border">
+                        {/* Strengths */}
+                        <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
+                          <h5 className="font-medium text-green-700 dark:text-green-400 mb-2 flex items-center gap-2">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                            </svg>
+                            Strengths
+                          </h5>
+                          <ul className="space-y-1">
+                            {sectionData.summary.strengths.map((strength, idx) => (
+                              <li key={idx} className="text-sm text-card-foreground/80">
+                                • {strength}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        {/* Gaps */}
+                        <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
+                          <h5 className="font-medium text-yellow-700 dark:text-yellow-400 mb-2 flex items-center gap-2">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                            Gaps
+                          </h5>
+                          <ul className="space-y-1">
+                            {sectionData.summary.gaps.map((gap, idx) => (
+                              <li key={idx} className="text-sm text-card-foreground/80">
+                                • {gap}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        {/* Improvements */}
+                        <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+                          <h5 className="font-medium text-blue-700 dark:text-blue-400 mb-2 flex items-center gap-2">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z" />
+                            </svg>
+                            Key Actions
+                          </h5>
+                          <ul className="space-y-1">
+                            {sectionData.summary.improvements.map((improvement, idx) => (
+                              <li key={idx} className="text-sm text-card-foreground/80">
+                                • {improvement}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Metadata */}
+                <div className="bg-muted rounded-lg p-4">
+                  <div className="text-sm text-muted-foreground">
+                    Analysis generated on{" "}
+                    {new Date(improvement.createdAt).toLocaleDateString()} at{" "}
+                    {new Date(improvement.createdAt).toLocaleTimeString()}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
