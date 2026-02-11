@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-    const baseUrl = 'https://pitchdesk.com';
+    const baseUrl = 'https://pitchdesk.in';
 
     // Static pages
     const staticPages = [

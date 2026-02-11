@@ -20,7 +20,7 @@ export default function PitchCompetitionsPage() {
     const featureSchema = generateSoftwareApplicationSchema({
         name: 'Pitch Competitions',
         description: 'Online platform for startup pitch competitions and virtual demo days',
-        url: 'https://pitchdesk.com/features/pitch-competitions',
+        url: 'https://pitchdesk.in/features/pitch-competitions',
     });
 
     const breadcrumbSchema = generateBreadcrumbSchema([

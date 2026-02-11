@@ -20,7 +20,7 @@ export default function RealTimeFeedbackPage() {
     const featureSchema = generateSoftwareApplicationSchema({
         name: 'Real-Time Voice Feedback',
         description: 'Voice-based AI pitch coaching with real-time feedback on delivery and confidence',
-        url: 'https://pitchdesk.com/features/real-time-feedback',
+        url: 'https://pitchdesk.in/features/real-time-feedback',
     });
 
     const breadcrumbSchema = generateBreadcrumbSchema([

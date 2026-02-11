@@ -248,7 +248,7 @@ export default function AboutPage() {
                                     </li>
                                 </ul>
                                 <Link
-                                    href="/vc"
+                                    href="/dashboard"
                                     className="mt-6 inline-block px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-opacity"
                                 >
                                     Explore VC Tools

@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://pitchdesk.com'),
+  metadataBase: new URL('https://pitchdesk.in'),
   title: {
     default: "PitchDesk | AI-Powered Pitch Practice & VC Simulation Platform",
     template: "%s | PitchDesk",
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://pitchdesk.com",
+    url: "https://pitchdesk.in",
     title: "PitchDesk | AI-Powered Pitch Practice & VC Simulation Platform",
     description: "Practice your startup pitch with AI judges, generate pitch scripts, and get discovered by VCs. The complete AI pitch training platform.",
     siteName: "PitchDesk",
@@ -59,13 +59,13 @@ export const metadata: Metadata = {
       },
     ],
   },
-  twitter: {
-    card: "summary_large_image",
-    title: "PitchDesk | AI-Powered Pitch Practice Platform",
-    description: "Practice your startup pitch with AI judges and get discovered by VCs.",
-    images: ["/og-image.png"],
-    creator: "@pitchdesk",
-  },
+  // twitter: {
+  //   card: "summary_large_image",
+  //   title: "PitchDesk | AI-Powered Pitch Practice Platform",
+  //   description: "Practice your startup pitch with AI judges and get discovered by VCs.",
+  //   images: ["/og-image.png"],
+  //   creator: "@pitchdesk",
+  // },
   robots: {
     index: true,
     follow: true,

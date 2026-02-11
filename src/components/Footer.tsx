@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
-import { Twitter, Linkedin, Github, Mail } from 'lucide-react';
+import { Twitter, Linkedin, Github, Mail, Instagram } from 'lucide-react';
 
 export default function Footer() {
     const { theme } = useTheme();
@@ -31,16 +31,19 @@ export default function Footer() {
                             AI-powered pitch practice platform for startup founders and VCs. Practice your pitch, get discovered by investors, and accelerate your fundraising journey.
                         </p>
                         <div className="flex gap-4">
-                            <a href="https://twitter.com/pitchdesk" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition">
+                            {/* <a href="https://twitter.com/pitchdesk" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition">
                                 <Twitter className="w-5 h-5" />
-                            </a>
-                            <a href="https://linkedin.com/company/pitchdesk" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition">
+                            </a> */}
+                            <a href="https://linkedin.com/company/pitch-desk" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition">
                                 <Linkedin className="w-5 h-5" />
                             </a>
-                            <a href="https://github.com/pitchdesk" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition">
-                                <Github className="w-5 h-5" />
+                            <a href="https://www.instagram.com/pitchdesk.in/" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition">
+                                <Instagram className="w-5 h-5" />
                             </a>
-                            <a href="mailto:support@pitchdesk.com" className="text-slate-400 hover:text-white transition">
+                            {/* <a href="https://github.com/pitchdesk" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition">
+                                <Github className="w-5 h-5" />
+                            </a> */}
+                            <a href="mailto:info@pitchdesk.in" className="text-slate-400 hover:text-white transition">
                                 <Mail className="w-5 h-5" />
                             </a>
                         </div>

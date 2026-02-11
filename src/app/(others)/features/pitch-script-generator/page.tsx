@@ -20,7 +20,7 @@ export default function PitchScriptGeneratorPage() {
     const featureSchema = generateSoftwareApplicationSchema({
         name: 'Pitch Script Generator',
         description: 'AI-powered tool to generate professional startup pitch scripts',
-        url: 'https://pitchdesk.com/features/pitch-script-generator',
+        url: 'https://pitchdesk.in/features/pitch-script-generator',
     });
 
     const breadcrumbSchema = generateBreadcrumbSchema([

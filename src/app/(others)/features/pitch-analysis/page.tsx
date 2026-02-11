@@ -20,7 +20,7 @@ export default function PitchAnalysisPage() {
     const featureSchema = generateSoftwareApplicationSchema({
         name: 'Pitch Analysis',
         description: 'AI pitch scoring system with detailed transcript analysis and performance metrics',
-        url: 'https://pitchdesk.com/features/pitch-analysis',
+        url: 'https://pitchdesk.in/features/pitch-analysis',
     });
 
     const breadcrumbSchema = generateBreadcrumbSchema([

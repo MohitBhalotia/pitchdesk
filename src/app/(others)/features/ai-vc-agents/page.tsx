@@ -20,7 +20,7 @@ export default function AIVCAgentsPage() {
     const featureSchema = generateSoftwareApplicationSchema({
         name: 'AI VC Agents',
         description: 'Build custom AI VC judges with personalized evaluation criteria and investment theses',
-        url: 'https://pitchdesk.com/features/ai-vc-agents',
+        url: 'https://pitchdesk.in/features/ai-vc-agents',
     });
 
     const breadcrumbSchema = generateBreadcrumbSchema([

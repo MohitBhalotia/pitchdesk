@@ -20,7 +20,7 @@ export default function VCDealFlowPage() {
     const featureSchema = generateSoftwareApplicationSchema({
         name: 'VC Deal Flow Automation',
         description: 'AI-powered startup screening and deal flow management for VCs and investors',
-        url: 'https://pitchdesk.com/features/vc-deal-flow',
+        url: 'https://pitchdesk.in/features/vc-deal-flow',
     });
 
     const breadcrumbSchema = generateBreadcrumbSchema([

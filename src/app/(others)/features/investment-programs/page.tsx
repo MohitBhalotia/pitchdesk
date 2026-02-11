@@ -20,7 +20,7 @@ export default function InvestmentProgramsPage() {
     const featureSchema = generateSoftwareApplicationSchema({
         name: 'Investment Programs',
         description: 'Platform to create and manage digital accelerators, incubators, and VC investment programs',
-        url: 'https://pitchdesk.com/features/investment-programs',
+        url: 'https://pitchdesk.in/features/investment-programs',
     });
 
     const breadcrumbSchema = generateBreadcrumbSchema([

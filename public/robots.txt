@@ -21,4 +21,4 @@ Allow: /payment
 Allow: /community
 
 # Sitemap
-Sitemap: https://pitchdesk.com/sitemap.xml
+Sitemap: https://pitchdesk.in/sitemap.xml

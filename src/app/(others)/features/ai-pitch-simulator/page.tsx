@@ -21,7 +21,7 @@ export default function AIPitchSimulatorPage() {
     const featureSchema = generateSoftwareApplicationSchema({
         name: 'AI Pitch Simulator',
         description: 'Practice your startup pitch with AI judges that simulate real VC meetings',
-        url: 'https://pitchdesk.com/features/ai-pitch-simulator',
+        url: 'https://pitchdesk.in/features/ai-pitch-simulator',
     });
 
     const breadcrumbSchema = generateBreadcrumbSchema([

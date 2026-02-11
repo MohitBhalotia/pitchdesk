@@ -104,7 +104,7 @@ export default function FeaturesPage() {
                 '@type': 'SoftwareApplication',
                 name: feature.title,
                 description: feature.description,
-                url: `https://pitchdesk.com${feature.href}`,
+                url: `https://pitchdesk.in${feature.href}`,
                 applicationCategory: 'BusinessApplication',
             },
         })),
@@ -254,7 +254,7 @@ export default function FeaturesPage() {
                                     </li>
                                 </ul>
                                 <Link
-                                    href="/vc"
+                                    href="/dashboard"
                                     className="mt-6 inline-block px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-opacity"
                                 >
                                     Explore VC Tools
