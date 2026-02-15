@@ -733,7 +733,7 @@ function CompetitionSidebar({
         }) => {
           try {
             const verifyRes = await axios.post(
-              "/api/competitions/razorpay/verify",
+              "/api/razorpay/webhook",
               {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
