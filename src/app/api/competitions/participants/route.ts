@@ -24,6 +24,15 @@ export async function POST(request: NextRequest) {
     if (!comp) {
       return NextResponse.json({ error: 'Competition not found' }, { status: 404 });
     }
+
+    // Payment gate: paid competitions must register through the payment flow
+    if (comp.paymentConfig?.isPaid) {
+      return NextResponse.json(
+        { error: 'PAYMENT_REQUIRED', message: 'This competition requires payment to register' },
+        { status: 402 }
+      );
+    }
+
     const maxSize = comp.teamSize?.max || 1;
     const minSize = comp.teamSize?.min || 1;
 

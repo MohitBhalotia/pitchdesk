@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,13 @@ import {
 } from "@/components/ui/sheet";
 import { toast } from "sonner";
 
+declare global {
+  interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Razorpay: any;
+  }
+}
+
 interface Competition {
   _id: string;
   title: string;
@@ -23,6 +30,11 @@ interface Competition {
   teamSize: {
     min: number;
     max: number;
+  };
+  paymentConfig?: {
+    isPaid: boolean;
+    registrationFee?: number;
+    chanceFee?: number;
   };
 }
 
@@ -139,32 +151,42 @@ export default function RegistrationForm({
   }
 
   const [emailErrors, setEmailErrors] = useState<string[]>([]);
+  const isPaid = competition.paymentConfig?.isPaid ?? false;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  // Load Razorpay script for paid competitions
+  useEffect(() => {
+    if (!isPaid) return;
+    if (document.getElementById("razorpay-checkout-script")) return;
+    const script = document.createElement("script");
+    script.id = "razorpay-checkout-script";
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+  }, [isPaid]);
+
+  const validateForm = (): boolean => {
     // Validate required team leader fields
     if (!teamLeader.collegeName.trim()) {
       toast.error('College name is required.');
-      return;
+      return false;
     }
     if (!teamLeader.phone.trim()) {
       toast.error('Phone number is required.');
-      return;
+      return false;
     }
     if (!/^\d{10}$/.test(teamLeader.phone.trim())) {
       toast.error('Phone number must be exactly 10 digits.');
-      return;
+      return false;
     }
 
     // Validate team size
-    const totalTeamSize =
+    const totalSize =
       1 + teamMembers.filter((member) => member.name && member.email).length;
-    if (totalTeamSize < competition.teamSize.min) {
+    if (totalSize < competition.teamSize.min) {
       toast.info(
         `Minimum team size is ${competition.teamSize.min}. Please add more team members.`
       );
-      return;
+      return false;
     }
 
     // Require both name and email for each team member if any field is filled
@@ -172,7 +194,7 @@ export default function RegistrationForm({
       const member = teamMembers[i];
       if ((member.name && !member.email) || (!member.name && member.email)) {
         toast.error(`Please fill both name and email for team member #${i + 1}.`);
-        return;
+        return false;
       }
     }
 
@@ -184,36 +206,128 @@ export default function RegistrationForm({
     const errors = validateTeamMemberEmails(trimmedMembers, teamLeader.email);
     setEmailErrors(errors);
     if (errors.some((e) => e)) {
-      return;
+      return false;
     }
-    // Update trimmed emails
     setTeamMembers(trimmedMembers);
+    return true;
+  };
 
+  const getRegistrationData = () => ({
+    competitionId: competition._id,
+    userId: userData.id,
+    teamName,
+    teamLeader,
+    teamMembers: teamMembers.filter((member) => member.name && member.email),
+    pitchTime: competition.pitchTime,
+  });
+
+  const handlePaidRegistration = async () => {
     setLoading(true);
-
     try {
-      const response = await axios.post("/api/competitions/participants", {
-        competitionId: competition._id,
-        userId: userData.id,
-        teamName,
-        teamLeader,
-        teamMembers: teamMembers.filter(
-          (member) => member.name && member.email
-        ),
-        pitchTime: competition.pitchTime,
+      // Create Razorpay order
+      const orderRes = await axios.post(
+        "/api/competitions/razorpay/create-order",
+        {
+          userId: userData.id,
+          competitionId: competition._id,
+          type: "registration",
+          registrationData: getRegistrationData(),
+        }
+      );
+
+      const { orderId, amount, currency, key } = orderRes.data;
+
+      const options = {
+        key,
+        amount,
+        currency,
+        name: "PitchDesk",
+        description: `Registration: ${competition.title}`,
+        order_id: orderId,
+        handler: async (response: {
+          razorpay_order_id: string;
+          razorpay_payment_id: string;
+          razorpay_signature: string;
+        }) => {
+          try {
+            const verifyRes = await axios.post(
+              "/api/razorpay/webhook",
+              {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              }
+            );
+            if (verifyRes.data.success) {
+              toast.success("Payment successful! You are now registered.");
+              onSuccess(verifyRes.data.participant);
+            }
+          } catch {
+            toast.error("Payment verification failed. Please contact support.");
+          } finally {
+            setLoading(false);
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setLoading(false);
+          },
+        },
+        prefill: {
+          name: userData.name,
+          email: userData.email,
+        },
+        theme: {
+          color: "#6366f1",
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on("payment.failed", () => {
+        toast.error("Payment failed. Please try again.");
+        setLoading(false);
       });
+      rzp.open();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.error("Payment error:", error);
+      toast.error(
+        error.response?.data?.error || "Could not initiate payment."
+      );
+      setLoading(false);
+    }
+  };
+
+  const handleFreeRegistration = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        "/api/competitions/participants",
+        getRegistrationData()
+      );
 
       if (response.status === 201) {
-        const participant = response.data;
-        onSuccess(participant);
+        onSuccess(response.data);
       }
-    } 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    catch (error: any) {
-      console.error('Registration error:', error);
-      toast.error(error.response?.data?.error || 'Registration failed. Please try again.');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      toast.error(
+        error.response?.data?.error || "Registration failed. Please try again."
+      );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    if (isPaid) {
+      await handlePaidRegistration();
+    } else {
+      await handleFreeRegistration();
     }
   };
 
@@ -409,8 +523,10 @@ export default function RegistrationForm({
               disabled={loading || totalTeamSize < competition.teamSize.min}
             >
               {loading
-                ? "Registering..."
-                : `Register Team (${totalTeamSize}/${competition.teamSize.max})`}
+                ? "Processing..."
+                : isPaid
+                  ? `Pay $${competition.paymentConfig?.registrationFee ?? 0} & Register`
+                  : `Register Team (${totalTeamSize}/${competition.teamSize.max})`}
             </Button>
           </CardFooter>
         </form>
