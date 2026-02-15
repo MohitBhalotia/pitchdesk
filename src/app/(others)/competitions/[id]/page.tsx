@@ -29,6 +29,7 @@ import {
   CheckCircle2Icon,
   ExternalLink,
   MoreVertical,
+  RefreshCw,
 } from "lucide-react";
 import RegistrationForm from "./registration-form";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -94,6 +95,11 @@ interface Competition {
   isPractice: boolean;
   isActive?: boolean;
   approved?: boolean;
+  paymentConfig?: {
+    isPaid: boolean;
+    registrationFee?: number;
+    chanceFee?: number;
+  };
 }
 
 // Update the participant type
@@ -118,6 +124,13 @@ interface Participant {
   pitchEvaluated: boolean;
 }
 
+declare global {
+  interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Razorpay: any;
+  }
+}
+
 export default function CompetitionPage() {
   const params = useParams();
   const { data: session, status } = useSession();
@@ -127,6 +140,17 @@ export default function CompetitionPage() {
   const [showRegistration, setShowRegistration] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  // Load Razorpay script for paid competitions
+  useEffect(() => {
+    if (!competition?.paymentConfig?.isPaid) return;
+    if (document.getElementById("razorpay-checkout-script")) return;
+    const script = document.createElement("script");
+    script.id = "razorpay-checkout-script";
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+  }, [competition?.paymentConfig?.isPaid]);
 
   useEffect(() => {
     async function fetchData() {
@@ -615,6 +639,7 @@ export default function CompetitionPage() {
               onStartPitch={handleStartPitchButton}
               onLeaderboard={handleLeaderboardButton}
               onPitchEvaluation={handlePitchEvaluationButton}
+              onParticipantUpdate={setParticipant}
             />
           </div>
         </div>
@@ -647,6 +672,7 @@ function CompetitionSidebar({
   onStartPitch,
   onLeaderboard,
   onPitchEvaluation,
+  onParticipantUpdate,
 }: {
   competition: Competition;
   participant: Participant | null;
@@ -656,6 +682,7 @@ function CompetitionSidebar({
   onStartPitch: () => void;
   onLeaderboard: () => void;
   onPitchEvaluation: () => void;
+  onParticipantUpdate: (p: Participant) => void;
 }) {
   const daysLeft = calculateDaysLeft(competition.registrationDeadline);
   const { data: session } = useSession();
@@ -673,6 +700,92 @@ function CompetitionSidebar({
     }
   }
   const isValidated = participant?.teamStatus === "validated";
+
+  // ---- Buy Another Chance logic ----
+  const [chanceFeeLoading, setChanceFeeLoading] = useState(false);
+  const handleBuyAnotherChance = async () => {
+    if (!localParticipant?._id || !session?.user?._id) return;
+    setChanceFeeLoading(true);
+    try {
+      const orderRes = await axios.post(
+        "/api/competitions/razorpay/create-order",
+        {
+          userId: session.user._id,
+          competitionId: competition._id,
+          type: "chance_fee",
+          participantId: localParticipant._id,
+        }
+      );
+
+      const { orderId, amount, currency, key } = orderRes.data;
+
+      const options = {
+        key,
+        amount,
+        currency,
+        name: "PitchDesk",
+        description: `Another Chance: ${competition.title}`,
+        order_id: orderId,
+        handler: async (response: {
+          razorpay_order_id: string;
+          razorpay_payment_id: string;
+          razorpay_signature: string;
+        }) => {
+          try {
+            const verifyRes = await axios.post(
+              "/api/competitions/razorpay/verify",
+              {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              }
+            );
+            if (verifyRes.data.success) {
+              toast.success("Payment successful! You can pitch again.");
+              // Update local state to re-enable Start Pitch
+              const updated = {
+                ...(localParticipant as Participant),
+                pitchSubmitted: false,
+                pitchEvaluated: false,
+              };
+              setLocalParticipant(updated);
+              onParticipantUpdate(updated);
+            }
+          } catch {
+            toast.error("Payment verification failed. Please contact support.");
+          } finally {
+            setChanceFeeLoading(false);
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setChanceFeeLoading(false);
+          },
+        },
+        prefill: {
+          name: session.user.fullName || "",
+          email: session.user.email || "",
+        },
+        theme: {
+          color: "#6366f1",
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on("payment.failed", () => {
+        toast.error("Payment failed. Please try again.");
+        setChanceFeeLoading(false);
+      });
+      rzp.open();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.error("Chance fee error:", error);
+      toast.error(
+        error.response?.data?.error || "Could not initiate payment."
+      );
+      setChanceFeeLoading(false);
+    }
+  };
 
   // ---- Add member modal logic ----
   const [addModal, setAddModal] = useState(false);
@@ -944,9 +1057,16 @@ function CompetitionSidebar({
                       size="lg"
                     >
                       {isRegistrationOpen
-                        ? "Register Now"
+                        ? competition.paymentConfig?.isPaid
+                          ? `Register Now - $${competition.paymentConfig.registrationFee ?? 0}`
+                          : "Register Now"
                         : "Registration Closed"}
                     </Button>
+                    {competition.paymentConfig?.isPaid && isRegistrationOpen && (
+                      <p className="text-xs sm:text-sm text-muted-foreground mt-2">
+                        Registration fee: ${competition.paymentConfig.registrationFee ?? 0}
+                      </p>
+                    )}
                     {!isRegistrationOpen && (
                       <p className="text-xs sm:text-sm text-muted-foreground mt-2">
                         Registration deadline has passed
@@ -1260,6 +1380,24 @@ function CompetitionSidebar({
                         Pitch Evaluation
                       </Button>
                     ))}
+
+                  {/* Buy Another Chance - visible when pitch submitted, not practice, and paid */}
+                  {(localParticipant || participant)?.pitchSubmitted &&
+                    !competition.isPractice &&
+                    competition.paymentConfig?.isPaid && (
+                      <Button
+                        onClick={handleBuyAnotherChance}
+                        variant="outline"
+                        className="w-full"
+                        size="lg"
+                        disabled={chanceFeeLoading}
+                      >
+                        <RefreshCw className={`w-4 h-4 mr-2 ${chanceFeeLoading ? "animate-spin" : ""}`} />
+                        {chanceFeeLoading
+                          ? "Processing..."
+                          : `Buy Another Chance ($${competition.paymentConfig.chanceFee ?? 0})`}
+                      </Button>
+                    )}
 
                   {/* Invite Another Member - only for leader if team not full */}
                   {localParticipant &&

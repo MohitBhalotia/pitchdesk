@@ -51,6 +51,11 @@ export interface ICompetition extends Document {
   createdAt: Date;
   updatedAt: Date;
   isPractice: boolean;
+  paymentConfig: {
+    isPaid: boolean;
+    registrationFee?: number;
+    chanceFee?: number;
+  };
 }
 
 const DetailsSchema = new Schema<IDetails>({
@@ -101,7 +106,13 @@ const CompetitionSchema = new Schema<ICompetition>({
   isActive: { type: Boolean, default: true },
   approved: { type: Boolean, default: false },
   totalRegistered: { type: Number, default: 0 },
-  isPractice: { type: Boolean, default: false }
+  isPractice: { type: Boolean, default: false },
+  paymentConfig: {
+      isPaid: { type: Boolean, default: false },
+      registrationFee: { type: Number, default: 1 },
+      chanceFee: { type: Number, default: 0.5 }
+    }
+  
 }, {
   timestamps: true
 });
