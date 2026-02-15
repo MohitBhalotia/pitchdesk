@@ -261,6 +261,7 @@ export default function RegistrationForm({
             if (verifyRes.data.success) {
               toast.success("Payment successful! You are now registered.");
               onSuccess(verifyRes.data.participant);
+              window.location.reload();
             }
           } catch {
             toast.error("Payment verification failed. Please contact support.");
