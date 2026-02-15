@@ -198,7 +198,7 @@ export default function CompetitionPage() {
     if (status !== "loading" && params?.id) {
       fetchData();
     }
-  }, [params?.id, session?.user?._id, status]);
+  }, [params?.id, session, status]);
 
   const handleRegistrationSuccess = (participantData: Participant) => {
     setParticipant(participantData);
@@ -987,18 +987,13 @@ function CompetitionSidebar({
           <CheckCircle2Icon className="w-6 h-6 " />
           Mini Practice Plan for{" "}
           <p className="flex gap-2">
-            <span className="line-through text-muted-foreground">
+            <span className="text-muted-foreground">
               {new Intl.NumberFormat("en-IN", {
                 style: "currency",
                 currency: "INR",
               }).format(140)}
             </span>
-            <span>
-              {new Intl.NumberFormat("en-IN", {
-                style: "currency",
-                currency: "INR",
-              }).format(70)}
-            </span>
+            
           </p>
         </AlertTitle>
 

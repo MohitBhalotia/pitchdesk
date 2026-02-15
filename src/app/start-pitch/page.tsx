@@ -137,8 +137,8 @@ function HomeContent() {
   }, [started]);
 
   const handleStop = useCallback(async () => {
-    console.log("🔒🔒🔒Ending pitch");
-    await axios.post("/api/update-pitch", {
+    console.log("Ending pitch");
+    await axios.post("/api/end-pitch", {
       pitchId: pitchId,
       sessionId: sessionIdRef.current,
       competitionId: competitionId ?? null,
