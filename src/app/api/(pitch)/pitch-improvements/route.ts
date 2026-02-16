@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
             return withCors(
                 NextResponse.json({ error: 'Invalid pitchId format' }, { status: 400 })
             );
+            
         }
 
         // Check if improvement analysis already exists
@@ -98,17 +99,20 @@ export async function POST(req: NextRequest) {
             }
         };
 
-        // Prepare form data for FastAPI (multipart/form-data)
-        const formData = new FormData();
-        formData.append('transcript', JSON.stringify({ transcript: conversationHistory }));
-        formData.append('scores', JSON.stringify(transformedScores));
+        // Prepare form data for FastAPI (application/x-www-form-urlencoded)
+        const params = new URLSearchParams();
+        params.append('transcript', JSON.stringify({ transcript: conversationHistory }));
+        params.append('scores', JSON.stringify(transformedScores));
 
         // Call FastAPI improvements endpoint
         const fastAPIResponse = await fetch(
             `${process.env.FASTAPI_BACKEND}/pitch/improvements`,
             {
                 method: 'POST',
-                body: formData,
+                body: params,
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
             }
         );
 
