@@ -13,7 +13,7 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-
+import CreateIncubation from "@/components/mvpblocks/create-incubation";
 interface IIncubationProgram {
     _id: string;
     title: string;
@@ -46,7 +46,7 @@ export default function IncubationListPage() {
     };
 
     return (
-        <div className="container mx-auto p-6 max-w-7xl">
+        <div className="container mx-auto p-6 max-w-7xl mt-20">
             <div className="mb-8 text-center max-w-2xl mx-auto">
                 <h1 className="text-4xl font-extrabold tracking-tight mb-4 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                     Investment Programs
@@ -70,7 +70,7 @@ export default function IncubationListPage() {
                     <p className="text-muted-foreground">No active investment programs found at the moment.</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
                     {programs.map((program) => (
                         <Card key={program._id} className="flex flex-col hover:shadow-lg transition-all duration-300 border-t-4 border-t-blue-500">
                             <CardHeader>
@@ -106,7 +106,10 @@ export default function IncubationListPage() {
                         </Card>
                     ))}
                 </div>
+
+
             )}
+            <CreateIncubation />
         </div>
     );
 }

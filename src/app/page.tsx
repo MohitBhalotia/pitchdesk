@@ -6,13 +6,14 @@ import Header1 from "@/components/mvpblocks/header-1";
 import SimplePricing from "@/components/mvpblocks/simple-pricing";
 import TestimonialsCarousel from "@/components/mvpblocks/testimonials-carousel";
 import PrivacyPreview from "@/components/mvpblocks/privacy-preview";
-
+import CreateIncubation from "@/components/mvpblocks/create-incubation";
 export default function Home() {
   return (
     <>
       <Header1  />
       <AppHero />
       <FeatureSteps />
+      <CreateIncubation />
       <TestimonialsCarousel />
       <SimplePricing />
       <PrivacyPreview />

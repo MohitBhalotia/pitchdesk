@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
 
         // Call FastAPI improvements endpoint
         const fastAPIResponse = await fetch(
-            `${process.env.NEXT_PUBLIC_FASTAPI_BACKEND}/pitch/improvements`,
+            `${process.env.FASTAPI_BACKEND}/pitch/improvements`,
             {
                 method: 'POST',
                 body: formData,

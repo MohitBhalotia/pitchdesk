@@ -70,7 +70,7 @@ const navItems: NavItem[] = [
   },
 
   { name: "Competitions", href1: "/competitions" },
-  { name: "CrowdFunding", href1: "/community/crowdfunding" },
+  { name: "Accelerators", href1: "/incubations" },
   { name: "Pricing", href1: "/#pricing", href2: "/payment" },
   { name: "Advisors", href1: "/advisors" },
   { name: "About", href1: "/meet-the-team" },

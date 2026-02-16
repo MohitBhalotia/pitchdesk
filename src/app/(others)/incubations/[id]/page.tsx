@@ -124,8 +124,7 @@ export default function IncubationDetailPage() {
             const response = await axios.get(`/api/incubations/${id}`);
             setProgram(response.data);
         } catch (error) {
-            console.error("Error fetching program:", error);
-            setError(error.response?.data?.error || "Failed to load program details. Please try again.");
+            setError("Failed to load program details. Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -195,7 +194,7 @@ export default function IncubationDetailPage() {
         </div>;
     }
 
-    if (error) {
+    if (error ) {
         return (
             <div className="container py-20 text-center">
                 <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600 mb-4">
@@ -215,7 +214,7 @@ export default function IncubationDetailPage() {
     }
 
     return (
-        <div className="container mx-auto p-4 md:p-8 max-w-6xl">
+        <div className="container mx-auto p-4 md:p-8 max-w-6xl mt-20">
             <Button variant="ghost" className="mb-6 pl-0 hover:bg-transparent hover:text-primary" onClick={() => router.back()}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Investment Programs
@@ -490,29 +489,47 @@ export default function IncubationDetailPage() {
                                 </div>
                             ) : !isRegistered ? (
                                 <div className="space-y-4">
-                                    <div className="flex items-start gap-2 text-sm text-blue-600 bg-blue-50 p-3 rounded-md dark:bg-blue-900/20 dark:text-blue-400">
-                                        <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
-                                        <p>Register for this program to get 15 minutes of dedicated pitch time!</p>
-                                    </div>
+                                    {!session ? (
+                                        <>
+                                            <div className="flex items-start gap-2 text-sm text-blue-600 bg-blue-50 p-3 rounded-md dark:bg-blue-900/20 dark:text-blue-400">
+                                                <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+                                                <p>Sign in to register for this program and get 15 minutes of dedicated pitch time!</p>
+                                            </div>
 
-                                    <Button
-                                        className="w-full size-lg bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-md"
-                                        onClick={handleRegister}
-                                        disabled={isRegistering}
-                                    >
-                                        {isRegistering ? (
-                                            <>
-                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                Registering...
-                                            </>
-                                        ) : (
-                                            "Register Now"
-                                        )}
-                                    </Button>
+                                            <Button
+                                                className="w-full size-lg bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-md"
+                                                onClick={() => router.push("/login")}
+                                            >
+                                                Sign In
+                                            </Button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <div className="flex items-start gap-2 text-sm text-blue-600 bg-blue-50 p-3 rounded-md dark:bg-blue-900/20 dark:text-blue-400">
+                                                <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+                                                <p>Register for this program to get 15 minutes of dedicated pitch time!</p>
+                                            </div>
 
-                                    <p className="text-xs text-center text-muted-foreground">
-                                        One-click registration • No form required
-                                    </p>
+                                            <Button
+                                                className="w-full size-lg bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 shadow-md"
+                                                onClick={handleRegister}
+                                                disabled={isRegistering}
+                                            >
+                                                {isRegistering ? (
+                                                    <>
+                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                        Registering...
+                                                    </>
+                                                ) : (
+                                                    "Register Now"
+                                                )}
+                                            </Button>
+
+                                            <p className="text-xs text-center text-muted-foreground">
+                                                One-click registration • No form required
+                                            </p>
+                                        </>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="space-y-4">
