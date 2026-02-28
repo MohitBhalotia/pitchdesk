@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { BarChart3, FileText, TrendingUp, Target, CheckCircle2, ArrowRight, Eye, Award } from 'lucide-react';
+import { BarChart3, FileText, TrendingUp, Target, CheckCircle2, ArrowRight, Eye, Award, UserPlus } from 'lucide-react';
 import { generateSEOMetadata, generateSoftwareApplicationSchema, generateBreadcrumbSchema } from '@/lib/seo';
 
 export const metadata: Metadata = generateSEOMetadata({
@@ -510,6 +510,12 @@ export default function PitchAnalysisPage() {
                                 <FileText className="w-10 h-10 text-primary mb-4" />
                                 <h3 className="text-xl font-bold text-foreground mb-2">Pitch Script Generator</h3>
                                 <p className="text-muted-foreground text-sm">Generate strong scripts to improve your scores.</p>
+                            </Link>
+
+                            <Link href="/features/ai-virtual-cofounder" className="bg-card rounded-xl p-6 shadow-md border border-border hover:shadow-xl hover:-translate-y-1 transition-all">
+                                <UserPlus className="w-10 h-10 text-primary mb-4" />
+                                <h3 className="text-xl font-bold text-foreground mb-2">AI Virtual Co-Founder</h3>
+                                <p className="text-muted-foreground text-sm">Talk daily with your AI partner about strategy and decisions.</p>
                             </Link>
                         </div>
                     </div>

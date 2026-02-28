@@ -10,13 +10,16 @@ import {
     Bot,
     Target,
     ArrowRight,
-    Sparkles
+    Sparkles,
+    Presentation,
+    Users,
+    UserPlus
 } from 'lucide-react';
 import { generateSEOMetadata, generateBreadcrumbSchema } from '@/lib/seo';
 
 export const metadata: Metadata = generateSEOMetadata({
     title: 'Features | Best Startup Pitch Practice Tool with AI Feedback - PitchDesk',
-    description: 'Explore PitchDesk features: AI pitch simulator, real-time voice feedback, pitch script generator, competitions, VC deal flow automation, and investment programs. The complete pitch practice software for founders.',
+    description: 'Explore PitchDesk features: AI pitch simulator, pitch deck generator, multi-VC room simulation, AI co-founder, real-time voice feedback, pitch script generator, competitions, and investment programs. The complete pitch practice software for founders.',
     canonical: '/features',
     keywords: [
         'best startup pitch practice tool',
@@ -84,6 +87,27 @@ const features = [
         description: 'Get detailed AI analysis of your pitch performance. See transcript breakdowns, scoring rubrics, and actionable improvement tips.',
         href: '/features/pitch-analysis',
         keywords: 'AI pitch scoring system',
+    },
+    {
+        icon: Presentation,
+        title: 'Pitch Deck Generation',
+        description: 'Create investor-ready pitch decks with AI. Generate slides and presentations like on Gamma or Canva—tailored to your startup story.',
+        href: '/features/pitch-deck-generation',
+        keywords: 'AI pitch deck generator',
+    },
+    {
+        icon: Users,
+        title: 'Multi-VC Room Simulation',
+        description: 'Practice in a Shark Tank–style virtual room with multiple AI VCs on screen. Get grilled by a panel of investors at once.',
+        href: '/features/multi-vc-simulation',
+        keywords: 'Shark Tank style pitch simulation',
+    },
+    {
+        icon: UserPlus,
+        title: 'AI Virtual Co-Founder',
+        description: 'Set up your AI co-founder and talk daily. Discuss strategy, ideas, and decisions with a partner that\'s always available.',
+        href: '/features/ai-virtual-cofounder',
+        keywords: 'AI co-founder for founders',
     },
 ];
 

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { FileText, Sparkles, Zap, Target, CheckCircle2, ArrowRight, Edit3 } from 'lucide-react';
+import { FileText, Sparkles, Zap, Target, CheckCircle2, ArrowRight, Edit3, Presentation } from 'lucide-react';
 import { generateSEOMetadata, generateSoftwareApplicationSchema, generateBreadcrumbSchema } from '@/lib/seo';
 
 export const metadata: Metadata = generateSEOMetadata({
@@ -404,6 +404,12 @@ export default function PitchScriptGeneratorPage() {
                                 <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10 text-primary mb-4" />
                                 <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Pitch Analysis</h3>
                                 <p className="text-muted-foreground text-sm">See how your script performs in simulated pitches.</p>
+                            </Link>
+
+                            <Link href="/features/pitch-deck-generation" className="bg-card rounded-xl p-4 sm:p-6 shadow-md border border-border hover:shadow-xl hover:-translate-y-1 transition-all">
+                                <Presentation className="w-8 h-8 sm:w-10 sm:h-10 text-primary mb-4" />
+                                <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Pitch Deck Generation</h3>
+                                <p className="text-muted-foreground text-sm">Turn your narrative into investor-ready slides.</p>
                             </Link>
                         </div>
                     </div>

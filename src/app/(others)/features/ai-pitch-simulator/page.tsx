@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { MessageSquare, Mic, Target, TrendingUp, CheckCircle2, ArrowRight, Play } from 'lucide-react';
+import { MessageSquare, Mic, Target, TrendingUp, CheckCircle2, ArrowRight, Play, Users } from 'lucide-react';
 import { generateSEOMetadata, generateSoftwareApplicationSchema, generateBreadcrumbSchema } from '@/lib/seo';
 
 export const metadata: Metadata = generateSEOMetadata({
@@ -217,6 +217,12 @@ export default function AIPitchSimulatorPage() {
                                 <Target className="w-8 h-8 sm:w-10 sm:h-10 text-primary mb-4" />
                                 <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Pitch Analysis</h3>
                                 <p className="text-sm sm:text-base text-muted-foreground">See detailed scoring and transcripts.</p>
+                            </Link>
+
+                            <Link href="/features/multi-vc-simulation" className="bg-card rounded-xl p-4 sm:p-6 shadow-md border border-border hover:shadow-xl hover:-translate-y-1 transition-all">
+                                <Users className="w-8 h-8 sm:w-10 sm:h-10 text-primary mb-4" />
+                                <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Multi-VC Room</h3>
+                                <p className="text-sm sm:text-base text-muted-foreground">Shark Tank style—pitch to multiple AI VCs at once.</p>
                             </Link>
                         </div>
                     </div>
