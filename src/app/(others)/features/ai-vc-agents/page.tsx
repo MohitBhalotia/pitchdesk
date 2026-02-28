@@ -62,7 +62,7 @@ export default function AIVCAgentsPage() {
 
                         <div className="flex flex-wrap gap-4">
                             <Link
-                                href="/vc"
+                                href="/dashboard"
                                 className="px-6 sm:px-8 py-3 sm:py-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-all duration-300 flex items-center justify-center gap-2"
                             >
                                 <Bot className="w-5 h-5" />
@@ -402,7 +402,7 @@ export default function AIVCAgentsPage() {
                             Create a custom AI judge that screens startups your way.
                         </p>
                         <Link
-                            href="/vc"
+                            href="/dashboard"
                             className="inline-flex items-center gap-2 px-10 py-5 bg-card text-primary rounded-lg font-bold text-lg hover:shadow-2xl hover:scale-105 transition-all duration-300"
                         >
                             <Bot className="w-6 h-6" />

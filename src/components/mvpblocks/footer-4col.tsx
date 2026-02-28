@@ -28,7 +28,7 @@ const data = {
     // { text: "Pitch Competitions", href: "/features/pitch-competitions" },
     { text: "Investment Programs", href: "/features/investment-programs" },
     // { text: "Start Pitching", href: "/start-a-pitch" },
-    { text: "Vertual Cofounder", href: "/features/ai-virtual-cofounder" },
+    { text: "Virtual Co-Founder", href: "/features/ai-virtual-cofounder" },
     { text: "Pitch Deck Generation", href: "/features/pitch-deck-generation" },
     { text: "Multi-VC Room Simulation", href: "/features/multi-vc-simulation" },
   ],

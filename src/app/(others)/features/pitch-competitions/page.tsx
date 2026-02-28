@@ -62,18 +62,18 @@ export default function PitchCompetitionsPage() {
 
                         <div className="flex flex-col sm:flex-row flex-wrap gap-4">
                             <Link
-                                href="/incubations"
+                                href="/competitions"
                                 className="px-6 sm:px-8 py-3 sm:py-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-all duration-300 flex items-center justify-center gap-2"
                             >
                                 <Trophy className="w-5 h-5" />
                                 Browse Competitions
                             </Link>
-                            <Link
-                                href="/vc"
-                                className="px-6 sm:px-8 py-3 sm:py-4 bg-secondary text-secondary-foreground rounded-lg font-semibold border border-border hover:bg-accent transition-all duration-300"
+                            <a
+                                href="mailto:info@pitchdesk.in?subject=Hosting%20a%20Pitch%20Competition"
+                                className="px-6 sm:px-8 py-3 sm:py-4 bg-secondary text-secondary-foreground rounded-lg font-semibold border border-border hover:bg-accent transition-all duration-300 inline-flex items-center justify-center gap-2"
                             >
-                                Host a Competition (VCs)
-                            </Link>
+                                Host a Competition (Contact Us)
+                            </a>
                         </div>
                     </div>
                 </section>
@@ -216,13 +216,13 @@ export default function PitchCompetitionsPage() {
                         </div>
 
                         <div className="text-center mt-8 sm:mt-10">
-                            <Link
-                                href="/vc"
+                            <a
+                                href="mailto:info@pitchdesk.in?subject=Hosting%20a%20Pitch%20Competition"
                                 className="inline-flex items-center gap-2 px-8 sm:px-10 py-4 sm:py-5 bg-background text-foreground rounded-lg font-bold text-base sm:text-lg hover:shadow-2xl hover:scale-105 transition-all duration-300"
                             >
                                 <Award className="w-5 h-5 sm:w-6 sm:h-6" />
-                                Create Your First Competition
-                            </Link>
+                                Host a Competition (Contact Us)
+                            </a>
                         </div>
                     </div>
                 </section>
@@ -360,7 +360,7 @@ export default function PitchCompetitionsPage() {
                             Browse active pitch competitions and start climbing the leaderboard.
                         </p>
                         <Link
-                            href="/incubations"
+                            href="/competitions"
                             className="inline-flex items-center gap-2 px-8 sm:px-10 py-4 sm:py-5 bg-background text-foreground rounded-lg font-bold text-base sm:text-lg hover:shadow-2xl hover:scale-105 transition-all duration-300"
                         >
                             <Trophy className="w-5 h-5 sm:w-6 sm:h-6" />

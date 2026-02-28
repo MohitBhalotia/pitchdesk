@@ -62,7 +62,7 @@ export default function InvestmentProgramsPage() {
 
                         <div className="flex flex-wrap gap-4">
                             <Link
-                                href="/vc"
+                                href="/dashboard"
                                 className="px-6 sm:px-8 py-3 sm:py-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-all duration-300 flex items-center justify-center gap-2"
                             >
                                 <Rocket className="w-5 h-5" />
@@ -387,7 +387,7 @@ export default function InvestmentProgramsPage() {
                             Create your first digital accelerator or investment program in minutes.
                         </p>
                         <Link
-                            href="/vc"
+                            href="/dashboard"
                             className="inline-flex items-center gap-2 px-8 sm:px-10 py-4 sm:py-5 bg-background text-foreground rounded-lg font-bold text-base sm:text-lg hover:shadow-2xl hover:scale-105 transition-all duration-300"
                         >
                             <Rocket className="w-6 h-6" />

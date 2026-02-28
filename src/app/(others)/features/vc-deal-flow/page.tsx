@@ -62,7 +62,7 @@ export default function VCDealFlowPage() {
 
                         <div className="flex flex-col sm:flex-row flex-wrap gap-4">
                             <Link
-                                href="/vc"
+                                href="/dashboard"
                                 className="px-6 sm:px-8 py-3 sm:py-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-all duration-300 flex items-center justify-center gap-2"
                             >
                                 <Zap className="w-5 h-5" />
@@ -355,7 +355,7 @@ export default function VCDealFlowPage() {
                             Stop manually screening every pitch. Let AI surface the best deals.
                         </p>
                         <Link
-                            href="/vc"
+                            href="/dashboard"
                             className="inline-flex items-center gap-2 px-8 sm:px-10 py-4 sm:py-5 bg-background text-foreground rounded-lg font-bold text-base sm:text-lg hover:shadow-2xl hover:scale-105 transition-all duration-300"
                         >
                             <Zap className="w-5 h-5 sm:w-6 sm:h-6" />
