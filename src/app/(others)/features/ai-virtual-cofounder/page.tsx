@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { UserPlus, MessageCircle, Lightbulb, CheckCircle2, Target, Sparkles } from 'lucide-react';
+import { UserPlus, MessageCircle, Lightbulb, CheckCircle2, Target, Sparkles, TrendingUp, Clock } from 'lucide-react';
 import { generateSEOMetadata, generateSoftwareApplicationSchema, generateBreadcrumbSchema } from '@/lib/seo';
 
 export const metadata: Metadata = generateSEOMetadata({
@@ -90,7 +90,7 @@ export default function AIVirtualCofounderPage() {
                             </p>
 
                             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-6">
-                                Whether you’re <strong className="text-foreground">solo</strong> and need a partner to think with, or in a team and want a neutral sparring partner, the AI co-founder is there to challenge assumptions, reflect your thinking back, and help you see options you might miss alone.
+                                Whether you&apos;re <strong className="text-foreground">solo</strong> and need a partner to think with, or in a team and want a neutral sparring partner, the AI co-founder is there to challenge assumptions, reflect your thinking back, and help you see options you might miss alone. People searching for &quot;AI co-founder for startups&quot; or &quot;solo founder support&quot; are looking for exactly this: a <strong className="text-foreground">startup sounding board</strong> that&apos;s always available.
                             </p>
 
                             <div className="grid sm:grid-cols-3 gap-4 sm:gap-6 mt-8">
@@ -134,8 +134,62 @@ export default function AIVirtualCofounderPage() {
                     </div>
                 </section>
 
-                {/* What You Can Do */}
+                {/* How It Works */}
                 <section className="container mx-auto px-4 py-12 sm:py-16 bg-secondary/20">
+                    <div className="max-w-4xl mx-auto">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-8 sm:mb-12 text-center">
+                            How Does the AI Virtual Co-Founder Work?
+                        </h2>
+
+                        <div className="space-y-6 sm:space-y-8">
+                            {[
+                                { num: '1', title: 'Set Up Your AI Co-Founder', desc: 'Configure your startup context—stage, market, goals. The AI uses this so conversations stay relevant to your situation.' },
+                                { num: '2', title: 'Talk Whenever You Need', desc: 'Chat or talk daily: morning check-ins, idea dumps, &quot;what would you do?&quot; moments, or decision framing. No scheduling required.' },
+                                { num: '3', title: 'Build on Previous Conversations', desc: 'Your AI co-founder remembers context. Refer back to earlier discussions so your thinking compounds over time.' },
+                                { num: '4', title: 'Get Challenged & Reflected', desc: 'The AI doesn\'t just agree—it asks questions, plays devil\'s advocate, and reflects your reasoning so you see blind spots.' },
+                            ].map((step) => (
+                                <div key={step.num} className="flex gap-4 sm:gap-6 items-start">
+                                    <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-primary text-primary-foreground rounded-xl flex items-center justify-center font-bold text-lg sm:text-xl">
+                                        {step.num}
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg sm:text-2xl font-bold text-foreground mb-2">{step.title}</h3>
+                                        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{step.desc}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* Why Use It */}
+                <section className="container mx-auto px-4 py-12 sm:py-16">
+                    <div className="max-w-5xl mx-auto">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-8 sm:mb-12 text-center">
+                            Why Use an AI Virtual Co-Founder?
+                        </h2>
+
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                            {[
+                                { icon: Clock, title: 'Always Available', desc: 'No scheduling, no time zones. When you need to think out loud at 2 AM or before a big meeting, your AI co-founder is there.' },
+                                { icon: TrendingUp, title: 'Better Decisions', desc: 'Talking through options with a partner—even an AI—surfaces assumptions and gaps. You make fewer impulsive or unclear calls.' },
+                                { icon: Target, title: 'Solo Founder Support', desc: 'If you don\'t have a co-founder yet, the AI fills the &quot;someone to talk to&quot; gap for strategy and sanity checks.' },
+                            ].map((benefit, idx) => {
+                                const Icon = benefit.icon;
+                                return (
+                                    <div key={idx} className="bg-card rounded-xl p-4 sm:p-6 shadow-lg border border-border">
+                                        <Icon className="w-10 h-10 sm:w-12 sm:h-12 text-primary mb-4" />
+                                        <h3 className="text-lg sm:text-xl font-bold text-foreground mb-3">{benefit.title}</h3>
+                                        <p className="text-sm sm:text-base text-muted-foreground">{benefit.desc}</p>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </section>
+
+                {/* What You Can Do */}
+                <section className="container mx-auto px-4 py-12 sm:py-16 bg-primary/5">
                     <div className="max-w-5xl mx-auto">
                         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-8 sm:mb-12 text-center">
                             What You Can Do with Your AI Co-Founder
@@ -158,6 +212,29 @@ export default function AIVirtualCofounderPage() {
                                             <p className="text-sm sm:text-base text-muted-foreground">{item.description}</p>
                                         </div>
                                     </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* When to Use */}
+                <section className="container mx-auto px-4 py-12 sm:py-16">
+                    <div className="max-w-5xl mx-auto">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-8 sm:mb-12 text-center">
+                            When to Talk to Your AI Co-Founder
+                        </h2>
+
+                        <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
+                            {[
+                                { title: 'Daily Standups', desc: 'Quick wins, blockers, and priorities. Structure your day without the formality of a team meeting.' },
+                                { title: 'Before Big Decisions', desc: 'Hiring, pricing, pivot, or partnership? Talk it through and get your reasoning stress-tested.' },
+                                { title: 'After Tough Meetings', desc: 'Debrief after an investor no, a hard customer call, or internal conflict. Process and plan next steps.' },
+                                { title: 'Fundraising Prep', desc: 'Rehearse narratives, anticipate questions, and refine your story before you hit the road.' },
+                            ].map((item, idx) => (
+                                <div key={idx} className="bg-card rounded-xl p-4 sm:p-6 border border-border hover:shadow-md transition-shadow">
+                                    <h3 className="text-base sm:text-lg font-bold text-foreground mb-2">{item.title}</h3>
+                                    <p className="text-sm sm:text-base text-muted-foreground">{item.desc}</p>
                                 </div>
                             ))}
                         </div>

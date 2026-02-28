@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Presentation, Sparkles, LayoutTemplate, CheckCircle2, FileText, Target } from 'lucide-react';
+import { Presentation, Sparkles, LayoutTemplate, CheckCircle2, FileText, Target, Zap, Clock } from 'lucide-react';
 import { generateSEOMetadata, generateSoftwareApplicationSchema, generateBreadcrumbSchema } from '@/lib/seo';
 
 export const metadata: Metadata = generateSEOMetadata({
@@ -90,7 +90,7 @@ export default function PitchDeckGenerationPage() {
                             </p>
 
                             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-6">
-                                Think <strong className="text-foreground">Gamma or Canva for startup pitch decks</strong>: you describe your startup, and AI generates slides you can customize. Export to PDF or PowerPoint and use it for fundraising, accelerators, or demo days.
+                                Think <strong className="text-foreground">Gamma or Canva for startup pitch decks</strong>: you describe your startup, and AI generates slides you can customize. Export to PDF or PowerPoint and use it for fundraising, accelerators, or demo days. If you search &quot;how to create a pitch deck&quot; or &quot;pitch deck for investors&quot;, you&apos;ll find the same sections everywhere—we automate that structure so you get a <strong className="text-foreground">pitch deck presentation</strong> that looks professional from day one.
                             </p>
 
                             <div className="grid sm:grid-cols-3 gap-4 sm:gap-6 mt-8">
@@ -111,6 +111,34 @@ export default function PitchDeckGenerationPage() {
                     </div>
                 </section>
 
+                {/* How It Works */}
+                <section className="container mx-auto px-4 py-12 sm:py-16 bg-secondary/20">
+                    <div className="max-w-4xl mx-auto">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-8 sm:mb-12 text-center">
+                            How Does Pitch Deck Generation Work?
+                        </h2>
+
+                        <div className="space-y-6 sm:space-y-8">
+                            {[
+                                { num: '1', title: 'Enter Your Startup Details', desc: 'Share your problem, solution, market size, traction, team, and funding ask—the same info you\'d use for a pitch script or investor meeting.' },
+                                { num: '2', title: 'AI Generates Your Slides', desc: 'The AI structures your story into investor-standard slides: title, problem, solution, market, product, traction, business model, team, and ask.' },
+                                { num: '3', title: 'Customize & Edit', desc: 'Every slide is editable. Change copy, add your branding, swap images, or tweak the narrative to match your voice.' },
+                                { num: '4', title: 'Export & Share', desc: 'Download your deck as PDF or PowerPoint. Send to investors, use in accelerator applications, or present at demo days.' },
+                            ].map((step) => (
+                                <div key={step.num} className="flex gap-4 sm:gap-6 items-start">
+                                    <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-primary text-primary-foreground rounded-xl flex items-center justify-center font-bold text-lg sm:text-xl">
+                                        {step.num}
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg sm:text-2xl font-bold text-foreground mb-2">{step.title}</h3>
+                                        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{step.desc}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
                 {/* Who It's For */}
                 <section className="container mx-auto px-4 py-12 sm:py-16">
                     <div className="max-w-5xl mx-auto">
@@ -126,6 +154,55 @@ export default function PitchDeckGenerationPage() {
                                 { title: 'Demo Day Presenters', desc: 'Turn your narrative into slides that match your talk.' },
                             ].map((item, idx) => (
                                 <div key={idx} className="bg-card rounded-xl p-4 sm:p-6 shadow-md border border-border hover:shadow-lg transition-shadow">
+                                    <h3 className="text-base sm:text-lg font-bold text-foreground mb-2">{item.title}</h3>
+                                    <p className="text-sm sm:text-base text-muted-foreground">{item.desc}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* Why Use It */}
+                <section className="container mx-auto px-4 py-12 sm:py-16">
+                    <div className="max-w-5xl mx-auto">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-8 sm:mb-12 text-center">
+                            Why Use an AI Pitch Deck Generator?
+                        </h2>
+
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                            {[
+                                { icon: Clock, title: 'Save Hours of Work', desc: 'Stop building slides from scratch. Get a full deck in minutes so you can focus on refining the story, not formatting.' },
+                                { icon: Zap, title: 'Investor-Standard Structure', desc: 'Slides follow the format VCs and accelerators expect—problem, solution, market, traction, team, ask—so you look prepared.' },
+                                { icon: Target, title: 'No Design Skills Needed', desc: 'You don\'t need Canva or PowerPoint expertise. The AI creates clean, professional slides you can customize.' },
+                            ].map((benefit, idx) => {
+                                const Icon = benefit.icon;
+                                return (
+                                    <div key={idx} className="bg-card rounded-xl p-4 sm:p-6 shadow-lg border border-border">
+                                        <Icon className="w-10 h-10 sm:w-12 sm:h-12 text-primary mb-4" />
+                                        <h3 className="text-lg sm:text-xl font-bold text-foreground mb-3">{benefit.title}</h3>
+                                        <p className="text-sm sm:text-base text-muted-foreground">{benefit.desc}</p>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </section>
+
+                {/* When to Use */}
+                <section className="container mx-auto px-4 py-12 sm:py-16 bg-primary/5">
+                    <div className="max-w-5xl mx-auto">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-8 sm:mb-12 text-center">
+                            When to Use Pitch Deck Generation
+                        </h2>
+
+                        <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
+                            {[
+                                { title: 'Before Fundraising', desc: 'Investors often ask for a deck before or after the first call. Have one ready instead of scrambling.' },
+                                { title: 'Accelerator Applications', desc: 'YC, Techstars, and most accelerators require a pitch deck. Generate a draft and tailor it to their application.' },
+                                { title: 'Demo Day or Pitch Events', desc: 'You need slides that match your talk. Generate a deck, then align your script and delivery to the same narrative.' },
+                                { title: 'Updating an Old Deck', desc: 'Pivoted or have new traction? Feed the AI your latest info and get an updated deck without starting from zero.' },
+                            ].map((item, idx) => (
+                                <div key={idx} className="bg-card rounded-xl p-4 sm:p-6 border border-border hover:shadow-md transition-shadow">
                                     <h3 className="text-base sm:text-lg font-bold text-foreground mb-2">{item.title}</h3>
                                     <p className="text-sm sm:text-base text-muted-foreground">{item.desc}</p>
                                 </div>

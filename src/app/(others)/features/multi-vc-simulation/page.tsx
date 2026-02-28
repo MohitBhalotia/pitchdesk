@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Users, MessageSquare, Mic, CheckCircle2, Target, Zap } from 'lucide-react';
+import { Users, MessageSquare, Mic, CheckCircle2, Target, Zap, TrendingUp, Shield } from 'lucide-react';
 import { generateSEOMetadata, generateSoftwareApplicationSchema, generateBreadcrumbSchema } from '@/lib/seo';
 
 export const metadata: Metadata = generateSEOMetadata({
@@ -90,7 +90,7 @@ export default function MultiVCSimulationPage() {
                             </p>
 
                             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-6">
-                                Think <strong className="text-foreground">Shark Tank style</strong>—but you&apos;re in the hot seat. One AI might focus on market size, another on traction, another on the team. You learn to pivot between questions, hold the room, and stay clear under pressure.
+                                Think <strong className="text-foreground">Shark Tank style</strong>—but you&apos;re in the hot seat. One AI might focus on market size, another on traction, another on the team. You learn to pivot between questions, hold the room, and stay clear under pressure. Founders searching for &quot;how to practice pitch with multiple investors&quot; or &quot;panel pitch practice&quot; are exactly who this is for: <strong className="text-foreground">multi-judge pitch simulation</strong> that mirrors real partner meetings and demo days.
                             </p>
 
                             <div className="grid sm:grid-cols-3 gap-4 sm:gap-6 mt-8">
@@ -134,7 +134,61 @@ export default function MultiVCSimulationPage() {
                     </div>
                 </section>
 
-                {/* How It Differs */}
+                {/* How It Works */}
+                <section className="container mx-auto px-4 py-12 sm:py-16 bg-secondary/20">
+                    <div className="max-w-4xl mx-auto">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-8 sm:mb-12 text-center">
+                            How Does Multi-VC Room Simulation Work?
+                        </h2>
+
+                        <div className="space-y-6 sm:space-y-8">
+                            {[
+                                { num: '1', title: 'Enter the Virtual Room', desc: 'You\'ll see multiple AI VC avatars on screen—each representing a different judge or partner in the room.' },
+                                { num: '2', title: 'Present to the Panel', desc: 'Pitch as you would in a real meeting. The AI VCs listen and can interrupt, ask follow-ups, or build on each other\'s questions.' },
+                                { num: '3', title: 'Handle Different Angles', desc: 'One might drill into market size, another into traction or team. You practice switching context and keeping everyone engaged.' },
+                                { num: '4', title: 'Get Panel Feedback', desc: 'After the session, see how you did across the panel—where you were strong and where each &quot;investor&quot; had concerns.' },
+                            ].map((step) => (
+                                <div key={step.num} className="flex gap-4 sm:gap-6 items-start">
+                                    <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-primary text-primary-foreground rounded-xl flex items-center justify-center font-bold text-lg sm:text-xl">
+                                        {step.num}
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg sm:text-2xl font-bold text-foreground mb-2">{step.title}</h3>
+                                        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{step.desc}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* Why Multiple VCs Change the Game / Benefits */}
+                <section className="container mx-auto px-4 py-12 sm:py-16">
+                    <div className="max-w-5xl mx-auto">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-8 sm:mb-12 text-center">
+                            Why Use Multi-VC Pitch Practice?
+                        </h2>
+
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                            {[
+                                { icon: Shield, title: 'Practice Before the Real Panel', desc: 'Make mistakes in a safe space. When you face 3–5 real VCs, you\'ll have already felt the pressure and learned to stay calm.' },
+                                { icon: TrendingUp, title: 'Closer to Real Dynamics', desc: 'Single-VC practice is great; panel practice is the next step. Interruptions, competing questions, and room control are different skills.' },
+                                { icon: Target, title: 'Build Panel Confidence', desc: 'The more you practice with multiple AI judges, the more natural it feels to address a room full of investors.' },
+                            ].map((benefit, idx) => {
+                                const Icon = benefit.icon;
+                                return (
+                                    <div key={idx} className="bg-card rounded-xl p-4 sm:p-6 shadow-lg border border-border">
+                                        <Icon className="w-10 h-10 sm:w-12 sm:h-12 text-primary mb-4" />
+                                        <h3 className="text-lg sm:text-xl font-bold text-foreground mb-3">{benefit.title}</h3>
+                                        <p className="text-sm sm:text-base text-muted-foreground">{benefit.desc}</p>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </section>
+
+                {/* Why Multiple VCs Change the Game - details */}
                 <section className="container mx-auto px-4 py-12 sm:py-16 bg-secondary/20">
                     <div className="max-w-5xl mx-auto">
                         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-8 sm:mb-12 text-center">
