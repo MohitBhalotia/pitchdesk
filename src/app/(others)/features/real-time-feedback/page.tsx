@@ -38,11 +38,11 @@ export default function RealTimeFeedbackPage() {
 
             <div className="min-h-screen bg-background">
                 {/* Hero Section */}
-                <section className="container mx-auto px-4 py-16 md:py-20">
+                <section className="container mx-auto px-4 py-12 sm:py-16 md:py-20">
                     <div className="max-w-4xl mx-auto">
                         <Link
                             href="/features"
-                            className="inline-flex items-center text-primary hover:text-primary/80 mb-6 font-medium"
+                            className="inline-flex items-center text-primary hover:opacity-80 mb-6 font-medium transition-opacity"
                         >
                             ← Back to Features
                         </Link>
@@ -52,25 +52,25 @@ export default function RealTimeFeedbackPage() {
                             Live AI Coaching
                         </div>
 
-                        <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-600">Voice-Based Pitch Practice</span> with Real-Time AI Feedback
+                        <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
+                            <span className="text-primary">Voice-Based Pitch Practice</span> with Real-Time AI Feedback
                         </h1>
 
-                        <p className="text-xl md:text-2xl text-muted-foreground mb-8 leading-relaxed">
+                        <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground mb-8 leading-relaxed">
                             The only <strong className="text-foreground">conversational AI investor</strong> that listens as you speak. Get <strong className="text-foreground">live pitch feedback software</strong> on delivery, confidence, pacing, and tone—while you&apos;re pitching, not after.
                         </p>
 
-                        <div className="flex flex-wrap gap-4">
+                        <div className="flex flex-col sm:flex-row flex-wrap gap-4">
                             <Link
                                 href="/start-a-pitch"
-                                className="px-8 py-4 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg font-semibold hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex items-center gap-2"
+                                className="px-6 sm:px-8 py-3 sm:py-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-all duration-300 flex items-center justify-center gap-2"
                             >
                                 <Mic className="w-5 h-5" />
                                 Try Voice Practice Now
                             </Link>
                             <Link
                                 href="/features/ai-pitch-simulator"
-                                className="px-8 py-4 bg-background text-foreground rounded-lg font-semibold border-2 border-border hover:border-orange-600 hover:text-orange-600 transition-all duration-300"
+                                className="px-6 sm:px-8 py-3 sm:py-4 bg-secondary text-secondary-foreground rounded-lg font-semibold border border-border hover:bg-accent transition-all duration-300"
                             >
                                 Learn About AI Simulator
                             </Link>
@@ -79,13 +79,13 @@ export default function RealTimeFeedbackPage() {
                 </section>
 
                 {/* What Makes It Unique */}
-                <section className="container mx-auto px-4 py-16">
+                <section className="container mx-auto px-4 py-12 sm:py-16">
                     <div className="max-w-5xl mx-auto">
-                        <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-6">
                             Why Voice-Based Practice is Different
                         </h2>
 
-                        <div className="bg-card rounded-2xl p-8 md:p-10 shadow-lg border border-border">
+                        <div className="bg-card rounded-2xl p-6 sm:p-8 md:p-10 shadow-lg border border-border">
                             <p className="text-lg text-muted-foreground leading-relaxed mb-6">
                                 Most pitch practice tools are text-based. You type your answers, read feedback, and never actually <em>speak</em> your pitch out loud. That&apos;s like learning to swim by reading about it.
                             </p>
@@ -94,12 +94,12 @@ export default function RealTimeFeedbackPage() {
                                 PitchDesk&apos;s <strong className="text-foreground">voice-based pitch practice</strong> feature is different. You speak, the AI listens and responds in real-time, and you get instant feedback on how you sound, not just what you say. It&apos;s the closest thing to a real VC meeting.
                             </p>
 
-                            <div className="grid md:grid-cols-2 gap-6 mt-8">
-                                <div className="p-6 bg-red-500/5 rounded-xl border border-red-500/20">
-                                    <h3 className="text-xl font-bold text-foreground mb-3 flex items-center gap-2">
-                                        <span className="text-red-500">✗</span> Traditional Practice Tools
+                            <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 mt-8">
+                                <div className="p-4 sm:p-6 bg-destructive/5 rounded-xl border border-destructive/20">
+                                    <h3 className="text-lg sm:text-xl font-bold text-foreground mb-3 flex items-center gap-2">
+                                        <span className="text-destructive">✗</span> Traditional Practice Tools
                                     </h3>
-                                    <ul className="space-y-2 text-muted-foreground">
+                                    <ul className="space-y-2 text-sm sm:text-base text-muted-foreground">
                                         <li>→ Type written responses</li>
                                         <li>→ No voice interaction</li>
                                         <li>→ Can&apos;t assess delivery</li>
@@ -108,11 +108,11 @@ export default function RealTimeFeedbackPage() {
                                     </ul>
                                 </div>
 
-                                <div className="p-6 bg-green-500/5 rounded-xl border border-green-500/20">
-                                    <h3 className="text-xl font-bold text-foreground mb-3 flex items-center gap-2">
-                                        <span className="text-green-600">✓</span> PitchDesk Voice Practice
+                                <div className="p-4 sm:p-6 bg-primary/5 rounded-xl border border-primary/20">
+                                    <h3 className="text-lg sm:text-xl font-bold text-foreground mb-3 flex items-center gap-2">
+                                        <span className="text-primary">✓</span> PitchDesk Voice Practice
                                     </h3>
-                                    <ul className="space-y-2 text-muted-foreground">
+                                    <ul className="space-y-2 text-sm sm:text-base text-muted-foreground">
                                         <li>→ Speak naturally like a real meeting</li>
                                         <li>→ AI listens and responds by voice</li>
                                         <li>→ Real-time delivery feedback</li>
@@ -126,40 +126,40 @@ export default function RealTimeFeedbackPage() {
                 </section>
 
                 {/* Who It's For */}
-                <section className="container mx-auto px-4 py-16">
+                <section className="container mx-auto px-4 py-12 sm:py-16">
                     <div className="max-w-5xl mx-auto">
-                        <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-8 text-center">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-8 sm:mb-12 text-center">
                             Who Benefits from Voice-Based Practice?
                         </h2>
 
-                        <div className="grid md:grid-cols-2 gap-8">
-                            <div className="bg-card text-card-foreground rounded-2xl p-8 border border-border hover:shadow-lg transition-all hover:border-orange-500/50">
-                                <Mic className="w-12 h-12 mb-4 text-orange-600" />
-                                <h3 className="text-2xl font-bold mb-4">Nervous Presenters</h3>
+                        <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+                            <div className="bg-card text-card-foreground rounded-2xl p-6 sm:p-8 border border-border hover:shadow-lg transition-all hover:border-primary/50">
+                                <Mic className="w-10 h-10 sm:w-12 sm:h-12 mb-4 text-primary" />
+                                <h3 className="text-lg sm:text-2xl font-bold mb-4">Nervous Presenters</h3>
                                 <p className="text-muted-foreground leading-relaxed">
                                     Overcome pitch anxiety by practicing speaking out loud in a judgment-free environment. Build confidence before your real investor meetings. Our <strong className="text-foreground">real-time pitch coaching AI</strong> tracks your nervousness and helps you improve.
                                 </p>
                             </div>
 
-                            <div className="bg-card text-card-foreground rounded-2xl p-8 border border-border hover:shadow-lg transition-all hover:border-red-500/50">
-                                <MessageCircle className="w-12 h-12 mb-4 text-red-600" />
-                                <h3 className="text-2xl font-bold mb-4">Non-Native English Speakers</h3>
+                            <div className="bg-card text-card-foreground rounded-2xl p-6 sm:p-8 border border-border hover:shadow-lg transition-all hover:border-primary/50">
+                                <MessageCircle className="w-10 h-10 sm:w-12 sm:h-12 mb-4 text-primary" />
+                                <h3 className="text-lg sm:text-2xl font-bold mb-4">Non-Native English Speakers</h3>
                                 <p className="text-muted-foreground leading-relaxed">
                                     Practice pronunciation, fluency, and natural conversational flow. The <strong className="text-foreground">conversational AI investor</strong> adapts to your speaking style and helps you refine your delivery in real-time.
                                 </p>
                             </div>
 
-                            <div className="bg-card text-card-foreground rounded-2xl p-8 border border-border hover:shadow-lg transition-all hover:border-pink-500/50">
-                                <Volume2 className="w-12 h-12 mb-4 text-pink-600" />
-                                <h3 className="text-2xl font-bold mb-4">Introverted Founders</h3>
+                            <div className="bg-card text-card-foreground rounded-2xl p-6 sm:p-8 border border-border hover:shadow-lg transition-all hover:border-primary/50">
+                                <Volume2 className="w-10 h-10 sm:w-12 sm:h-12 mb-4 text-primary" />
+                                <h3 className="text-lg sm:text-2xl font-bold mb-4">Introverted Founders</h3>
                                 <p className="text-muted-foreground leading-relaxed">
                                     Not naturally outgoing? Practice speaking confidently without the pressure of a live audience. Get comfortable thinking on your feet in a safe, private space.
                                 </p>
                             </div>
 
-                            <div className="bg-card text-card-foreground rounded-2xl p-8 border border-border hover:shadow-lg transition-all hover:border-rose-500/50">
-                                <TrendingUp className="w-12 h-12 mb-4 text-rose-600" />
-                                <h3 className="text-2xl font-bold mb-4">Demo Day Presenters</h3>
+                            <div className="bg-card text-card-foreground rounded-2xl p-6 sm:p-8 border border-border hover:shadow-lg transition-all hover:border-primary/50">
+                                <TrendingUp className="w-10 h-10 sm:w-12 sm:h-12 mb-4 text-primary" />
+                                <h3 className="text-lg sm:text-2xl font-bold mb-4">Demo Day Presenters</h3>
                                 <p className="text-muted-foreground leading-relaxed">
                                     Preparing for a high-stakes demo day? Use our <strong className="text-foreground">AI voice judge platform</strong> to practice your delivery, timing, and stage presence until it&apos;s second nature.
                                 </p>
@@ -169,20 +169,20 @@ export default function RealTimeFeedbackPage() {
                 </section>
 
                 {/* How It Works */}
-                <section className="container mx-auto px-4 py-16 bg-muted/30">
+                <section className="container mx-auto px-4 py-12 sm:py-16 bg-secondary/20">
                     <div className="max-w-4xl mx-auto">
-                        <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-12 text-center">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-8 sm:mb-12 text-center">
                             How Real-Time Voice Feedback Works
                         </h2>
 
-                        <div className="space-y-8">
+                        <div className="space-y-6 sm:space-y-8">
                             {/* Step 1 */}
-                            <div className="flex gap-6 items-start">
-                                <div className="flex-shrink-0 w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center font-bold text-xl border border-primary/20">
+                            <div className="flex gap-4 sm:gap-6 items-start">
+                                <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-primary text-primary-foreground rounded-xl flex items-center justify-center font-bold text-lg sm:text-xl">
                                     1
                                 </div>
                                 <div>
-                                    <h3 className="text-2xl font-bold text-foreground mb-2">Allow Microphone Access</h3>
+                                    <h3 className="text-lg sm:text-2xl font-bold text-foreground mb-2">Allow Microphone Access</h3>
                                     <p className="text-muted-foreground leading-relaxed">
                                         Grant permission for PitchDesk to use your microphone. All voice processing happens securely, and your pitches are private and encrypted.
                                     </p>
@@ -190,12 +190,12 @@ export default function RealTimeFeedbackPage() {
                             </div>
 
                             {/* Step 2 */}
-                            <div className="flex gap-6 items-start">
-                                <div className="flex-shrink-0 w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center font-bold text-xl border border-primary/20">
+                            <div className="flex gap-4 sm:gap-6 items-start">
+                                <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-primary text-primary-foreground rounded-xl flex items-center justify-center font-bold text-lg sm:text-xl">
                                     2
                                 </div>
                                 <div>
-                                    <h3 className="text-2xl font-bold text-foreground mb-2">Start Speaking Your Pitch</h3>
+                                    <h3 className="text-lg sm:text-2xl font-bold text-foreground mb-2">Start Speaking Your Pitch</h3>
                                     <p className="text-muted-foreground leading-relaxed">
                                         Talk naturally, as if you&apos;re in a real investor meeting. The AI listens, processes your speech in real-time, and understands both your content and delivery style.
                                     </p>
@@ -203,12 +203,12 @@ export default function RealTimeFeedbackPage() {
                             </div>
 
                             {/* Step 3 */}
-                            <div className="flex gap-6 items-start">
-                                <div className="flex-shrink-0 w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center font-bold text-xl border border-primary/20">
+                            <div className="flex gap-4 sm:gap-6 items-start">
+                                <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-primary text-primary-foreground rounded-xl flex items-center justify-center font-bold text-lg sm:text-xl">
                                     3
                                 </div>
                                 <div>
-                                    <h3 className="text-2xl font-bold text-foreground mb-2">Get Live Vocal Feedback</h3>
+                                    <h3 className="text-lg sm:text-2xl font-bold text-foreground mb-2">Get Live Vocal Feedback</h3>
                                     <p className="text-muted-foreground leading-relaxed">
                                         As you speak, the AI analyzes your pacing, filler words, pauses, tone, and confidence. You&apos;ll see real-time indicators like &quot;Too fast,&quot; &quot;Good pacing,&quot; or &quot;Low energy.&quot;
                                     </p>
@@ -216,12 +216,12 @@ export default function RealTimeFeedbackPage() {
                             </div>
 
                             {/* Step 4 */}
-                            <div className="flex gap-6 items-start">
-                                <div className="flex-shrink-0 w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center font-bold text-xl border border-primary/20">
+                            <div className="flex gap-4 sm:gap-6 items-start">
+                                <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-primary text-primary-foreground rounded-xl flex items-center justify-center font-bold text-lg sm:text-xl">
                                     4
                                 </div>
                                 <div>
-                                    <h3 className="text-2xl font-bold text-foreground mb-2">AI Asks Follow-Up Questions</h3>
+                                    <h3 className="text-lg sm:text-2xl font-bold text-foreground mb-2">AI Asks Follow-Up Questions</h3>
                                     <p className="text-muted-foreground leading-relaxed">
                                         The <strong className="text-foreground">conversational AI investor</strong> responds by voice, asking realistic follow-up questions about your business. Engage in a natural back-and-forth conversation, just like a real VC meeting.
                                     </p>
@@ -229,12 +229,12 @@ export default function RealTimeFeedbackPage() {
                             </div>
 
                             {/* Step 5 */}
-                            <div className="flex gap-6 items-start">
-                                <div className="flex-shrink-0 w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center font-bold text-xl border border-primary/20">
+                            <div className="flex gap-4 sm:gap-6 items-start">
+                                <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-primary text-primary-foreground rounded-xl flex items-center justify-center font-bold text-lg sm:text-xl">
                                     5
                                 </div>
                                 <div>
-                                    <h3 className="text-2xl font-bold text-foreground mb-2">Review Detailed Analysis</h3>
+                                    <h3 className="text-lg sm:text-2xl font-bold text-foreground mb-2">Review Detailed Analysis</h3>
                                     <p className="text-muted-foreground leading-relaxed">
                                         After your pitch, review a detailed breakdown of your delivery: speech rate, confidence score, filler word count, pause patterns, energy levels, and areas for improvement.
                                     </p>
@@ -245,13 +245,13 @@ export default function RealTimeFeedbackPage() {
                 </section>
 
                 {/* What You Get Feedback On */}
-                <section className="container mx-auto px-4 py-16">
+                <section className="container mx-auto px-4 py-12 sm:py-16">
                     <div className="max-w-5xl mx-auto">
-                        <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-12 text-center">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-8 sm:mb-12 text-center">
                             What the AI Analyzes in Real-Time
                         </h2>
 
-                        <div className="grid md:grid-cols-2 gap-6">
+                        <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
                             {[
                                 {
                                     title: 'Speech Pacing',
@@ -286,11 +286,11 @@ export default function RealTimeFeedbackPage() {
                                     description: 'How well do you answer tough questions? The AI scores your responses on relevance, clarity, and confidence.',
                                 },
                             ].map((item, idx) => (
-                                <div key={idx} className="bg-card rounded-xl p-6 shadow-sm border border-border hover:shadow-md transition-shadow">
+                                <div key={idx} className="bg-card rounded-xl p-4 sm:p-6 shadow-sm border border-border hover:shadow-md transition-shadow">
                                     <div className="flex items-start gap-3">
-                                        <CheckCircle2 className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
+                                        <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-primary flex-shrink-0 mt-1" />
                                         <div>
-                                            <h3 className="text-xl font-bold text-foreground mb-2">{item.title}</h3>
+                                            <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">{item.title}</h3>
                                             <p className="text-muted-foreground leading-relaxed">{item.description}</p>
                                         </div>
                                     </div>
@@ -301,36 +301,36 @@ export default function RealTimeFeedbackPage() {
                 </section>
 
                 {/* Benefits */}
-                <section className="container mx-auto px-4 py-16 bg-primary/5">
+                <section className="container mx-auto px-4 py-12 sm:py-16 bg-primary/5">
                     <div className="max-w-4xl mx-auto">
-                        <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-foreground">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-6 sm:mb-8 text-center text-foreground">
                             Why Voice Practice is Critical
                         </h2>
 
-                        <div className="space-y-6">
-                            <div className="bg-card rounded-xl p-6 border border-border shadow-sm">
-                                <h3 className="text-xl font-bold mb-2 text-foreground">Your Pitch Deck Won&apos;t Save You</h3>
+                        <div className="space-y-4 sm:space-y-6">
+                            <div className="bg-card rounded-xl p-4 sm:p-6 border border-border shadow-sm">
+                                <h3 className="text-lg sm:text-xl font-bold mb-2 text-foreground">Your Pitch Deck Won&apos;t Save You</h3>
                                 <p className="text-muted-foreground">
                                     A beautiful slide deck means nothing if you can&apos;t articulate your vision confidently. VCs invest in founders, not PowerPoint. Practice your <em>delivery</em>, not just your content.
                                 </p>
                             </div>
 
-                            <div className="bg-card rounded-xl p-6 border border-border shadow-sm">
-                                <h3 className="text-xl font-bold mb-2 text-foreground">First Impressions Are Everything</h3>
+                            <div className="bg-card rounded-xl p-4 sm:p-6 border border-border shadow-sm">
+                                <h3 className="text-lg sm:text-xl font-bold mb-2 text-foreground">First Impressions Are Everything</h3>
                                 <p className="text-muted-foreground">
                                     You have 30 seconds to grab a VC&apos;s attention. If you sound nervous, unprepared, or unclear, the meeting is over before it starts. Voice practice builds the confidence needed to nail that first impression.
                                 </p>
                             </div>
 
-                            <div className="bg-card rounded-xl p-6 border border-border shadow-sm">
-                                <h3 className="text-xl font-bold mb-2 text-foreground">Written Practice Doesn&apos;t Transfer to Speaking</h3>
+                            <div className="bg-card rounded-xl p-4 sm:p-6 border border-border shadow-sm">
+                                <h3 className="text-lg sm:text-xl font-bold mb-2 text-foreground">Written Practice Doesn&apos;t Transfer to Speaking</h3>
                                 <p className="text-muted-foreground">
                                     You might know your pitch by heart on paper, but speaking it out loud is a totally different skill. Voice practice bridges the gap between knowing and delivering.
                                 </p>
                             </div>
 
-                            <div className="bg-card rounded-xl p-6 border border-border shadow-sm">
-                                <h3 className="text-xl font-bold mb-2 text-foreground">Build Muscle Memory</h3>
+                            <div className="bg-card rounded-xl p-4 sm:p-6 border border-border shadow-sm">
+                                <h3 className="text-lg sm:text-xl font-bold mb-2 text-foreground">Build Muscle Memory</h3>
                                 <p className="text-muted-foreground">
                                     The more you <em>speak</em> your pitch, the more natural it becomes. By the time you&apos;re in front of real VCs, your pitch will flow effortlessly because your brain and mouth have rehearsed it hundreds of times.
                                 </p>
@@ -340,36 +340,36 @@ export default function RealTimeFeedbackPage() {
                 </section>
 
                 {/* Real Use Cases */}
-                <section className="container mx-auto px-4 py-16">
+                <section className="container mx-auto px-4 py-12 sm:py-16">
                     <div className="max-w-5xl mx-auto">
-                        <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-12 text-center">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-8 sm:mb-12 text-center">
                             When to Use Voice-Based Practice
                         </h2>
 
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div className="bg-card rounded-xl p-6 border border-border hover:border-orange-500/30 transition-colors">
-                                <h3 className="text-xl font-bold text-foreground mb-3">Before Your First VC Meeting</h3>
+                        <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
+                            <div className="bg-card rounded-xl p-4 sm:p-6 border border-border hover:border-primary/30 transition-colors">
+                                <h3 className="text-lg sm:text-xl font-bold text-foreground mb-3">Before Your First VC Meeting</h3>
                                 <p className="text-muted-foreground">
                                     Run through your pitch 10-20 times with voice feedback to eliminate nervousness and build fluency. Walk into your meeting calm and confident.
                                 </p>
                             </div>
 
-                            <div className="bg-card rounded-xl p-6 border border-border hover:border-red-500/30 transition-colors">
-                                <h3 className="text-xl font-bold text-foreground mb-3">Demo Day Rehearsals</h3>
+                            <div className="bg-card rounded-xl p-4 sm:p-6 border border-border hover:border-primary/30 transition-colors">
+                                <h3 className="text-lg sm:text-xl font-bold text-foreground mb-3">Demo Day Rehearsals</h3>
                                 <p className="text-muted-foreground">
                                     Practice your stage pitch with live voice feedback. Fine-tune your pacing, eliminate filler words, and master the art of speaking to a large audience.
                                 </p>
                             </div>
 
-                            <div className="bg-card rounded-xl p-6 border border-border hover:border-pink-500/30 transition-colors">
-                                <h3 className="text-xl font-bold text-foreground mb-3">Pitch Competition Prep</h3>
+                            <div className="bg-card rounded-xl p-4 sm:p-6 border border-border hover:border-primary/30 transition-colors">
+                                <h3 className="text-lg sm:text-xl font-bold text-foreground mb-3">Pitch Competition Prep</h3>
                                 <p className="text-muted-foreground">
                                     Sharpen your delivery for high-pressure pitch contests. Practice speaking under time constraints and get feedback on your energy and enthusiasm.
                                 </p>
                             </div>
 
-                            <div className="bg-card rounded-xl p-6 border border-border hover:border-purple-500/30 transition-colors">
-                                <h3 className="text-xl font-bold text-foreground mb-3">Overcoming Stage Fright</h3>
+                            <div className="bg-card rounded-xl p-4 sm:p-6 border border-border hover:border-primary/30 transition-colors">
+                                <h3 className="text-lg sm:text-xl font-bold text-foreground mb-3">Overcoming Stage Fright</h3>
                                 <p className="text-muted-foreground">
                                     Build confidence by practicing speaking in a private, judgment-free environment. Track your nervousness score and watch it drop over time.
                                 </p>
@@ -379,28 +379,28 @@ export default function RealTimeFeedbackPage() {
                 </section>
 
                 {/* Related Features */}
-                <section className="container mx-auto px-4 py-16">
+                <section className="container mx-auto px-4 py-12 sm:py-16">
                     <div className="max-w-5xl mx-auto">
-                        <h2 className="text-3xl font-bold text-foreground mb-8 text-center">
+                        <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-6 sm:mb-8 text-center">
                             Related Features
                         </h2>
 
-                        <div className="grid md:grid-cols-3 gap-6">
-                            <Link href="/features/ai-pitch-simulator" className="bg-card rounded-xl p-6 shadow-sm border border-border hover:shadow-lg hover:-translate-y-1 transition-all">
-                                <MessageCircle className="w-10 h-10 text-blue-600 mb-4" />
-                                <h3 className="text-xl font-bold text-foreground mb-2">AI Pitch Simulator</h3>
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                            <Link href="/features/ai-pitch-simulator" className="bg-card rounded-xl p-4 sm:p-6 shadow-md border border-border hover:shadow-xl hover:-translate-y-1 transition-all">
+                                <MessageCircle className="w-8 h-8 sm:w-10 sm:h-10 text-primary mb-4" />
+                                <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">AI Pitch Simulator</h3>
                                 <p className="text-muted-foreground text-sm">Full pitch simulation with AI judges and Q&A.</p>
                             </Link>
 
-                            <Link href="/features/pitch-analysis" className="bg-card rounded-xl p-6 shadow-sm border border-border hover:shadow-lg hover:-translate-y-1 transition-all">
-                                <TrendingUp className="w-10 h-10 text-green-600 mb-4" />
-                                <h3 className="text-xl font-bold text-foreground mb-2">Pitch Analysis</h3>
+                            <Link href="/features/pitch-analysis" className="bg-card rounded-xl p-4 sm:p-6 shadow-md border border-border hover:shadow-xl hover:-translate-y-1 transition-all">
+                                <TrendingUp className="w-8 h-8 sm:w-10 sm:h-10 text-primary mb-4" />
+                                <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Pitch Analysis</h3>
                                 <p className="text-muted-foreground text-sm">Detailed scoring and transcript analysis after each session.</p>
                             </Link>
 
-                            <Link href="/features/pitch-competitions" className="bg-card rounded-xl p-6 shadow-sm border border-border hover:shadow-lg hover:-translate-y-1 transition-all">
-                                <Zap className="w-10 h-10 text-purple-600 mb-4" />
-                                <h3 className="text-xl font-bold text-foreground mb-2">Pitch Competitions</h3>
+                            <Link href="/features/pitch-competitions" className="bg-card rounded-xl p-4 sm:p-6 shadow-md border border-border hover:shadow-xl hover:-translate-y-1 transition-all">
+                                <Zap className="w-8 h-8 sm:w-10 sm:h-10 text-primary mb-4" />
+                                <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">Pitch Competitions</h3>
                                 <p className="text-muted-foreground text-sm">Test your voice skills in live competitions.</p>
                             </Link>
                         </div>
@@ -408,19 +408,19 @@ export default function RealTimeFeedbackPage() {
                 </section>
 
                 {/* CTA */}
-                <section className="container mx-auto px-4 py-16 pb-24">
-                    <div className="max-w-3xl mx-auto text-center bg-gradient-to-br from-orange-600 to-red-600 rounded-3xl p-12 text-white shadow-2xl">
-                        <h2 className="text-3xl md:text-5xl font-bold mb-6">
+                <section className="container mx-auto px-4 py-12 sm:py-16 pb-16 sm:pb-24">
+                    <div className="max-w-3xl mx-auto text-center bg-primary rounded-3xl p-8 sm:p-12 text-primary-foreground shadow-2xl">
+                        <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold mb-4 sm:mb-6">
                             Start Speaking Your Pitch Out Loud
                         </h2>
-                        <p className="text-xl text-orange-100 mb-8">
+                        <p className="text-lg sm:text-xl opacity-90 mb-6 sm:mb-8">
                             Build real speaking confidence with voice-based AI feedback.
                         </p>
                         <Link
                             href="/start-a-pitch"
-                            className="inline-flex items-center gap-2 px-10 py-5 bg-background text-orange-600 rounded-lg font-bold text-lg hover:shadow-2xl hover:scale-105 transition-all duration-300"
+                            className="inline-flex items-center gap-2 px-8 sm:px-10 py-4 sm:py-5 bg-background text-foreground rounded-lg font-bold text-base sm:text-lg hover:shadow-2xl hover:scale-105 transition-all duration-300"
                         >
-                            <Mic className="w-6 h-6" />
+                            <Mic className="w-5 h-5 sm:w-6 sm:h-6" />
                             Practice with Voice Now
                         </Link>
                     </div>
