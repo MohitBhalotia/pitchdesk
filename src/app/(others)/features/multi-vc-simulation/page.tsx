@@ -64,7 +64,7 @@ export default function MultiVCSimulationPage() {
                         <div className="flex flex-col sm:flex-row flex-wrap gap-4">
                             <span className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-primary/80 text-primary-foreground rounded-lg font-semibold cursor-not-allowed opacity-90">
                                 <Users className="w-5 h-5" />
-                                Enter Multi-VC Room (Incoming)
+                                Enter Multi-VC Room (Coming Soon)
                             </span>
                             <Link
                                 href="/start-a-pitch"
@@ -256,7 +256,7 @@ export default function MultiVCSimulationPage() {
                         </p>
                         <span className="inline-flex items-center gap-2 px-8 sm:px-10 py-4 sm:py-5 bg-primary-foreground/20 text-primary-foreground rounded-lg font-bold text-base sm:text-lg border border-primary-foreground/30 cursor-not-allowed">
                             <Zap className="w-5 h-5 sm:w-6 sm:h-6" />
-                            Enter Multi-VC Room (Incoming)
+                            Enter Multi-VC Room (Coming Soon)
                         </span>
                     </div>
                 </section>

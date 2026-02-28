@@ -64,7 +64,7 @@ export default function AIVirtualCofounderPage() {
                         <div className="flex flex-col sm:flex-row flex-wrap gap-4">
                             <span className="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 bg-primary/80 text-primary-foreground rounded-lg font-semibold cursor-not-allowed opacity-90">
                                 <UserPlus className="w-5 h-5" />
-                                Set Up My AI Co-Founder (Incoming)
+                                Set Up My AI Co-Founder (Coming Soon)
                             </span>
                             <Link
                                 href="/features/ai-pitch-simulator"
@@ -281,7 +281,7 @@ export default function AIVirtualCofounderPage() {
                         </p>
                         <span className="inline-flex items-center gap-2 px-8 sm:px-10 py-4 sm:py-5 bg-primary-foreground/20 text-primary-foreground rounded-lg font-bold text-base sm:text-lg border border-primary-foreground/30 cursor-not-allowed">
                             <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" />
-                            Set Up My AI Co-Founder (Incoming)
+                            Set Up My AI Co-Founder (Coming Soon)
                         </span>
                     </div>
                 </section>

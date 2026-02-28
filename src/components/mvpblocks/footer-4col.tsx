@@ -1,13 +1,9 @@
 import {
-  //Dribbble,
-  // Facebook,
-  // Github,
   Instagram,
   Linkedin,
   Mail,
   MapPin,
   Phone,
-  //Twitter,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -15,30 +11,49 @@ import Image from "next/image";
 const data = {
   instaLink: "https://www.instagram.com/pitchdesk.in",
   linkedInLink: "https://www.linkedin.com/company/pitch-desk",
-  //twitterLink: 'https://twitter.com/mvpblocks',
-  //githubLink: 'https://github.com/mvpblocks',
-  services: {
-    PitchSession: "#",
-    QnA: "#",
-    pitchGen: "#",
-  },
-  about: {
-    team: "/meet-the-team",
-    // dream: "/our-dream",
-    advisors: "/advisors",
-  },
+
+  aboutCompany: [
+    { text: "About Us", href: "/about" },
+    { text: "Advisors", href: "/advisors" },
+    { text: "Meet the Team", href: "/meet-the-team" },
+    { text: "All Features", href: "/features" },
+    { text: "Pricing", href: "/payment" },
+  ],
+
+  founders: [
+    { text: "AI Pitch Simulator", href: "/features/ai-pitch-simulator" },
+    // { text: "Script Generator", href: "/features/pitch-script-generator" },
+    // { text: "Voice Feedback", href: "/features/real-time-feedback" },
+    { text: "Pitch Analysis", href: "/features/pitch-analysis" },
+    // { text: "Pitch Competitions", href: "/features/pitch-competitions" },
+    { text: "Investment Programs", href: "/features/investment-programs" },
+    // { text: "Start Pitching", href: "/start-a-pitch" },
+    { text: "Vertual Cofounder", href: "/features/ai-virtual-cofounder" },
+    { text: "Pitch Deck Generation", href: "/features/pitch-deck-generation" },
+    { text: "Multi-VC Room Simulation", href: "/features/multi-vc-simulation" },
+  ],
+
+  vcs: [
+    { text: "AI VC Agents", href: "/features/ai-vc-agents" },
+    { text: "Deal Flow Automation", href: "/features/vc-deal-flow" },
+    { text: "Run Investment Programs", href: "/features/investment-programs" },
+    // { text: "Host Competitions", href: "/features/pitch-competitions" },
+  ],
+
   help: {
     faqsAndSupport: "/community/support",
     feedback: "/community/feedback",
     privacyPolicy: "/privacy",
   },
+
   contact: {
     email: "info@pitchdesk.in",
     phone: "+91 9987105864",
     address: "India",
   },
+
   company: {
-    name: "Pitch Desk",
+    name: "PitchDesk",
     description:
       "Fueling founder's growth with AI that listens, challenges, and helps them shine in every pitch.",
     logo: "/logo.png",
@@ -46,27 +61,8 @@ const data = {
 };
 
 const socialLinks = [
-  //{ icon: Facebook, label: 'Facebook', href: data.facebookLink },
   { icon: Instagram, label: "Instagram", href: data.instaLink },
   { icon: Linkedin, label: "LinkedIn", href: data.linkedInLink },
-  //{ icon: Twitter, label: 'Twitter', href: data.twitterLink },
-  //{ icon: Github, label: 'GitHub', href: data.githubLink },
-];
-
-const aboutLinks = [
-  //{ text: 'Company History', href: data.about.history },
-  { text: "Meet the Team", href: data.about.team },
-  { text: "Advisors", href: data.about.advisors },
-  // { text: 'Our Dream', href: data.about.dream }
-  //{ text: 'Employee Handbook', href: data.about.handbook },
-  //{ text: 'Careers', href: data.about.careers },
-];
-
-const serviceLinks = [
-  { text: "Pitch session with AI VC's" },
-  { text: "QnA and Negotiation practice" },
-  { text: "Generate Deal cracking pitch" },
-  //{ text: 'Google Ads', href: data.services.googleads },
 ];
 
 const helpfulLinks = [
@@ -87,35 +83,32 @@ const contactInfo = [
 
 export default function Footer4Col() {
   return (
-    <footer className="bg-secondary dark:bg-secondary/20 mt-16 w-full  rounded-t-xl">
+    <footer className="bg-secondary dark:bg-secondary/20 mt-16 w-full rounded-t-xl">
       <div className="mx-auto max-w-screen-xl px-4 pt-16 pb-6 sm:px-6 lg:px-8 lg:pt-24">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+          {/* LEFT SECTION */}
           <div>
-            <div className="text-primary  flex justify-center gap-2 sm:justify-start">
+            <div className="flex justify-center gap-2 sm:justify-start">
               <Image
-                src={data.company.logo || "/placeholder.svg"}
+                src={data.company.logo}
                 alt="logo"
                 width={40}
                 height={40}
                 className="dark:invert rounded-full"
               />
               <span className="text-2xl font-bold text-accent-foreground">
-                {" "}
                 PitchDesk
               </span>
             </div>
 
-            <p className="text-foreground/50 mt-6 max-w-md text-center leading-relaxed sm:max-w-xs sm:text-left">
+            <p className="text-foreground/50 mt-6 max-w-md text-center sm:text-left">
               {data.company.description}
             </p>
 
-            <ul className="mt-8 flex justify-center gap-6 sm:justify-start md:gap-8">
+            <ul className="mt-8 flex justify-center gap-6 sm:justify-start">
               {socialLinks.map(({ icon: Icon, label, href }) => (
                 <li key={label}>
-                  <Link
-                    href={href}
-                    className="text-primary hover:text-primary/80 transition"
-                  >
+                  <Link href={href} className="text-primary hover:text-primary/80">
                     <span className="sr-only">{label}</span>
                     <Icon className="size-6" />
                   </Link>
@@ -124,16 +117,15 @@ export default function Footer4Col() {
             </ul>
           </div>
 
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4 lg:col-span-2">
+          {/* RIGHT GRID */}
+          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-5 lg:col-span-2">
+            {/* ABOUT + COMPANY */}
             <div className="text-center sm:text-left">
-              <p className="text-lg font-medium">About Us</p>
+              <p className="text-lg font-medium">Company</p>
               <ul className="mt-8 space-y-4 text-sm">
-                {aboutLinks.map(({ text, href }) => (
+                {data.aboutCompany.map(({ text, href }) => (
                   <li key={text}>
-                    <Link
-                      className="text-secondary-foreground/70 transition"
-                      href={href}
-                    >
+                    <Link href={href} className="text-secondary-foreground/70">
                       {text}
                     </Link>
                   </li>
@@ -141,27 +133,78 @@ export default function Footer4Col() {
               </ul>
             </div>
 
+            {/* FOR FOUNDERS */}
             <div className="text-center sm:text-left">
-              <p className="text-lg font-medium">Our Services</p>
+              <p className="text-lg font-medium">For Founders</p>
               <ul className="mt-8 space-y-4 text-sm">
-                {serviceLinks.map(({ text }) => (
-                  <li key={text}>{text}</li>
+                {data.founders.map(({ text, href }) => (
+                  <li key={text}>
+                    <Link href={href} className="text-secondary-foreground/70">
+                      {text}
+                    </Link>
+                  </li>
                 ))}
               </ul>
             </div>
+
+            {/* FOR VCs */}
+            <div className="text-center sm:text-left">
+              <p className="text-lg font-medium">For VCs</p>
+              <ul className="mt-8 space-y-4 text-sm">
+                {data.vcs.map(({ text, href }) => (
+                  <li key={text}>
+                    <Link href={href} className="text-secondary-foreground/70">
+                      {text}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* HELP + CONTACT */}
+            {/* <div className="text-center sm:text-left">
+              <p className="text-lg font-medium">Helpful Links</p>
+              <ul className="mt-8 space-y-4 text-sm">
+                {helpfulLinks.map(({ text, href }) => (
+                  <li key={text}>
+                    <Link href={href} className="text-secondary-foreground/70">
+                      {text}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+
+              <p className="text-lg font-medium mt-8">Contact Us</p>
+              <ul className="mt-4 space-y-4 text-sm">
+                {contactInfo.map(({ icon: Icon, text, isAddress, href }) => (
+                  <li key={text}>
+                    <a
+                      href={href}
+                      className="flex items-center justify-center gap-2 sm:justify-start"
+                    >
+                      <Icon className="text-primary size-5" />
+                      {isAddress ? (
+                        <address className="not-italic text-secondary-foreground/70">
+                          {text}
+                        </address>
+                      ) : (
+                        <span className="text-secondary-foreground/70">
+                          {text}
+                        </span>
+                      )}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div> */}
 
             <div className="text-center sm:text-left">
               <p className="text-lg font-medium">Helpful Links</p>
               <ul className="mt-8 space-y-4 text-sm">
                 {helpfulLinks.map(({ text, href }) => (
                   <li key={text}>
-                    <Link
-                      href={href}
-                      className="text-secondary-foreground/70 transition"
-                    >
-                      <span className="text-secondary-foreground/70 transition">
-                        {text}
-                      </span>
+                    <Link href={href} className="text-secondary-foreground/70">
+                      {text}
                     </Link>
                   </li>
                 ))}
@@ -174,18 +217,16 @@ export default function Footer4Col() {
                 {contactInfo.map(({ icon: Icon, text, isAddress, href }) => (
                   <li key={text}>
                     <a
-                      className="flex items-center justify-center gap-1.5 sm:justify-start"
                       href={href}
+                      className="flex items-center justify-center gap-2 sm:justify-start"
                     >
-                      <Icon className="text-primary size-5 shrink-0 shadow-sm" />
+                      <Icon className="text-primary size-5" />
                       {isAddress ? (
-                        <address className="text-secondary-foreground/70 -mt-0.5 flex-1 not-italic transition">
+                        <address className="not-italic text-secondary-foreground/70">
                           {text}
                         </address>
                       ) : (
-                        <span className="text-secondary-foreground/70 flex-1 transition">
-                          {text}
-                        </span>
+                        <span className="text-secondary-foreground/70">{text}</span>
                       )}
                     </a>
                   </li>
@@ -195,16 +236,12 @@ export default function Footer4Col() {
           </div>
         </div>
 
-        <div className="mt-12 border-t pt-6">
-          <div className="text-center sm:flex sm:justify-between sm:text-left">
-            <p className="text-sm">
-              <span className="block sm:inline">All rights reserved.</span>
-            </p>
-
-            <p className="text-secondary-foreground/70 mt-4 text-sm transition sm:order-first sm:mt-0">
-              &copy; 2025 {data.company.name}
-            </p>
-          </div>
+        {/* BOTTOM */}
+        <div className="mt-12 border-t pt-6 text-center sm:flex sm:justify-between">
+          <p className="text-sm text-secondary-foreground/70">
+            © {new Date().getFullYear()} {data.company.name}
+          </p>
+          <p className="text-sm">All rights reserved.</p>
         </div>
       </div>
     </footer>
