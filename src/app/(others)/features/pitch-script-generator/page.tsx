@@ -4,7 +4,7 @@ import { FileText, Sparkles, Zap, Target, CheckCircle2, ArrowRight, Edit3, Prese
 import { generateSEOMetadata, generateSoftwareApplicationSchema, generateBreadcrumbSchema } from '@/lib/seo';
 
 export const metadata: Metadata = generateSEOMetadata({
-    title: 'Startup Pitch Script Generator | AI Investor Pitch Script Tool - PitchDesk',
+    title: 'Startup Pitch Script Generator | AI Pitch Writing Tool',
     description: 'Generate professional startup pitch scripts with AI. Create compelling investor pitch presentations, funding pitch narratives, and structured pitch documents in minutes with PitchDesk\'s AI pitch writing assistant.',
     canonical: '/features/pitch-script-generator',
     keywords: [
@@ -12,7 +12,9 @@ export const metadata: Metadata = generateSEOMetadata({
         'investor pitch script AI',
         'funding pitch writing assistant',
         'pitch presentation script tool',
-        'automated pitch document creator',
+        'free pitch script template AI',
+        'how to prepare for VC pitch',
+        'pitch deck script writer',
     ],
 });
 

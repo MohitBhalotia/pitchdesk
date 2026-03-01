@@ -4,7 +4,7 @@ import { Users, MessageSquare, Mic, CheckCircle2, Target, Zap, TrendingUp, Shiel
 import { generateSEOMetadata, generateSoftwareApplicationSchema, generateBreadcrumbSchema } from '@/lib/seo';
 
 export const metadata: Metadata = generateSEOMetadata({
-    title: 'Multi-VC Room Simulation | Shark Tank Style AI Pitch Practice - PitchDesk',
+    title: 'Multi-VC Room Simulation | Shark Tank Style AI Pitch Practice',
     description: 'Practice your pitch in a virtual room with multiple AI VCs on screen—Shark Tank style. Get grilled by a panel of investors at once. The most realistic multi-judge pitch simulation for founders.',
     canonical: '/features/multi-vc-simulation',
     keywords: [
@@ -14,6 +14,7 @@ export const metadata: Metadata = generateSEOMetadata({
         'virtual pitch room multiple VCs',
         'AI investor panel simulator',
         'pitch to multiple judges',
+        'multi judge pitch simulation for founders',
     ],
 });
 

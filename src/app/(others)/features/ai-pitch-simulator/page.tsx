@@ -4,7 +4,7 @@ import { MessageSquare, Mic, Target, TrendingUp, CheckCircle2, ArrowRight, Play,
 import { generateSEOMetadata, generateSoftwareApplicationSchema, generateBreadcrumbSchema } from '@/lib/seo';
 
 export const metadata: Metadata = generateSEOMetadata({
-    title: 'Practice Startup Pitch with AI Judges Online | AI Pitch Simulator - PitchDesk',
+    title: 'Practice Startup Pitch with AI Judges Online | AI Pitch Simulator',
     description: 'Simulate real VC meetings with PitchDesk\'s AI pitch simulator. Practice your startup pitch with AI judges online, get realistic Q&A, instant feedback, and improve your fundraising success.',
     canonical: '/features/ai-pitch-simulator',
     keywords: [
@@ -12,8 +12,10 @@ export const metadata: Metadata = generateSEOMetadata({
         'AI shark tank simulator',
         'simulate VC meeting online',
         'interactive pitch simulator',
-        'AI pitch practice',
-        'virtual pitch room',
+        'best AI for startup pitch practice',
+        'how to practice startup pitch online',
+        'pitch deck practice tool',
+        'real-time negotiation simulator',
     ],
 });
 

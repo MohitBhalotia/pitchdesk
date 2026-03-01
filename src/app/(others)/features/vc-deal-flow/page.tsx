@@ -4,7 +4,7 @@ import { BarChart3, Filter, Zap, Database, TrendingUp, CheckCircle2, ArrowRight,
 import { generateSEOMetadata, generateSoftwareApplicationSchema, generateBreadcrumbSchema } from '@/lib/seo';
 
 export const metadata: Metadata = generateSEOMetadata({
-    title: 'VC Deal Flow Automation Software | AI Startup Screening - PitchDesk',
+    title: 'VC Deal Flow Automation Software | AI Startup Screening',
     description: 'Automate startup screening and deal flow management with PitchDesk. AI-powered pitch screening for VCs, automated startup evaluation, and intelligent application management. Scale your deal flow effortlessly.',
     canonical: '/features/vc-deal-flow',
     keywords: [
@@ -13,6 +13,7 @@ export const metadata: Metadata = generateSEOMetadata({
         'automated pitch screening',
         'AI startup evaluation system',
         'deal flow management for VCs',
+        'AI pitch screening for investors',
     ],
 });
 

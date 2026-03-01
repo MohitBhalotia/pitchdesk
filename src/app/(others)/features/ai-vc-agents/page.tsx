@@ -4,7 +4,7 @@ import { Bot, Settings, Zap, Brain, Target, CheckCircle2, ArrowRight, Sparkles }
 import { generateSEOMetadata, generateSoftwareApplicationSchema, generateBreadcrumbSchema } from '@/lib/seo';
 
 export const metadata: Metadata = generateSEOMetadata({
-    title: 'Build AI VC Judge | Custom AI Investor Simulator - PitchDesk',
+    title: 'Build AI VC Judge | Custom AI Investor Simulator',
     description: 'Create personalized AI VC agents with custom evaluation criteria, investment theses, and sector focus. Build AI VC judges for automated startup screening and pitch evaluation. The ultimate customizable VC avatar.',
     canonical: '/features/ai-vc-agents',
     keywords: [
@@ -13,6 +13,7 @@ export const metadata: Metadata = generateSEOMetadata({
         'personalized AI VC agent',
         'custom AI investor avatar',
         'AI VC simulator platform',
+        'automated startup screening AI judge',
     ],
 });
 

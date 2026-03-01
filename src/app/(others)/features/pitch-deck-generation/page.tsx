@@ -4,8 +4,8 @@ import { Presentation, Sparkles, LayoutTemplate, CheckCircle2, FileText, Target,
 import { generateSEOMetadata, generateSoftwareApplicationSchema, generateBreadcrumbSchema } from '@/lib/seo';
 
 export const metadata: Metadata = generateSEOMetadata({
-    title: 'AI Pitch Deck Generator | Create Investor Pitch Decks Online - PitchDesk',
-    description: 'Generate professional startup pitch decks with AI. Create investor-ready slides and presentations like Gamma or Canva. Free AI pitch deck maker for founders—problem, solution, market, traction, and more.',
+    title: 'AI Pitch Deck Generator | Create Investor Pitch Decks Online Free',
+    description: 'Generate professional startup pitch decks with AI. Create investor-ready slides and presentations like Gamma or Canva. Best free AI pitch deck maker and pitchdeck generator for founders—problem, solution, market, traction, and more.',
     canonical: '/features/pitch-deck-generation',
     keywords: [
         'AI pitch deck generator',
@@ -13,7 +13,10 @@ export const metadata: Metadata = generateSEOMetadata({
         'startup pitch deck maker',
         'investor pitch deck template AI',
         'pitch deck presentation generator',
-        'AI slides for startup',
+        'pitchdeck generator',
+        'best pitch deck generator free',
+        'free pitch deck maker online',
+        'best pitchdeck generator',
     ],
 });
 
@@ -90,7 +93,7 @@ export default function PitchDeckGenerationPage() {
                             </p>
 
                             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-6">
-                                Think <strong className="text-foreground">Gamma or Canva for startup pitch decks</strong>: you describe your startup, and AI generates slides you can customize. Export to PDF or PowerPoint and use it for fundraising, accelerators, or demo days. If you search &quot;how to create a pitch deck&quot; or &quot;pitch deck for investors&quot;, you&apos;ll find the same sections everywhere—we automate that structure so you get a <strong className="text-foreground">pitch deck presentation</strong> that looks professional from day one.
+                                Think <strong className="text-foreground">Gamma or Canva for startup pitch decks</strong>: you describe your startup, and AI generates slides you can customize. Export to PDF or PowerPoint and use it for fundraising, accelerators, or demo days. Whether you search &quot;pitchdeck generator&quot;, &quot;best pitch deck generator&quot;, or &quot;how to create a pitch deck&quot;—we automate that structure so you get a <strong className="text-foreground">pitch deck presentation</strong> that looks professional from day one.
                             </p>
 
                             <div className="grid sm:grid-cols-3 gap-4 sm:gap-6 mt-8">

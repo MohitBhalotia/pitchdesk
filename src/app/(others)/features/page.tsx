@@ -18,16 +18,17 @@ import {
 import { generateSEOMetadata, generateBreadcrumbSchema } from '@/lib/seo';
 
 export const metadata: Metadata = generateSEOMetadata({
-    title: 'Features | Best Startup Pitch Practice Tool with AI Feedback - PitchDesk',
+    title: 'Features | Best AI Pitch Practice Tool with Voice Feedback',
     description: 'Explore PitchDesk features: AI pitch simulator, pitch deck generator, multi-VC room simulation, AI co-founder, real-time voice feedback, pitch script generator, competitions, and investment programs. The complete pitch practice software for founders.',
     canonical: '/features',
     keywords: [
         'best startup pitch practice tool',
+        'best AI pitch practice tool',
         'pitch practice software for founders',
-        'AI pitch feedback',
+        'pitch deck practice platform',
         'startup pitch training platform',
-        'VC pitch simulator',
-        'pitch coaching software',
+        'AI pitch practice with voice',
+        'pitchdeck practice platform',
     ],
 });
 
@@ -170,7 +171,7 @@ export default function FeaturesPage() {
                                 href="/about"
                                 className="px-6 sm:px-8 py-3 sm:py-4 bg-secondary text-secondary-foreground rounded-lg font-semibold border border-border hover:bg-accent transition-all duration-300"
                             >
-                                Learn More
+                                About PitchDesk
                             </Link>
                         </div>
                     </div>
@@ -201,7 +202,7 @@ export default function FeaturesPage() {
                                         </p>
 
                                         <div className="flex items-center gap-2 text-primary text-sm font-medium group-hover:gap-3 transition-all">
-                                            Learn more
+                                            Explore Feature
                                             <ArrowRight className="w-4 h-4" />
                                         </div>
                                     </Link>

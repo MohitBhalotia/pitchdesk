@@ -4,7 +4,7 @@ import { Building2, Rocket, Users, Calendar, TrendingUp, CheckCircle2, ArrowRigh
 import { generateSEOMetadata, generateSoftwareApplicationSchema, generateBreadcrumbSchema } from '@/lib/seo';
 
 export const metadata: Metadata = generateSEOMetadata({
-    title: 'Create VC Investment Program | Digital Incubation Platform - PitchDesk',
+    title: 'Create VC Investment Program | Digital Incubation Platform',
     description: 'Launch digital accelerators, incubators, and investment programs on PitchDesk. Manage startup applications, track cohorts, automate selection, and run online accelerator programs effortlessly.',
     canonical: '/features/investment-programs',
     keywords: [
@@ -13,6 +13,7 @@ export const metadata: Metadata = generateSEOMetadata({
         'launch startup accelerator online',
         'manage incubator digitally',
         'online accelerator management software',
+        'startup accelerator management platform',
     ],
 });
 

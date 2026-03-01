@@ -53,6 +53,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
         'investment-programs',
         'ai-vc-agents',
         'pitch-analysis',
+        'pitch-deck-generation',
+        'multi-vc-simulation',
+        'ai-virtual-cofounder',
     ].map((feature) => ({
         url: `${baseUrl}/features/${feature}`,
         lastModified: new Date(),

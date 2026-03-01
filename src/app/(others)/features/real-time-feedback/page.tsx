@@ -4,15 +4,16 @@ import { Mic, Radio, Zap, MessageCircle, TrendingUp, CheckCircle2, ArrowRight, V
 import { generateSEOMetadata, generateSoftwareApplicationSchema, generateBreadcrumbSchema } from '@/lib/seo';
 
 export const metadata: Metadata = generateSEOMetadata({
-    title: 'Voice Based Pitch Practice | Real-Time AI Pitch Coaching - PitchDesk',
+    title: 'Voice-Based Pitch Practice | Real-Time AI Pitch Coaching',
     description: 'Practice pitching out loud with voice-based AI feedback. Get real-time pitch coaching, conversational AI investor responses, and live feedback on delivery, pacing, and confidence. The only interactive pitch simulator with voice.',
     canonical: '/features/real-time-feedback',
     keywords: [
         'voice based pitch practice',
         'conversational AI investor',
         'real-time pitch coaching AI',
+        'speak your pitch to AI',
+        'AI pitch coach for founders',
         'live pitch feedback software',
-        'AI voice judge platform',
     ],
 });
 

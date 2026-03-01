@@ -4,7 +4,7 @@ import { BarChart3, FileText, TrendingUp, Target, CheckCircle2, ArrowRight, Eye,
 import { generateSEOMetadata, generateSoftwareApplicationSchema, generateBreadcrumbSchema } from '@/lib/seo';
 
 export const metadata: Metadata = generateSEOMetadata({
-    title: 'AI Pitch Scoring System | Pitch Transcript Analysis Tool - PitchDesk',
+    title: 'AI Pitch Scoring System | Pitch Transcript Analysis Tool',
     description: 'Get detailed AI pitch scoring and analysis after every pitch. Pitch transcript analysis, scoring rubrics, performance metrics, and actionable improvement tips. AI tool to evaluate startup pitch quality.',
     canonical: '/features/pitch-analysis',
     keywords: [
@@ -13,6 +13,8 @@ export const metadata: Metadata = generateSEOMetadata({
         'automated pitch evaluation',
         'AI tool to evaluate startup pitch',
         'pitch performance scoring software',
+        'AI feedback on my pitch',
+        'pitch refinement AI tool',
     ],
 });
 

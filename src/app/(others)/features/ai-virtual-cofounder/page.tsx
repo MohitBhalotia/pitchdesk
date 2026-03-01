@@ -4,7 +4,7 @@ import { UserPlus, MessageCircle, Lightbulb, CheckCircle2, Target, Sparkles, Tre
 import { generateSEOMetadata, generateSoftwareApplicationSchema, generateBreadcrumbSchema } from '@/lib/seo';
 
 export const metadata: Metadata = generateSEOMetadata({
-    title: 'AI Virtual Co-Founder | Talk to Your AI Partner Daily - PitchDesk',
+    title: 'AI Virtual Co-Founder | Talk to Your AI Partner Daily',
     description: 'Set up your AI virtual co-founder and talk daily. Discuss strategy, ideas, decisions, and execution. Your always-available partner for thinking through startup challenges—solo founders and teams.',
     canonical: '/features/ai-virtual-cofounder',
     keywords: [
@@ -14,6 +14,7 @@ export const metadata: Metadata = generateSEOMetadata({
         'AI business partner founder',
         'solo founder AI assistant',
         'AI strategy partner',
+        'startup sounding board AI',
     ],
 });
 

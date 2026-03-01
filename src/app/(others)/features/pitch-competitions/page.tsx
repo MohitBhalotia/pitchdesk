@@ -4,15 +4,16 @@ import { Trophy, Users, Star, Target, TrendingUp, CheckCircle2, ArrowRight, Awar
 import { generateSEOMetadata, generateSoftwareApplicationSchema, generateBreadcrumbSchema } from '@/lib/seo';
 
 export const metadata: Metadata = generateSEOMetadata({
-    title: 'Online Pitch Competition Platform | Virtual Startup Tournaments - PitchDesk',
+    title: 'Online Pitch Competition Platform | Virtual Startup Tournaments',
     description: 'Join startup pitch competitions, virtual demo days, and funding tournaments on PitchDesk. Host pitch competitions, compete on leaderboards, and get discovered by VCs. The complete pitch competition platform.',
     canonical: '/features/pitch-competitions',
     keywords: [
         'online pitch competition platform',
         'virtual demo day hosting',
-        'startup pitch competition platform',
+        'startup pitch tournament',
         'platform to host startup pitch competition',
         'demo day management software',
+        'virtual startup pitch tournament',
     ],
 });
 
