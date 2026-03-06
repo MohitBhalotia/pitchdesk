@@ -9,9 +9,12 @@ export async function GET(req: Request, context: RouteContext) {
     try {
         await dbConnect();
 
-        // Ensure Agent model is registered
+        // Ensure models are registered for populate
         if (!AgentModel) {
             throw new Error("Agent model not loaded");
+        }
+        if (!UserModel) {
+            throw new Error("User model not loaded");
         }
 
         const { id } = await context.params;
