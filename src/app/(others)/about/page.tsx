@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Target, Users, Rocket, TrendingUp, Building2, Sparkles, ArrowRight } from 'lucide-react';
+import { Target, Users, TrendingUp, Building2, Sparkles, ArrowRight } from 'lucide-react';
 import { generateSEOMetadata, generateOrganizationSchema, generateBreadcrumbSchema } from '@/lib/seo';
 
 export const metadata: Metadata = generateSEOMetadata({
@@ -73,7 +73,7 @@ export default function AboutPage() {
                                 Why PitchDesk Exists
                             </h2>
                             <p className="text-lg sm:text-xl text-muted-foreground">
-                                We're solving the hardest problem founders face: <strong className="text-foreground">getting pitch-ready without wasting investor time</strong>
+                                We&apos;re solving the hardest problem founders face: <strong className="text-foreground">getting pitch-ready without wasting investor time</strong>
                             </p>
                         </div>
 
@@ -94,7 +94,7 @@ export default function AboutPage() {
 
                                     <div className="flex gap-3">
                                         <span className="text-destructive font-bold">→</span>
-                                        <p><strong className="text-foreground">VCs waste time on unprepared pitches.</strong> 90% of pitches don't meet basic standards.</p>
+                                        <p><strong className="text-foreground">VCs waste time on unprepared pitches.</strong> 90% of pitches don&apos;t meet basic standards.</p>
                                     </div>
 
                                     <div className="flex gap-3">

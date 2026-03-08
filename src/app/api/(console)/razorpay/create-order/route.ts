@@ -6,16 +6,16 @@ import dbConnect from "@/lib/db"
 
 export async function POST(req: NextRequest) {
   await dbConnect()
-  try{
+  try {
     const { planId, userId } = await req.json()
 
     const plan = await planModel.findById(planId)
-    
-    if(!plan){
+
+    if (!plan) {
       return NextResponse.json({
-        success:false,
+        success: false,
         message: "plan does not exist"
-      }, {status: 400})
+      }, { status: 400 })
     }
 
     const options = {
@@ -45,9 +45,9 @@ export async function POST(req: NextRequest) {
       key: process.env.RAZOR_KEY_ID
     })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  }catch(error: any){
+  } catch (error: any) {
     console.log(error);
-    
+
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
