@@ -40,41 +40,12 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { name: "Home", href1: "/" },
-  {
-    name: "Features",
-    href1: "/#features",
-    href2: "/community/features",
-    // hasDropdown: true,
-    // dropdownItems: [
-    //   {
-    //     name: "AI Powered VC's",
-    //     href: "#",
-    //     description: "Talk with different Real Persona VC's",
-    //   },
-    //   {
-    //     name: "Personalised Pitches",
-    //     href: "$",
-    //     description: "Get Your Perfect Pitch",
-    //   },
-    //   {
-    //     name: "Pitch Analysis",
-    //     href: "#",
-    //     description: "Detailed Report of Your Pitch",
-    //   },
-    //   {
-    //     name: "Pitch Improvement",
-    //     href: "#",
-    //     description: "Improve Your Existing Pitch",
-    //   },
-    // ],
-  },
-
+  { name: "Features", href1: "/features", href2: "/features" },
   { name: "Competitions", href1: "/competitions" },
   { name: "CrowdFunding", href1: "/community/crowdfunding" },
   { name: "Pricing", href1: "/#pricing", href2: "/payment" },
   { name: "Advisors", href1: "/advisors" },
-  { name: "About", href1: "/meet-the-team" },
-  // { name: "Meet the VCs", href: "/login" },
+  { name: "About", href1: "/about", href2: "/about" },
 ];
 export default function Header1() {
   const { data: session, status } = useSession();
@@ -117,13 +88,12 @@ export default function Header1() {
 
   return (
     <header
-      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
-        isScrolled
+      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${isScrolled
           ? theme === "dark"
             ? "bg-black/80 backdrop-blur shadow-lg"
             : "bg-white/80 backdrop-blur shadow-lg"
           : "bg-transparent"
-      }`}
+        }`}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Top row */}
@@ -157,7 +127,7 @@ export default function Header1() {
                       onMouseLeave={() => setActiveDropdown(null)}
                     >
                       <Link
-                        href={user ? item.href2??item.href1 : item.href1}
+                        href={user ? item.href2 ?? item.href1 : item.href1}
                         onClick={(e) => {
                           if (item.href1.startsWith("#")) {
                             e.preventDefault();
@@ -169,9 +139,8 @@ export default function Header1() {
                         <span>{item.name}</span>
                         {item.hasDropdown && (
                           <ChevronDown
-                            className={`h-4 w-4 transition-transform ${
-                              activeDropdown === item.name ? "rotate-180" : ""
-                            }`}
+                            className={`h-4 w-4 transition-transform ${activeDropdown === item.name ? "rotate-180" : ""
+                              }`}
                           />
                         )}
                       </Link>
@@ -180,11 +149,10 @@ export default function Header1() {
                         <AnimatePresence>
                           {activeDropdown === item.name && (
                             <motion.ul
-                              className={`absolute top-full left-0 mt-2 w-80 rounded-xl border border-border bg-background shadow-xl z-40 ${
-                                item.name === "Solutions"
+                              className={`absolute top-full left-0 mt-2 w-80 rounded-xl border border-border bg-background shadow-xl z-40 ${item.name === "Solutions"
                                   ? "w-[600px] grid grid-cols-2 gap-6 p-6"
                                   : "p-2"
-                              }`}
+                                }`}
                               initial={{ opacity: 0, y: -10 }}
                               animate={{ opacity: 1, y: 0 }}
                               exit={{ opacity: 0, y: -10 }}

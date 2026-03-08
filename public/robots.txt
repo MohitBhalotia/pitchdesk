@@ -1,0 +1,24 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /vc/bots/
+Disallow: /vc/incubations/
+Disallow: /my-pitches/
+Disallow: /payment-history/
+Disallow: /evaluation/
+Disallow: /feedback/
+Disallow: /generated-pitches/
+Disallow: /generate-pitch/
+Disallow: /projection/
+
+# Allow public pages
+Allow: /about
+Allow: /features
+Allow: /competitions
+Allow: /advisors
+Allow: /payment
+Allow: /community
+
+# Sitemap
+Sitemap: https://pitchdesk.in/sitemap.xml
