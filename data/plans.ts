@@ -36,11 +36,11 @@ export const plans: Record<string, Plan> = {
         included: true,
       },
       {
-        text: "Idea Validator VC — evaluate your startup concept before pitching",
+        text: "Idea Validator VC evaluate your startup concept before pitching",
         included: false,
       },
       {
-        text: "Grilling Session — survive tough rapid-fire investor Q&A with Griller VC",
+        text: "Grilling Session survive tough rapid-fire investor Q&A with Griller VC",
         included: false,
       },
       {
@@ -52,12 +52,12 @@ export const plans: Record<string, Plan> = {
         included: true,
       },
       {
-        text: "AI-generated Basic pitch script",
-        included: true,
-      },
-      {
         text: "Pitch improvement suggestions with actionable feedback",
         included: false,
+      },
+      {
+        text: "AI-generated Basic pitch script",
+        included: true,
       },
       {
         text: "Pitch deck creation",
@@ -106,11 +106,11 @@ export const plans: Record<string, Plan> = {
         included: true,
       },
       {
-        text: "Idea Validator VC — evaluate your startup concept before pitching",
+        text: "Idea Validator VC evaluate your startup concept before pitching",
         included: true,
       },
       {
-        text: "Grilling Session — survive tough rapid-fire investor Q&A with Griller VC",
+        text: "Grilling Session survive tough rapid-fire investor Q&A with Griller VC",
         included: false,
       },
       {
@@ -122,15 +122,15 @@ export const plans: Record<string, Plan> = {
         included: true,
       },
       {
+        text: "pitch improvement suggestions with actionable feedback",
+        included: false,
+      },
+      {
         text: "Unlimited advanced AI pitch script generation",
         included: true,
       },
       {
-        text: "AI-powered pitch improvement suggestions with actionable feedback",
-        included: false,
-      },
-      {
-        text: "AI-generated pitch deck creation",
+        text: "pitch deck creation",
         included: false,
       },
       {
@@ -165,7 +165,7 @@ export const plans: Record<string, Plan> = {
     price: 8,
     planId: "68aa8cbf5958f9468e59ca14",
     minutes: 150,
-    description: "Level up your pitch preparation with advanced AI coaching tools",
+    description: "Level up your pitch preparation with advanced AI tools",
     features: [
       {
         text: "150 minutes of live AI pitch practice time",
@@ -176,11 +176,11 @@ export const plans: Record<string, Plan> = {
         included: true,
       },
       {
-        text: "Idea Validator VC — evaluate your startup concept before pitching",
+        text: "Idea Validator VC evaluate your startup concept before pitching",
         included: true,
       },
       {
-        text: "Grilling Session — survive tough rapid-fire investor Q&A with Griller VC",
+        text: "Grilling Session survive tough rapid-fire investor Q&A with Griller VC",
         included: true,
       },
       {
@@ -192,11 +192,11 @@ export const plans: Record<string, Plan> = {
         included: true,
       },
       {
-        text: "Unlimited advanced AI pitch script generation",
+        text: "pitch improvement suggestions with actionable feedback",
         included: true,
       },
       {
-        text: "AI-powered pitch improvement suggestions with actionable feedback",
+        text: "Unlimited advanced AI pitch script generation",
         included: true,
       },
       {
@@ -246,11 +246,11 @@ export const plans: Record<string, Plan> = {
         included: true,
       },
       {
-        text: "Idea Validator VC — evaluate your startup concept before pitching",
+        text: "Idea Validator VC evaluate your startup concept before pitching",
         included: true,
       },
       {
-        text: "Grilling Session — survive tough rapid-fire investor Q&A with Griller VC",
+        text: "Grilling Session survive tough rapid-fire investor Q&A with Griller VC",
         included: true,
       },
       {
@@ -262,11 +262,11 @@ export const plans: Record<string, Plan> = {
         included: true,
       },
       {
-        text: "Unlimited advanced AI pitch script generation",
+        text: "pitch improvement suggestions with actionable feedback",
         included: true,
       },
       {
-        text: "AI-powered pitch improvement suggestions with actionable feedback",
+        text: "Unlimited advanced AI pitch script generation",
         included: true,
       },
       {
@@ -316,11 +316,11 @@ export const plans: Record<string, Plan> = {
         included: true,
       },
       {
-        text: "Idea Validator VC — evaluate your startup concept before pitching",
+        text: "Idea Validator VC evaluate your startup concept before pitching",
         included: true,
       },
       {
-        text: "Grilling Session — survive tough rapid-fire investor Q&A with Griller VC",
+        text: "Grilling Session survive tough rapid-fire investor Q&A with Griller VC",
         included: true,
       },
       {
@@ -332,11 +332,11 @@ export const plans: Record<string, Plan> = {
         included: true,
       },
       {
-        text: "Unlimited  advanced AI pitch script generation",
+        text: "pitch improvement suggestions with actionable feedback",
         included: true,
       },
       {
-        text: "AI-powered pitch improvement suggestions with actionable feedback",
+        text: "Unlimited  advanced AI pitch script generation",
         included: true,
       },
       {
