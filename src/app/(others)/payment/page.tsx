@@ -3,364 +3,270 @@
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-// import NumberFlow from "@number-flow/react";
-import { BadgeCheck, IndianRupee, Sparkles } from "lucide-react";
+import { BadgeCheck, Check, X, DollarSign, Sparkles } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { plans, Plan } from "data/plans";
 
+// ─── Early Bird Config ───────────────────────────────────────────────────────
 const EARLY_BIRD_DISCOUNT = 0.5; // 50% off
-const EARLY_BIRD_EXPIRY = new Date("2025-12-31"); // expires on 5 Nov 2025
+const EARLY_BIRD_EXPIRY = new Date("2025-12-31");
 const isEarlyBirdActive = new Date() < EARLY_BIRD_EXPIRY;
 
-const TIERS = [
-  {
-    id: "mini",
-    name: "mini",
-    planId: "6921acd6d8e375db6e5271f5",
-    // price: {
-    //   monthly: 399,
-    //   yearly: 3000,
-    // },
-    price: 140,
-    description: "Everything you need to refine and perfect your pitch",
-    features: [
-      "30 minutes of comprehensive pitch practice",
-      "Extended Q&A sessions with detailed feedback",
-      "Access to all AI Venture Capitalists",
-      "Advanced pitch analysis with actionable insights",
-      "AI-powered improvement suggestions",
-      "Personalized pitch generation with advanced metrics",
-      "Priority email support",
-      // "Single-user account",
-    ],
-    cta: "Buy Now",
-    // popular: true,
-  },
-  {
-    id: "standard",
-    name: "Standard",
-    planId: "68aa8cbf5958f9468e59ca14",
-    // price: {
-    //   monthly: 399,
-    //   yearly: 3000,
-    // },
-    price: 399,
-    description: "Everything you need to refine and perfect your pitch",
-    features: [
-      "100 minutes of comprehensive pitch practice",
-      "Extended Q&A sessions with detailed feedback",
-      "Access to all AI Venture Capitalists",
-      "Advanced pitch analysis with actionable insights",
-      "AI-powered improvement suggestions",
-      "Personalized pitch generation with advanced metrics",
-      "Priority email support",
-      // "Single-user account",
-    ],
-    cta: "Buy Now",
-    // popular: true,
-  },
-  {
-    id: "pro",
-    name: "Pro",
-    planId: "68aa8cbf5958f9468e59ca15",
-    price: 699,
-    description: "Advanced tools for serious fundraising preparation",
-    features: [
-      "300 minutes of unlimited pitch mastery",
-      "Deep-dive Q&A sessions with expert AI VCs",
-      "Premium access to all AI Venture Capitalists",
-      "Comprehensive pitch analysis with competitor benchmarking",
-      "Advanced personalized pitch generation with more metrics",
-      "Access to crowdfunding platform (coming soon)",
-      "Progress tracking and performance analytics",
-      "Dedicated support within 12 hours",
-      // "Single-user account",
-    ],
-    cta: "Buy Now",
-    popular: true,
-  },
-  {
-    id: "enterprise",
-    name: "Enterprise",
-    planId: "68aa8cbf5958f9468e59ca16",
-    price: 1499,
-    description: "Complete fundraising ecosystem for scaling startups",
-    features: [
-      "600 minutes of comprehensive pitch training",
-      "Strategic Q&A sessions with expert AI VCs",
-      "Premium access to all AI Venture Capitalists",
-      "Comprehensive pitch analysis with competitor benchmarking",
-      "Advanced personalized pitch generation with more metrics",
-      "Access to crowdfunding platform & promotion (Coming soon)",
-      "Connect with real VCs (Coming soon)",
-      "Custom pitch templates and frameworks",
-      "Progress tracking and performance analytics",
-      "Premium customer support",
-      // "Single-user account",
-    ],
-    cta: "Buy Now",
-  },
-];
+// Only show paid plans on the payment page (plans that have a Razorpay planId)
+const PAID_PLANS = Object.values(plans).filter((p) => p.planId);
 
+// ─── PopularBackground ───────────────────────────────────────────────────────
 const PopularBackground = () => (
   <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,119,0.3),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(45,30,220,0.4),rgba(255,255,255,0))] pointer-events-none" />
 );
 
-// const Tab = ({
-//   text,
-//   selected,
-//   setSelected,
-//   discount = false,
-// }: {
-//   text: string;
-//   selected: boolean;
-//   setSelected: (text: string) => void;
-//   discount?: boolean;
-// }) => {
-//   return (
-//     <button
-//       onClick={() => setSelected(text)}
-//       className={cn(
-//         'text-foreground relative w-fit px-4 py-2 text-sm font-semibold capitalize transition-colors',
-//         discount && 'flex items-center justify-center gap-2.5',
-//       )}
-//     >
-//       <span className="relative z-10">{text}</span>
-//       {selected && (
-//         <motion.span
-//           layoutId="tab"
-//           transition={{ type: 'spring', duration: 0.4 }}
-//           className="bg-background absolute inset-0 z-0 rounded-full shadow-sm"
-//         ></motion.span>
-//       )}
-//       {discount && (
-//         <Badge
-//           className={cn(
-//             'relative z-10 bg-gray-100 text-xs whitespace-nowrap text-black shadow-none hover:bg-gray-100',
-//             selected
-//               ? 'bg-[#F3F4F6] hover:bg-[#F3F4F6]'
-//               : 'bg-gray-300 hover:bg-gray-300',
-//           )}
-//         >
-//           Save 35%
-//         </Badge>
-//       )}
-//     </button>
-//   );
-// };
-
+// ─── PricingCard ─────────────────────────────────────────────────────────────
 const PricingCard = ({
-  tier,
+  plan,
   submitPayment,
   loading,
 }: {
-  tier: (typeof TIERS)[0];
+  plan: Plan;
   submitPayment: (planId: string) => void;
   loading: boolean;
 }) => {
-  // const price = tier.price;
-  const isPopular = tier.popular;
+  const isPopular = plan.popular;
+  const discountedPrice =
+    isEarlyBirdActive && plan.price > 0
+      ? plan.price * EARLY_BIRD_DISCOUNT
+      : plan.price;
 
   return (
     <div
       className={cn(
-        "relative flex flex-col gap-8 overflow-hidden rounded-2xl border p-6 shadow",
-        "bg-background text-foreground"
-        // isPopular && 'outline outline-[#eb638a]',
+        "relative flex flex-col gap-6 overflow-hidden rounded-2xl border p-6 shadow transition-all duration-300 hover:shadow-lg",
+        "bg-background text-foreground",
+        isPopular && "ring-2 ring-violet-600/50"
       )}
     >
       {isPopular && <PopularBackground />}
 
-      <h2 className="flex items-center gap-3 text-xl font-medium capitalize">
-        {tier.name}
+      {/* Plan name + Popular badge */}
+      <div className="flex items-center gap-3">
+        <plan.icon className="h-5 w-5 text-muted-foreground" />
+        <h2 className="text-xl font-semibold capitalize">{plan.name}</h2>
         {isPopular && (
-          <Badge className="mt-1 bg-violet-700 px-2 py-1 text-white hover:bg-primary">
-            <Sparkles className="mr-2" /> Most Popular
+          <Badge className="ml-auto bg-violet-700 px-2 py-1 text-white hover:bg-primary">
+            <Sparkles className="mr-1 h-3.5 w-3.5" /> Most Popular
           </Badge>
         )}
-      </h2>
+      </div>
 
-      <div className="relative h-12">
+      {/* Description */}
+      <p className="text-sm text-muted-foreground">{plan.description}</p>
+
+      {/* Price */}
+      <div className="flex flex-col gap-1">
         {isEarlyBirdActive ? (
-          <>
-            <div className="flex items-center gap-2">
-              {tier.id !== "hobby" && (
-                <span className="text-muted-foreground line-through text-lg flex items-center gap-1">
-                  <IndianRupee />
-                  {tier.price}
-                </span>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-muted-foreground line-through text-base flex items-center gap-0.5">
+              <DollarSign className="h-4 w-4" />
+              {plan.price}
+            </span>
+            <span
+              className={cn(
+                "text-3xl font-bold flex items-center gap-0.5",
+                isPopular ? "text-violet-600" : "text-foreground"
               )}
-              <span
-                className={cn(
-                  "text-3xl font-bold flex items-center gap-1",
-                  tier.popular ? "text-primary" : "text-foreground"
-                )}
-              >
-                <IndianRupee />
-                {tier.price * EARLY_BIRD_DISCOUNT}
-              </span>
-            </div>
-          </>
+            >
+              <DollarSign className="h-6 w-6" />
+              {discountedPrice}
+            </span>
+            <Badge
+              variant="outline"
+              className="text-green-700 border-green-300 bg-green-50 text-xs"
+            >
+              50% OFF
+            </Badge>
+          </div>
         ) : (
           <span
             className={cn(
-              "text-3xl font-bold flex items-center gap-1",
-              tier.popular ? "text-primary" : "text-foreground"
+              "text-3xl font-bold flex items-center gap-0.5",
+              isPopular ? "text-violet-600" : "text-foreground"
             )}
           >
-            <IndianRupee />
-            {tier.price}
+            <DollarSign className="h-6 w-6" />
+            {plan.price}
           </span>
         )}
+        <span className="text-xs text-muted-foreground">one-time</span>
       </div>
 
-      <div className="flex-1 space-y-2">
-        <h3 className="text-sm font-medium">{tier.description}</h3>
-        <ul className="space-y-2">
-          {tier.features.map((feature, index) => (
-            <li
-              key={index}
+      {/* Feature list with ✅ / ❌ */}
+      <ul className="flex-1 space-y-2">
+        {plan.features.map((feature, index) => (
+          <li
+            key={index}
+            className={cn(
+              "flex items-start gap-2 text-sm",
+              feature.included
+                ? "text-foreground/80"
+                : "text-muted-foreground/50"
+            )}
+          >
+            <span
               className={cn(
-                "flex items-center gap-2 text-sm font-medium",
-                "text-foreground/60"
+                "flex h-5 w-5 shrink-0 items-center justify-center rounded-full mt-0.5",
+                feature.included
+                  ? isPopular
+                    ? "bg-violet-600/10 text-violet-600"
+                    : "bg-green-500/10 text-green-600"
+                  : "bg-red-500/10 text-red-500"
               )}
             >
-              <BadgeCheck size={16} />
-              {feature}
-            </li>
-          ))}
-        </ul>
-      </div>
+              {feature.included ? (
+                <Check className="h-3 w-3" />
+              ) : (
+                <X className="h-3 w-3" />
+              )}
+            </span>
+            <span className={cn(!feature.included && "line-through")}>
+              {feature.text}
+            </span>
+          </li>
+        ))}
+      </ul>
 
+      {/* CTA Button */}
       <Button
-        className={cn("h-fit w-full rounded-lg")}
-        onClick={() => submitPayment(tier.planId)}
+        className={cn(
+          "h-fit w-full rounded-lg font-medium transition-all duration-300",
+          isPopular
+            ? "bg-violet-700 hover:bg-violet-800 text-white"
+            : ""
+        )}
+        onClick={() => submitPayment(plan.planId!)}
         disabled={loading}
       >
-        {/* {loading ? 'Processing...' : tier.cta} */}
-        {tier.cta}
+        {plan.cta}
       </Button>
     </div>
   );
 };
 
+// ─── PricingSection (Page) ───────────────────────────────────────────────────
 export default function PricingSection() {
   const [loading, setLoading] = useState(false);
   const { data: session, update } = useSession();
   const router = useRouter();
-  // const userId = session?.user?._id;
-  // const userName = session?.user?.fullName || "User";
-  // const userEmail = session?.user?.email || "user@email.com";
 
+  // Load Razorpay checkout script
   useEffect(() => {
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
     script.async = true;
     document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
   }, []);
 
   const handlePayment = async (planId: string) => {
-  if (loading) return;
-  setLoading(true);
+    if (loading) return;
+    setLoading(true);
 
-  try {
-    if (!session || !session.user?._id) {
-      toast.error("Please sign in to continue.");
-      setLoading(false);
-      router.prefetch("/login");
-      setTimeout(() => router.push("/login"), 500);
-      return;
-    }
+    try {
+      if (!session || !session.user?._id) {
+        toast.error("Please sign in to continue.");
+        setLoading(false);
+        router.prefetch("/login");
+        setTimeout(() => router.push("/login"), 500);
+        return;
+      }
 
-    const res = await fetch("/api/razorpay/create-order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ planId, userId: session.user._id }),
-    });
+      const res = await fetch("/api/razorpay/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ planId, userId: session.user._id }),
+      });
 
-    const data = await res.json();
-    if (!data.key || !data.orderId) {
-      toast.error("Failed to initialize payment.");
-      setLoading(false);
-      return;
-    }
+      const data = await res.json();
+      if (!data.key || !data.orderId) {
+        toast.error("Failed to initialize payment.");
+        setLoading(false);
+        return;
+      }
 
-    // Push temporary route so back button works
-    router.push("/payment", { scroll: false });
+      // Push temporary route so back button works
+      router.push("/payment", { scroll: false });
 
-    const options = {
-      key: data.key,
-      amount: data.amount,
-      currency: data.currency,
-      order_id: data.orderId,
-      name: "PitchDesk",
-      description: "Plan Subscription",
-      prefill: {
-        name: session.user.fullName,
-        email: session.user.email,
-      },
-      modal: {
-        ondismiss: function () {
-          toast("Payment cancelled. You can try again anytime.");
-          setLoading(false);
-          router.back(); // Back to previous route
+      const options = {
+        key: data.key,
+        amount: data.amount,
+        currency: data.currency,
+        order_id: data.orderId,
+        name: "PitchDesk",
+        description: "Plan Subscription",
+        prefill: {
+          name: session.user.fullName,
+          email: session.user.email,
         },
-      },
-      handler: async (response: Record<string, string>) => {
-        try {
-          const verifyRes = await fetch("/api/razorpay/payment/verify", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(response),
-          });
-          const verifyData = await verifyRes.json();
+        modal: {
+          ondismiss: function () {
+            toast("Payment cancelled. You can try again anytime.");
+            setLoading(false);
+            router.back();
+          },
+        },
+        handler: async (response: Record<string, string>) => {
+          try {
+            const verifyRes = await fetch("/api/razorpay/payment/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(response),
+            });
+            const verifyData = await verifyRes.json();
 
-          if (verifyData.success) {
-            toast.success("Payment successful! Redirecting...");
-            await new Promise((r) => setTimeout(r, 500));
-            await update();
-            router.replace("/dashboard");
-          } else {
-            toast.error("Payment verification failed.");
-            router.back(); // Back to pricing page
+            if (verifyData.success) {
+              toast.success("Payment successful! Redirecting...");
+              await new Promise((r) => setTimeout(r, 500));
+              await update();
+              router.replace("/dashboard");
+            } else {
+              toast.error("Payment verification failed.");
+              router.back();
+            }
+          } catch (err) {
+            console.error(err);
+            toast.error("Error verifying payment.");
+            router.back();
+          } finally {
+            setLoading(false);
           }
-        } catch (err) {
-          console.error(err);
-          toast.error("Error verifying payment.");
-          router.back();
-        } finally {
-          setLoading(false);
-        }
-      },
-    };
+        },
+      };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rzp = new (window as any).Razorpay(options);
-    rzp.open();
-  } catch (err) {
-    console.error(err);
-    toast.error("Payment error.");
-    setLoading(false);
-  }
-};
-
-
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      console.error(err);
+      toast.error("Payment error.");
+      setLoading(false);
+    }
+  };
 
   return (
     <section className="flex flex-col items-center mt-20 gap-10 py-10 bg-card dark:bg-background">
-      <div className="space-y-7 text-center">
-        <div className="space-y-4 ">
-          <h1 className="text-4xl font-medium md:text-5xl">
-            Plans and Pricing
-          </h1>
-          <p>
-            Choose the plan that best suits your needs and start refining your
-            pitch today.
-          </p>
-        </div>
+      {/* Header */}
+      <div className="space-y-4 text-center">
+        <h1 className="text-4xl font-medium md:text-5xl">Plans and Pricing</h1>
+        <p className="text-muted-foreground max-w-xl mx-auto">
+          Choose the plan that best suits your needs and start refining your
+          pitch today.
+        </p>
       </div>
+
+      {/* Early Bird Banner */}
       {isEarlyBirdActive && (
         <div className="bg-green-50 border border-green-200 text-green-800 rounded-full px-4 py-2 text-sm font-medium flex items-center justify-center gap-2 shadow-sm">
           <Sparkles className="h-4 w-4 text-green-600" />
@@ -372,11 +278,13 @@ export default function PricingSection() {
           !
         </div>
       )}
-      <div className="  grid w-full max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-4">
-        {TIERS.map((tier, i) => (
+
+      {/* Pricing Cards */}
+      <div className="grid w-full max-w-6xl grid-cols-1 gap-6 px-4 sm:grid-cols-2 lg:grid-cols-4">
+        {PAID_PLANS.map((plan) => (
           <PricingCard
-            key={i}
-            tier={tier}
+            key={plan.id}
+            plan={plan}
             submitPayment={handlePayment}
             loading={loading}
           />

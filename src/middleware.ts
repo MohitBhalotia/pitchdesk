@@ -3,6 +3,7 @@ import { getToken } from "next-auth/jwt";
 
 const protectedRoutes = [
   "/dashboard",
+  "/vc",
   "/start-pitch",
   "/start-a-pitch",
   "/generate-pitch",
@@ -63,7 +64,7 @@ export async function middleware(request: NextRequest) {
   ) {
     return NextResponse.redirect(new URL("/signup/step2", request.url));
   }
-  if (!token && protectedRoutes.includes(url.pathname)) {
+  if (!token && (protectedRoutes.includes(url.pathname) || url.pathname.startsWith("/vc/"))) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
   return NextResponse.next();
@@ -77,6 +78,8 @@ export const config = {
     "/payment",
     "/signup/:path*",
     "/dashboard/:path*",
+    "/vc",
+    "/vc/:path*",
     "/start-pitch/:path*",
     "/start-a-pitch",
     "/generate-pitch/:path*",

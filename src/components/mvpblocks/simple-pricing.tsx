@@ -15,19 +15,19 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ArrowRight, Check, IndianRupee, Sparkles } from "lucide-react";
+import { ArrowRight, Check, X, DollarSign, Sparkles } from "lucide-react";
 import { plans } from "data/plans";
 import { useSession } from "next-auth/react";
+
+// 🏷️ Early Bird Offer Setup
+const EARLY_BIRD_DISCOUNT = 0.5; // 50% off
+const EARLY_BIRD_EXPIRY = new Date("2025-12-31");
+const isEarlyBirdActive = new Date() < EARLY_BIRD_EXPIRY;
 
 export default function SimplePricing() {
   const router = useRouter();
   const { data: session } = useSession();
   const user = session?.user;
-
-  // 🏷️ Early Bird Offer Setup
-  const EARLY_BIRD_DISCOUNT = 0.5; // 50% off
-  const EARLY_BIRD_EXPIRY = new Date("2025-12-31"); // expires on 5 Nov 2025
-  const isEarlyBirdActive = new Date() < EARLY_BIRD_EXPIRY;
 
   return (
     <div
@@ -74,7 +74,7 @@ export default function SimplePricing() {
         {isEarlyBirdActive && (
           <div className="bg-green-50 border border-green-200 text-green-800 rounded-full px-4 py-2 text-sm font-medium flex items-center justify-center gap-2 shadow-sm">
             <Sparkles className="h-4 w-4 text-green-600" />
-            Early Bird Offer: Get <b>50% Off</b>on all plans till{" "}
+            Early Bird Offer: Get <b>50% Off</b> on all plans till{" "}
             {EARLY_BIRD_EXPIRY.toLocaleDateString("en-IN", {
               day: "numeric",
               month: "short",
@@ -83,7 +83,7 @@ export default function SimplePricing() {
           </div>
         )}
 
-        <div className="mt-8 grid w-full max-w-6xl grid-cols-1 gap-6 md:grid-cols-3">
+        <div className="mt-8 grid w-full max-w-6xl grid-cols-1 gap-6 md:grid-cols-3 lg:grid-cols-5">
           {Object.values(plans).map((plan, index) => (
             <motion.div
               key={plan.id}
@@ -100,7 +100,7 @@ export default function SimplePricing() {
                     ? "ring-primary/50 dark:shadow-primary/10 shadow-md ring-2"
                     : "hover:border-primary/30",
                   plan.popular &&
-                    "from-primary/[0.03] bg-gradient-to-b to-transparent"
+                  "from-primary/[0.03] bg-gradient-to-b to-transparent"
                 )}
               >
                 {plan.popular && (
@@ -143,7 +143,7 @@ export default function SimplePricing() {
                             <div className="flex items-center gap-2">
                               {plan.id !== "hobby" && (
                                 <span className="text-muted-foreground line-through text-lg flex items-center gap-1">
-                                  <IndianRupee />
+                                  <DollarSign className="h-4 w-4" />
                                   {plan.price}
                                 </span>
                               )}
@@ -155,8 +155,10 @@ export default function SimplePricing() {
                                     : "text-foreground"
                                 )}
                               >
-                                <IndianRupee />
-                                {plan.price * EARLY_BIRD_DISCOUNT}
+                                <DollarSign className="h-6 w-6" />
+                                {plan.price === 0
+                                  ? "Free"
+                                  : plan.price * EARLY_BIRD_DISCOUNT}
                               </span>
                             </div>
                           </>
@@ -167,8 +169,14 @@ export default function SimplePricing() {
                               plan.popular ? "text-primary" : "text-foreground"
                             )}
                           >
-                            <IndianRupee />
-                            {plan.price}
+                            {plan.price === 0 ? (
+                              "Free"
+                            ) : (
+                              <>
+                                <DollarSign className="h-6 w-6" />
+                                {plan.price}
+                              </>
+                            )}
                           </span>
                         )}
                       </div>
@@ -176,33 +184,41 @@ export default function SimplePricing() {
                   </CardDescription>
                 </CardHeader>
 
-                <CardContent className="grid gap-3 pb-6">
-                  {plan.features.map((feature, index) => (
+                <CardContent className="grid gap-2 pb-6">
+                  {plan.features.map((feature, idx) => (
                     <motion.div
-                      key={index}
+                      key={idx}
                       initial={{ opacity: 0, x: -5 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3, delay: 0.5 + index * 0.05 }}
-                      className="flex items-center gap-2 text-sm"
+                      transition={{ duration: 0.3, delay: 0.5 + idx * 0.04 }}
+                      className="flex items-start gap-2 text-sm"
                     >
                       <div
                         className={cn(
-                          "flex h-5 w-5 items-center justify-center rounded-full",
-                          plan.popular
-                            ? "bg-primary/10 text-primary"
-                            : "bg-secondary text-secondary-foreground"
+                          "flex h-5 w-5 shrink-0 items-center justify-center rounded-full mt-0.5",
+                          feature.included
+                            ? plan.popular
+                              ? "bg-primary/10 text-primary"
+                              : "bg-green-500/10 text-green-600"
+                            : "bg-red-500/10 text-red-500"
                         )}
                       >
-                        <Check className="h-3.5 w-3.5" />
+                        {feature.included ? (
+                          <Check className="h-3 w-3" />
+                        ) : (
+                          <X className="h-3 w-3" />
+                        )}
                       </div>
                       <span
-                        className={
-                          plan.popular
-                            ? "text-foreground"
-                            : "text-muted-foreground"
-                        }
+                        className={cn(
+                          feature.included
+                            ? plan.popular
+                              ? "text-foreground"
+                              : "text-muted-foreground"
+                            : "text-muted-foreground/50 line-through"
+                        )}
                       >
-                        {feature}
+                        {feature.text}
                       </span>
                     </motion.div>
                   ))}
@@ -236,7 +252,7 @@ export default function SimplePricing() {
                           : "hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
                       )}
                     >
-                      <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                      <ArrowRight className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                       {plan.cta}
                     </Button>
                   )}
