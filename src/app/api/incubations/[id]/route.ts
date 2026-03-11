@@ -15,7 +15,7 @@ export async function GET(req: Request, context: RouteContext) {
         }
 
         const { id } = await context.params;
-
+ 
         const program = await IncubationProgram.findById(id)
             .populate('vcId', 'fullName profileImage')
             .populate('botId', 'name image description');
