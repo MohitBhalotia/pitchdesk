@@ -110,6 +110,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
         'pitch-deck-generation',
         'multi-vc-simulation',
         'ai-virtual-cofounder',
+        'idea-validator-ai',
+        'founder-community',
+        'cofounder-matching',
+        'founder-crm',
+        'startup-metrics-dashboard',
     ].map((feature) => ({
         url: `${baseUrl}/features/${feature}`,
         lastModified: new Date(),
