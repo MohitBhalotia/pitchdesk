@@ -53,6 +53,21 @@ export async function GET(req: Request) {
                 }
             },
             { $unwind: { path: '$pitchId', preserveNullAndEmptyArrays: true } },
+            // Join PitchEval to get the authoritative TotalScore (already out of 100)
+            {
+                $lookup: {
+                    from: 'pitchevaluations',
+                    localField: 'pitchId._id',
+                    foreignField: 'pitchId',
+                    as: 'pitchEval'
+                }
+            },
+            { $unwind: { path: '$pitchEval', preserveNullAndEmptyArrays: true } },
+            {
+                $addFields: {
+                    score: { $ifNull: ['$pitchEval.scores.TotalScore', '$score'] }
+                }
+            },
         ];
 
         if (status && status !== 'all') {

@@ -89,7 +89,14 @@ export default function VCPitchDetailPage() {
     const fetchData = async () => {
         try {
             const res = await axios.get(`/api/vc/pitches/${id}/details`);
-            setApplication(res.data.application);
+            const appData = res.data.application;
+
+            // Override stale stored score with the authoritative PitchEval TotalScore
+            if (res.data.correctScore != null) {
+                appData.score = res.data.correctScore;
+            }
+
+            setApplication(appData);
             setPitch(res.data.pitch);
             setEvaluation(res.data.evaluation);
         } catch (error) {

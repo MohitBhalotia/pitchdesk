@@ -63,7 +63,8 @@ export async function GET(req: Request, context: RouteContext) {
         return NextResponse.json({
             application: enhancedApplication,
             pitch,
-            evaluation
+            evaluation,
+            correctScore: evaluation?.scores?.TotalScore ?? null
         });
     } catch (error) {
         console.error("Error fetching pitch details:", error);
