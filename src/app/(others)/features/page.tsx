@@ -13,13 +13,17 @@ import {
     Sparkles,
     Presentation,
     Users,
-    UserPlus
+    UserPlus,
+    Lightbulb,
+    Search,
+    Database,
+    LineChart
 } from 'lucide-react';
 import { generateSEOMetadata, generateBreadcrumbSchema } from '@/lib/seo';
 
 export const metadata: Metadata = generateSEOMetadata({
     title: 'Features | Best AI Pitch Practice Tool with Voice Feedback',
-    description: 'Explore PitchDesk features: AI pitch simulator, pitch deck generator, multi-VC room simulation, AI co-founder, real-time voice feedback, pitch script generator, competitions, and investment programs. The complete pitch practice software for founders.',
+    description: 'Explore PitchDesk features: AI pitch simulator, pitch deck generator, multi-VC room simulation, AI co-founder, idea validator, founder community, co-founder matching, investor CRM, and startup metrics dashboard. The complete pitch practice software for founders.',
     canonical: '/features',
     keywords: [
         'best startup pitch practice tool',
@@ -29,6 +33,11 @@ export const metadata: Metadata = generateSEOMetadata({
         'startup pitch training platform',
         'AI pitch practice with voice',
         'pitchdeck practice platform',
+        'startup idea validation tool',
+        'founder community platform',
+        'find a co-founder',
+        'investor CRM for startups',
+        'startup metrics dashboard',
     ],
 });
 
@@ -109,6 +118,41 @@ const features = [
         description: 'Set up your AI co-founder and talk daily. Discuss strategy, ideas, and decisions with a partner that\'s always available.',
         href: '/features/ai-virtual-cofounder',
         keywords: 'AI co-founder for founders',
+    },
+    {
+        icon: Lightbulb,
+        title: 'AI Idea Validator',
+        description: 'Validate your startup idea with AI. Discuss market potential, competition, and business viability before building.',
+        href: '/features/idea-validator-ai',
+        keywords: 'Startup idea validation tool',
+    },
+    {
+        icon: Users,
+        title: 'Founder Community',
+        description: 'Connect with startup founders worldwide. Share experiences, post blogs, discuss challenges, and grow together.',
+        href: '/features/founder-community',
+        keywords: 'Founder networking platform',
+    },
+    {
+        icon: Search,
+        title: 'Co-Founder Matching',
+        description: 'Find your perfect co-founder through smart matching. Connect with complementary founders based on skills and interests.',
+        href: '/features/cofounder-matching',
+        keywords: 'Find a co-founder platform',
+    },
+    {
+        icon: Database,
+        title: 'Founder CRM',
+        description: 'Manage investor relationships like a sales pipeline. Track conversations, store meeting notes, and schedule follow-ups.',
+        href: '/features/founder-crm',
+        keywords: 'Investor CRM for startups',
+    },
+    {
+        icon: LineChart,
+        title: 'Startup Metrics Dashboard',
+        description: 'Track revenue, growth rate, burn rate, runway, and customer acquisition. Generate investor-ready reports automatically.',
+        href: '/features/startup-metrics-dashboard',
+        keywords: 'Startup KPI tracker',
     },
 ];
 

@@ -55,7 +55,7 @@ export async function POST(req: Request, context: RouteContext) {
             founderId: session.user._id,
             pitchId,
             registrationData,
-            score: parseInt(String((evaluation.scores?.TotalScore/145)*100)) || 0,
+            score: evaluation.scores?.TotalScore || 0,
             botFeedback: evaluation.summary || "",
             status: 'pending',
             statusHistory: [{
