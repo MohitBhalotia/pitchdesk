@@ -10,11 +10,11 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com https://vercel.live",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com https://blocks.mvp-subha.me https://i.postimg.cc",
               "font-src 'self'",
-              "connect-src 'self' https://api.deepgram.com wss://api.deepgram.com https://*.vercel-insights.com https://va.vercel-scripts.com https://pitchdesk-backend.vercel.app",
+              "connect-src 'self' https://api.deepgram.com wss://api.deepgram.com https://*.vercel-insights.com https://va.vercel-scripts.com https://pitchdesk-backend.vercel.app https://vercel.live",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",

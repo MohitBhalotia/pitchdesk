@@ -4,14 +4,14 @@
   "mainDocumentUrl": "https://pitchdesk.in/",
   "finalDisplayedUrl": "https://pitchdesk.in/",
   "finalUrl": "https://pitchdesk.in/",
-  "fetchTime": "2026-03-25T20:24:14.630Z",
+  "fetchTime": "2026-03-25T20:45:40.690Z",
   "gatherMode": "navigation",
   "runWarnings": [],
   "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
   "environment": {
     "networkUserAgent": "Mozilla/5.0 (Linux; Android 11; moto g power (2022)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Mobile Safari/537.36",
     "hostUserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
-    "benchmarkIndex": 3296.5,
+    "benchmarkIndex": 2969,
     "credits": {}
   },
   "audits": {
@@ -67,47 +67,14 @@
         ],
         "items": [
           {
-            "source": "network",
-            "description": "Failed to load resource: the server responded with a status of 404 ()",
+            "source": "security",
+            "description": "Loading the script 'https://vercel.live/_next-live/feedback/feedback.js' violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://va.vercel-scripts.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback. The action has been blocked.",
             "sourceLocation": {
               "type": "source-location",
-              "url": "https://pitchdesk.in/site.webmanifest",
+              "url": "https://pitchdesk.in/_next/static/chunks/webpack-7235bef26fe62d32.js",
               "urlProvider": "network",
-              "line": 0,
-              "column": 0
-            }
-          },
-          {
-            "source": "network",
-            "description": "Failed to load resource: the server responded with a status of 404 ()",
-            "sourceLocation": {
-              "type": "source-location",
-              "url": "https://pitchdesk.in/site.webmanifest",
-              "urlProvider": "network",
-              "line": 0,
-              "column": 0
-            }
-          },
-          {
-            "source": "other",
-            "description": "Manifest fetch from https://pitchdesk.in/site.webmanifest failed, code 404",
-            "sourceLocation": {
-              "type": "source-location",
-              "url": "https://pitchdesk.in/",
-              "urlProvider": "network",
-              "line": 0,
-              "column": 0
-            }
-          },
-          {
-            "source": "other",
-            "description": "Manifest fetch from https://pitchdesk.in/site.webmanifest failed, code 404",
-            "sourceLocation": {
-              "type": "source-location",
-              "url": "https://pitchdesk.in/",
-              "urlProvider": "network",
-              "line": 0,
-              "column": 0
+              "line": 1,
+              "column": 418
             }
           }
         ]
@@ -339,8 +306,14 @@
         ],
         "items": [
           {
-            "severity": "High",
-            "description": "No CSP found in enforcement mode"
+            "directive": "script-src",
+            "description": "Host allowlists can frequently be bypassed. Consider using CSP nonces or hashes instead, along with `'strict-dynamic'` if necessary.",
+            "severity": "High"
+          },
+          {
+            "directive": "script-src",
+            "description": "`'unsafe-inline'` allows the execution of unsafe in-page scripts and event handlers. Consider using CSP nonces or hashes to allow scripts individually.",
+            "severity": "High"
           }
         ]
       }
@@ -349,8 +322,8 @@
       "id": "has-hsts",
       "title": "Use a strong HSTS policy",
       "description": "Deployment of the HSTS header significantly reduces the risk of downgrading HTTP connections and eavesdropping attacks. A rollout in stages, starting with a low max-age is recommended. [Learn more about using a strong HSTS policy.](https://developer.chrome.com/docs/lighthouse/best-practices/has-hsts)",
-      "score": 1,
-      "scoreDisplayMode": "informative",
+      "score": null,
+      "scoreDisplayMode": "notApplicable",
       "details": {
         "type": "table",
         "headings": [
@@ -379,26 +352,15 @@
             "label": "Severity"
           }
         ],
-        "items": [
-          {
-            "directive": "includeSubDomains",
-            "description": "No `includeSubDomains` directive found",
-            "severity": "Medium"
-          },
-          {
-            "directive": "preload",
-            "description": "No `preload` directive found",
-            "severity": "Medium"
-          }
-        ]
+        "items": []
       }
     },
     "origin-isolation": {
       "id": "origin-isolation",
       "title": "Ensure proper origin isolation with COOP",
       "description": "The Cross-Origin-Opener-Policy (COOP) can be used to isolate the top-level window from other documents such as pop-ups. [Learn more about deploying the COOP header.](https://web.dev/articles/why-coop-coep#coop)",
-      "score": 1,
-      "scoreDisplayMode": "informative",
+      "score": null,
+      "scoreDisplayMode": "notApplicable",
       "details": {
         "type": "table",
         "headings": [
@@ -427,20 +389,15 @@
             "label": "Severity"
           }
         ],
-        "items": [
-          {
-            "description": "No COOP header found",
-            "severity": "High"
-          }
-        ]
+        "items": []
       }
     },
     "clickjacking-mitigation": {
       "id": "clickjacking-mitigation",
       "title": "Mitigate clickjacking with XFO or CSP",
       "description": "The `X-Frame-Options` (XFO) header or the `frame-ancestors` directive in the `Content-Security-Policy` (CSP) header control where a page can be embedded. These can mitigate clickjacking attacks by blocking some or all sites from embedding the page. [Learn more about mitigating clickjacking](https://developer.chrome.com/docs/lighthouse/best-practices/clickjacking-mitigation).",
-      "score": 1,
-      "scoreDisplayMode": "informative",
+      "score": null,
+      "scoreDisplayMode": "notApplicable",
       "details": {
         "type": "table",
         "headings": [
@@ -461,12 +418,7 @@
             "label": "Severity"
           }
         ],
-        "items": [
-          {
-            "severity": "High",
-            "description": "No frame control policy found"
-          }
-        ]
+        "items": []
       }
     },
     "trusted-types-xss": {
@@ -537,9 +489,9 @@
     },
     "inspector-issues": {
       "id": "inspector-issues",
-      "title": "No issues in the `Issues` panel in Chrome Devtools",
+      "title": "Issues were logged in the `Issues` panel in Chrome Devtools",
       "description": "Issues logged to the `Issues` panel in Chrome Devtools indicate unresolved problems. They can come from network request failures, insufficient security controls, and other browser concerns. Open up the Issues panel in Chrome DevTools for more details on each issue.",
-      "score": 1,
+      "score": 0,
       "scoreDisplayMode": "binary",
       "details": {
         "type": "table",
@@ -554,7 +506,19 @@
             "label": "Issue type"
           }
         ],
-        "items": []
+        "items": [
+          {
+            "issueType": "Content security policy",
+            "subItems": {
+              "type": "subitems",
+              "items": [
+                {
+                  "url": "https://vercel.live/_next-live/feedback/feedback.js"
+                }
+              ]
+            }
+          }
+        ]
       }
     },
     "js-libraries": {
@@ -765,7 +729,7 @@
         }
       ],
       "id": "best-practices",
-      "score": 0.77
+      "score": 0.73
     }
   },
   "categoryGroups": {
@@ -1221,349 +1185,349 @@
   "timing": {
     "entries": [
       {
-        "startTime": 144,
+        "startTime": 153,
         "name": "lh:config",
-        "duration": 131.2,
+        "duration": 140.2,
         "entryType": "measure"
       },
       {
-        "startTime": 145.4,
+        "startTime": 154.1,
         "name": "lh:config:resolveArtifactsToDefns",
-        "duration": 0.9,
+        "duration": 1,
         "entryType": "measure"
       },
       {
-        "startTime": 275.3,
+        "startTime": 293.3,
         "name": "lh:runner:gather",
-        "duration": 6019.2,
+        "duration": 5884.8,
         "entryType": "measure"
       },
       {
-        "startTime": 275.5,
+        "startTime": 293.5,
         "name": "lh:driver:connect",
-        "duration": 12.1,
+        "duration": 11.5,
         "entryType": "measure"
       },
       {
-        "startTime": 287.7,
+        "startTime": 305.3,
         "name": "lh:driver:navigate",
-        "duration": 19.3,
+        "duration": 20.9,
         "entryType": "measure"
       },
       {
-        "startTime": 307.2,
+        "startTime": 326.4,
         "name": "lh:gather:getBenchmarkIndex",
-        "duration": 1016.8,
+        "duration": 1010.8,
         "entryType": "measure"
       },
       {
-        "startTime": 1324.1,
+        "startTime": 1337.3,
         "name": "lh:gather:getVersion",
-        "duration": 0.6,
+        "duration": 0.5,
         "entryType": "measure"
       },
       {
-        "startTime": 1324.9,
+        "startTime": 1338,
         "name": "lh:gather:getDevicePixelRatio",
         "duration": 0.9,
         "entryType": "measure"
       },
       {
-        "startTime": 1326,
+        "startTime": 1339.2,
         "name": "lh:prepare:navigationMode",
-        "duration": 36.5,
+        "duration": 115.9,
         "entryType": "measure"
       },
       {
-        "startTime": 1326.5,
+        "startTime": 1339.7,
         "name": "lh:gather:getVersion",
-        "duration": 0.2,
+        "duration": 0.3,
         "entryType": "measure"
       },
       {
-        "startTime": 1335.1,
+        "startTime": 1349.4,
         "name": "lh:storage:clearDataForOrigin",
-        "duration": 10.3,
+        "duration": 12.6,
         "entryType": "measure"
       },
       {
-        "startTime": 1345.5,
+        "startTime": 1362.2,
         "name": "lh:storage:clearBrowserCaches",
-        "duration": 15.7,
+        "duration": 90.7,
         "entryType": "measure"
       },
       {
-        "startTime": 1361.7,
+        "startTime": 1454.1,
         "name": "lh:gather:prepareThrottlingAndNetwork",
-        "duration": 0.8,
+        "duration": 1,
         "entryType": "measure"
       },
       {
-        "startTime": 1374.7,
+        "startTime": 1462.4,
         "name": "lh:driver:navigate",
-        "duration": 3262.8,
+        "duration": 3076.3,
         "entryType": "measure"
       },
       {
-        "startTime": 4655.7,
+        "startTime": 4559.3,
         "name": "lh:computed:NetworkRecords",
         "duration": 0.9,
         "entryType": "measure"
       },
       {
-        "startTime": 4656.8,
+        "startTime": 4560.4,
         "name": "lh:gather:getArtifact:DevtoolsLog",
         "duration": 0.1,
         "entryType": "measure"
       },
       {
-        "startTime": 4656.9,
+        "startTime": 4560.6,
         "name": "lh:gather:getArtifact:ConsoleMessages",
         "duration": 0,
         "entryType": "measure"
       },
       {
-        "startTime": 4656.9,
+        "startTime": 4560.6,
         "name": "lh:gather:getArtifact:Doctype",
-        "duration": 3.9,
+        "duration": 2.3,
         "entryType": "measure"
       },
       {
-        "startTime": 4660.8,
+        "startTime": 4563,
         "name": "lh:gather:getArtifact:Inputs",
-        "duration": 5.1,
+        "duration": 11.9,
         "entryType": "measure"
       },
       {
-        "startTime": 4665.9,
+        "startTime": 4574.9,
         "name": "lh:gather:getArtifact:ImageElements",
-        "duration": 332.9,
+        "duration": 305.8,
         "entryType": "measure"
       },
       {
-        "startTime": 4998.9,
+        "startTime": 4880.8,
         "name": "lh:gather:getArtifact:InspectorIssues",
         "duration": 0.3,
         "entryType": "measure"
       },
       {
-        "startTime": 4999.2,
+        "startTime": 4881.1,
         "name": "lh:computed:MainResource",
         "duration": 0.1,
         "entryType": "measure"
       },
       {
-        "startTime": 4999.2,
+        "startTime": 4881.1,
         "name": "lh:gather:getArtifact:MainDocumentContent",
         "duration": 2.9,
         "entryType": "measure"
       },
       {
-        "startTime": 5002.1,
+        "startTime": 4884,
         "name": "lh:gather:getArtifact:MetaElements",
-        "duration": 4,
+        "duration": 5.1,
         "entryType": "measure"
       },
       {
-        "startTime": 5006.2,
+        "startTime": 4889.1,
         "name": "lh:gather:getArtifact:NetworkUserAgent",
-        "duration": 0.1,
+        "duration": 0.2,
         "entryType": "measure"
       },
       {
-        "startTime": 5006.3,
+        "startTime": 4889.3,
         "name": "lh:gather:getArtifact:Scripts",
         "duration": 0.2,
         "entryType": "measure"
       },
       {
-        "startTime": 5006.5,
+        "startTime": 4889.5,
         "name": "lh:gather:getArtifact:SourceMaps",
-        "duration": 1.5,
+        "duration": 1.9,
         "entryType": "measure"
       },
       {
-        "startTime": 5008,
+        "startTime": 4891.5,
         "name": "lh:gather:getArtifact:Stacks",
-        "duration": 8.7,
+        "duration": 9.3,
         "entryType": "measure"
       },
       {
-        "startTime": 5008.1,
+        "startTime": 4891.6,
         "name": "lh:gather:collectStacks",
-        "duration": 8.6,
+        "duration": 9.2,
         "entryType": "measure"
       },
       {
-        "startTime": 5016.7,
+        "startTime": 4900.8,
         "name": "lh:gather:getArtifact:ViewportDimensions",
-        "duration": 1.5,
+        "duration": 0.8,
         "entryType": "measure"
       },
       {
-        "startTime": 5018.2,
+        "startTime": 4901.6,
         "name": "lh:gather:getArtifact:FullPageScreenshot",
-        "duration": 1275,
+        "duration": 1271.2,
         "entryType": "measure"
       },
       {
-        "startTime": 6294.6,
-        "name": "lh:runner:audit",
-        "duration": 21.6,
-        "entryType": "measure"
-      },
-      {
-        "startTime": 6294.7,
+        "startTime": 6178.3,
         "name": "lh:runner:auditing",
-        "duration": 21.2,
+        "duration": 25,
         "entryType": "measure"
       },
       {
-        "startTime": 6295.4,
+        "startTime": 6178.3,
+        "name": "lh:runner:audit",
+        "duration": 25.3,
+        "entryType": "measure"
+      },
+      {
+        "startTime": 6179,
         "name": "lh:audit:is-on-https",
-        "duration": 0.9,
+        "duration": 1.1,
         "entryType": "measure"
       },
       {
-        "startTime": 6296.4,
+        "startTime": 6180.1,
         "name": "lh:audit:redirects-http",
-        "duration": 0.4,
+        "duration": 0.6,
         "entryType": "measure"
       },
       {
-        "startTime": 6296.9,
+        "startTime": 6180.8,
         "name": "lh:audit:errors-in-console",
-        "duration": 0.9,
+        "duration": 0.8,
         "entryType": "measure"
       },
       {
-        "startTime": 6297.2,
+        "startTime": 6181,
         "name": "lh:computed:JSBundles",
         "duration": 0.1,
         "entryType": "measure"
       },
       {
-        "startTime": 6298,
+        "startTime": 6181.7,
         "name": "lh:audit:image-aspect-ratio",
-        "duration": 0.7,
+        "duration": 0.8,
         "entryType": "measure"
       },
       {
-        "startTime": 6298.7,
+        "startTime": 6182.6,
         "name": "lh:audit:image-size-responsive",
-        "duration": 0.9,
+        "duration": 1.2,
         "entryType": "measure"
       },
       {
-        "startTime": 6299,
+        "startTime": 6183.1,
         "name": "lh:computed:ImageRecords",
         "duration": 0.2,
         "entryType": "measure"
       },
       {
-        "startTime": 6299.7,
+        "startTime": 6184,
         "name": "lh:audit:deprecations",
         "duration": 1.6,
         "entryType": "measure"
       },
       {
-        "startTime": 6301.4,
+        "startTime": 6185.8,
         "name": "lh:audit:third-party-cookies",
-        "duration": 0.8,
+        "duration": 0.7,
         "entryType": "measure"
       },
       {
-        "startTime": 6302.4,
+        "startTime": 6186.7,
         "name": "lh:audit:valid-source-maps",
-        "duration": 2.4,
+        "duration": 2.5,
         "entryType": "measure"
       },
       {
-        "startTime": 6302.8,
+        "startTime": 6187.1,
         "name": "lh:computed:EntityClassification",
-        "duration": 1.2,
+        "duration": 1.1,
         "entryType": "measure"
       },
       {
-        "startTime": 6304.9,
+        "startTime": 6189.4,
         "name": "lh:audit:csp-xss",
+        "duration": 2.6,
+        "entryType": "measure"
+      },
+      {
+        "startTime": 6192.3,
+        "name": "lh:audit:has-hsts",
         "duration": 0.8,
         "entryType": "measure"
       },
       {
-        "startTime": 6305.8,
-        "name": "lh:audit:has-hsts",
-        "duration": 1,
-        "entryType": "measure"
-      },
-      {
-        "startTime": 6306.9,
+        "startTime": 6193.2,
         "name": "lh:audit:origin-isolation",
         "duration": 0.7,
         "entryType": "measure"
       },
       {
-        "startTime": 6307.8,
+        "startTime": 6194.2,
         "name": "lh:audit:clickjacking-mitigation",
-        "duration": 0.7,
+        "duration": 0.8,
         "entryType": "measure"
       },
       {
-        "startTime": 6308.7,
+        "startTime": 6195.2,
         "name": "lh:audit:trusted-types-xss",
         "duration": 0.9,
         "entryType": "measure"
       },
       {
-        "startTime": 6309.8,
+        "startTime": 6196.3,
         "name": "lh:audit:doctype",
-        "duration": 0.7,
+        "duration": 0.9,
         "entryType": "measure"
       },
       {
-        "startTime": 6310.7,
+        "startTime": 6197.5,
         "name": "lh:audit:charset",
-        "duration": 0.9,
+        "duration": 1.2,
         "entryType": "measure"
       },
       {
-        "startTime": 6311.8,
+        "startTime": 6198.8,
         "name": "lh:audit:geolocation-on-start",
-        "duration": 0.9,
+        "duration": 0.8,
         "entryType": "measure"
       },
       {
-        "startTime": 6312.8,
+        "startTime": 6199.9,
         "name": "lh:audit:inspector-issues",
-        "duration": 0.7,
+        "duration": 0.8,
         "entryType": "measure"
       },
       {
-        "startTime": 6313.7,
+        "startTime": 6200.8,
         "name": "lh:audit:js-libraries",
-        "duration": 0.5,
+        "duration": 0.6,
         "entryType": "measure"
       },
       {
-        "startTime": 6314.4,
+        "startTime": 6201.6,
         "name": "lh:audit:notification-on-start",
         "duration": 0.8,
         "entryType": "measure"
       },
       {
-        "startTime": 6315.3,
+        "startTime": 6202.6,
         "name": "lh:audit:paste-preventing-inputs",
-        "duration": 0.6,
+        "duration": 0.7,
         "entryType": "measure"
       },
       {
-        "startTime": 6315.9,
+        "startTime": 6203.3,
         "name": "lh:runner:generate",
         "duration": 0.3,
         "entryType": "measure"
       }
     ],
-    "total": 6040.8
+    "total": 5910.1
   },
   "i18n": {
     "rendererFormattedStrings": {},
@@ -1692,14 +1656,16 @@
       "core/audits/csp-xss.js | columnSeverity": [
         "audits[csp-xss].details.headings[2].label"
       ],
+      "core/lib/csp-evaluator.js | strictDynamic": [
+        "audits[csp-xss].details.items[0].description"
+      ],
       "core/lib/i18n/i18n.js | itemSeverityHigh": [
         "audits[csp-xss].details.items[0].severity",
-        "audits[origin-isolation].details.items[0].severity",
-        "audits[clickjacking-mitigation].details.items[0].severity",
+        "audits[csp-xss].details.items[1].severity",
         "audits[trusted-types-xss].details.items[0].severity"
       ],
-      "core/audits/csp-xss.js | noCsp": [
-        "audits[csp-xss].details.items[0].description"
+      "core/lib/csp-evaluator.js | unsafeInline": [
+        "audits[csp-xss].details.items[1].description"
       ],
       "core/audits/has-hsts.js | title": [
         "audits[has-hsts].title"
@@ -1713,16 +1679,6 @@
       "core/audits/has-hsts.js | columnSeverity": [
         "audits[has-hsts].details.headings[2].label"
       ],
-      "core/audits/has-hsts.js | noSubdomain": [
-        "audits[has-hsts].details.items[0].description"
-      ],
-      "core/lib/i18n/i18n.js | itemSeverityMedium": [
-        "audits[has-hsts].details.items[0].severity",
-        "audits[has-hsts].details.items[1].severity"
-      ],
-      "core/audits/has-hsts.js | noPreload": [
-        "audits[has-hsts].details.items[1].description"
-      ],
       "core/audits/origin-isolation.js | title": [
         "audits[origin-isolation].title"
       ],
@@ -1735,9 +1691,6 @@
       "core/audits/origin-isolation.js | columnSeverity": [
         "audits[origin-isolation].details.headings[2].label"
       ],
-      "core/audits/origin-isolation.js | noCoop": [
-        "audits[origin-isolation].details.items[0].description"
-      ],
       "core/audits/clickjacking-mitigation.js | title": [
         "audits[clickjacking-mitigation].title"
       ],
@@ -1746,9 +1699,6 @@
       ],
       "core/audits/clickjacking-mitigation.js | columnSeverity": [
         "audits[clickjacking-mitigation].details.headings[1].label"
-      ],
-      "core/audits/clickjacking-mitigation.js | noClickjackingMitigation": [
-        "audits[clickjacking-mitigation].details.items[0].description"
       ],
       "core/audits/trusted-types-xss.js | title": [
         "audits[trusted-types-xss].title"
@@ -1780,7 +1730,7 @@
       "core/audits/dobetterweb/geolocation-on-start.js | description": [
         "audits[geolocation-on-start].description"
       ],
-      "core/audits/dobetterweb/inspector-issues.js | title": [
+      "core/audits/dobetterweb/inspector-issues.js | failureTitle": [
         "audits[inspector-issues].title"
       ],
       "core/audits/dobetterweb/inspector-issues.js | description": [
