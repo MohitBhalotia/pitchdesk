@@ -1,39 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { patients } from "../../../../../data/dummy";
 
 
 
-export const patients = [
-    {
-        id: 1,
-        firstName: "Lisa",
-        lastName: "Brown",
-        dob: "1988-01-25",
-    },
-    {
-        id: 2,
-        firstName: "Michael",
-        lastName: "Davis",
-        dob: "1992-03-15",
-    },
-    {
-        id: 3,
-        firstName: "Emily",
-        lastName: "White",
-        dob: "1995-07-10",
-    },
-    {
-        id: 4,
-        firstName: "David",
-        lastName: "Johnson",
-        dob: "1990-01-13",
-    },
-    {
-        id: 5,
-        firstName: "John",
-        lastName: "Doe",
-        dob: "1990-05-01",
-    },
-]
+
 export async function POST(req: NextRequest) {
     try {
         const { firstName, lastName, dob } = await req.json();

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { patients } from "../patient/route";
+import { patients } from "../../../../../data/dummy";
 
 export async function POST(req: NextRequest) {
     try {
@@ -22,10 +22,10 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ msg: 'endTime must be after startTime' }, { status: 400 });
         }
         await Promise.resolve(new Promise((resolve) => setTimeout(resolve, 2000)));
-        
+
 
         return NextResponse.json({ msg: 'Appointment created successfully' }, { status: 201 });
-        } catch (error) {
-            return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-        }
+    } catch (error) {
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
+}
