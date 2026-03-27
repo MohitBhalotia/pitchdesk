@@ -9,8 +9,8 @@ const resendContactUs = async (
   message: string
 ): Promise<{ id: string } | null | undefined> => {
     const { data, error } = await resend.emails.send({
-          from: 'info@pitchdesk.in', 
-          to: ['ayushajg88@gmail.com'], 
+          from: 'PitchDesk Contact <contact@pitchdesk.in>', 
+          to: ['info@pitchdesk.in'], 
           subject: `New Contact Form Submission from ${name}`,
           react: ContactUsEmail({ 
             fullName: name, 

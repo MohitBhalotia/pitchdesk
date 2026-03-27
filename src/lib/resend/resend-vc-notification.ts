@@ -8,7 +8,7 @@ const resendVCNotification = async (
   vcEmail: string
 ): Promise<{ id: string } | null | undefined> => {
   const { data, error } = await resend.emails.send({
-    from: 'info@pitchdesk.in',
+    from: 'PitchDesk Accounts <accounts@pitchdesk.in>',
     to: 'info@pitchdesk.in', // Admin email
     subject: 'New VC Registration Alert || Pitch Desk',
     react: VCRegistrationNotificationEmail({ vcName, vcEmail }),
