@@ -18,12 +18,24 @@ import { Checkbox } from "@/components/ui/checkbox";
 import signupSchemaStep1 from "@/schemas/signUpSchemaStep1";
 import OAuthButtons from "@/components/oauth-button";
 import Link from "next/link";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { toast } from "sonner";
+import axios, { AxiosError } from "axios";
+import ApiResponse from "@/types/ApiResponse";
+import { Loader2 } from "lucide-react";
 
 function Step1FormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const role = searchParams?.get("role") as "founder" | "vc" | null;
   const redirectUrl = searchParams?.get("redirect");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!role || (role !== "founder" && role !== "vc")) {
+      router.replace("/signup");
+    }
+  }, [role, router]);
 
   const form = useForm({
     resolver: zodResolver(signupSchemaStep1),
@@ -37,19 +49,57 @@ function Step1FormContent() {
   });
 
   const onSubmit = async (data: z.infer<typeof signupSchemaStep1>) => {
-    localStorage.setItem("step1Data", JSON.stringify(data));
-    // Store redirect URL if it exists
-    if (redirectUrl) {
-      localStorage.setItem("signupRedirect", redirectUrl);
+    setIsSubmitting(true);
+    try {
+      const finalPayload = {
+        ...data,
+        role: role,
+        company: "",
+        websiteUrl: "",
+      };
+
+      const res = await axios.post<ApiResponse>("/api/auth/signup", finalPayload);
+      
+      if (res.data.success) {
+        if (role === "vc") {
+          router.push("/verification-pending");
+          toast.success(
+            "Thank you for registering as a Venture Capitalist! Our team will verify your VC account and contact you soon."
+          );
+        } else {
+          // Store redirect URL for after email verification and login
+          if (redirectUrl) {
+            sessionStorage.setItem("postVerifyRedirect", redirectUrl);
+          }
+          router.push("/verify-email?id=" + res.data?.data);
+          toast.success(res.data.message);
+        }
+      }
+    } catch (error) {
+      const axiosError = error as AxiosError<ApiResponse>;
+      toast.error(
+        axiosError.response?.data.message ||
+          "An error occurred while creating your account"
+      );
+    } finally {
+      setIsSubmitting(false);
     }
-    router.push("/signup/step2");
   };
+
+  if (!role) return null;
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <div className="flex flex-col items-center gap-2 text-center my-10">
-          <h1 className="text-3xl font-bold">Create Account</h1>
+          <h1 className="text-3xl font-bold">
+            {role === "founder" ? "Create Founder Account" : "Create Investor Account"}
+          </h1>
+          {/* <p className="text-muted-foreground text-sm">
+            {role === "founder" 
+              ? "Join PitchDesk to refine your pitch and connect with investors." 
+              : "Discover promising startups and manage your investment pipeline."}
+          </p> */}
         </div>
         <div className="space-y-4">
           <FormField
@@ -59,7 +109,7 @@ function Step1FormContent() {
               <FormItem>
                 <FormLabel>Full Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="John Doe" {...field} />
+                  <Input placeholder="John Doe" {...field} disabled={isSubmitting} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -77,6 +127,7 @@ function Step1FormContent() {
                     type="email"
                     placeholder="john@example.com"
                     {...field}
+                    disabled={isSubmitting}
                   />
                 </FormControl>
                 <FormMessage />
@@ -91,7 +142,7 @@ function Step1FormContent() {
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="••••••••" {...field} />
+                  <Input type="password" placeholder="••••••••" {...field} disabled={isSubmitting} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -105,7 +156,7 @@ function Step1FormContent() {
               <FormItem>
                 <FormLabel>Confirm Password</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="••••••••" {...field} />
+                  <Input type="password" placeholder="••••••••" {...field} disabled={isSubmitting} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -122,6 +173,7 @@ function Step1FormContent() {
                     <Checkbox
                       checked={field.value}
                       onCheckedChange={field.onChange}
+                      disabled={isSubmitting}
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
@@ -146,9 +198,16 @@ function Step1FormContent() {
         <Button
           type="submit"
           className="w-full"
-          disabled={!form.watch("privacyPolicy")}
+          disabled={!form.watch("privacyPolicy") || isSubmitting}
         >
-          Continue
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Creating Account...
+            </>
+          ) : (
+            "Create Account"
+          )}
         </Button>
 
         <div className="relative">
@@ -163,7 +222,7 @@ function Step1FormContent() {
         </div>
 
         <div className="space-y-2">
-          <OAuthButtons disabled={!form.watch("privacyPolicy")} />
+          <OAuthButtons disabled={!form.watch("privacyPolicy") || isSubmitting} />
           {!form.watch("privacyPolicy") && (
             <p className="text-xs text-center text-muted-foreground">
               Please accept the Privacy Policy to continue
@@ -180,7 +239,7 @@ function Step1FormContent() {
                   ? `/login?redirect=${encodeURIComponent(redirectUrl)}`
                   : "/login"
               }
-              className="hover:underline"
+              className="hover:underline text-primary font-medium"
             >
               Login
             </Link>
@@ -190,6 +249,7 @@ function Step1FormContent() {
     </Form>
   );
 }
+
 export default function Step1Form() {
   return (
     <Suspense fallback={<div>Loading...</div>}>

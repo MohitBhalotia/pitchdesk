@@ -25,8 +25,8 @@ export async function POST(req: NextRequest){
     }
 
     const companyDoc = await CompanyModel.create({
-      companyName: validatedData.company,
-      websiteUrl: validatedData.websiteUrl,
+      companyName: validatedData.company || "My Company",
+      websiteUrl: validatedData.websiteUrl || "",
     });
 
     // Hash password

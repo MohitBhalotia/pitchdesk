@@ -262,7 +262,7 @@ export default function Header1() {
                     Sign In
                   </Link>
                   <Link
-                    href="/signup/step1"
+                    href="/signup"
                     className="inline-flex items-center space-x-2 rounded-full px-6 py-2.5 font-medium text-white transition-all duration-200 hover:shadow-lg"
                     style={{
                       backgroundImage:
@@ -369,7 +369,7 @@ export default function Header1() {
                     Sign In
                   </Link>
                   <Link
-                    href="/signup/step1"
+                    href="/signup"
                     className="block w-full rounded-lg bg-gradient-to-r from-primary to-blue-800 py-2 text-center font-medium text-white hover:shadow-lg transition"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >

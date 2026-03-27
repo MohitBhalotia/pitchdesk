@@ -16,6 +16,13 @@ export default function OAuthButtons({ disabled = false }: OAuthButtonsProps) {
     if (redirectUrl) {
       sessionStorage.setItem("authRedirect", redirectUrl);
     }
+    
+    // Store role in sessionStorage so it can be used after callback
+    const role = searchParams?.get("role");
+    if (role) {
+      sessionStorage.setItem("authRole", role);
+    }
+    
     signIn("google", { callbackUrl: "/callBack" });
   };
 

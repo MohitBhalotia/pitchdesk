@@ -153,8 +153,8 @@ function LoginFormContent(
             <Link
               href={
                 redirectUrl
-                  ? `/signup/step1?redirect=${encodeURIComponent(redirectUrl)}`
-                  : "/signup/step1"
+                  ? `/signup?redirect=${encodeURIComponent(redirectUrl)}`
+                  : "/signup"
               }
               className="underline underline-offset-4"
             >

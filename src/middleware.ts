@@ -48,21 +48,12 @@ export async function middleware(request: NextRequest) {
 
   if (
     token &&
-    token.signupStep2Done &&
     (url.pathname.startsWith("/login") ||
       url.pathname.startsWith("/signup/step1") ||
       url.pathname.startsWith("/signup/step2") ||
       url.pathname === "/")
   ) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
-  if (
-    token &&
-    !token.signupStep2Done &&
-    (url.pathname.startsWith("/signup/step1") ||
-      protectedRoutes.includes(url.pathname))
-  ) {
-    return NextResponse.redirect(new URL("/signup/step2", request.url));
   }
   if (!token && (protectedRoutes.includes(url.pathname) || url.pathname.startsWith("/vc/"))) {
     return NextResponse.redirect(new URL("/login", request.url));

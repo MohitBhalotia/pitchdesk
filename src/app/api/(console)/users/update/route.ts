@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     }
 
     const companyDoc = await CompanyModel.create({
-        companyName: company,
+        companyName: company || "My Company",
         websiteUrl: websiteUrl || ""
     })
 
@@ -30,7 +30,6 @@ export async function POST(req: Request) {
         await UserModel.findByIdAndUpdate(user._id, {
             role,
             company: companyDoc._id,
-            websiteUrl,
             signupStep2Done: true
         });
     }
@@ -39,7 +38,6 @@ export async function POST(req: Request) {
             isVerified:false,// for vc, not verified bydefault even for signup via google
             role,
             company: companyDoc._id,
-            websiteUrl,
             signupStep2Done: true
         });
     }

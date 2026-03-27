@@ -59,7 +59,7 @@ export default function AppHero() {
 
         <div className="flex flex-col items-start gap-4 sm:flex-row animate-in slide-in-from-bottom-4 duration-500 delay-500">
           <Button
-            onClick={() => router.push("/signup/step1")}
+            onClick={() => router.push("/signup")}
             size="lg"
             className="rounded-full bg-gradient-to-b from-primary/80 to-primary/90 text-white shadow-[0px_2px_0px_0px_rgba(255,255,255,0.3)_inset]"
           >
