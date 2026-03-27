@@ -5,7 +5,31 @@ import {
   VerificationEmailData,
   ForgotPasswordEmailData,
   ContactUsEmailData,
+  VCAdminNotificationEmailData,
 } from "./email-types";
+
+
+export async function sendVCNotificationEmailEvent(
+  vcName: string,
+  vcEmail: string
+): Promise<void> {
+  const emailData: VCAdminNotificationEmailData = {
+    type: "vc_notification",
+    to: "info@pitchdesk.in", // Send to admin
+    vcName,
+    vcEmail,
+  };
+
+  try {
+    await inngest.send({
+      name: "email.send",
+      data: emailData,
+    });
+  } catch (error) {
+    console.error("Failed to queue VC notification email event to Inngest:", error);
+    throw new Error(`Failed to queue VC notification email: ${error instanceof Error ? error.message : "Unknown error"}`);
+  }
+}
 
 
 export async function sendInviteEmailEvent(
@@ -124,6 +148,7 @@ export async function sendBulkEmailEvents(
     | VerificationEmailData
     | ForgotPasswordEmailData
     | ContactUsEmailData
+    | VCAdminNotificationEmailData
   >
 ): Promise<void> {
   try {

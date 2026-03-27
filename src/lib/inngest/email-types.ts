@@ -1,6 +1,6 @@
 // Email event types for Inngest
 
-export type EmailType = "invite" | "verification" | "forgot" | "contact";
+export type EmailType = "invite" | "verification" | "forgot" | "contact" | "vc_notification";
 
 export interface BaseEmailEvent {
   type: EmailType;
@@ -40,9 +40,15 @@ export interface ContactUsEmailData extends BaseEmailEvent {
   message: string;
 }
 
+export interface VCAdminNotificationEmailData extends BaseEmailEvent {
+  type: "vc_notification";
+  vcName: string;
+  vcEmail: string;
+}
+
 export type EmailEventData =
   | InviteEmailData
   | VerificationEmailData
   | ForgotPasswordEmailData
-  | ContactUsEmailData;
-
+  | ContactUsEmailData
+  | VCAdminNotificationEmailData;

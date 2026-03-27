@@ -4,10 +4,15 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Shield, Mail } from "lucide-react";
+import { Shield, Mail, LogOut } from "lucide-react";
+import { signOut } from "next-auth/react";
 
 export default function VerificationPending() {
   const router = useRouter();
+
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: "/" });
+  };
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-background p-4">
@@ -64,13 +69,23 @@ export default function VerificationPending() {
             </div>
           </div>
 
-          <Button 
-            onClick={() => router.push("/")} 
-            variant="outline"
-            className="w-full"
-          >
-            Return to Home
-          </Button>
+          <div className="flex flex-col gap-3">
+            <Button 
+              onClick={() => router.push("/")} 
+              variant="outline"
+              className="w-full"
+            >
+              Return to Home
+            </Button>
+            <Button 
+              onClick={handleLogout} 
+              variant="ghost"
+              className="w-full flex items-center justify-center gap-2 text-muted-foreground hover:text-foreground"
+            >
+              <LogOut className="w-4 h-4" />
+              Logout
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

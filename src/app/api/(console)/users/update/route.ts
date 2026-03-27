@@ -4,6 +4,7 @@ import dbConnect from "@/lib/db";
 import UserModel from "@/models/UserModel";
 import CompanyModel from "@/models/CompanyModel";
 import { createFreeUserPlan } from "@/lib/razorpayUtils";
+import { sendVCNotificationEmailEvent } from "@/lib/inngest/email-helpers";
 
 export async function POST(req: Request) {
     const session = await getServerSession(authOptions)
@@ -34,6 +35,7 @@ export async function POST(req: Request) {
         });
     }
     else if(role==='vc'){
+        await sendVCNotificationEmailEvent(user.fullName, user.email);
         await UserModel.findByIdAndUpdate(user._id, {
             isVerified:false,// for vc, not verified bydefault even for signup via google
             role,

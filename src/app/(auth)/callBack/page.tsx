@@ -30,6 +30,13 @@ export default function CallBackPage() {
             await update();
             sessionStorage.removeItem("authRole");
             
+            if (storedRole === "vc") {
+              // For VC, redirect to verification pending even after Google signup
+              toast.success("Registration successful! Your VC account is pending verification.");
+              window.location.replace("/verification-pending");
+              return;
+            }
+
             const storedRedirect = sessionStorage.getItem("authRedirect");
             if (storedRedirect) {
               sessionStorage.removeItem("authRedirect");

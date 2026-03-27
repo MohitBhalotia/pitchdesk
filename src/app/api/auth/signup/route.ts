@@ -5,7 +5,7 @@ import CompanyModel from "@/models/CompanyModel";
 import bcrypt from "bcryptjs";
 import signupSchema from "@/schemas/signUpSchema";
 import { z } from "zod";
-import { sendVerificationEmailEvent } from "@/lib/inngest/email-helpers";
+import { sendVerificationEmailEvent, sendVCNotificationEmailEvent } from "@/lib/inngest/email-helpers";
 import { createFreeUserPlan } from "@/lib/razorpayUtils";
 export async function POST(req: NextRequest){
   await dbConnect();
@@ -55,6 +55,9 @@ export async function POST(req: NextRequest){
       await createFreeUserPlan(user._id.toString());
       // Send verification email via Inngest queue
       await sendVerificationEmailEvent(user.verificationCode, user.fullName, user.email, user._id.toString());
+    } else if (user.role === "vc") {
+      // Send notification to admin for new VC registration
+      await sendVCNotificationEmailEvent(user.fullName, user.email);
     }
 
 

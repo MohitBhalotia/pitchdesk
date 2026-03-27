@@ -10,6 +10,7 @@ import resendInviteTeamMember from "@/lib/resend/resend-invite";
 import resendVerify from "@/lib/resend/resend-verification";
 import resendForgot from "@/lib/resend/resend-forgot";
 import resendContactUs from "@/lib/resend/resend-contactUs";
+import resendVCNotification from "@/lib/resend/resend-vc-notification";
 import IncubationParticipant from "@/models/IncubationParticipant";
 
 export const updatePitch = inngest.createFunction(
@@ -241,6 +242,14 @@ export const sendEmail = inngest.createFunction(
               emailData.name,
               emailData.email,
               emailData.message
+            );
+            break;
+          }
+
+          case "vc_notification": {
+            emailResult = await resendVCNotification(
+              emailData.vcName,
+              emailData.vcEmail
             );
             break;
           }

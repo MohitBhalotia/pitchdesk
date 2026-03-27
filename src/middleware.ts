@@ -55,6 +55,12 @@ export async function middleware(request: NextRequest) {
   ) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
+
+  // Check for unverified VC
+  if (token && token.role === "vc" && !token.isVerified && !url.pathname.startsWith("/verification-pending")) {
+    return NextResponse.redirect(new URL("/verification-pending", request.url));
+  }
+
   if (!token && (protectedRoutes.includes(url.pathname) || url.pathname.startsWith("/vc/"))) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
