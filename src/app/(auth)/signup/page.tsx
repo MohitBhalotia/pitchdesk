@@ -4,12 +4,49 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { User, Briefcase } from "lucide-react";
+import { User, Briefcase, Loader2 } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { useState } from "react";
+import axios from "axios";
+import { toast } from "sonner";
 
 export default function SignupRoleSelection() {
   const router = useRouter();
+  const { data: session, status, update } = useSession();
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleRoleSelect = (role: "founder" | "vc") => {
+  const handleRoleSelect = async (role: "founder" | "vc") => {
+    // If user is already authenticated but missing role selection (e.g. from direct Google login)
+    if (status === "authenticated" && !session?.user?.signupStep2Done) {
+      setIsProcessing(true);
+      try {
+        const res = await axios.post("/api/users/update", {
+          role,
+          company: "",
+          websiteUrl: "",
+        });
+
+        if (res.status === 200) {
+          await update(); // Refresh session data
+          
+          if (role === "vc") {
+            toast.success("Registration successful! Your account is pending verification.");
+            window.location.replace("/verification-pending");
+          } else {
+            toast.success("Welcome to PitchDesk!");
+            window.location.replace("/dashboard");
+          }
+        }
+      } catch (error) {
+        console.error("Error updating role:", error);
+        toast.error("Failed to update role. Please try again.");
+      } finally {
+        setIsProcessing(false);
+      }
+      return;
+    }
+
+    // Default flow for guest users
     router.push(`/signup/step1?role=${role}`);
   };
 
@@ -38,7 +75,7 @@ export default function SignupRoleSelection() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
           <Card 
-            className="cursor-pointer transition-all hover:ring-2 hover:ring-primary hover:shadow-lg group"
+            className={`cursor-pointer transition-all hover:ring-2 hover:ring-primary hover:shadow-lg group ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}
             onClick={() => handleRoleSelect("founder")}
           >
             <CardHeader className="text-center pb-2">
@@ -51,14 +88,14 @@ export default function SignupRoleSelection() {
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <div className="text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                Sign up as Founder &rarr;
+              <div className="text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign up as Founder →"}
               </div>
             </CardContent>
           </Card>
 
           <Card 
-            className="cursor-pointer transition-all hover:ring-2 hover:ring-primary hover:shadow-lg group"
+            className={`cursor-pointer transition-all hover:ring-2 hover:ring-primary hover:shadow-lg group ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}
             onClick={() => handleRoleSelect("vc")}
           >
             <CardHeader className="text-center pb-2">
@@ -71,21 +108,23 @@ export default function SignupRoleSelection() {
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <div className="text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                Sign up as Investor &rarr;
+              <div className="text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign up as Investor →"}
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <div className="text-center pt-4">
-          <p className="text-sm text-muted-foreground">
-            Already have an account?{" "}
-            <Link href="/login" className="text-primary hover:underline font-medium">
-              Log in
-            </Link>
-          </p>
-        </div>
+        {!session?.user && (
+          <div className="text-center pt-4">
+            <p className="text-sm text-muted-foreground">
+              Already have an account?{" "}
+              <Link href="/login" className="text-primary hover:underline font-medium">
+                Log in
+              </Link>
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

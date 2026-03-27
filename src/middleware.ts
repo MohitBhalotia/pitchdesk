@@ -48,12 +48,26 @@ export async function middleware(request: NextRequest) {
 
   if (
     token &&
+    token.signupStep2Done &&
     (url.pathname.startsWith("/login") ||
+      url.pathname === "/signup" ||
       url.pathname.startsWith("/signup/step1") ||
       url.pathname.startsWith("/signup/step2") ||
       url.pathname === "/")
   ) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  // Redirect to signup if they are logged in but haven't finished setup
+  if (
+    token &&
+    !token.signupStep2Done &&
+    !url.pathname.startsWith("/signup") &&
+    !url.pathname.startsWith("/callBack") &&
+    !url.pathname.startsWith("/api") &&
+    !url.pathname.startsWith("/verification-pending")
+  ) {
+    return NextResponse.redirect(new URL("/signup", request.url));
   }
 
   // Check for unverified VC

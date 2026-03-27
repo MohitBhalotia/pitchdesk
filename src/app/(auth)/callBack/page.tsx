@@ -16,10 +16,17 @@ export default function CallBackPage() {
       if (status === "authenticated" && session?.user && !session.user.signupStep2Done && !processing) {
         setProcessing(true);
         try {
-          const storedRole = sessionStorage.getItem("authRole") || "founder";
+          const storedRole = sessionStorage.getItem("authRole");
+          
+          if (!storedRole) {
+            // No role selected (e.g. user logged in via /login with Google)
+            // Redirect to role selection page
+            router.replace("/signup");
+            return;
+          }
           
           const step2Data = {
-            role: storedRole,
+            role: storedRole as "founder" | "vc",
             company: "",
             websiteUrl: "",
           };

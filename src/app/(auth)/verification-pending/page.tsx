@@ -70,13 +70,13 @@ export default function VerificationPending() {
           </div>
 
           <div className="flex flex-col gap-3">
-            <Button 
+            {/* <Button 
               onClick={() => router.push("/")} 
               variant="outline"
               className="w-full"
             >
               Return to Home
-            </Button>
+            </Button> */}
             <Button 
               onClick={handleLogout} 
               variant="ghost"
