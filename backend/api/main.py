@@ -365,6 +365,7 @@ class TranscriptMessage(BaseModel):
 
 class PitchRequest(BaseModel):
     transcript: List[TranscriptMessage]
+    vc_context: Optional[dict] = None
 
 
 class RefineRequest(BaseModel):
@@ -709,11 +710,30 @@ async def evaluate_pitch(req: PitchRequest):
 
         # Convert transcript to text format - using the correct field names
         transcript_text = "\n".join([f"{m.role}: {m.content}" for m in req.transcript])
-        # logging.info(f"Transcript length: {len(transcript_text)} characters")
-        # logging.info(f"Number of messages: {len(req.transcript)}")
-        # logging.info(
-        #     f"Sample message: role={req.transcript[0].role}, content={req.transcript[0].content[:50]}..."
-        # )
+
+        # Build user content — inject VC context if provided (incubation programs with custom VC bots)
+        user_content = "Analyze the following transcript and return a strict JSON object as defined above:\n\n"
+
+        if req.vc_context:
+            name = req.vc_context.get("name", "")
+            sectors = ", ".join(req.vc_context.get("sectors", [])) or "various sectors"
+            stages = ", ".join(req.vc_context.get("stages", [])) or "all stages"
+            geo = req.vc_context.get("geographic_focus") or ""
+            stage_note = (
+                "At this stage, weight team quality, vision clarity, and early market signal more than unit economics."
+                if any(s in stages for s in ["Pre-seed", "Seed", "Pre-Series A"])
+                else "At this stage, expect demonstrated traction, clear unit economics, and a credible path to profitability."
+            )
+            user_content += f"""[VC EVALUATOR CONTEXT]
+This pitch was conducted with {name}, a VC specializing in {sectors}{f" ({geo})" if geo else ""} at {stages} stage.
+Consider this investment thesis as a fair additional lens:
+- When scoring Business Investability, give modest extra credit if the startup demonstrates strong domain expertise, sector-specific metrics, or competitive understanding in {sectors}
+- In your summary, reflect what this VC would specifically find compelling or concerning given their focus
+- {stage_note}
+All hard caps and scoring mechanics remain fully in effect. This context modestly influences perspective, not objective scoring.
+[END VC CONTEXT]\n\n"""
+
+        user_content += transcript_text
 
         # Call OpenAI API
         completion = client.chat.completions.create(
@@ -722,10 +742,7 @@ async def evaluate_pitch(req: PitchRequest):
             response_format={"type": "json_object"},
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
-                {
-                    "role": "user",
-                    "content": f"Analyze the following transcript and return a strict JSON object as defined above:\n\n{transcript_text}",
-                },
+                {"role": "user", "content": user_content},
             ],
         )
 
@@ -835,29 +852,28 @@ TONE:
 
 
 SYSTEM_PROMPT_OVERVIEW = """
-You are an expert Venture Capital Analyst.
-Your task is to analyze a startup pitch transcript and generate a structured "Pitch Overview".
+You are a senior Venture Capital Analyst preparing a deal brief for an investment partner.
+Analyze the startup pitch transcript and generate a structured Pitch Overview as valid JSON.
 
-You must extract key information into a valid JSON object.
-
-**JSON Structure:**
 {
-  "oneLiner": "A single, impactful sentence describing what the startup does.",
-  "problem": "What pain point are they solving?",
-  "solution": "How does their product/service solve it?",
-  "market": "Target market and industry sector.",
-  "keyMetrics": "Revenue, Users, Growth, etc. (or 'No specific metrics mentioned')",
-  "businessModel": "How they make money.",
-  "ask": "Funding ask and valuation (or 'Not mentioned').",
-  "team": "Founder background or team info (or 'Not mentioned').",
-  "analystTake": "Your 1-2 sentence professional assessment."
+  "oneLiner": "A single punchy sentence: what they do and for whom.",
+  "problem": "The core pain point — specific about who feels it and how acutely.",
+  "solution": "What they built and the key insight that makes it work.",
+  "market": "Target market, industry, and any market size figures mentioned.",
+  "keyMetrics": "All traction: revenue, users, growth, retention, partnerships. If none mentioned: 'No traction data shared.'",
+  "businessModel": "How they make money — pricing, channels, unit economics if mentioned.",
+  "ask": "Funding ask, valuation, and use of funds. If not mentioned: 'Not mentioned.'",
+  "team": "Who they are — backgrounds, domain experience, why them for this problem.",
+  "strengths": ["2-3 genuinely notable things about this startup — specific, not generic cheerleading"],
+  "concerns": ["2-3 key risks, gaps, or red flags a diligent investor must probe"],
+  "analystTake": "2-3 opinionated sentences: overall investment thesis, what stage this startup really is at, and what would need to be true for this to be fundable."
 }
 
-**Rules:**
-- Return ONLY valid JSON.
-- Do not include markdown code blocks (```json).
-- Be concise and professional.
-- Do NOT hallucinate information.
+Rules:
+- Return ONLY valid JSON. No markdown, no code blocks.
+- Be direct and opinionated — this is for a partner, not the founder.
+- Do NOT hallucinate. If data was not shared, say so.
+- strengths and concerns must be arrays of plain strings, each one sentence.
 """
 
 

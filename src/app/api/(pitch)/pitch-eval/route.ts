@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import { PitchEval } from '@/models/PitchEvalModel';
 import Pitch from '@/models/PitchModel';
+import IncubationProgram from '@/models/IncubationProgramModel';
+import Agent from '@/models/AgentModel';
 import dbConnect from '@/lib/db';
 
 interface FastAPIResponse {
@@ -95,11 +97,34 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Fetch VC context for incubation pitches (modestly enriches evaluation perspective)
+    let vc_context = null;
+    if (pitch.incubationId) {
+      try {
+        const program = await IncubationProgram.findById(pitch.incubationId)
+          .populate('botId', 'name sector investmentStage geographicFocus');
+        if (program?.botId) {
+          const agent = program.botId as any;
+          vc_context = {
+            name: agent.name || '',
+            sectors: agent.sector || [],
+            stages: agent.investmentStage || [],
+            geographic_focus: agent.geographicFocus || null,
+          };
+        }
+      } catch {
+        // Non-critical — proceed with generic evaluation if context fetch fails
+      }
+    }
+
     // Send transcript to FastAPI
     const fastAPIResponse = await fetch(`${process.env.FASTAPI_BACKEND}/evaluate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ transcript: conversationHistory }),
+      body: JSON.stringify({
+        transcript: conversationHistory,
+        ...(vc_context && { vc_context }),
+      }),
     });
 
     const contentType = fastAPIResponse.headers.get('content-type');

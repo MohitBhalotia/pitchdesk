@@ -32,6 +32,9 @@ declare global {
     keyMetrics?: string;
     businessModel?: string;
     ask?: string;
+    team?: string;
+    strengths?: string[];
+    concerns?: string[];
     analystTake?: string;
   }
 

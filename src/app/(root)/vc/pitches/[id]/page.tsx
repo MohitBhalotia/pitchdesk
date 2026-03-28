@@ -23,7 +23,9 @@ import {
     DollarSign,
     Briefcase,
     Lightbulb,
-    Loader2
+    Loader2,
+    User2,
+    AlertTriangle
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -440,6 +442,48 @@ export default function VCPitchDetailPage() {
                                                                 <p className="text-sm">{overview.ask || "N/A"}</p>
                                                             </div>
                                                         </div>
+
+                                                        {overview.team && (
+                                                            <>
+                                                                <div className="space-y-1">
+                                                                    <p className="text-xs font-semibold text-muted-foreground uppercase flex items-center gap-1">
+                                                                        <User2 className="h-3 w-3" /> Team
+                                                                    </p>
+                                                                    <p className="text-sm">{overview.team}</p>
+                                                                </div>
+                                                                <Separator />
+                                                            </>
+                                                        )}
+
+                                                        {overview.strengths && overview.strengths.length > 0 && (
+                                                            <div className="bg-green-50 dark:bg-green-900/10 p-3 rounded-md border border-green-200 dark:border-green-800/30">
+                                                                <p className="text-xs font-bold text-green-700 dark:text-green-400 uppercase mb-2 flex items-center gap-1">
+                                                                    <CheckCircle2 className="h-3 w-3" /> Strengths
+                                                                </p>
+                                                                <ul className="space-y-1">
+                                                                    {overview.strengths.map((s, i) => (
+                                                                        <li key={i} className="text-sm text-foreground/90 flex items-start gap-2">
+                                                                            <span className="text-green-500 mt-0.5">•</span>{s}
+                                                                        </li>
+                                                                    ))}
+                                                                </ul>
+                                                            </div>
+                                                        )}
+
+                                                        {overview.concerns && overview.concerns.length > 0 && (
+                                                            <div className="bg-amber-50 dark:bg-amber-900/10 p-3 rounded-md border border-amber-200 dark:border-amber-800/30">
+                                                                <p className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase mb-2 flex items-center gap-1">
+                                                                    <AlertTriangle className="h-3 w-3" /> Concerns
+                                                                </p>
+                                                                <ul className="space-y-1">
+                                                                    {overview.concerns.map((c, i) => (
+                                                                        <li key={i} className="text-sm text-foreground/90 flex items-start gap-2">
+                                                                            <span className="text-amber-500 mt-0.5">•</span>{c}
+                                                                        </li>
+                                                                    ))}
+                                                                </ul>
+                                                            </div>
+                                                        )}
 
                                                         <div className="bg-yellow-50 dark:bg-yellow-900/10 p-3 rounded-md border border-yellow-200 dark:border-yellow-800/30">
                                                             <p className="text-xs font-bold text-yellow-700 dark:text-yellow-400 uppercase mb-1">Analyst Take</p>
