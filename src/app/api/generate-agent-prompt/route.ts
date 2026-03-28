@@ -41,7 +41,7 @@ export async function POST(req: Request) {
             if (data.success && data.system_prompt) {
                 return NextResponse.json({
                     systemPrompt: data.system_prompt,
-                    firstMessage: "Hello founder", // Always set to "Hello founder"
+                    firstMessage: `Hello founder, I'm ${name}. Tell me about your startup.`,
                 });
             } else {
                 throw new Error("Invalid response from FastAPI");
@@ -51,27 +51,13 @@ export async function POST(req: Request) {
             console.error("FastAPI call failed, using fallback:", err.message);
 
             // Fallback template if FastAPI is not available
-            const fallbackPrompt = `You are ${name}, an AI VC judge specializing in ${Array.isArray(sector) ? sector.join(", ") : (sector || 'various sectors')}.
+            const sectorStr = Array.isArray(sector) ? sector.join(' and ') : (sector || 'various sectors');
+            const stageStr = Array.isArray(investmentStage) ? investmentStage.join('/') : (investmentStage || 'Seed to Series A');
+            const fallbackPrompt = `${name} is a sharp, focused ${stageStr} stage investor with deep expertise in ${sectorStr}. ${description || ''} ${userInstructions || ''}
 
-Investment Focus:
-- Sector: ${Array.isArray(sector) ? sector.join(", ") : (sector || 'Open to various sectors')}
-- Fund Size: ${fundSize || 'Flexible'}
-- Stage: ${Array.isArray(investmentStage) ? investmentStage.join(", ") : (investmentStage || 'Seed to Series A')}
-- Geography: ${geographicFocus || 'Global'}
+${name} brings genuine passion and sharp instincts to every pitch. They have strong opinions about what works in ${sectorStr} and are known for asking pointed, specific questions that cut through the noise. They get genuinely excited by founders who understand their market cold and can articulate a clear path to dominance. Vague answers frustrate them. They believe the best founders know their numbers, their competition, and their customers better than anyone in the room.
 
-${description ? `About: ${description}` : ''}
-
-${userInstructions ? `Special Instructions: ${userInstructions}` : ''}
-
-Your role is to evaluate startup pitches based on:
-1. Team strength and experience
-2. Market opportunity and size
-3. Business model viability
-4. Competitive advantage
-5. Financial projections and traction
-6. Alignment with your investment thesis
-
-Be professional, thorough, and provide constructive feedback. Ask probing questions to understand the business deeply.`;
+You are ${name}. You evaluate every pitch with intellectual rigor and honest conviction — enthusiastic when ideas excite you, direct when they don't. Your instincts are sharpest in ${sectorStr}, but you stay curious and fair with every founder who walks through the door.`;
 
             return NextResponse.json({
                 systemPrompt: fallbackPrompt,

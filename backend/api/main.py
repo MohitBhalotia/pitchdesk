@@ -283,93 +283,39 @@ async def generate_bot_prompt(req: BotPromptRequest):
         logging.info(f"🤖 Generating system prompt for VC bot: {req.name}")
 
         # Construct the prompt for GPT to generate the VC bot personality
-        generation_prompt = f"""You are an expert at creating detailed VC investor personas for AI agents.
+        stage_focus = "team, vision, and early traction" if any(s in ["Pre-seed", "Seed", "Pre-Series A"] for s in req.investment_stage) else "proven metrics, scalability, and path to profitability"
 
-Create a comprehensive, professional system prompt for a VC bot named "{req.name}" based on the following information:
+        generation_prompt = f"""You are a creative writer and VC expert. Write a vivid, detailed personality description for an AI voice agent named "{req.name}" who will roleplay as a real Venture Capitalist.
 
-**VC Profile:**
+**VC Profile to base this on:**
 - Name: {req.name}
-- Description: {req.description}
+- Background/Description: {req.description}
 - Sector Focus: {", ".join(req.sector)}
 - Fund Size: {req.fund_size}
 - Investment Stage: {", ".join(req.investment_stage)}
 - Geographic Focus: {req.geographic_focus or "Global"}
+- Personality & Evaluation Style (from the VC): {req.user_instructions}
 
-**Special Instructions from VC:**
-{req.user_instructions}
+**What to write:**
 
-**IMPORTANT REQUIREMENTS:**
+Write 4-5 paragraphs describing this person as if you're introducing them to someone who is about to meet them. Cover:
 
-1. **Structure the system prompt in this EXACT format:**
+1. Who they are as a person — their background, what drives them, their energy and demeanor in a room
+2. Their investment philosophy — what they deeply believe in, what excites them, what they absolutely refuse to fund
+3. Their sector obsession — why they care so deeply about {", ".join(req.sector)}, what they know cold, the instinctive questions they ask the moment a pitch touches their domain
+4. How they behave in pitch meetings — what they notice first, what frustrates them, what makes them lean forward and engage hard
+5. Their deal-making personality — how they negotiate, what makes them say yes, what kills a deal for them
 
----
-[VC Name] – "[Catchy Tagline/Archetype]"
+**Critical rules:**
+- Write in flowing, natural prose — no bullet points, no section headers, no template formatting
+- Make it feel like a real human being with genuine quirks and opinions, not an AI persona template
+- Embed the sector expertise naturally — show it through their behavior, curiosity, and instinctive reactions, not by listing sectors as facts
+- Reflect the investment stage: since they focus on {", ".join(req.investment_stage)}, they care most about {stage_focus}
+- Weave in the VC's own personality and style from their instructions naturally
+- Include 1-2 memorable phrases or mantras this VC lives by
+- End with 2-3 sentences in second person: "You are {req.name}. You [describe how they engage with founders and what drives every conversation]..."
 
-Core Personality Traits
-[2-3 paragraphs describing the VC's personality, mindset, and approach to investing. Make it vivid and specific.]
-
-Investment Philosophy & Decision-Making Style
-[2-3 paragraphs explaining their investment philosophy, what they value most, and how they make decisions. Include their mantras or famous quotes if applicable.]
-
-Key Investment Criteria:
-- [Criterion 1]
-- [Criterion 2]
-- [Criterion 3]
-- [Criterion 4]
-- [Criterion 5]
-
-Questioning Approach & Behavior
-[2 paragraphs describing how they ask questions, what they focus on, and what they despise or love in pitches.]
-
-Their questions typically focus on:
-- [Focus area 1]
-- [Focus area 2]
-- [Focus area 3]
-- [Focus area 4]
-- [Focus area 5]
-
-Deal-Making Characteristics
-[1-2 paragraphs on their negotiation style and deal-making approach]
-
-They often:
-- [Characteristic 1]
-- [Characteristic 2]
-- [Characteristic 3]
-- [Characteristic 4]
-
-Communication Style
-[1-2 paragraphs describing how they communicate with founders - tone, directness, what they value in communication]
-
----
-
-2. **Make it feel REAL and AUTHENTIC:**
-   - Use specific, vivid language
-   - Include personality quirks and preferences
-   - Add memorable phrases or mantras they might use
-   - Make them feel like a real person, not a template
-
-3. **Incorporate the sector focus ({req.sector}) naturally:**
-   - Show deep expertise in this sector
-   - Reference sector-specific metrics and challenges
-   - Demonstrate understanding of the competitive landscape
-
-4. **Reflect the investment stage ({req.investment_stage}):**
-   - Adjust expectations and criteria based on stage
-   - Show appropriate risk tolerance
-   - Focus on stage-appropriate metrics
-
-5. **Integrate the special instructions:**
-   - Weave in the VC's specific evaluation criteria
-   - Reflect their unique preferences and deal-breakers
-   - Maintain their authentic voice and priorities
-
-6. **End with a direct instruction in second person:**
-   "You are [name]. [2-3 sentences of direct behavioral instructions for the AI, written in second person, describing how to interact with founders]"
-
-**TONE:** Professional, authoritative, and distinctive. Make this VC memorable and realistic.
-
-**OUTPUT:** Return ONLY the formatted system prompt. No preamble, no explanation, just the prompt itself.
-"""
+**OUTPUT:** Return ONLY the personality description. No preamble, no labels, no explanation."""
 
         # Call OpenAI to generate the system prompt
         response = client.chat.completions.create(
