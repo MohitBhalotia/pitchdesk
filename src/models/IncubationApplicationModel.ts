@@ -57,18 +57,17 @@ const IncubationApplicationSchema = new Schema<IIncubationApplication>({
         required: true
     },
     registrationData: {
-        startupName: { type: String, required: true },
-        founderName: { type: String, required: true },
-        email: { type: String, required: true },
-        phone: { type: String, required: true },
-        industry: { type: String, required: true },
+        startupName: { type: String },
+        founderName: { type: String },
+        email: { type: String },
+        phone: { type: String },
+        industry: { type: String },
         stage: {
             type: String,
             enum: ['idea', 'mvp', 'early_revenue', 'growth', 'scaling'],
-            required: true
         },
-        teamSize: { type: Number, required: true },
-        description: { type: String, required: true, maxlength: 500 },
+        teamSize: { type: Number },
+        description: { type: String, maxlength: 500 },
         website: { type: String },
         linkedin: { type: String },
         fundingRaised: { type: String }

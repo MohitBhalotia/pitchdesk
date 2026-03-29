@@ -47,8 +47,15 @@ export async function POST(req: Request, context: RouteContext) {
 
         const evalData = await PitchEval.findOne({ pitchId: pitchId });
 
-        const score = evalData?.scores?.TotalScore || 0;
-        const feedback = evalData?.summary || "No specific feedback generated.";
+        if (!evalData) {
+            return NextResponse.json(
+                { error: "Your pitch has not been evaluated yet. Please wait for evaluation to complete before applying." },
+                { status: 400 }
+            );
+        }
+
+        const score = evalData.scores?.TotalScore || 0;
+        const feedback = evalData.summary || "No specific feedback generated.";
 
         const application = await IncubationApplication.create({
             programId,

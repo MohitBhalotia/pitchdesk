@@ -54,6 +54,10 @@ const PitchSchema = new Schema<Pitch>(
         conversationHistory: [
             MessageSchema
         ],
+        endTime: {
+            type: Date,
+            default: null
+        },
         creditsUsed: {
             type: Number,
             default: 0

@@ -715,22 +715,42 @@ async def evaluate_pitch(req: PitchRequest):
         user_content = "Analyze the following transcript and return a strict JSON object as defined above:\n\n"
 
         if req.vc_context:
-            name = req.vc_context.get("name", "")
+            name = req.vc_context.get("name", "Unknown VC")
             sectors = ", ".join(req.vc_context.get("sectors", [])) or "various sectors"
             stages = ", ".join(req.vc_context.get("stages", [])) or "all stages"
             geo = req.vc_context.get("geographic_focus") or ""
+            description = req.vc_context.get("description") or ""
+            user_instructions = req.vc_context.get("user_instructions") or ""
+
             stage_note = (
                 "At this stage, weight team quality, vision clarity, and early market signal more than unit economics."
                 if any(s in stages for s in ["Pre-seed", "Seed", "Pre-Series A"])
                 else "At this stage, expect demonstrated traction, clear unit economics, and a credible path to profitability."
             )
+
+            persona_block = ""
+            if description:
+                persona_block += f"\nVC Background: {description}"
+            if user_instructions:
+                persona_block += f"\nVC Evaluation Style: {user_instructions}"
+
             user_content += f"""[VC EVALUATOR CONTEXT]
-This pitch was conducted with {name}, a VC specializing in {sectors}{f" ({geo})" if geo else ""} at {stages} stage.
-Consider this investment thesis as a fair additional lens:
-- When scoring Business Investability, give modest extra credit if the startup demonstrates strong domain expertise, sector-specific metrics, or competitive understanding in {sectors}
-- In your summary, reflect what this VC would specifically find compelling or concerning given their focus
-- {stage_note}
-All hard caps and scoring mechanics remain fully in effect. This context modestly influences perspective, not objective scoring.
+This pitch was submitted to an investment program run by {name}.
+{name} focuses on: sectors — {sectors}{f", geography — {geo}" if geo else ""}, stages — {stages}.{persona_block}
+{stage_note}
+
+ALIGNMENT ASSESSMENT INSTRUCTIONS:
+1. First, determine whether this startup's sector, stage, and business model fall within {name}'s stated investment thesis (sectors: {sectors}, stages: {stages}{f", geography: {geo}" if geo else ""}).
+
+2. If the startup is OUT OF SCOPE for this VC (wrong sector, wrong stage, or outside geographic focus):
+   - Reduce the Business Investability Subtotal by 3 to 5 points relative to what you would otherwise award (apply within existing hard caps — the result must never exceed the hard-cap ceiling for that pitch).
+   - In the summary, explicitly state the mismatch: which dimension(s) fall outside {name}'s thesis, and why this reduces investability from this VC's perspective.
+
+3. If the startup IS IN SCOPE (sector, stage, and geography align with {name}'s thesis):
+   - Evaluate at full value using standard scoring mechanics — no extra credit, no penalty.
+   - In the summary, note the alignment briefly (1–2 sentences) so {name} sees the fit clearly.
+
+All other hard caps and scoring mechanics remain fully in effect.
 [END VC CONTEXT]\n\n"""
 
         user_content += transcript_text

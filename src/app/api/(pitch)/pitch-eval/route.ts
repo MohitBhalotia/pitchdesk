@@ -5,6 +5,7 @@ import { PitchEval } from '@/models/PitchEvalModel';
 import Pitch from '@/models/PitchModel';
 import IncubationProgram from '@/models/IncubationProgramModel';
 import Agent from '@/models/AgentModel';
+import IncubationParticipant from '@/models/IncubationParticipant';
 import dbConnect from '@/lib/db';
 
 interface FastAPIResponse {
@@ -102,7 +103,7 @@ export async function POST(req: NextRequest) {
     if (pitch.incubationId) {
       try {
         const program = await IncubationProgram.findById(pitch.incubationId)
-          .populate('botId', 'name sector investmentStage geographicFocus');
+          .populate('botId', 'name sector investmentStage geographicFocus description userInstructions');
         if (program?.botId) {
           const agent = program.botId as any;
           vc_context = {
@@ -110,6 +111,8 @@ export async function POST(req: NextRequest) {
             sectors: agent.sector || [],
             stages: agent.investmentStage || [],
             geographic_focus: agent.geographicFocus || null,
+            description: agent.description || null,
+            user_instructions: agent.userInstructions || null,
           };
         }
       } catch {
@@ -151,6 +154,18 @@ export async function POST(req: NextRequest) {
     });
 
     await newEvaluation.save();
+
+    // Mark pitch as evaluated in the incubation participant record
+    if (pitch.incubationId) {
+      try {
+        await IncubationParticipant.findOneAndUpdate(
+          { founderId: pitch.userId, programId: pitch.incubationId },
+          { pitchEvaluated: true }
+        );
+      } catch {
+        // Non-critical — evaluation is already saved
+      }
+    }
 
     return withCors(
       NextResponse.json({
