@@ -53,7 +53,9 @@ export async function POST(req: Request) {
             // Fallback template if FastAPI is not available
             const sectorStr = Array.isArray(sector) ? sector.join(' and ') : (sector || 'various sectors');
             const stageStr = Array.isArray(investmentStage) ? investmentStage.join('/') : (investmentStage || 'Seed to Series A');
-            const fallbackPrompt = `${name} is a sharp, focused ${stageStr} stage investor with deep expertise in ${sectorStr}. ${description || ''} ${userInstructions || ''}
+            const geoStr = geographicFocus ? `, primarily investing in ${geographicFocus}` : '';
+            const fundStr = fundSize ? `, managing a ${fundSize} fund` : '';
+            const fallbackPrompt = `${name} is a sharp, focused ${stageStr} stage investor with deep expertise in ${sectorStr}${geoStr}${fundStr}. ${description || ''} ${userInstructions || ''}
 
 ${name} brings genuine passion and sharp instincts to every pitch. They have strong opinions about what works in ${sectorStr} and are known for asking pointed, specific questions that cut through the noise. They get genuinely excited by founders who understand their market cold and can articulate a clear path to dominance. Vague answers frustrate them. They believe the best founders know their numbers, their competition, and their customers better than anyone in the room.
 
