@@ -475,17 +475,47 @@ export default function IncubationDetailPage() {
                         </CardHeader>
                         <CardContent>
                             {application ? (
-                                <div className="text-center py-4">
-                                    <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-600 mb-4">
-                                        <CheckCircle2 className="h-6 w-6" />
-                                    </div>
-                                    <h3 className="font-bold text-lg">Application Submitted</h3>
-                                    <p className="text-muted-foreground text-sm mt-1 mb-4">
-                                        Status: <span className="font-medium capitalize text-foreground">{application.status}</span>
-                                    </p>
-                                    {/* <Button variant="outline" className="w-full" disabled>
-                                        View Submission
-                                    </Button> */}
+                                <div className="py-2">
+                                    {application.status === 'accepted' ? (
+                                        <div className="text-center py-4">
+                                            <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-green-600 mb-4">
+                                                <CheckCircle2 className="h-7 w-7" />
+                                            </div>
+                                            <h3 className="font-bold text-lg text-green-700 dark:text-green-400">Accepted!</h3>
+                                            <p className="text-sm text-muted-foreground mt-2 mb-4">
+                                                Congratulations! Your application has been accepted into this program. The investment team will be in touch with next steps.
+                                            </p>
+                                            <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 text-sm px-3 py-1">
+                                                Accepted
+                                            </Badge>
+                                        </div>
+                                    ) : application.status === 'rejected' ? (
+                                        <div className="text-center py-4">
+                                            <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-red-500 mb-4">
+                                                <AlertCircle className="h-7 w-7" />
+                                            </div>
+                                            <h3 className="font-bold text-lg text-foreground">Application Not Selected</h3>
+                                            <p className="text-sm text-muted-foreground mt-2 mb-4">
+                                                Thank you for your application. Unfortunately, the investment team has decided not to move forward at this time. Keep building — the right opportunity is ahead.
+                                            </p>
+                                            <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 text-sm px-3 py-1">
+                                                Not Selected
+                                            </Badge>
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-4">
+                                            <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-blue-100 text-blue-600 mb-4">
+                                                <CheckCircle2 className="h-7 w-7" />
+                                            </div>
+                                            <h3 className="font-bold text-lg">Application Submitted</h3>
+                                            <p className="text-sm text-muted-foreground mt-2 mb-4">
+                                                Your application is currently under review by the investment team. We will notify you once a decision has been made.
+                                            </p>
+                                            <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 text-sm px-3 py-1">
+                                                Under Review
+                                            </Badge>
+                                        </div>
+                                    )}
                                 </div>
                             ) : !isRegistered ? (
                                 <div className="space-y-4">

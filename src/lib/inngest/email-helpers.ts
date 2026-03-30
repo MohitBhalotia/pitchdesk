@@ -6,6 +6,8 @@ import {
   ForgotPasswordEmailData,
   ContactUsEmailData,
   VCAdminNotificationEmailData,
+  ApplicationAcceptedEmailData,
+  ApplicationRejectedEmailData,
 } from "./email-types";
 
 
@@ -141,6 +143,64 @@ export async function sendContactUsEmailEvent(
   }
 }
 
+
+export async function sendApplicationAcceptedEmailEvent(
+  founderEmail: string,
+  founderName: string,
+  startupName: string,
+  programName: string,
+  programUrl: string,
+  vcName: string
+): Promise<void> {
+  const emailData: ApplicationAcceptedEmailData = {
+    type: "application_accepted",
+    to: founderEmail,
+    founderName,
+    startupName,
+    programName,
+    programUrl,
+    vcName,
+  };
+
+  try {
+    await inngest.send({
+      name: "email.send",
+      data: emailData,
+    });
+  } catch (error) {
+    console.error("Failed to queue application accepted email event to Inngest:", error);
+    throw new Error(`Failed to queue application accepted email for ${founderEmail}: ${error instanceof Error ? error.message : "Unknown error"}`);
+  }
+}
+
+export async function sendApplicationRejectedEmailEvent(
+  founderEmail: string,
+  founderName: string,
+  startupName: string,
+  programName: string,
+  programUrl: string,
+  vcName: string
+): Promise<void> {
+  const emailData: ApplicationRejectedEmailData = {
+    type: "application_rejected",
+    to: founderEmail,
+    founderName,
+    startupName,
+    programName,
+    programUrl,
+    vcName,
+  };
+
+  try {
+    await inngest.send({
+      name: "email.send",
+      data: emailData,
+    });
+  } catch (error) {
+    console.error("Failed to queue application rejected email event to Inngest:", error);
+    throw new Error(`Failed to queue application rejected email for ${founderEmail}: ${error instanceof Error ? error.message : "Unknown error"}`);
+  }
+}
 
 export async function sendBulkEmailEvents(
   emailEvents: Array<
