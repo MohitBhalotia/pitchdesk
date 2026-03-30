@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import {
     Loader2,
     Search,
-    TrendingUp
+    TrendingUp,
+    Download
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,15 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 interface IApplication {
     _id: string;
@@ -89,13 +99,36 @@ export default function VCPitchReviewPage() {
         }
     };
 
-    const updateStatus = async (id: string, newStatus: string) => {
+    const handleExport = async (status: string) => {
         try {
-            // Optimistically update UI
-            setApplications(prev => prev.map(app =>
-                app._id === id ? { ...app, status: newStatus as IApplication['status'] } : app
-            ));
+            const params = new URLSearchParams({ status });
+            const response = await axios.get(`/api/vc/pitches/export?${params}`, {
+                responseType: 'blob',
+            });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `pitches-${status}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Export failed:", error);
+            toast.error("Export failed. Please try again.");
+        }
+    };
 
+    const updateStatus = async (id: string, newStatus: string, currentStatus: string) => {
+        // Do nothing if clicking the already-active status
+        if (currentStatus === newStatus) return;
+
+        // Optimistically update UI
+        setApplications(prev => prev.map(app =>
+            app._id === id ? { ...app, status: newStatus as IApplication['status'] } : app
+        ));
+
+        try {
             await axios.put(`/api/vc/pitches/${id}`, { action: newStatus });
         } catch (error) {
             console.error("Error updating status:", error);
@@ -138,11 +171,31 @@ export default function VCPitchReviewPage() {
 
     return (
         <div className="container mx-auto p-6 max-w-7xl">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold tracking-tight mb-2">Pitch Reviews</h1>
-                <p className="text-muted-foreground">
-                    Review and manage all pitch submissions across all your investment programs.
-                </p>
+            <div className="mb-8 flex items-start justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight mb-2">Pitch Reviews</h1>
+                    <p className="text-muted-foreground">
+                        Review and manage all pitch submissions across all your investment programs.
+                    </p>
+                </div>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" className="gap-2 shrink-0">
+                            <Download className="h-4 w-4" />
+                            Export CSV
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Export applications</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => handleExport('all')}>All Applications</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleExport('pending')}>Pending</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleExport('wishlist')}>Wishlisted</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleExport('accepted')}>Accepted</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleExport('hold')}>On Hold</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleExport('rejected')}>Rejected</DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
 
             <div className="flex flex-col md:flex-row gap-4 mb-6">
@@ -251,7 +304,7 @@ export default function VCPitchReviewPage() {
                                     className={`w-full text-xs ${app.status === 'wishlist' ? 'bg-purple-600 hover:bg-purple-700 text-white hover:text-white' : 'bg-transparent text-purple-600 border-purple-200 hover:bg-purple-50 hover:text-purple-700'}`}
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        updateStatus(app._id, 'wishlist');
+                                        updateStatus(app._id, 'wishlist', app.status);
                                     }}
                                 >
                                     Wishlist
@@ -262,7 +315,7 @@ export default function VCPitchReviewPage() {
                                     className={`w-full text-xs ${app.status === 'accepted' ? 'bg-green-600 hover:bg-green-700 text-white hover:text-white' : 'bg-transparent text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700'}`}
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        updateStatus(app._id, 'accepted');
+                                        updateStatus(app._id, 'accepted', app.status);
                                     }}
                                 >
                                     Accept
@@ -273,7 +326,7 @@ export default function VCPitchReviewPage() {
                                     className={`w-full text-xs ${app.status === 'hold' ? 'bg-orange-600 hover:bg-orange-700 text-white hover:text-white' : 'bg-transparent text-orange-600 border-orange-200 hover:bg-orange-50 hover:text-orange-700'}`}
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        updateStatus(app._id, 'hold');
+                                        updateStatus(app._id, 'hold', app.status);
                                     }}
                                 >
                                     Hold
@@ -284,7 +337,7 @@ export default function VCPitchReviewPage() {
                                     className={`w-full text-xs ${app.status === 'rejected' ? 'bg-red-600 hover:bg-red-700 text-white hover:text-white' : 'bg-transparent text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700'}`}
                                     onClick={(e) => {
                                         e.stopPropagation();
-                                        updateStatus(app._id, 'rejected');
+                                        updateStatus(app._id, 'rejected', app.status);
                                     }}
                                 >
                                     Reject

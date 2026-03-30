@@ -129,13 +129,18 @@ export default function VCPitchDetailPage() {
     };
 
     const updateStatus = async (newStatus: string) => {
+        // Do nothing if clicking the already-active status
+        if (application?.status === newStatus) return;
+
+        const prevStatus = application?.status;
+        setApplication(prev => prev ? { ...prev, status: newStatus } : prev);
         try {
             await axios.put(`/api/vc/pitches/${id}`, { action: newStatus });
-            toast.success(`Application ${newStatus}!`);
-            fetchData(); // Refresh to get updated status
+            toast.success(`Status updated to ${newStatus}`);
         } catch (error) {
             console.error("Error updating status:", error);
             toast.error("Failed to update status");
+            setApplication(prev => prev ? { ...prev, status: prevStatus ?? '' } : prev);
         }
     };
 

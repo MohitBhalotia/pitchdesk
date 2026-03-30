@@ -11,6 +11,8 @@ import resendVerify from "@/lib/resend/resend-verification";
 import resendForgot from "@/lib/resend/resend-forgot";
 import resendContactUs from "@/lib/resend/resend-contactUs";
 import resendVCNotification from "@/lib/resend/resend-vc-notification";
+import resendApplicationAccepted from "@/lib/resend/resend-application-accepted";
+import resendApplicationRejected from "@/lib/resend/resend-application-rejected";
 import IncubationParticipant from "@/models/IncubationParticipant";
 
 export const updatePitch = inngest.createFunction(
@@ -250,6 +252,30 @@ export const sendEmail = inngest.createFunction(
             emailResult = await resendVCNotification(
               emailData.vcName,
               emailData.vcEmail
+            );
+            break;
+          }
+
+          case "application_accepted": {
+            emailResult = await resendApplicationAccepted(
+              emailData.to,
+              emailData.founderName,
+              emailData.startupName,
+              emailData.programName,
+              emailData.programUrl,
+              emailData.vcName
+            );
+            break;
+          }
+
+          case "application_rejected": {
+            emailResult = await resendApplicationRejected(
+              emailData.to,
+              emailData.founderName,
+              emailData.startupName,
+              emailData.programName,
+              emailData.programUrl,
+              emailData.vcName
             );
             break;
           }

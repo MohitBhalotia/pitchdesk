@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft, Loader2, FileText, Calendar, TrendingUp, Mail, Phone, Building2, Users as UsersIcon, Clock } from "lucide-react";
+import { ArrowLeft, Loader2, FileText, Calendar, TrendingUp, Mail, Phone, Building2, Users as UsersIcon, Clock, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -34,6 +34,14 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
@@ -98,17 +106,45 @@ export default function ApplicationsPage() {
         }
     };
 
-    const updateApplicationStatus = async (applicationId: string, newStatus: string) => {
+    const updateApplicationStatus = async (applicationId: string, newStatus: string, currentStatus: string) => {
+        // Do nothing if clicking the already-active status
+        if (currentStatus === newStatus) return;
+
+        // Optimistic update — instantly reflect in UI
+        setApplications(prev =>
+            prev.map(app => app._id === applicationId ? { ...app, status: newStatus } : app)
+        );
         try {
             await axios.patch(`/api/vc/incubations/${id}/applications`, {
                 applicationId,
                 status: newStatus,
             });
-            toast.success("Status updated successfully");
-            fetchApplications();
+            toast.success("Status updated");
         } catch (error) {
             console.error("Error updating status:", error);
             toast.error("Failed to update status");
+            // Revert on error
+            fetchApplications();
+        }
+    };
+
+    const handleExport = async (status: string) => {
+        try {
+            const params = new URLSearchParams({ status, programId: id as string });
+            const response = await axios.get(`/api/vc/pitches/export?${params}`, {
+                responseType: 'blob',
+            });
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `applications-${status}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Export failed:", error);
+            toast.error("Export failed. Please try again.");
         }
     };
 
@@ -177,11 +213,31 @@ export default function ApplicationsPage() {
                 Back to Program
             </Button>
 
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold tracking-tight">Applications</h1>
-                <p className="text-muted-foreground mt-1">
-                    Review and manage applications for this investment program
-                </p>
+            <div className="mb-8 flex items-start justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Applications</h1>
+                    <p className="text-muted-foreground mt-1">
+                        Review and manage applications for this investment program
+                    </p>
+                </div>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" className="gap-2 shrink-0">
+                            <Download className="h-4 w-4" />
+                            Export CSV
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Export applications</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => handleExport('all')}>All Applications</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleExport('pending')}>Pending</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleExport('wishlist')}>Wishlisted</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleExport('accepted')}>Accepted</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleExport('hold')}>On Hold</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleExport('rejected')}>Rejected</DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
 
             {/* Stats */}
@@ -567,7 +623,7 @@ export default function ApplicationsPage() {
                                                     variant={application.status === "wishlist" ? "default" : "outline"}
                                                     size="sm"
                                                     className={application.status === "wishlist" ? "bg-purple-600 hover:bg-purple-700 text-white hover:text-white" : "bg-transparent text-purple-600 border-purple-300 hover:bg-purple-50 hover:text-purple-700"}
-                                                    onClick={() => updateApplicationStatus(application._id, "wishlist")}
+                                                    onClick={() => updateApplicationStatus(application._id, "wishlist", application.status)}
                                                 >
                                                     Wishlist
                                                 </Button>
@@ -575,7 +631,7 @@ export default function ApplicationsPage() {
                                                     variant={application.status === "hold" ? "default" : "outline"}
                                                     size="sm"
                                                     className={application.status === "hold" ? "bg-orange-600 hover:bg-orange-700 text-white hover:text-white" : "bg-transparent text-orange-600 border-orange-300 hover:bg-orange-50 hover:text-orange-700"}
-                                                    onClick={() => updateApplicationStatus(application._id, "hold")}
+                                                    onClick={() => updateApplicationStatus(application._id, "hold", application.status)}
                                                 >
                                                     Hold
                                                 </Button>
@@ -583,7 +639,7 @@ export default function ApplicationsPage() {
                                                     variant={application.status === "accepted" ? "default" : "outline"}
                                                     size="sm"
                                                     className={application.status === "accepted" ? "bg-green-600 hover:bg-green-700 text-white hover:text-white" : "bg-transparent text-green-600 border-green-300 hover:bg-green-50 hover:text-green-700"}
-                                                    onClick={() => updateApplicationStatus(application._id, "accepted")}
+                                                    onClick={() => updateApplicationStatus(application._id, "accepted", application.status)}
                                                 >
                                                     Accept
                                                 </Button>
@@ -591,7 +647,7 @@ export default function ApplicationsPage() {
                                                     variant={application.status === "rejected" ? "default" : "outline"}
                                                     size="sm"
                                                     className={application.status === "rejected" ? "bg-red-600 hover:bg-red-700 text-white hover:text-white" : "bg-transparent text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700"}
-                                                    onClick={() => updateApplicationStatus(application._id, "rejected")}
+                                                    onClick={() => updateApplicationStatus(application._id, "rejected", application.status)}
                                                 >
                                                     Reject
                                                 </Button>
