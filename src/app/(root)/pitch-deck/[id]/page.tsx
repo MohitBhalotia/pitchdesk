@@ -221,7 +221,14 @@ export default function DeckEditorPage() {
   );
 
   const handleSlideContentChange = useCallback(
-    (field: string, value: string | string[]) => {
+    (
+      field: string,
+      value:
+        | string
+        | string[]
+        | Array<{ label: string; value: string }>
+        | Array<{ name: string; role: string; bio: string }>
+    ) => {
       updateDeck((prev) => {
         const newSlides = [...prev.slides];
         newSlides[activeSlideIndex] = {

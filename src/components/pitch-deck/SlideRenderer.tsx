@@ -19,7 +19,14 @@ interface SlideRendererProps {
   };
   templateId: string;
   isEditing?: boolean;
-  onContentChange?: (field: string, value: string | string[]) => void;
+  onContentChange?: (
+    field: string,
+    value:
+      | string
+      | string[]
+      | Array<{ label: string; value: string }>
+      | Array<{ name: string; role: string; bio: string }>
+  ) => void;
   className?: string;
   onClick?: () => void;
   slideRef?: React.Ref<HTMLDivElement>;

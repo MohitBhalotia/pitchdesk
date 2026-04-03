@@ -7,7 +7,7 @@ function EditableField({
   value, field, isEditing, onContentChange, className, as: Tag = "p",
 }: {
   value?: string; field: string; isEditing?: boolean;
-  onContentChange?: (field: string, value: string | string[]) => void;
+  onContentChange?: (field: string, value: string | string[] | Array<{ label: string; value: string }> | Array<{ name: string; role: string; bio: string }>) => void;
   className?: string; as?: "h1" | "h2" | "h3" | "p" | "span";
 }) {
   if (!value) return null;
@@ -87,10 +87,32 @@ function MetricsSlide({ heading, bodyText, metrics, isEditing, onContentChange }
         <div className="grid grid-cols-3 gap-6 flex-1 items-center">
           {metrics.map((metric, i) => (
             <div key={i} className="text-center p-8 rounded-2xl bg-white shadow-lg border border-purple-100 hover:shadow-xl transition-shadow">
-              <p className="text-5xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent mb-3">
-                {metric.value}
-              </p>
-              <p className="text-gray-500 text-sm uppercase tracking-wider font-medium">{metric.label}</p>
+              {isEditing ? (
+                <p
+                  className="text-5xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent mb-3 outline-none focus:ring-2 focus:ring-purple-400 rounded px-1"
+                  contentEditable suppressContentEditableWarning
+                  onBlur={(e) => {
+                    const newMetrics = [...metrics];
+                    newMetrics[i] = { ...newMetrics[i], value: e.currentTarget.textContent || "" };
+                    onContentChange?.("metrics", newMetrics);
+                  }}
+                >{metric.value}</p>
+              ) : (
+                <p className="text-5xl font-extrabold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent mb-3">{metric.value}</p>
+              )}
+              {isEditing ? (
+                <p
+                  className="text-gray-500 text-sm uppercase tracking-wider font-medium outline-none focus:ring-2 focus:ring-purple-400 rounded px-1"
+                  contentEditable suppressContentEditableWarning
+                  onBlur={(e) => {
+                    const newMetrics = [...metrics];
+                    newMetrics[i] = { ...newMetrics[i], label: e.currentTarget.textContent || "" };
+                    onContentChange?.("metrics", newMetrics);
+                  }}
+                >{metric.label}</p>
+              ) : (
+                <p className="text-gray-500 text-sm uppercase tracking-wider font-medium">{metric.label}</p>
+              )}
             </div>
           ))}
         </div>
@@ -116,9 +138,39 @@ function TeamSlide({ heading, bodyText, teamMembers, isEditing, onContentChange 
               <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full mx-auto mb-4 flex items-center justify-center">
                 <span className="text-white text-xl font-bold">{member.name.charAt(0)}</span>
               </div>
-              <p className="text-gray-800 font-bold text-lg">{member.name}</p>
-              <p className="text-purple-500 text-sm font-medium mb-2">{member.role}</p>
-              <p className="text-gray-500 text-xs leading-relaxed">{member.bio}</p>
+              {isEditing ? (
+                <p className="text-gray-800 font-bold text-lg outline-none focus:ring-2 focus:ring-purple-400 rounded px-1"
+                  contentEditable suppressContentEditableWarning
+                  onBlur={(e) => {
+                    const newMembers = [...teamMembers!];
+                    newMembers[i] = { ...newMembers[i], name: e.currentTarget.textContent || "" };
+                    onContentChange?.("teamMembers", newMembers);
+                  }}>{member.name}</p>
+              ) : (
+                <p className="text-gray-800 font-bold text-lg">{member.name}</p>
+              )}
+              {isEditing ? (
+                <p className="text-purple-500 text-sm font-medium mb-2 outline-none focus:ring-2 focus:ring-purple-400 rounded px-1"
+                  contentEditable suppressContentEditableWarning
+                  onBlur={(e) => {
+                    const newMembers = [...teamMembers!];
+                    newMembers[i] = { ...newMembers[i], role: e.currentTarget.textContent || "" };
+                    onContentChange?.("teamMembers", newMembers);
+                  }}>{member.role}</p>
+              ) : (
+                <p className="text-purple-500 text-sm font-medium mb-2">{member.role}</p>
+              )}
+              {isEditing ? (
+                <p className="text-gray-500 text-xs leading-relaxed outline-none focus:ring-2 focus:ring-purple-400 rounded px-1"
+                  contentEditable suppressContentEditableWarning
+                  onBlur={(e) => {
+                    const newMembers = [...teamMembers!];
+                    newMembers[i] = { ...newMembers[i], bio: e.currentTarget.textContent || "" };
+                    onContentChange?.("teamMembers", newMembers);
+                  }}>{member.bio}</p>
+              ) : (
+                <p className="text-gray-500 text-xs leading-relaxed">{member.bio}</p>
+              )}
             </div>
           ))}
         </div>

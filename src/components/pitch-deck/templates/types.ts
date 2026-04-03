@@ -30,7 +30,14 @@ export interface SlideContentProps {
   callToAction?: string;
   notes?: string;
   isEditing?: boolean;
-  onContentChange?: (field: string, value: string | string[]) => void;
+  onContentChange?: (
+    field: string,
+    value:
+      | string
+      | string[]
+      | Array<{ label: string; value: string }>
+      | Array<{ name: string; role: string; bio: string }>
+  ) => void;
 }
 
 export interface TemplateComponent {
