@@ -13,6 +13,12 @@ import {
   Save,
   Presentation,
   StickyNote,
+  FileSpreadsheet,
+  Wand2,
+  Zap,
+  Minimize2,
+  Maximize2,
+  Target,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -63,6 +69,7 @@ interface Deck {
   title: string;
   templateId: string;
   slides: Slide[];
+  companyData?: Record<string, string>;
   status: string;
 }
 
@@ -155,6 +162,9 @@ export default function DeckEditorPage() {
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [showNotes, setShowNotes] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
+  const [regenPrompt, setRegenPrompt] = useState("");
+  const [showRegenDialog, setShowRegenDialog] = useState(false);
+  const [regenerating, setRegenerating] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const slideRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
@@ -345,6 +355,49 @@ export default function DeckEditorPage() {
     }
   }, [deck]);
 
+  // AI Slide Regeneration
+  const regenerateSlide = useCallback(
+    async (instruction: string) => {
+      if (!deck) return;
+      setRegenerating(true);
+      try {
+        const res = await fetch("/api/pitch-deck/regenerate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            slideIndices: [activeSlideIndex],
+            instruction,
+            companyData: deck.companyData || {},
+            existingSlides: deck.slides,
+          }),
+        });
+        if (!res.ok) throw new Error("Failed to regenerate");
+        const data = await res.json();
+        if (data.slides && data.slides.length > 0) {
+          const regenSlide = data.slides[0];
+          updateDeck((prev) => {
+            const newSlides = [...prev.slides];
+            newSlides[activeSlideIndex] = {
+              ...newSlides[activeSlideIndex],
+              ...regenSlide,
+              order: newSlides[activeSlideIndex].order,
+              slideType: newSlides[activeSlideIndex].slideType,
+            };
+            return { ...prev, slides: newSlides };
+          });
+          toast.success("Slide regenerated!");
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to regenerate slide");
+      } finally {
+        setRegenerating(false);
+        setShowRegenDialog(false);
+      }
+    },
+    [deck, activeSlideIndex, updateDeck]
+  );
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -426,6 +479,22 @@ export default function DeckEditorPage() {
           <Button variant="outline" size="sm" onClick={exportPDF}>
             <Download className="h-4 w-4 mr-1" />
             PDF
+          </Button>
+
+          <Button variant="outline" size="sm" onClick={async () => {
+            if (!deck) return;
+            toast.info("Generating PPTX...");
+            try {
+              const { exportDeckToPPTX } = await import("@/lib/pptx-export");
+              await exportDeckToPPTX(deck.title, deck.slides, currentTemplate.metadata.colors);
+              toast.success("PPTX exported successfully!");
+            } catch (error) {
+              console.error("PPTX export failed:", error);
+              toast.error("Failed to export PPTX");
+            }
+          }}>
+            <FileSpreadsheet className="h-4 w-4 mr-1" />
+            PPTX
           </Button>
         </div>
       </div>
@@ -533,7 +602,66 @@ export default function DeckEditorPage() {
             </div>
           </div>
 
-          {/* Keyboard Shortcuts */}
+          {/* AI Actions */}
+          <div>
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">AI Actions</h3>
+            <div className="space-y-2">
+              <Button variant="outline" size="sm" className="w-full justify-start text-xs"
+                disabled={regenerating}
+                onClick={() => { setRegenPrompt("Regenerate this slide with more compelling, data-driven content"); setShowRegenDialog(true); }}>
+                <Wand2 className="h-3 w-3 mr-2" />
+                Regenerate Slide
+              </Button>
+              <Button variant="outline" size="sm" className="w-full justify-start text-xs"
+                disabled={regenerating}
+                onClick={() => regenerateSlide("Rewrite this slide to be more professional, confident, and persuasive. Use stronger language and specific numbers.")}>
+                <Zap className="h-3 w-3 mr-2" />
+                {regenerating ? "Improving..." : "Improve Tone"}
+              </Button>
+              <Button variant="outline" size="sm" className="w-full justify-start text-xs"
+                disabled={regenerating}
+                onClick={() => regenerateSlide("Condense this slide to its most essential points. Remove filler, keep only the most impactful statements. Reduce bullet points to 3 items max.")}>
+                <Minimize2 className="h-3 w-3 mr-2" />
+                Shorten
+              </Button>
+              <Button variant="outline" size="sm" className="w-full justify-start text-xs"
+                disabled={regenerating}
+                onClick={() => regenerateSlide("Add more detail, supporting data, and context to this slide. Include specific metrics, evidence, and examples. Expand bullet points to 5-6 items.")}>
+                <Maximize2 className="h-3 w-3 mr-2" />
+                Expand
+              </Button>
+              <Button variant="outline" size="sm" className="w-full justify-start text-xs"
+                disabled={regenerating}
+                onClick={() => regenerateSlide("Optimize this slide for investor audiences. Emphasize ROI, market size, growth trajectory, defensibility, and unit economics. Add specific financial metrics.")}>
+                <Target className="h-3 w-3 mr-2" />
+                Investor Focus
+              </Button>
+            </div>
+          </div>
+
+          {/* Regen Dialog */}
+          {showRegenDialog && (
+            <div className="border rounded-lg p-3 bg-background space-y-3">
+              <p className="text-xs font-medium">Custom instruction:</p>
+              <Textarea
+                className="text-xs resize-none"
+                rows={3}
+                value={regenPrompt}
+                onChange={(e) => setRegenPrompt(e.target.value)}
+                placeholder="Describe how you'd like this slide to change..."
+              />
+              <div className="flex gap-2">
+                <Button size="sm" className="flex-1 text-xs" disabled={regenerating}
+                  onClick={() => regenerateSlide(regenPrompt)}>
+                  {regenerating ? <><Loader2 className="h-3 w-3 mr-1 animate-spin" />Generating...</> : "Regenerate"}
+                </Button>
+                <Button size="sm" variant="outline" className="text-xs"
+                  onClick={() => setShowRegenDialog(false)}>Cancel</Button>
+              </div>
+            </div>
+          )}
+
+          {/* Tips */}
           <div>
             <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Tips</h3>
             <div className="space-y-1 text-xs text-muted-foreground">

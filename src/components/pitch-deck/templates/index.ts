@@ -1,12 +1,28 @@
 import modernDark from "./modern-dark";
 import startupGradient from "./startup-gradient";
 import cleanMinimal from "./clean-minimal";
+import midnightBlue from "./midnight-blue";
+import ventureBold from "./venture-bold";
+import siliconValley from "./silicon-valley";
+import pitchBlack from "./pitch-black";
+import forest from "./forest";
+import coralSunrise from "./coral-sunrise";
+import slateProfessional from "./slate-professional";
+import royal from "./royal";
 import type { TemplateComponent } from "./types";
 
 export const templates: Record<string, TemplateComponent> = {
   "modern-dark": modernDark,
   "startup-gradient": startupGradient,
   "clean-minimal": cleanMinimal,
+  "midnight-blue": midnightBlue,
+  "venture-bold": ventureBold,
+  "silicon-valley": siliconValley,
+  "pitch-black": pitchBlack,
+  "forest": forest,
+  "coral-sunrise": coralSunrise,
+  "slate-professional": slateProfessional,
+  "royal": royal,
 };
 
 export const templateList = Object.values(templates);
