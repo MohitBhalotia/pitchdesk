@@ -115,6 +115,35 @@ declare global {
     updatedAt: Date
   }
 
+  export interface IPitchDeckSlide {
+    slideType: string;
+    order: number;
+    heading?: string;
+    subheading?: string;
+    bodyText?: string;
+    bulletPoints?: string[];
+    metrics?: Array<{ label: string; value: string }>;
+    teamMembers?: Array<{ name: string; role: string; bio: string }>;
+    chartData?: {
+      type: string;
+      labels: string[];
+      values: number[];
+    };
+    callToAction?: string;
+    notes?: string;
+  }
+
+  export interface IPitchDeck extends Document {
+    _id: string;
+    userId: mongoose.Schema.Types.ObjectId;
+    title: string;
+    templateId: string;
+    slides: IPitchDeckSlide[];
+    companyData: Record<string, string>;
+    status: "generating" | "draft" | "published";
+    createdAt: Date;
+    updatedAt: Date;
+  }
 
 }
 

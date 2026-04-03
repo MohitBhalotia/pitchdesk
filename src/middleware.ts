@@ -11,6 +11,7 @@ const protectedRoutes = [
   "/my-pitches",
   "/payment",
   "/investors",
+  "/pitch-deck",
 ];
 
 // ⭐ Basic Auth Check (only for staging / preview)
@@ -97,5 +98,6 @@ export const config = {
     "/investors",
     "/invite-competition",
     "/competitions/:path*",
+    "/pitch-deck/:path*",
   ],
 };
