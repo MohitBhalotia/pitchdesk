@@ -200,10 +200,21 @@ export async function POST(req: NextRequest) {
       })
       .join("\n");
 
+    const websiteSection = companyData.websiteContent
+      ? `\n\nWEBSITE CONTENT (extracted from company's website — use this for additional context):\n${companyData.websiteContent}`
+      : "";
+
     const userPrompt = `Generate a professional investor pitch deck for the following company.
 
 COMPANY PROFILE:
-${dataLines}
+${dataLines}${websiteSection}
+
+RESEARCH REQUIREMENT: Before generating content, analyze the company's industry to infer:
+- Likely direct competitors and their positioning (even if not provided)
+- Realistic market sizing based on the industry vertical
+- Typical metrics and benchmarks for companies at this stage in this industry
+- Common investor concerns and objections for this type of company
+Use this inferred research to make the content more specific and credible.
 
 IMPORTANT INSTRUCTIONS:
 - Use the provided data directly and specifically — incorporate exact figures, names, and descriptions

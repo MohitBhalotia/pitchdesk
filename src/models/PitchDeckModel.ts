@@ -16,6 +16,19 @@ export interface IPitchDeckSlide {
   };
   callToAction?: string;
   notes?: string;
+  decorativeElements?: Array<{
+    type: "divider" | "accent-bar" | "circle" | "quote-box";
+    position: "top" | "bottom" | "left" | "right" | "center";
+    color?: string;
+  }>;
+  images?: Array<{
+    url: string;
+    publicId?: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }>;
 }
 
 export interface IPitchDeck extends Document {
@@ -57,6 +70,23 @@ const slideSchema = new Schema(
     },
     callToAction: String,
     notes: String,
+    decorativeElements: [
+      {
+        type: { type: String, enum: ["divider", "accent-bar", "circle", "quote-box"] },
+        position: { type: String, enum: ["top", "bottom", "left", "right", "center"] },
+        color: String,
+      },
+    ],
+    images: [
+      {
+        url: String,
+        publicId: String,
+        x: Number,
+        y: Number,
+        width: Number,
+        height: Number,
+      },
+    ],
   },
   { _id: false }
 );

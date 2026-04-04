@@ -29,6 +29,19 @@ export interface SlideContentProps {
   };
   callToAction?: string;
   notes?: string;
+  decorativeElements?: Array<{
+    type: "divider" | "accent-bar" | "circle" | "quote-box";
+    position: "top" | "bottom" | "left" | "right" | "center";
+    color?: string;
+  }>;
+  images?: Array<{
+    url: string;
+    publicId?: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }>;
   isEditing?: boolean;
   onContentChange?: (
     field: string,

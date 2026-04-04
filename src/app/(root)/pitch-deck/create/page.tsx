@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Loader2, ArrowLeft, Presentation } from "lucide-react";
+import { Loader2, ArrowLeft, Presentation, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -346,8 +346,62 @@ export default function CreatePitchDeck() {
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [selectedTemplate, setSelectedTemplate] = useState("modern-dark");
   const [loading, setLoading] = useState(false);
+  const [scraping, setScraping] = useState(false);
   const router = useRouter();
   const { data: session } = useSession();
+
+  const handleFetchWebsite = async () => {
+    const url = formData.website;
+    if (!url) {
+      toast.error("Please enter a website URL first");
+      return;
+    }
+    setScraping(true);
+    toast.info("Fetching website content...");
+    try {
+      const res = await fetch("/api/pitch-deck/scrape-website", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to fetch website");
+      }
+      const data = await res.json();
+
+      // Auto-populate empty fields
+      const updates: Record<string, string> = {};
+      if (data.title && !formData.companyName) {
+        updates.companyName = data.title.split(/[|\-–—]/)[0].trim();
+      }
+      if ((data.description || data.paragraphs?.[0]) && !formData.tagline) {
+        const desc = data.description || data.paragraphs[0];
+        updates.tagline = desc.length > 80 ? desc.slice(0, 77) + "..." : desc;
+      }
+      if (data.description && !formData.elevatorPitch) {
+        updates.elevatorPitch = data.description;
+      }
+
+      // Store full scraped content for AI generation
+      const websiteContent = [
+        data.title && `Title: ${data.title}`,
+        data.description && `Description: ${data.description}`,
+        data.headings?.length && `Key Headings: ${data.headings.join("; ")}`,
+        data.paragraphs?.length && `Content: ${data.paragraphs.join(" ")}`,
+        data.listItems?.length && `Features/Items: ${data.listItems.join("; ")}`,
+      ].filter(Boolean).join("\n");
+      updates.websiteContent = websiteContent;
+
+      setFormData((prev) => ({ ...prev, ...updates }));
+      toast.success(`Website content fetched! ${Object.keys(updates).length - 1} field(s) auto-populated.`);
+    } catch (error) {
+      console.error(error);
+      toast.error(error instanceof Error ? error.message : "Failed to fetch website");
+    } finally {
+      setScraping(false);
+    }
+  };
 
   const fieldsByCategory = fields.reduce(
     (acc, field) => {
@@ -485,14 +539,34 @@ export default function CreatePitchDeck() {
                     </p>
                   )}
                   {field.inputType === "short" ? (
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      type={field.name === "website" ? "url" : "text"}
-                      placeholder={field.placeholder}
-                      value={formData[field.name] || ""}
-                      onChange={handleInputChange}
-                    />
+                    <div className={field.name === "website" ? "flex gap-2" : ""}>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        type={field.name === "website" ? "url" : "text"}
+                        placeholder={field.placeholder}
+                        value={formData[field.name] || ""}
+                        onChange={handleInputChange}
+                        className={field.name === "website" ? "flex-1" : ""}
+                      />
+                      {field.name === "website" && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={scraping || !formData.website}
+                          onClick={handleFetchWebsite}
+                          className="shrink-0"
+                        >
+                          {scraping ? (
+                            <Loader2 className="h-4 w-4 animate-spin mr-1" />
+                          ) : (
+                            <Globe className="h-4 w-4 mr-1" />
+                          )}
+                          {scraping ? "Fetching..." : "Fetch Info"}
+                        </Button>
+                      )}
+                    </div>
                   ) : (
                     <Textarea
                       id={field.name}

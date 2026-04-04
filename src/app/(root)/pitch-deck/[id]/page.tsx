@@ -19,6 +19,15 @@ import {
   Minimize2,
   Maximize2,
   Target,
+  ToggleLeft,
+  ToggleRight,
+  Minus,
+  Circle,
+  Quote,
+  RectangleHorizontal,
+  ImagePlus,
+  Upload,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,6 +59,21 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+interface DecorativeElement {
+  type: "divider" | "accent-bar" | "circle" | "quote-box";
+  position: "top" | "bottom" | "left" | "right" | "center";
+  color?: string;
+}
+
+interface SlideImage {
+  url: string;
+  publicId?: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 interface Slide {
   slideType: string;
   order: number;
@@ -62,6 +86,8 @@ interface Slide {
   chartData?: { type: string; labels: string[]; values: number[] };
   callToAction?: string;
   notes?: string;
+  decorativeElements?: DecorativeElement[];
+  images?: SlideImage[];
 }
 
 interface Deck {
@@ -165,6 +191,8 @@ export default function DeckEditorPage() {
   const [regenPrompt, setRegenPrompt] = useState("");
   const [showRegenDialog, setShowRegenDialog] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [generatingImage, setGeneratingImage] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const slideRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
@@ -398,6 +426,95 @@ export default function DeckEditorPage() {
     [deck, activeSlideIndex, updateDeck]
   );
 
+  // Image upload handler
+  const handleImageUpload = useCallback(
+    async (file: File) => {
+      if (!deck) return;
+      setUploadingImage(true);
+      try {
+        const reader = new FileReader();
+        const base64 = await new Promise<string>((resolve, reject) => {
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+
+        const res = await fetch("/api/pitch-deck/upload-image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ imageBase64: base64 }),
+        });
+        if (!res.ok) throw new Error("Upload failed");
+        const data = await res.json();
+
+        updateDeck((prev) => {
+          const newSlides = [...prev.slides];
+          const slide = newSlides[activeSlideIndex];
+          const existing = slide.images || [];
+          newSlides[activeSlideIndex] = {
+            ...slide,
+            images: [...existing, { url: data.url, publicId: data.publicId, x: 60, y: 10, width: 30, height: 30 }],
+          };
+          return { ...prev, slides: newSlides };
+        });
+        toast.success("Image added to slide!");
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to upload image");
+      } finally {
+        setUploadingImage(false);
+      }
+    },
+    [deck, activeSlideIndex, updateDeck]
+  );
+
+  // Drag-drop handler for canvas
+  const handleCanvasDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      const files = e.dataTransfer.files;
+      if (files.length > 0 && files[0].type.startsWith("image/")) {
+        handleImageUpload(files[0]);
+      }
+    },
+    [handleImageUpload]
+  );
+
+  // AI image generation
+  const handleGenerateImage = useCallback(async () => {
+    if (!deck) return;
+    const slide = deck.slides[activeSlideIndex];
+    setGeneratingImage(true);
+    try {
+      const prompt = `Create a professional, minimal illustration for a pitch deck slide about: ${slide.heading || slide.slideType}. ${slide.bodyText || ""}. Style: clean, modern, suitable for business presentation. No text in the image.`;
+
+      const res = await fetch("/api/pitch-deck/generate-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
+      if (!res.ok) throw new Error("Image generation failed");
+      const data = await res.json();
+
+      updateDeck((prev) => {
+        const newSlides = [...prev.slides];
+        const s = newSlides[activeSlideIndex];
+        const existing = s.images || [];
+        newSlides[activeSlideIndex] = {
+          ...s,
+          images: [...existing, { url: data.url, publicId: data.publicId, x: 60, y: 10, width: 30, height: 30 }],
+        };
+        return { ...prev, slides: newSlides };
+      });
+      toast.success("AI image generated and added!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to generate image");
+    } finally {
+      setGeneratingImage(false);
+    }
+  }, [deck, activeSlideIndex, updateDeck]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -542,7 +659,58 @@ export default function DeckEditorPage() {
 
         {/* Center Panel - Main Slide Canvas */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 flex items-center justify-center p-8 bg-muted/20">
+          {/* Visual Elements Toolbar */}
+          <div className="flex items-center justify-center gap-1 px-4 py-1.5 border-b bg-background/80">
+            <span className="text-xs text-muted-foreground mr-2">Decorations:</span>
+            {([
+              { type: "divider" as const, icon: Minus, label: "Divider" },
+              { type: "accent-bar" as const, icon: RectangleHorizontal, label: "Accent Bar" },
+              { type: "circle" as const, icon: Circle, label: "Circle" },
+              { type: "quote-box" as const, icon: Quote, label: "Quote Box" },
+            ]).map(({ type, icon: Icon, label }) => (
+              <DropdownMenu key={type}>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" title={label}>
+                    <Icon className="h-3.5 w-3.5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  {(["top", "bottom", "left", "right", "center"] as const).map((pos) => (
+                    <DropdownMenuItem key={pos} onClick={() => {
+                      updateDeck((prev) => {
+                        const newSlides = [...prev.slides];
+                        const slide = newSlides[activeSlideIndex];
+                        const existing = slide.decorativeElements || [];
+                        newSlides[activeSlideIndex] = {
+                          ...slide,
+                          decorativeElements: [...existing, { type, position: pos }],
+                        };
+                        return { ...prev, slides: newSlides };
+                      });
+                    }}>
+                      {pos.charAt(0).toUpperCase() + pos.slice(1)}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ))}
+            {activeSlide?.decorativeElements && activeSlide.decorativeElements.length > 0 && (
+              <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-destructive ml-2"
+                onClick={() => {
+                  updateDeck((prev) => {
+                    const newSlides = [...prev.slides];
+                    newSlides[activeSlideIndex] = { ...newSlides[activeSlideIndex], decorativeElements: [] };
+                    return { ...prev, slides: newSlides };
+                  });
+                }}>
+                Clear All
+              </Button>
+            )}
+          </div>
+
+          <div className="flex-1 flex items-center justify-center p-8 bg-muted/20"
+            onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; }}
+            onDrop={handleCanvasDrop}>
             <div className="w-full max-w-4xl">
               <SlideRenderer
                 slide={activeSlide}
@@ -571,11 +739,104 @@ export default function DeckEditorPage() {
 
         {/* Right Panel - Properties */}
         <div className="w-64 border-l bg-muted/30 overflow-y-auto p-4 space-y-6">
-          {/* Slide Info */}
+          {/* Slide Info + Type Changer */}
           <div>
             <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Slide</h3>
-            <p className="text-sm font-medium capitalize">{activeSlide?.slideType.replace("_", " ")}</p>
-            <p className="text-xs text-muted-foreground">Slide {activeSlideIndex + 1} of {deck.slides.length}</p>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 text-sm font-medium capitalize hover:text-primary transition-colors cursor-pointer">
+                  {activeSlide?.slideType.replace("_", " ")}
+                  <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {SLIDE_TYPES.map((type) => (
+                  <DropdownMenuItem
+                    key={type.value}
+                    className={activeSlide?.slideType === type.value ? "bg-accent" : ""}
+                    onClick={() => {
+                      if (activeSlide?.slideType === type.value) return;
+                      updateDeck((prev) => {
+                        const newSlides = [...prev.slides];
+                        const current = newSlides[activeSlideIndex];
+                        const defaults: Partial<Slide> = {};
+                        // Reset type-specific fields for new type
+                        if (["market", "traction", "financials", "ask"].includes(type.value)) {
+                          defaults.metrics = current.metrics || [{ label: "Metric", value: "0" }];
+                        } else {
+                          defaults.metrics = undefined;
+                        }
+                        if (type.value === "team") {
+                          defaults.teamMembers = current.teamMembers || [{ name: "Name", role: "Role", bio: "Bio" }];
+                        } else {
+                          defaults.teamMembers = undefined;
+                        }
+                        if (["problem", "solution", "product", "business_model", "competition", "ask"].includes(type.value)) {
+                          defaults.bulletPoints = current.bulletPoints || ["Point 1"];
+                        } else if (!["market", "traction", "financials"].includes(type.value)) {
+                          defaults.bulletPoints = undefined;
+                        }
+                        if (type.value === "closing") {
+                          defaults.callToAction = current.callToAction || "Get in touch";
+                        }
+                        newSlides[activeSlideIndex] = {
+                          ...current,
+                          slideType: type.value,
+                          ...defaults,
+                        };
+                        return { ...prev, slides: newSlides };
+                      });
+                    }}
+                  >
+                    {type.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <p className="text-xs text-muted-foreground mt-1">Slide {activeSlideIndex + 1} of {deck.slides.length}</p>
+          </div>
+
+          {/* Field Toggles */}
+          <div>
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Fields</h3>
+            <div className="space-y-2">
+              {[
+                { key: "subheading", label: "Subheading", defaultVal: "Subheading" },
+                { key: "bodyText", label: "Body Text", defaultVal: "Add your content here..." },
+                { key: "bulletPoints", label: "Bullet Points", defaultVal: ["Point 1"] },
+                { key: "callToAction", label: "Call to Action", defaultVal: "Get in touch" },
+              ].map(({ key, label, defaultVal }) => {
+                const fieldKey = key as keyof Slide;
+                const isArray = Array.isArray(defaultVal);
+                const hasValue = isArray
+                  ? activeSlide?.[fieldKey] && (activeSlide[fieldKey] as string[]).length > 0
+                  : !!activeSlide?.[fieldKey];
+                return (
+                  <button
+                    key={key}
+                    className="flex items-center justify-between w-full text-xs py-1 px-1 rounded hover:bg-muted transition-colors"
+                    onClick={() => {
+                      updateDeck((prev) => {
+                        const newSlides = [...prev.slides];
+                        if (hasValue) {
+                          newSlides[activeSlideIndex] = { ...newSlides[activeSlideIndex], [key]: isArray ? [] : "" };
+                        } else {
+                          newSlides[activeSlideIndex] = { ...newSlides[activeSlideIndex], [key]: defaultVal };
+                        }
+                        return { ...prev, slides: newSlides };
+                      });
+                    }}
+                  >
+                    <span>{label}</span>
+                    {hasValue ? (
+                      <ToggleRight className="h-4 w-4 text-primary" />
+                    ) : (
+                      <ToggleLeft className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Template */}
@@ -661,12 +922,68 @@ export default function DeckEditorPage() {
             </div>
           )}
 
+          {/* Images */}
+          <div>
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Images</h3>
+            <div className="space-y-2">
+              <Button variant="outline" size="sm" className="w-full justify-start text-xs"
+                disabled={uploadingImage}
+                onClick={() => {
+                  const input = document.createElement("input");
+                  input.type = "file";
+                  input.accept = "image/*";
+                  input.onchange = (e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0];
+                    if (file) handleImageUpload(file);
+                  };
+                  input.click();
+                }}>
+                {uploadingImage ? <Loader2 className="h-3 w-3 mr-2 animate-spin" /> : <Upload className="h-3 w-3 mr-2" />}
+                {uploadingImage ? "Uploading..." : "Upload Image"}
+              </Button>
+              <Button variant="outline" size="sm" className="w-full justify-start text-xs"
+                disabled={generatingImage}
+                onClick={handleGenerateImage}>
+                {generatingImage ? <Loader2 className="h-3 w-3 mr-2 animate-spin" /> : <Sparkles className="h-3 w-3 mr-2" />}
+                {generatingImage ? "Generating..." : "Generate AI Image"}
+              </Button>
+              <p className="text-xs text-muted-foreground">Or drag & drop an image onto the slide</p>
+
+              {/* Image list */}
+              {activeSlide?.images && activeSlide.images.length > 0 && (
+                <div className="space-y-2 mt-2">
+                  {activeSlide.images.map((img, i) => (
+                    <div key={i} className="flex items-center gap-2 p-1.5 rounded border group">
+                      <img src={img.url} alt="" className="w-10 h-10 object-cover rounded" />
+                      <span className="text-xs text-muted-foreground flex-1 truncate">Image {i + 1}</span>
+                      <button className="opacity-0 group-hover:opacity-100 text-destructive p-0.5"
+                        onClick={() => {
+                          updateDeck((prev) => {
+                            const newSlides = [...prev.slides];
+                            const slide = newSlides[activeSlideIndex];
+                            newSlides[activeSlideIndex] = {
+                              ...slide,
+                              images: (slide.images || []).filter((_, idx) => idx !== i),
+                            };
+                            return { ...prev, slides: newSlides };
+                          });
+                        }}>
+                        <Trash2 className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* Tips */}
           <div>
             <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Tips</h3>
             <div className="space-y-1 text-xs text-muted-foreground">
               <p>Click text to edit inline</p>
               <p>Drag thumbnails to reorder</p>
+              <p>Drag images onto the slide</p>
               <p>Changes auto-save</p>
             </div>
           </div>

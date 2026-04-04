@@ -16,6 +16,19 @@ interface SlideRendererProps {
     chartData?: { type: string; labels: string[]; values: number[] };
     callToAction?: string;
     notes?: string;
+    decorativeElements?: Array<{
+      type: "divider" | "accent-bar" | "circle" | "quote-box";
+      position: "top" | "bottom" | "left" | "right" | "center";
+      color?: string;
+    }>;
+    images?: Array<{
+      url: string;
+      publicId?: string;
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    }>;
   };
   templateId: string;
   isEditing?: boolean;
