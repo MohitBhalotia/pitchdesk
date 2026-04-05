@@ -676,19 +676,16 @@ export default function CreateBotPage() {
                                                         <FormLabel>Sector Focus (Multiple)</FormLabel>
                                                         <DropdownMenu>
                                                             <DropdownMenuTrigger asChild>
-                                                                <Button variant="outline" className="w-full justify-between font-normal">
+                                                                <Button variant="outline" className="w-full justify-start font-normal min-h-10 h-auto py-2">
                                                                     {field.value?.length > 0 ? (
-                                                                        <div className="flex gap-1 flex-wrap">
-                                                                            {field.value.slice(0, 2).map((s: string) => <Badge key={s} variant="secondary" className="mr-1">{s}</Badge>)}
-                                                                            {field.value.length > 2 && <span className="text-xs text-muted-foreground">+{field.value.length - 2} more</span>}
-                                                                        </div>
-                                                                    ) : "Select sectors"}
+                                                                        <span className="text-muted-foreground">{field.value.length} sector{field.value.length > 1 ? "s" : ""} selected</span>
+                                                                    ) : <span className="text-muted-foreground">Select sectors</span>}
                                                                 </Button>
                                                             </DropdownMenuTrigger>
-                                                            <DropdownMenuContent className="w-56" align="start">
+                                                            <DropdownMenuContent className="w-56 max-h-60 overflow-y-auto" align="start">
                                                                 <DropdownMenuLabel>Sectors</DropdownMenuLabel>
                                                                 <DropdownMenuSeparator />
-                                                                {["FinTech", "HealthTech", "EdTech", "E-commerce", "SaaS", "Sports & Fitness", "Agritech", "Logistics", "Consumer", "B2B Marketplace", "Gaming","Hardware", "Biotech", "Others"].map((sector) => (
+                                                                {["FinTech", "HealthTech", "EdTech", "E-commerce", "SaaS", "Sports & Fitness", "Agritech", "Logistics", "Consumer", "B2B Marketplace", "Gaming", "Hardware", "Biotech", "Others"].map((sector) => (
                                                                     <DropdownMenuCheckboxItem
                                                                         key={sector}
                                                                         checked={field.value?.includes(sector)}
@@ -705,6 +702,22 @@ export default function CreateBotPage() {
                                                                 ))}
                                                             </DropdownMenuContent>
                                                         </DropdownMenu>
+                                                        {field.value?.length > 0 && (
+                                                            <div className="flex flex-wrap gap-1 mt-2">
+                                                                {field.value.map((s: string) => (
+                                                                    <Badge key={s} variant="secondary" className="flex items-center gap-1 pr-1">
+                                                                        {s}
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => field.onChange(field.value.filter((v: string) => v !== s))}
+                                                                            className="ml-1 rounded-full hover:bg-muted-foreground/20 p-0.5"
+                                                                        >
+                                                                            <X className="h-3 w-3" />
+                                                                        </button>
+                                                                    </Badge>
+                                                                ))}
+                                                            </div>
+                                                        )}
                                                         <FormMessage />
                                                     </FormItem>
                                                 )}
@@ -751,16 +764,13 @@ export default function CreateBotPage() {
                                                         <FormLabel>Investment Stage (Multiple)</FormLabel>
                                                         <DropdownMenu>
                                                             <DropdownMenuTrigger asChild>
-                                                                <Button variant="outline" className="w-full justify-between font-normal">
+                                                                <Button variant="outline" className="w-full justify-start font-normal min-h-10 h-auto py-2">
                                                                     {field.value?.length > 0 ? (
-                                                                        <div className="flex gap-1 flex-wrap">
-                                                                            {field.value.slice(0, 2).map((s: string) => <Badge key={s} variant="secondary" className="mr-1">{s}</Badge>)}
-                                                                            {field.value.length > 2 && <span className="text-xs text-muted-foreground">+{field.value.length - 2} more</span>}
-                                                                        </div>
-                                                                    ) : "Select stages"}
+                                                                        <span className="text-muted-foreground">{field.value.length} stage{field.value.length > 1 ? "s" : ""} selected</span>
+                                                                    ) : <span className="text-muted-foreground">Select stages</span>}
                                                                 </Button>
                                                             </DropdownMenuTrigger>
-                                                            <DropdownMenuContent className="w-56" align="start">
+                                                            <DropdownMenuContent className="w-56 max-h-60 overflow-y-auto" align="start">
                                                                 <DropdownMenuLabel>Stages</DropdownMenuLabel>
                                                                 <DropdownMenuSeparator />
                                                                 {["Pre-seed", "Seed", "Pre-Series A", "Series A", "Series B", "Series C+", "Growth"].map((stage) => (
@@ -780,6 +790,22 @@ export default function CreateBotPage() {
                                                                 ))}
                                                             </DropdownMenuContent>
                                                         </DropdownMenu>
+                                                        {field.value?.length > 0 && (
+                                                            <div className="flex flex-wrap gap-1 mt-2">
+                                                                {field.value.map((s: string) => (
+                                                                    <Badge key={s} variant="secondary" className="flex items-center gap-1 pr-1">
+                                                                        {s}
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => field.onChange(field.value.filter((v: string) => v !== s))}
+                                                                            className="ml-1 rounded-full hover:bg-muted-foreground/20 p-0.5"
+                                                                        >
+                                                                            <X className="h-3 w-3" />
+                                                                        </button>
+                                                                    </Badge>
+                                                                ))}
+                                                            </div>
+                                                        )}
                                                         <FormMessage />
                                                     </FormItem>
                                                 )}

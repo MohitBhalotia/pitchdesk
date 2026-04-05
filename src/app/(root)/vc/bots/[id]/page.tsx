@@ -29,15 +29,23 @@ interface IAgent {
     createdAt: string;
 }
 
+interface IProgram {
+    _id: string;
+    title: string;
+    status: string;
+}
+
 export default function AgentDetailPage() {
     const router = useRouter();
     const { id } = useParams();
     const [bot, setBot] = useState<IAgent | null>(null);
+    const [programs, setPrograms] = useState<IProgram[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         if (id) {
             fetchBot();
+            fetchPrograms();
         }
     }, [id]);
 
@@ -49,6 +57,21 @@ export default function AgentDetailPage() {
             console.error("Error fetching bot:", error);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const fetchPrograms = async () => {
+        try {
+            const response = await axios.get("/api/vc/incubations");
+            const allPrograms: IProgram[] = response.data;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const filtered = allPrograms.filter((p: any) => {
+                const botId = p.botId?._id || p.botId;
+                return botId === id;
+            });
+            setPrograms(filtered);
+        } catch (error) {
+            console.error("Error fetching programs:", error);
         }
     };
 
@@ -141,13 +164,27 @@ export default function AgentDetailPage() {
                                 <p className="text-sm text-muted-foreground">Created</p>
                                 <p className="font-medium">{new Date(bot.createdAt).toLocaleDateString()}</p>
                             </div>
-                            <div>
+                            {/* Pitches Evaluated — to be implemented later */}
+                            {/* <div>
                                 <p className="text-sm text-muted-foreground">Pitches Evaluated</p>
                                 <p className="font-medium">Coming Soon</p>
-                            </div>
+                            </div> */}
                             <div>
-                                <p className="text-sm text-muted-foreground">Used in Programs</p>
-                                <p className="font-medium">Coming Soon</p>
+                                <p className="text-sm text-muted-foreground mb-2">Used in Programs</p>
+                                {programs.length > 0 ? (
+                                    <div className="flex flex-col gap-1.5">
+                                        {programs.map((p) => (
+                                            <div key={p._id} className="flex items-center justify-between">
+                                                <span className="text-sm font-medium">{p.title}</span>
+                                                <Badge variant={p.status === "published" ? "default" : "secondary"} className="text-xs">
+                                                    {p.status}
+                                                </Badge>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <p className="text-sm text-muted-foreground">Not used in any program yet</p>
+                                )}
                             </div>
                         </CardContent>
                     </Card>

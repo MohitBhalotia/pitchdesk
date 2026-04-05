@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { User, Briefcase, Loader2 } from "lucide-react";
+import { User, Briefcase, Loader2, Zap, ShieldCheck } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import axios from "axios";
@@ -88,13 +88,17 @@ export default function SignupRoleSelection() {
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
+              <div className="flex items-center justify-center gap-1.5 text-xs text-green-600/80 dark:text-green-400/70 mb-3">
+                <Zap className="h-3.5 w-3.5 flex-shrink-0" />
+                <span>Instant access, start pitching right after signup</span>
+              </div>
               <div className="text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                 {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign up as Founder →"}
               </div>
             </CardContent>
           </Card>
 
-          <Card 
+          <Card
             className={`cursor-pointer transition-all hover:ring-2 hover:ring-primary hover:shadow-lg group ${isProcessing ? 'opacity-50 pointer-events-none' : ''}`}
             onClick={() => handleRoleSelect("vc")}
           >
@@ -108,6 +112,10 @@ export default function SignupRoleSelection() {
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
+              <div className="flex items-center justify-center gap-1.5 text-xs text-amber-600/80 dark:text-amber-400/70 mb-3">
+                <ShieldCheck className="h-3.5 w-3.5 flex-shrink-0" />
+                <span>Manually verified by our team before access is granted</span>
+              </div>
               <div className="text-sm font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                 {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign up as Investor →"}
               </div>

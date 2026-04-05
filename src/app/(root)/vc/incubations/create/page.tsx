@@ -88,7 +88,7 @@ export default function CreateIncubationPage() {
             fundingAmount: "",
             equityExpectations: "",
             notes: "",
-            status: "draft" as const,
+            status: "published" as const,
         },
     });
 
