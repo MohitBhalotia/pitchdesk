@@ -1,4 +1,7 @@
 import PptxGenJS from "pptxgenjs";
+import { migrateSlide } from "@/lib/slide-migration";
+import { isSlideV2 } from "@/types/slide-elements";
+import type { AnySlide, SlideV2, TextElement, ImageElement, ShapeElement } from "@/types/slide-elements";
 
 interface SlideData {
   slideType: string;
@@ -10,6 +13,8 @@ interface SlideData {
   teamMembers?: Array<{ name: string; role: string; bio: string }>;
   callToAction?: string;
   notes?: string;
+  elements?: unknown[];
+  background?: string;
 }
 
 interface ThemeColors {
@@ -292,6 +297,89 @@ function addClosingSlide(pptx: PptxGenJS, slide: SlideData, colors: ThemeColors)
   }
 }
 
+const PPTX_W = 13.33;
+const PPTX_H = 7.5;
+
+function addElementsSlide(pptx: PptxGenJS, slide: SlideV2, colors: ThemeColors) {
+  const s = pptx.addSlide();
+  const bg = slide.background || colors.background;
+  s.background = { fill: hexToRgb(bg.replace(/^#/, "").length === 6 ? bg : colors.background) };
+  if (slide.notes) s.addNotes(slide.notes);
+
+  for (const el of slide.elements) {
+    const x = (el.x / 100) * PPTX_W;
+    const y = (el.y / 100) * PPTX_H;
+    const w = (el.width / 100) * PPTX_W;
+    const h = (el.height / 100) * PPTX_H;
+
+    if (el.type === "text") {
+      const t = el as TextElement;
+      // Scale font: px at 1280px canvas → PPTX points (approx 1:1)
+      const fontSize = t.fontSize || 16;
+      const textColor = t.color || (() => {
+        switch (t.role) {
+          case "metric-value": case "cta": return colors.accent;
+          case "heading": case "subheading": return colors.text;
+          default: return colors.textSecondary;
+        }
+      })();
+
+      if (t.role === "bullet-group") {
+        const items = t.content.split("\n").filter(Boolean);
+        const bullets = items.map((item) => ({
+          text: item,
+          options: {
+            fontSize: Math.round(fontSize),
+            color: hexToRgb(textColor),
+            bullet: { code: "2022", color: hexToRgb(colors.accent) },
+            paraSpaceAfter: 6,
+          },
+        }));
+        s.addText(bullets as PptxGenJS.TextProps[], {
+          x, y, w, h,
+          fontFace: "Calibri",
+          valign: "top",
+        });
+      } else {
+        s.addText(t.content || "", {
+          x, y, w, h,
+          fontSize: Math.round(fontSize),
+          bold: t.fontWeight === "bold",
+          italic: t.fontStyle === "italic",
+          color: hexToRgb(textColor),
+          align: (t.textAlign as PptxGenJS.HAlign) || "left",
+          fontFace: "Calibri",
+          valign: "top",
+          wrap: true,
+        });
+      }
+    } else if (el.type === "image") {
+      const img = el as ImageElement;
+      try {
+        s.addImage({ path: img.imageUrl, x, y, w, h });
+      } catch {
+        // Image may fail if URL is not accessible during export; skip silently
+      }
+    } else if (el.type === "shape") {
+      const shape = el as ShapeElement;
+      const fill = shape.fill || colors.primary;
+      if (shape.shape === "rect") {
+        s.addShape(pptx.ShapeType.rect, {
+          x, y, w, h,
+          fill: { color: hexToRgb(fill) },
+          line: shape.stroke ? { color: hexToRgb(shape.stroke), width: shape.strokeWidth || 1 } : undefined,
+        });
+      } else if (shape.shape === "circle") {
+        s.addShape(pptx.ShapeType.ellipse, {
+          x, y, w, h,
+          fill: { color: hexToRgb(fill) },
+          line: shape.stroke ? { color: hexToRgb(shape.stroke), width: shape.strokeWidth || 1 } : undefined,
+        });
+      }
+    }
+  }
+}
+
 export async function exportDeckToPPTX(
   title: string,
   slides: SlideData[],
@@ -303,6 +391,15 @@ export async function exportDeckToPPTX(
   pptx.author = "PitchDesk";
 
   for (const slide of slides) {
+    const anySlide = slide as AnySlide;
+    // Use the new element-based export path if slide has elements[]
+    const slideV2 = isSlideV2(anySlide) ? anySlide : migrateSlide(anySlide);
+    if (slideV2.elements && slideV2.elements.length > 0) {
+      addElementsSlide(pptx, slideV2, colors);
+      continue;
+    }
+
+    // Legacy fallback (for any slide that didn't migrate)
     switch (slide.slideType) {
       case "title":
         addTitleSlide(pptx, slide, colors);

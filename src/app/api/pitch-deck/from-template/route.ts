@@ -4,6 +4,8 @@ import authOptions from "@/lib/auth";
 import dbConnect from "@/lib/db";
 import PitchDeckModel from "@/models/PitchDeckModel";
 import { deckTemplates } from "@/data/deck-templates";
+import { migrateDeck } from "@/lib/slide-migration";
+import type { AnySlide } from "@/types/slide-elements";
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,11 +27,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const migratedSlides = migrateDeck(template.slides as AnySlide[]);
+
     const deck = await PitchDeckModel.create({
       userId: session.user._id,
       title: `${template.name} — Pitch Deck`,
       templateId: themeId || template.suggestedThemeId,
-      slides: template.slides,
+      slides: migratedSlides,
       companyData: {},
       status: "draft",
     });

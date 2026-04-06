@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import authOptions from "@/lib/auth";
 import dbConnect from "@/lib/db";
+import { migrateDeck } from "@/lib/slide-migration";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -125,10 +126,11 @@ Please regenerate the requested slides following the instruction while maintaini
     }
 
     const result = JSON.parse(content);
+    const migratedSlides = migrateDeck(result.slides);
 
     return NextResponse.json({
       message: "Slides regenerated successfully",
-      slides: result.slides,
+      slides: migratedSlides,
     });
   } catch (error) {
     console.error("Error regenerating slides:", error);

@@ -7,12 +7,13 @@ interface SlideFrameProps {
   className?: string;
   onClick?: () => void;
   slideRef?: React.Ref<HTMLDivElement>;
+  background?: string;
 }
 
 const SLIDE_WIDTH = 1280;
 const SLIDE_HEIGHT = 720;
 
-export default function SlideFrame({ children, className = "", onClick, slideRef }: SlideFrameProps) {
+export default function SlideFrame({ children, className = "", onClick, slideRef, background }: SlideFrameProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
 
@@ -49,7 +50,10 @@ export default function SlideFrame({ children, className = "", onClick, slideRef
           transform: `scale(${scale})`,
         }}
       >
-        <div className="w-full h-full relative overflow-hidden">
+        <div
+          className="w-full h-full relative overflow-hidden"
+          style={background ? { background } : undefined}
+        >
           {children}
         </div>
       </div>

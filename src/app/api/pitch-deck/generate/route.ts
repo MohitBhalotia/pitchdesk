@@ -4,6 +4,7 @@ import OpenAI from "openai";
 import authOptions from "@/lib/auth";
 import dbConnect from "@/lib/db";
 import PitchDeckModel from "@/models/PitchDeckModel";
+import { migrateDeck } from "@/lib/slide-migration";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -243,6 +244,7 @@ IMPORTANT INSTRUCTIONS:
     }
 
     const generatedData = JSON.parse(content);
+    const migratedSlides = migrateDeck(generatedData.slides);
 
     const deck = await PitchDeckModel.create({
       userId: session.user._id,
@@ -250,7 +252,7 @@ IMPORTANT INSTRUCTIONS:
         generatedData.title ||
         `${companyData.companyName} - Pitch Deck`,
       templateId,
-      slides: generatedData.slides,
+      slides: migratedSlides,
       companyData,
       status: "draft",
     });

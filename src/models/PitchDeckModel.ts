@@ -1,8 +1,13 @@
 import mongoose, { Schema, Model, Document } from "mongoose";
+import type { SlideElement } from "@/types/slide-elements";
 
 export interface IPitchDeckSlide {
   slideType: string;
   order: number;
+  // New element-based model (Phase A)
+  elements?: SlideElement[];
+  background?: string;
+  // Legacy fields (kept for backward compatibility)
   heading?: string;
   subheading?: string;
   bodyText?: string;
@@ -46,6 +51,40 @@ const slideSchema = new Schema(
   {
     slideType: { type: String, required: true },
     order: { type: Number, required: true },
+    // New element-based model (Phase A)
+    elements: [
+      {
+        id: String,
+        type: { type: String, enum: ["text", "shape", "image"] },
+        x: Number,
+        y: Number,
+        width: Number,
+        height: Number,
+        zIndex: Number,
+        locked: Boolean,
+        // text fields
+        content: String,
+        fontSize: Number,
+        fontWeight: String,
+        fontStyle: String,
+        textAlign: String,
+        color: String,
+        lineHeight: Number,
+        role: String,
+        // shape fields
+        shape: { type: String },
+        fill: String,
+        stroke: String,
+        strokeWidth: Number,
+        opacity: Number,
+        // image fields
+        imageUrl: String,
+        imagePublicId: String,
+        objectFit: String,
+      },
+    ],
+    background: String,
+    // Legacy fields
     heading: String,
     subheading: String,
     bodyText: String,

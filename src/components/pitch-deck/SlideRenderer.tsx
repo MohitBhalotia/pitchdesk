@@ -3,35 +3,16 @@
 import React from "react";
 import SlideFrame from "./SlideFrame";
 import { getTemplate } from "./templates";
+import ElementCanvas from "./ElementCanvas";
+import { migrateSlide } from "@/lib/slide-migration";
+import { isSlideV2 } from "@/types/slide-elements";
+import type { AnySlide, SlideElement } from "@/types/slide-elements";
 
 interface SlideRendererProps {
-  slide: {
-    slideType: string;
-    heading?: string;
-    subheading?: string;
-    bodyText?: string;
-    bulletPoints?: string[];
-    metrics?: Array<{ label: string; value: string }>;
-    teamMembers?: Array<{ name: string; role: string; bio: string }>;
-    chartData?: { type: string; labels: string[]; values: number[] };
-    callToAction?: string;
-    notes?: string;
-    decorativeElements?: Array<{
-      type: "divider" | "accent-bar" | "circle" | "quote-box";
-      position: "top" | "bottom" | "left" | "right" | "center";
-      color?: string;
-    }>;
-    images?: Array<{
-      url: string;
-      publicId?: string;
-      x: number;
-      y: number;
-      width: number;
-      height: number;
-    }>;
-  };
+  slide: AnySlide;
   templateId: string;
   isEditing?: boolean;
+  /** @deprecated Use onElementChange for the new element-based model */
   onContentChange?: (
     field: string,
     value:
@@ -40,6 +21,10 @@ interface SlideRendererProps {
       | Array<{ label: string; value: string }>
       | Array<{ name: string; role: string; bio: string }>
   ) => void;
+  selectedElementId?: string | null;
+  onSelectElement?: (id: string | null) => void;
+  onElementChange?: (id: string, patch: Partial<SlideElement>) => void;
+  exportMode?: boolean;
   className?: string;
   onClick?: () => void;
   slideRef?: React.Ref<HTMLDivElement>;
@@ -49,20 +34,32 @@ export default function SlideRenderer({
   slide,
   templateId,
   isEditing = false,
-  onContentChange,
+  selectedElementId = null,
+  onSelectElement,
+  onElementChange,
+  exportMode = false,
   className = "",
   onClick,
   slideRef,
 }: SlideRendererProps) {
   const template = getTemplate(templateId);
-  const { SlideComponent } = template;
+  const slideV2 = isSlideV2(slide) ? slide : migrateSlide(slide);
 
   return (
-    <SlideFrame className={className} onClick={onClick} slideRef={slideRef}>
-      <SlideComponent
-        {...slide}
+    <SlideFrame
+      className={className}
+      onClick={onClick}
+      slideRef={slideRef}
+      background={slideV2.background || template.metadata.colors.background}
+    >
+      <ElementCanvas
+        elements={slideV2.elements}
+        themeColors={template.metadata.colors}
         isEditing={isEditing}
-        onContentChange={onContentChange}
+        selectedElementId={selectedElementId}
+        onSelectElement={onSelectElement ?? (() => {})}
+        onElementChange={onElementChange ?? (() => {})}
+        exportMode={exportMode}
       />
     </SlideFrame>
   );

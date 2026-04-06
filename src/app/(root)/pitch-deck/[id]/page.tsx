@@ -10,8 +10,6 @@ import {
   GripVertical,
   ChevronDown,
   Loader2,
-  Save,
-  Presentation,
   StickyNote,
   FileSpreadsheet,
   Wand2,
@@ -19,15 +17,15 @@ import {
   Minimize2,
   Maximize2,
   Target,
-  ToggleLeft,
-  ToggleRight,
-  Minus,
   Circle,
-  Quote,
-  RectangleHorizontal,
-  ImagePlus,
+  Type,
   Upload,
   Sparkles,
+  Bold,
+  Italic,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,8 +37,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { v4 as uuid } from "uuid";
 import SlideRenderer from "@/components/pitch-deck/SlideRenderer";
 import { templateList, getTemplate } from "@/components/pitch-deck/templates";
+import { migrateDeck, migrateSlide, createDefaultElements } from "@/lib/slide-migration";
+import type { SlideElement, TextElement, ShapeElement } from "@/types/slide-elements";
 import {
   DndContext,
   closestCenter,
@@ -77,6 +78,10 @@ interface SlideImage {
 interface Slide {
   slideType: string;
   order: number;
+  // New element-based model
+  elements?: SlideElement[];
+  background?: string;
+  // Legacy fields (backward compat)
   heading?: string;
   subheading?: string;
   bodyText?: string;
@@ -193,6 +198,8 @@ export default function DeckEditorPage() {
   const [regenerating, setRegenerating] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [generatingImage, setGeneratingImage] = useState(false);
+  const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const slideRefs = useRef<Record<number, HTMLDivElement | null>>({});
 
@@ -208,7 +215,8 @@ export default function DeckEditorPage() {
         const res = await fetch(`/api/pitch-deck/${deckId}`);
         if (!res.ok) throw new Error("Failed to fetch deck");
         const data = await res.json();
-        setDeck(data.deck);
+        const migratedSlides = migrateDeck(data.deck.slides);
+        setDeck({ ...data.deck, slides: migratedSlides });
       } catch (error) {
         console.error(error);
         toast.error("Failed to load deck");
@@ -258,23 +266,88 @@ export default function DeckEditorPage() {
     [autoSave]
   );
 
-  const handleSlideContentChange = useCallback(
-    (
-      field: string,
-      value:
-        | string
-        | string[]
-        | Array<{ label: string; value: string }>
-        | Array<{ name: string; role: string; bio: string }>
-    ) => {
+const handleElementChange = useCallback(
+    (elementId: string, patch: Partial<SlideElement>) => {
       updateDeck((prev) => {
         const newSlides = [...prev.slides];
+        const slide = newSlides[activeSlideIndex];
+        if (!slide.elements) return prev;
         newSlides[activeSlideIndex] = {
-          ...newSlides[activeSlideIndex],
-          [field]: value,
+          ...slide,
+          elements: slide.elements.map((el) =>
+            el.id === elementId ? { ...el, ...patch } : el
+          ),
         };
         return { ...prev, slides: newSlides };
       });
+    },
+    [activeSlideIndex, updateDeck]
+  );
+
+  const handleDeleteElement = useCallback(
+    (elementId: string) => {
+      updateDeck((prev) => {
+        const newSlides = [...prev.slides];
+        const slide = newSlides[activeSlideIndex];
+        if (!slide.elements) return prev;
+        newSlides[activeSlideIndex] = {
+          ...slide,
+          elements: slide.elements.filter((el) => el.id !== elementId),
+        };
+        return { ...prev, slides: newSlides };
+      });
+      setSelectedElementId(null);
+    },
+    [activeSlideIndex, updateDeck]
+  );
+
+  const handleAddTextElement = useCallback(() => {
+    const newEl: SlideElement = {
+      id: uuid(),
+      type: "text",
+      role: "body",
+      content: "Click to edit",
+      x: 10,
+      y: 10,
+      width: 40,
+      height: 10,
+      fontSize: 18,
+    };
+    updateDeck((prev) => {
+      const newSlides = [...prev.slides];
+      const slide = newSlides[activeSlideIndex];
+      newSlides[activeSlideIndex] = {
+        ...slide,
+        elements: [...(slide.elements || []), newEl],
+      };
+      return { ...prev, slides: newSlides };
+    });
+    setSelectedElementId(newEl.id);
+  }, [activeSlideIndex, updateDeck]);
+
+  const handleAddShapeElement = useCallback(
+    (shape: "rect" | "circle" | "line") => {
+      const newEl: SlideElement = {
+        id: uuid(),
+        type: "shape",
+        shape,
+        x: 35,
+        y: 35,
+        width: 30,
+        height: 30,
+        fill: "#3b82f6",
+        opacity: 0.7,
+      };
+      updateDeck((prev) => {
+        const newSlides = [...prev.slides];
+        const slide = newSlides[activeSlideIndex];
+        newSlides[activeSlideIndex] = {
+          ...slide,
+          elements: [...(slide.elements || []), newEl],
+        };
+        return { ...prev, slides: newSlides };
+      });
+      setSelectedElementId(newEl.id);
     },
     [activeSlideIndex, updateDeck]
   );
@@ -312,9 +385,7 @@ export default function DeckEditorPage() {
         const newSlide: Slide = {
           slideType,
           order: prev.slides.length,
-          heading: slideType === "title" ? "New Slide" : slideType.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-          bodyText: "Add your content here...",
-          bulletPoints: ["point"].includes(slideType) ? [] : undefined,
+          elements: createDefaultElements(slideType),
         };
         return { ...prev, slides: [...prev.slides, newSlide] };
       });
@@ -352,6 +423,10 @@ export default function DeckEditorPage() {
     if (!deck) return;
 
     toast.info("Generating PDF...");
+    setIsExporting(true);
+    // Wait 2 animation frames so React re-renders plain divs (no react-rnd handles)
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
     try {
       const html2canvas = (await import("html2canvas")).default;
       const jsPDF = (await import("jspdf")).default;
@@ -380,6 +455,8 @@ export default function DeckEditorPage() {
     } catch (error) {
       console.error("PDF export failed:", error);
       toast.error("Failed to export PDF");
+    } finally {
+      setIsExporting(false);
     }
   }, [deck]);
 
@@ -402,12 +479,12 @@ export default function DeckEditorPage() {
         if (!res.ok) throw new Error("Failed to regenerate");
         const data = await res.json();
         if (data.slides && data.slides.length > 0) {
-          const regenSlide = data.slides[0];
+          const regenSlide = migrateSlide(data.slides[0]);
           updateDeck((prev) => {
             const newSlides = [...prev.slides];
             newSlides[activeSlideIndex] = {
               ...newSlides[activeSlideIndex],
-              ...regenSlide,
+              elements: regenSlide.elements,
               order: newSlides[activeSlideIndex].order,
               slideType: newSlides[activeSlideIndex].slideType,
             };
@@ -447,13 +524,24 @@ export default function DeckEditorPage() {
         if (!res.ok) throw new Error("Upload failed");
         const data = await res.json();
 
+        const newImageEl: SlideElement = {
+          id: uuid(),
+          type: "image",
+          imageUrl: data.url,
+          imagePublicId: data.publicId,
+          x: 60,
+          y: 10,
+          width: 30,
+          height: 80,
+          zIndex: 10,
+          objectFit: "contain",
+        };
         updateDeck((prev) => {
           const newSlides = [...prev.slides];
           const slide = newSlides[activeSlideIndex];
-          const existing = slide.images || [];
           newSlides[activeSlideIndex] = {
             ...slide,
-            images: [...existing, { url: data.url, publicId: data.publicId, x: 60, y: 10, width: 30, height: 30 }],
+            elements: [...(slide.elements || []), newImageEl],
           };
           return { ...prev, slides: newSlides };
         });
@@ -496,13 +584,25 @@ export default function DeckEditorPage() {
       if (!res.ok) throw new Error("Image generation failed");
       const data = await res.json();
 
+      const { v4: uuid } = await import("uuid");
+      const newImageEl: SlideElement = {
+        id: uuid(),
+        type: "image",
+        imageUrl: data.url,
+        imagePublicId: data.publicId,
+        x: 60,
+        y: 10,
+        width: 30,
+        height: 80,
+        zIndex: 10,
+        objectFit: "contain",
+      };
       updateDeck((prev) => {
         const newSlides = [...prev.slides];
         const s = newSlides[activeSlideIndex];
-        const existing = s.images || [];
         newSlides[activeSlideIndex] = {
           ...s,
-          images: [...existing, { url: data.url, publicId: data.publicId, x: 60, y: 10, width: 30, height: 30 }],
+          elements: [...(s.elements || []), newImageEl],
         };
         return { ...prev, slides: newSlides };
       });
@@ -659,53 +759,48 @@ export default function DeckEditorPage() {
 
         {/* Center Panel - Main Slide Canvas */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Visual Elements Toolbar */}
+          {/* Add Element Toolbar */}
           <div className="flex items-center justify-center gap-1 px-4 py-1.5 border-b bg-background/80">
-            <span className="text-xs text-muted-foreground mr-2">Decorations:</span>
-            {([
-              { type: "divider" as const, icon: Minus, label: "Divider" },
-              { type: "accent-bar" as const, icon: RectangleHorizontal, label: "Accent Bar" },
-              { type: "circle" as const, icon: Circle, label: "Circle" },
-              { type: "quote-box" as const, icon: Quote, label: "Quote Box" },
-            ]).map(({ type, icon: Icon, label }) => (
-              <DropdownMenu key={type}>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" title={label}>
-                    <Icon className="h-3.5 w-3.5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  {(["top", "bottom", "left", "right", "center"] as const).map((pos) => (
-                    <DropdownMenuItem key={pos} onClick={() => {
-                      updateDeck((prev) => {
-                        const newSlides = [...prev.slides];
-                        const slide = newSlides[activeSlideIndex];
-                        const existing = slide.decorativeElements || [];
-                        newSlides[activeSlideIndex] = {
-                          ...slide,
-                          decorativeElements: [...existing, { type, position: pos }],
-                        };
-                        return { ...prev, slides: newSlides };
-                      });
-                    }}>
-                      {pos.charAt(0).toUpperCase() + pos.slice(1)}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ))}
-            {activeSlide?.decorativeElements && activeSlide.decorativeElements.length > 0 && (
-              <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-destructive ml-2"
-                onClick={() => {
-                  updateDeck((prev) => {
-                    const newSlides = [...prev.slides];
-                    newSlides[activeSlideIndex] = { ...newSlides[activeSlideIndex], decorativeElements: [] };
-                    return { ...prev, slides: newSlides };
-                  });
-                }}>
-                Clear All
-              </Button>
-            )}
+            <span className="text-xs text-muted-foreground mr-2">Add:</span>
+            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" title="Add Text"
+              onClick={handleAddTextElement}>
+              <Type className="h-3.5 w-3.5 mr-1" />
+              Text
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" title="Add Shape">
+                  <Circle className="h-3.5 w-3.5 mr-1" />
+                  Shape
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => handleAddShapeElement("rect")}>Rectangle</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleAddShapeElement("circle")}>Circle</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleAddShapeElement("line")}>Line</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" title="Upload Image"
+              disabled={uploadingImage}
+              onClick={() => {
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = "image/*";
+                input.onchange = (e) => {
+                  const file = (e.target as HTMLInputElement).files?.[0];
+                  if (file) handleImageUpload(file);
+                };
+                input.click();
+              }}>
+              <Upload className="h-3.5 w-3.5 mr-1" />
+              Image
+            </Button>
+            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" title="Generate AI Image"
+              disabled={generatingImage}
+              onClick={handleGenerateImage}>
+              <Sparkles className="h-3.5 w-3.5 mr-1" />
+              AI Image
+            </Button>
           </div>
 
           <div className="flex-1 flex items-center justify-center p-8 bg-muted/20"
@@ -716,7 +811,10 @@ export default function DeckEditorPage() {
                 slide={activeSlide}
                 templateId={deck.templateId}
                 isEditing={true}
-                onContentChange={handleSlideContentChange}
+                selectedElementId={selectedElementId}
+                onSelectElement={setSelectedElementId}
+                onElementChange={handleElementChange}
+                exportMode={isExporting}
                 className="w-full rounded-lg shadow-2xl"
               />
             </div>
@@ -731,7 +829,13 @@ export default function DeckEditorPage() {
                 rows={3}
                 placeholder="Add speaker notes for this slide..."
                 value={activeSlide?.notes || ""}
-                onChange={(e) => handleSlideContentChange("notes", e.target.value)}
+                onChange={(e) => {
+                  updateDeck((prev) => {
+                    const newSlides = [...prev.slides];
+                    newSlides[activeSlideIndex] = { ...newSlides[activeSlideIndex], notes: e.target.value };
+                    return { ...prev, slides: newSlides };
+                  });
+                }}
               />
             </div>
           )}
@@ -759,33 +863,14 @@ export default function DeckEditorPage() {
                       updateDeck((prev) => {
                         const newSlides = [...prev.slides];
                         const current = newSlides[activeSlideIndex];
-                        const defaults: Partial<Slide> = {};
-                        // Reset type-specific fields for new type
-                        if (["market", "traction", "financials", "ask"].includes(type.value)) {
-                          defaults.metrics = current.metrics || [{ label: "Metric", value: "0" }];
-                        } else {
-                          defaults.metrics = undefined;
-                        }
-                        if (type.value === "team") {
-                          defaults.teamMembers = current.teamMembers || [{ name: "Name", role: "Role", bio: "Bio" }];
-                        } else {
-                          defaults.teamMembers = undefined;
-                        }
-                        if (["problem", "solution", "product", "business_model", "competition", "ask"].includes(type.value)) {
-                          defaults.bulletPoints = current.bulletPoints || ["Point 1"];
-                        } else if (!["market", "traction", "financials"].includes(type.value)) {
-                          defaults.bulletPoints = undefined;
-                        }
-                        if (type.value === "closing") {
-                          defaults.callToAction = current.callToAction || "Get in touch";
-                        }
                         newSlides[activeSlideIndex] = {
                           ...current,
                           slideType: type.value,
-                          ...defaults,
+                          elements: createDefaultElements(type.value),
                         };
                         return { ...prev, slides: newSlides };
                       });
+                      setSelectedElementId(null);
                     }}
                   >
                     {type.label}
@@ -796,47 +881,105 @@ export default function DeckEditorPage() {
             <p className="text-xs text-muted-foreground mt-1">Slide {activeSlideIndex + 1} of {deck.slides.length}</p>
           </div>
 
-          {/* Field Toggles */}
+          {/* Element Properties */}
           <div>
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Fields</h3>
-            <div className="space-y-2">
-              {[
-                { key: "subheading", label: "Subheading", defaultVal: "Subheading" },
-                { key: "bodyText", label: "Body Text", defaultVal: "Add your content here..." },
-                { key: "bulletPoints", label: "Bullet Points", defaultVal: ["Point 1"] },
-                { key: "callToAction", label: "Call to Action", defaultVal: "Get in touch" },
-              ].map(({ key, label, defaultVal }) => {
-                const fieldKey = key as keyof Slide;
-                const isArray = Array.isArray(defaultVal);
-                const hasValue = isArray
-                  ? activeSlide?.[fieldKey] && (activeSlide[fieldKey] as string[]).length > 0
-                  : !!activeSlide?.[fieldKey];
-                return (
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Element</h3>
+            {(() => {
+              const el = selectedElementId
+                ? activeSlide?.elements?.find((e) => e.id === selectedElementId)
+                : null;
+              if (!el) {
+                return <p className="text-xs text-muted-foreground">Click an element to edit its properties</p>;
+              }
+              return (
+                <div className="space-y-3">
+                  {el.type === "text" && (
+                    <>
+                      <div>
+                        <label className="text-xs text-muted-foreground block mb-1">Font Size</label>
+                        <input
+                          type="number"
+                          min={8}
+                          max={120}
+                          className="w-full h-7 px-2 text-xs border rounded bg-background"
+                          value={(el as TextElement).fontSize || 16}
+                          onChange={(e) => handleElementChange(el.id, { fontSize: Number(e.target.value) } as Partial<TextElement>)}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground block mb-1">Style</label>
+                        <div className="flex gap-1">
+                          <button
+                            className={`flex-1 h-7 text-xs border rounded font-bold transition-colors ${(el as TextElement).fontWeight === "bold" ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
+                            onClick={() => handleElementChange(el.id, { fontWeight: (el as TextElement).fontWeight === "bold" ? "normal" : "bold" } as Partial<TextElement>)}
+                          >
+                            <Bold className="h-3 w-3 mx-auto" />
+                          </button>
+                          <button
+                            className={`flex-1 h-7 text-xs border rounded italic transition-colors ${(el as TextElement).fontStyle === "italic" ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
+                            onClick={() => handleElementChange(el.id, { fontStyle: (el as TextElement).fontStyle === "italic" ? "normal" : "italic" } as Partial<TextElement>)}
+                          >
+                            <Italic className="h-3 w-3 mx-auto" />
+                          </button>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground block mb-1">Align</label>
+                        <div className="flex gap-1">
+                          {(["left", "center", "right"] as const).map((align) => {
+                            const Icon = align === "left" ? AlignLeft : align === "center" ? AlignCenter : AlignRight;
+                            return (
+                              <button
+                                key={align}
+                                className={`flex-1 h-7 text-xs border rounded transition-colors ${(el as TextElement).textAlign === align ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
+                                onClick={() => handleElementChange(el.id, { textAlign: align } as Partial<TextElement>)}
+                              >
+                                <Icon className="h-3 w-3 mx-auto" />
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground block mb-1">Color</label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            className="w-8 h-7 rounded border cursor-pointer"
+                            value={(el as TextElement).color || "#ffffff"}
+                            onChange={(e) => handleElementChange(el.id, { color: e.target.value } as Partial<TextElement>)}
+                          />
+                          {(el as TextElement).color && (
+                            <button className="text-xs text-muted-foreground hover:text-foreground"
+                              onClick={() => handleElementChange(el.id, { color: undefined } as Partial<TextElement>)}>
+                              Reset
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
+                  {el.type === "shape" && (
+                    <div>
+                      <label className="text-xs text-muted-foreground block mb-1">Fill Color</label>
+                      <input
+                        type="color"
+                        className="w-8 h-7 rounded border cursor-pointer"
+                        value={(el as ShapeElement).fill || "#3b82f6"}
+                        onChange={(e) => handleElementChange(el.id, { fill: e.target.value } as Partial<SlideElement>)}
+                      />
+                    </div>
+                  )}
                   <button
-                    key={key}
-                    className="flex items-center justify-between w-full text-xs py-1 px-1 rounded hover:bg-muted transition-colors"
-                    onClick={() => {
-                      updateDeck((prev) => {
-                        const newSlides = [...prev.slides];
-                        if (hasValue) {
-                          newSlides[activeSlideIndex] = { ...newSlides[activeSlideIndex], [key]: isArray ? [] : "" };
-                        } else {
-                          newSlides[activeSlideIndex] = { ...newSlides[activeSlideIndex], [key]: defaultVal };
-                        }
-                        return { ...prev, slides: newSlides };
-                      });
-                    }}
+                    className="w-full h-7 text-xs border border-destructive text-destructive rounded hover:bg-destructive hover:text-destructive-foreground transition-colors flex items-center justify-center gap-1"
+                    onClick={() => handleDeleteElement(el.id)}
                   >
-                    <span>{label}</span>
-                    {hasValue ? (
-                      <ToggleRight className="h-4 w-4 text-primary" />
-                    ) : (
-                      <ToggleLeft className="h-4 w-4 text-muted-foreground" />
-                    )}
+                    <Trash2 className="h-3 w-3" />
+                    Delete Element
                   </button>
-                );
-              })}
-            </div>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Template */}
@@ -926,54 +1069,8 @@ export default function DeckEditorPage() {
           <div>
             <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Images</h3>
             <div className="space-y-2">
-              <Button variant="outline" size="sm" className="w-full justify-start text-xs"
-                disabled={uploadingImage}
-                onClick={() => {
-                  const input = document.createElement("input");
-                  input.type = "file";
-                  input.accept = "image/*";
-                  input.onchange = (e) => {
-                    const file = (e.target as HTMLInputElement).files?.[0];
-                    if (file) handleImageUpload(file);
-                  };
-                  input.click();
-                }}>
-                {uploadingImage ? <Loader2 className="h-3 w-3 mr-2 animate-spin" /> : <Upload className="h-3 w-3 mr-2" />}
-                {uploadingImage ? "Uploading..." : "Upload Image"}
-              </Button>
-              <Button variant="outline" size="sm" className="w-full justify-start text-xs"
-                disabled={generatingImage}
-                onClick={handleGenerateImage}>
-                {generatingImage ? <Loader2 className="h-3 w-3 mr-2 animate-spin" /> : <Sparkles className="h-3 w-3 mr-2" />}
-                {generatingImage ? "Generating..." : "Generate AI Image"}
-              </Button>
+              <p className="text-xs text-muted-foreground">Use the toolbar above to add images. Images are draggable elements — select one and use the Element panel to delete.</p>
               <p className="text-xs text-muted-foreground">Or drag & drop an image onto the slide</p>
-
-              {/* Image list */}
-              {activeSlide?.images && activeSlide.images.length > 0 && (
-                <div className="space-y-2 mt-2">
-                  {activeSlide.images.map((img, i) => (
-                    <div key={i} className="flex items-center gap-2 p-1.5 rounded border group">
-                      <img src={img.url} alt="" className="w-10 h-10 object-cover rounded" />
-                      <span className="text-xs text-muted-foreground flex-1 truncate">Image {i + 1}</span>
-                      <button className="opacity-0 group-hover:opacity-100 text-destructive p-0.5"
-                        onClick={() => {
-                          updateDeck((prev) => {
-                            const newSlides = [...prev.slides];
-                            const slide = newSlides[activeSlideIndex];
-                            newSlides[activeSlideIndex] = {
-                              ...slide,
-                              images: (slide.images || []).filter((_, idx) => idx !== i),
-                            };
-                            return { ...prev, slides: newSlides };
-                          });
-                        }}>
-                        <Trash2 className="h-3 w-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
 
@@ -981,9 +1078,10 @@ export default function DeckEditorPage() {
           <div>
             <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Tips</h3>
             <div className="space-y-1 text-xs text-muted-foreground">
-              <p>Click text to edit inline</p>
-              <p>Drag thumbnails to reorder</p>
-              <p>Drag images onto the slide</p>
+              <p>Click element to select + edit</p>
+              <p>Drag elements to reposition</p>
+              <p>Drag corners to resize</p>
+              <p>Drag slide thumbnails to reorder</p>
               <p>Changes auto-save</p>
             </div>
           </div>
@@ -998,10 +1096,12 @@ export default function DeckEditorPage() {
             ref={(el) => { slideRefs.current[i] = el; }}
             style={{ width: 1280, height: 720 }}
           >
-            {React.createElement(getTemplate(deck.templateId).SlideComponent, {
-              ...slide,
-              isEditing: false,
-            })}
+            <SlideRenderer
+              slide={slide}
+              templateId={deck.templateId}
+              isEditing={false}
+              exportMode={true}
+            />
           </div>
         ))}
       </div>
