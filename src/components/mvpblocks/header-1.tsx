@@ -43,7 +43,7 @@ const navItems: NavItem[] = [
   { name: "Features", href1: "/features", href2: "/features" },
   { name: "Competitions", href1: "/competitions" },
   { name: "Accelerators", href1: "/incubations" },
-  { name: "Pricing", href1: "/#pricing", href2: "/payment" },
+  { name: "Pricing", href1: "/#pricing", href2: "/#pricing" },
   { name: "Advisors", href1: "/advisors" },
   { name: "About", href1: "/about", href2: "/about" },
 ];
