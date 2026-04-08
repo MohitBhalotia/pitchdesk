@@ -300,6 +300,20 @@ function addClosingSlide(pptx: PptxGenJS, slide: SlideData, colors: ThemeColors)
 const PPTX_W = 13.33;
 const PPTX_H = 7.5;
 
+function htmlToPlainText(html: string): string {
+  if (!html.trimStart().startsWith("<")) return html;
+  return html
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>/gi, "\n")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 function addElementsSlide(pptx: PptxGenJS, slide: SlideV2, colors: ThemeColors) {
   const s = pptx.addSlide();
   const bg = slide.background || colors.background;
@@ -325,7 +339,7 @@ function addElementsSlide(pptx: PptxGenJS, slide: SlideV2, colors: ThemeColors) 
       })();
 
       if (t.role === "bullet-group") {
-        const items = t.content.split("\n").filter(Boolean);
+        const items = htmlToPlainText(t.content).split("\n").filter(Boolean);
         const bullets = items.map((item) => ({
           text: item,
           options: {
@@ -341,7 +355,7 @@ function addElementsSlide(pptx: PptxGenJS, slide: SlideV2, colors: ThemeColors) 
           valign: "top",
         });
       } else {
-        s.addText(t.content || "", {
+        s.addText(htmlToPlainText(t.content || ""), {
           x, y, w, h,
           fontSize: Math.round(fontSize),
           bold: t.fontWeight === "bold",
@@ -355,6 +369,7 @@ function addElementsSlide(pptx: PptxGenJS, slide: SlideV2, colors: ThemeColors) 
       }
     } else if (el.type === "image") {
       const img = el as ImageElement;
+      if (!img.imageUrl) continue; // skip empty placeholders
       try {
         s.addImage({ path: img.imageUrl, x, y, w, h });
       } catch {
@@ -374,6 +389,24 @@ function addElementsSlide(pptx: PptxGenJS, slide: SlideV2, colors: ThemeColors) 
           x, y, w, h,
           fill: { color: hexToRgb(fill) },
           line: shape.stroke ? { color: hexToRgb(shape.stroke), width: shape.strokeWidth || 1 } : undefined,
+        });
+      } else if (shape.shape === "line") {
+        const lineColor = shape.strokeWidth && shape.strokeWidth > 0 ? (shape.stroke || fill) : fill;
+        s.addShape(pptx.ShapeType.line, {
+          x, y,
+          w,
+          h: 0,
+          line: { color: hexToRgb(lineColor), width: shape.strokeWidth || 2 },
+        });
+      } else if (shape.shape === "arrow") {
+        const arrowColor = shape.strokeWidth && shape.strokeWidth > 0 ? (shape.stroke || fill) : fill;
+        // pptxgenjs uses "bentConnector2" or custom arrow marker; fall back to a line with right arrow via shape
+        s.addShape(pptx.ShapeType.rightArrow, {
+          x, y,
+          w,
+          h: Math.max(h, 0.15),
+          fill: { color: hexToRgb(arrowColor) },
+          line: { color: hexToRgb(arrowColor), width: 1 },
         });
       }
     }

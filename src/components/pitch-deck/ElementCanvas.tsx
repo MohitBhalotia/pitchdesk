@@ -1,9 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Rnd } from "react-rnd";
 import type { TemplateMetadata } from "./templates/types";
-import type { SlideElement } from "@/types/slide-elements";
+import type { SlideElement, TextElement } from "@/types/slide-elements";
 import ElementContent from "./ElementContent";
 
 const SLIDE_W = 1280;
@@ -40,6 +40,8 @@ interface ElementCanvasProps {
   onSelectElement: (id: string | null) => void;
   onElementChange: (id: string, patch: Partial<SlideElement>) => void;
   exportMode?: boolean;
+  textEditingId?: string | null;
+  onTextEditingChange?: (id: string | null) => void;
 }
 
 export default function ElementCanvas({
@@ -50,7 +52,28 @@ export default function ElementCanvas({
   onSelectElement,
   onElementChange,
   exportMode = false,
+  textEditingId: externalTextEditingId,
+  onTextEditingChange,
 }: ElementCanvasProps) {
+  const [internalTextEditingId, setInternalTextEditingId] = useState<string | null>(null);
+
+  const textEditingId = externalTextEditingId !== undefined ? externalTextEditingId : internalTextEditingId;
+  const setTextEditingId = useCallback((id: string | null) => {
+    setInternalTextEditingId(id);
+    onTextEditingChange?.(id);
+  }, [onTextEditingChange]);
+
+  // Escape key exits text editing
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && textEditingId) {
+        setTextEditingId(null);
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [textEditingId, setTextEditingId]);
+
   const sorted = [...elements].sort(
     (a, b) => (a.zIndex ?? 1) - (b.zIndex ?? 1)
   );
@@ -59,12 +82,17 @@ export default function ElementCanvas({
     <div
       className="absolute inset-0"
       onClick={(e) => {
-        if (e.target === e.currentTarget) onSelectElement(null);
+        if (e.target === e.currentTarget) {
+          onSelectElement(null);
+          setTextEditingId(null);
+        }
       }}
     >
       {sorted.map((el) => {
         const { x, y, width, height } = pctToPx(el);
         const isSelected = selectedElementId === el.id;
+        const isTextEditing = textEditingId === el.id;
+        const isTextEl = el.type === "text";
 
         if (!isEditing || exportMode) {
           return (
@@ -84,6 +112,7 @@ export default function ElementCanvas({
                 themeColors={themeColors}
                 isEditing={false}
                 isSelected={false}
+                isTextEditing={false}
                 onChange={() => {}}
               />
             </div>
@@ -123,8 +152,18 @@ export default function ElementCanvas({
               e.stopPropagation();
               onSelectElement(el.id);
             }}
-            enableResizing={!el.locked}
-            disableDragging={el.locked === true}
+            onDoubleClick={(e) => {
+              e.stopPropagation();
+              if (isTextEl) {
+                const tel = el as TextElement;
+                const role = tel.role;
+                if (role !== "bullet-group" && role !== "team-card") {
+                  setTextEditingId(el.id);
+                }
+              }
+            }}
+            enableResizing={!el.locked && !isTextEditing}
+            disableDragging={el.locked === true || isTextEditing}
           >
             <div style={{ width: "100%", height: "100%" }}>
               <ElementContent
@@ -132,6 +171,7 @@ export default function ElementCanvas({
                 themeColors={themeColors}
                 isEditing={isEditing}
                 isSelected={isSelected}
+                isTextEditing={isTextEditing}
                 onChange={(patch) => onElementChange(el.id, patch)}
               />
             </div>

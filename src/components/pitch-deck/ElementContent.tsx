@@ -1,6 +1,12 @@
 "use client";
 
 import React from "react";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import { TextStyle } from "@tiptap/extension-text-style";
+import { Color } from "@tiptap/extension-color";
+import TextAlign from "@tiptap/extension-text-align";
+import Underline from "@tiptap/extension-underline";
 import type { TemplateMetadata } from "./templates/types";
 import type {
   SlideElement,
@@ -8,12 +14,14 @@ import type {
   ShapeElement,
   ImageElement,
 } from "@/types/slide-elements";
+import FormatToolbar from "./FormatToolbar";
 
 interface ElementContentProps {
   element: SlideElement;
   themeColors: TemplateMetadata["colors"];
   isEditing: boolean;
   isSelected: boolean;
+  isTextEditing: boolean;
   onChange: (patch: Partial<SlideElement>) => void;
 }
 
@@ -46,14 +54,12 @@ function resolveTextColor(
 function TextContent({
   el,
   themeColors,
-  isEditing,
-  isSelected,
+  isTextEditing,
   onChange,
 }: {
   el: TextElement;
   themeColors: TemplateMetadata["colors"];
-  isEditing: boolean;
-  isSelected: boolean;
+  isTextEditing: boolean;
   onChange: (patch: Partial<TextElement>) => void;
 }) {
   const color = resolveTextColor(el, themeColors);
@@ -69,6 +75,7 @@ function TextContent({
     overflow: "hidden",
   };
 
+  // Bullet-group: keep structured plain-text rendering
   if (el.role === "bullet-group") {
     const items = el.content.split("\n").filter(Boolean);
     return (
@@ -100,6 +107,7 @@ function TextContent({
     );
   }
 
+  // Team-card: keep structured plain-text rendering
   if (el.role === "team-card") {
     const lines = el.content.split("\n").filter(Boolean);
     const [name, role, ...bioParts] = lines;
@@ -152,29 +160,116 @@ function TextContent({
     );
   }
 
-  // Regular text — contentEditable when editing and selected
-  if (isEditing && isSelected) {
+  // Regular text — Tiptap editor when in text-editing mode
+  return (
+    <TiptapTextContent
+      el={el}
+      color={color}
+      style={style}
+      isTextEditing={isTextEditing}
+      onChange={onChange}
+    />
+  );
+}
+
+// Tiptap-based text content (separate component so hooks are always called)
+function TiptapTextContent({
+  el,
+  color,
+  style,
+  isTextEditing,
+  onChange,
+}: {
+  el: TextElement;
+  color: string;
+  style: React.CSSProperties;
+  isTextEditing: boolean;
+  onChange: (patch: Partial<TextElement>) => void;
+}) {
+  const buildStyleStr = () =>
+    [
+      `font-size:${el.fontSize || 16}px`,
+      `color:${color}`,
+      `text-align:${el.textAlign || "left"}`,
+      `line-height:${el.lineHeight || 1.4}`,
+      "outline:none",
+      "width:100%",
+      "height:100%",
+    ].join(";");
+
+  const editor = useEditor(
+    {
+      extensions: [
+        StarterKit,
+        TextStyle,
+        Color,
+        TextAlign.configure({ types: ["paragraph", "heading"] }),
+        Underline,
+      ],
+      content: el.content || "",
+      onUpdate: ({ editor }) => {
+        onChange({ content: editor.getHTML() });
+      },
+      editorProps: {
+        attributes: { style: buildStyleStr(), class: "tiptap-editor" },
+      },
+    },
+    [el.id]
+  );
+
+  // Sync element-level style props (fontSize, color, align) back to editor when they change
+  React.useEffect(() => {
+    if (!editor) return;
+    editor.setOptions({
+      editorProps: {
+        attributes: { style: buildStyleStr(), class: "tiptap-editor" },
+      },
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editor, el.fontSize, color, el.textAlign, el.lineHeight]);
+
+  if (isTextEditing && editor) {
+    return (
+      <div style={{ width: "100%", height: "100%", position: "relative" }}>
+        {/* Floating format toolbar — above the element */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: "calc(100% + 6px)",
+            left: 0,
+            zIndex: 9999,
+            pointerEvents: "auto",
+          }}
+        >
+          <FormatToolbar
+            editor={editor}
+            element={el}
+            onElementChange={onChange}
+          />
+        </div>
+        <EditorContent
+          editor={editor}
+          style={{
+            ...style,
+            cursor: "text",
+            overflow: "auto",
+          }}
+        />
+      </div>
+    );
+  }
+
+  // View mode — render stored HTML (Tiptap-compatible or plain text)
+  const isHtml = el.content.trimStart().startsWith("<");
+  if (isHtml) {
     return (
       <div
-        contentEditable
-        suppressContentEditableWarning
-        style={{ ...style, outline: "none", cursor: "text" }}
-        onBlur={(e) => {
-          const newContent = e.currentTarget.innerText;
-          if (newContent !== el.content) {
-            onChange({ content: newContent } as Partial<TextElement>);
-          }
-        }}
+        style={style}
         dangerouslySetInnerHTML={{ __html: el.content }}
       />
     );
   }
-
-  return (
-    <div style={style}>
-      {el.content}
-    </div>
-  );
+  return <div style={style}>{el.content}</div>;
 }
 
 // ─── Shape element ─────────────────────────────────────────────────────────
@@ -190,6 +285,7 @@ function ShapeContent({
   const stroke = el.stroke || "transparent";
   const strokeWidth = el.strokeWidth ?? 0;
   const opacity = el.opacity ?? 1;
+  const markerId = `arrow-${el.id}`;
 
   if (el.shape === "rect") {
     return (
@@ -223,18 +319,49 @@ function ShapeContent({
 
   if (el.shape === "line") {
     return (
+      <svg width="100%" height="100%" style={{ display: "block", opacity }}>
+        <line
+          x1="2"
+          y1="50%"
+          x2="98%"
+          y2="50%"
+          stroke={strokeWidth > 0 ? stroke : fill}
+          strokeWidth={strokeWidth || 2}
+        />
+      </svg>
+    );
+  }
+
+  if (el.shape === "arrow") {
+    const arrowFill = strokeWidth > 0 ? stroke : fill;
+    return (
       <svg
         width="100%"
         height="100%"
+        viewBox="0 0 100 20"
+        preserveAspectRatio="none"
         style={{ display: "block", opacity }}
       >
+        <defs>
+          <marker
+            id={markerId}
+            markerWidth="8"
+            markerHeight="8"
+            refX="7"
+            refY="4"
+            orient="auto"
+          >
+            <polygon points="0 0, 8 4, 0 8" fill={arrowFill} />
+          </marker>
+        </defs>
         <line
-          x1="0"
-          y1="50%"
-          x2="100%"
-          y2="50%"
-          stroke={stroke || fill}
+          x1="2"
+          y1="10"
+          x2="90"
+          y2="10"
+          stroke={arrowFill}
           strokeWidth={strokeWidth || 2}
+          markerEnd={`url(#${markerId})`}
         />
       </svg>
     );
@@ -245,7 +372,34 @@ function ShapeContent({
 
 // ─── Image element ─────────────────────────────────────────────────────────
 
-function ImageContent({ el }: { el: ImageElement }) {
+function ImageContent({
+  el,
+  themeColors,
+}: {
+  el: ImageElement;
+  themeColors: TemplateMetadata["colors"];
+}) {
+  if (!el.imageUrl) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          background: themeColors.surface,
+          border: `2px dashed ${themeColors.textSecondary}`,
+          borderRadius: 8,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <span style={{ color: themeColors.textSecondary, fontSize: 14 }}>
+          Drop image here
+        </span>
+      </div>
+    );
+  }
+
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
@@ -268,6 +422,7 @@ export default function ElementContent({
   themeColors,
   isEditing,
   isSelected,
+  isTextEditing,
   onChange,
 }: ElementContentProps) {
   if (element.type === "text") {
@@ -275,8 +430,7 @@ export default function ElementContent({
       <TextContent
         el={element as TextElement}
         themeColors={themeColors}
-        isEditing={isEditing}
-        isSelected={isSelected}
+        isTextEditing={isTextEditing}
         onChange={onChange as (patch: Partial<TextElement>) => void}
       />
     );
@@ -292,7 +446,12 @@ export default function ElementContent({
   }
 
   if (element.type === "image") {
-    return <ImageContent el={element as ImageElement} />;
+    return (
+      <ImageContent
+        el={element as ImageElement}
+        themeColors={themeColors}
+      />
+    );
   }
 
   return null;

@@ -1,6 +1,7 @@
 import { v4 as uuid } from "uuid";
 import {
   AnySlide,
+  ElementRole,
   ImageElement,
   LegacySlide,
   SlideElement,
@@ -8,6 +9,7 @@ import {
   TextElement,
   isSlideV2,
 } from "@/types/slide-elements";
+import { layoutPresets } from "@/data/layout-presets";
 
 // ─── Default layout positions per slide type ─────────────────────────────────
 // All values are percentages of 1280×720
@@ -286,7 +288,7 @@ export function migrateSlide(slide: AnySlide): SlideV2 {
 
   return {
     slideType: legacy.slideType,
-    order: legacy.order,
+    order: legacy.order ?? 0,
     elements,
     notes: legacy.notes,
   };
@@ -333,4 +335,36 @@ export function createDefaultElements(slideType: string): SlideElement[] {
     callToAction: slideType === "closing" ? "Get in Touch" : undefined,
   };
   return migrateSlide(placeholder).elements;
+}
+
+
+export function applyLayoutPreset(
+  slide: SlideV2,
+  presetId: string,
+  preserveContent = true
+): SlideV2 {
+  const preset = layoutPresets.find((p) => p.id === presetId);
+  if (!preset) return slide;
+
+  const newElements = preset.createElements();
+
+  if (preserveContent) {
+    const oldByRole = new Map<ElementRole, TextElement>();
+    for (const e of slide.elements) {
+      if (e.type === "text" && (e as TextElement).role) {
+        oldByRole.set((e as TextElement).role!, e as TextElement);
+      }
+    }
+    for (const el of newElements) {
+      if (el.type === "text") {
+        const tel = el as TextElement;
+        if (tel.role) {
+          const existing = oldByRole.get(tel.role);
+          if (existing?.content) tel.content = existing.content;
+        }
+      }
+    }
+  }
+
+  return { ...slide, elements: newElements };
 }

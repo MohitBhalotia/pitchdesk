@@ -40,8 +40,10 @@ import { toast } from "sonner";
 import { v4 as uuid } from "uuid";
 import SlideRenderer from "@/components/pitch-deck/SlideRenderer";
 import { templateList, getTemplate } from "@/components/pitch-deck/templates";
-import { migrateDeck, migrateSlide, createDefaultElements } from "@/lib/slide-migration";
-import type { SlideElement, TextElement, ShapeElement } from "@/types/slide-elements";
+import { migrateDeck, migrateSlide, createDefaultElements, applyLayoutPreset } from "@/lib/slide-migration";
+import type { SlideElement, SlideV2, TextElement, ShapeElement, ImageElement } from "@/types/slide-elements";
+import { isSlideV2 } from "@/types/slide-elements";
+import LayoutPresetPicker from "@/components/pitch-deck/LayoutPresetPicker";
 import {
   DndContext,
   closestCenter,
@@ -275,7 +277,7 @@ const handleElementChange = useCallback(
         newSlides[activeSlideIndex] = {
           ...slide,
           elements: slide.elements.map((el) =>
-            el.id === elementId ? { ...el, ...patch } : el
+            el.id === elementId ? ({ ...el, ...patch } as SlideElement) : el
           ),
         };
         return { ...prev, slides: newSlides };
@@ -325,18 +327,45 @@ const handleElementChange = useCallback(
     setSelectedElementId(newEl.id);
   }, [activeSlideIndex, updateDeck]);
 
+  const handleDuplicateElement = useCallback(
+    (elementId: string) => {
+      updateDeck((prev) => {
+        const newSlides = [...prev.slides];
+        const slide = newSlides[activeSlideIndex];
+        if (!slide.elements) return prev;
+        const original = slide.elements.find((e) => e.id === elementId);
+        if (!original) return prev;
+        const copy: SlideElement = {
+          ...original,
+          id: uuid(),
+          x: Math.min(original.x + 3, 90),
+          y: Math.min(original.y + 3, 90),
+        };
+        newSlides[activeSlideIndex] = {
+          ...slide,
+          elements: [...slide.elements, copy],
+        };
+        return { ...prev, slides: newSlides };
+      });
+    },
+    [activeSlideIndex, updateDeck]
+  );
+
   const handleAddShapeElement = useCallback(
-    (shape: "rect" | "circle" | "line") => {
+    (shape: "rect" | "circle" | "line" | "arrow") => {
+      const isLinear = shape === "line" || shape === "arrow";
       const newEl: SlideElement = {
         id: uuid(),
         type: "shape",
         shape,
-        x: 35,
-        y: 35,
-        width: 30,
-        height: 30,
+        x: 30,
+        y: isLinear ? 48 : 30,
+        width: 40,
+        height: isLinear ? 6 : 30,
         fill: "#3b82f6",
-        opacity: 0.7,
+        stroke: isLinear ? "#3b82f6" : "transparent",
+        strokeWidth: isLinear ? 3 : 0,
+        opacity: 1,
       };
       updateDeck((prev) => {
         const newSlides = [...prev.slides];
@@ -539,10 +568,24 @@ const handleElementChange = useCallback(
         updateDeck((prev) => {
           const newSlides = [...prev.slides];
           const slide = newSlides[activeSlideIndex];
-          newSlides[activeSlideIndex] = {
-            ...slide,
-            elements: [...(slide.elements || []), newImageEl],
-          };
+          const elements = slide.elements || [];
+          const placeholderIdx = elements.findIndex(
+            (e) => e.type === "image" && !(e as ImageElement).imageUrl
+          );
+          if (placeholderIdx >= 0) {
+            // Fill placeholder — keep its position/size, just update imageUrl
+            const updated = [...elements];
+            const ph = updated[placeholderIdx];
+            updated[placeholderIdx] = {
+              ...ph,
+              imageUrl: data.url,
+              imagePublicId: data.publicId,
+              objectFit: "contain",
+            } as SlideElement;
+            newSlides[activeSlideIndex] = { ...slide, elements: updated };
+          } else {
+            newSlides[activeSlideIndex] = { ...slide, elements: [...elements, newImageEl] };
+          }
           return { ...prev, slides: newSlides };
         });
         toast.success("Image added to slide!");
@@ -584,7 +627,6 @@ const handleElementChange = useCallback(
       if (!res.ok) throw new Error("Image generation failed");
       const data = await res.json();
 
-      const { v4: uuid } = await import("uuid");
       const newImageEl: SlideElement = {
         id: uuid(),
         type: "image",
@@ -600,10 +642,22 @@ const handleElementChange = useCallback(
       updateDeck((prev) => {
         const newSlides = [...prev.slides];
         const s = newSlides[activeSlideIndex];
-        newSlides[activeSlideIndex] = {
-          ...s,
-          elements: [...(s.elements || []), newImageEl],
-        };
+        const elements = s.elements || [];
+        const placeholderIdx = elements.findIndex(
+          (e) => e.type === "image" && !(e as ImageElement).imageUrl
+        );
+        if (placeholderIdx >= 0) {
+          const updated = [...elements];
+          updated[placeholderIdx] = {
+            ...updated[placeholderIdx],
+            imageUrl: data.url,
+            imagePublicId: data.publicId,
+            objectFit: "contain",
+          } as SlideElement;
+          newSlides[activeSlideIndex] = { ...s, elements: updated };
+        } else {
+          newSlides[activeSlideIndex] = { ...s, elements: [...elements, newImageEl] };
+        }
         return { ...prev, slides: newSlides };
       });
       toast.success("AI image generated and added!");
@@ -778,6 +832,7 @@ const handleElementChange = useCallback(
                 <DropdownMenuItem onClick={() => handleAddShapeElement("rect")}>Rectangle</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleAddShapeElement("circle")}>Circle</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleAddShapeElement("line")}>Line</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleAddShapeElement("arrow")}>Arrow</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
             <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" title="Upload Image"
@@ -960,26 +1015,103 @@ const handleElementChange = useCallback(
                     </>
                   )}
                   {el.type === "shape" && (
-                    <div>
-                      <label className="text-xs text-muted-foreground block mb-1">Fill Color</label>
-                      <input
-                        type="color"
-                        className="w-8 h-7 rounded border cursor-pointer"
-                        value={(el as ShapeElement).fill || "#3b82f6"}
-                        onChange={(e) => handleElementChange(el.id, { fill: e.target.value } as Partial<SlideElement>)}
-                      />
-                    </div>
+                    <>
+                      <div>
+                        <label className="text-xs text-muted-foreground block mb-1">Fill Color</label>
+                        <input
+                          type="color"
+                          className="w-8 h-7 rounded border cursor-pointer"
+                          value={(el as ShapeElement).fill || "#3b82f6"}
+                          onChange={(e) => handleElementChange(el.id, { fill: e.target.value } as Partial<SlideElement>)}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground block mb-1">Stroke Color</label>
+                        <input
+                          type="color"
+                          className="w-8 h-7 rounded border cursor-pointer"
+                          value={(el as ShapeElement).stroke || "#000000"}
+                          onChange={(e) => handleElementChange(el.id, { stroke: e.target.value } as Partial<SlideElement>)}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground block mb-1">Stroke Width: {(el as ShapeElement).strokeWidth ?? 0}px</label>
+                        <input
+                          type="range"
+                          min={0}
+                          max={10}
+                          value={(el as ShapeElement).strokeWidth ?? 0}
+                          className="w-full"
+                          onChange={(e) => handleElementChange(el.id, { strokeWidth: Number(e.target.value) } as Partial<SlideElement>)}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground block mb-1">Opacity: {Math.round(((el as ShapeElement).opacity ?? 1) * 100)}%</label>
+                        <input
+                          type="range"
+                          min={0}
+                          max={100}
+                          value={Math.round(((el as ShapeElement).opacity ?? 1) * 100)}
+                          className="w-full"
+                          onChange={(e) => handleElementChange(el.id, { opacity: Number(e.target.value) / 100 } as Partial<SlideElement>)}
+                        />
+                      </div>
+                    </>
                   )}
-                  <button
-                    className="w-full h-7 text-xs border border-destructive text-destructive rounded hover:bg-destructive hover:text-destructive-foreground transition-colors flex items-center justify-center gap-1"
-                    onClick={() => handleDeleteElement(el.id)}
-                  >
-                    <Trash2 className="h-3 w-3" />
-                    Delete Element
-                  </button>
+                  {/* Z-index controls — all element types */}
+                  <div>
+                    <label className="text-xs text-muted-foreground block mb-1">Layer Order</label>
+                    <div className="flex gap-1">
+                      <button
+                        className="flex-1 h-7 text-xs border rounded hover:bg-muted transition-colors"
+                        onClick={() => handleElementChange(el.id, { zIndex: (el.zIndex || 1) + 1 } as Partial<SlideElement>)}
+                      >
+                        Bring Forward
+                      </button>
+                      <button
+                        className="flex-1 h-7 text-xs border rounded hover:bg-muted transition-colors"
+                        onClick={() => handleElementChange(el.id, { zIndex: Math.max(0, (el.zIndex || 1) - 1) } as Partial<SlideElement>)}
+                      >
+                        Send Back
+                      </button>
+                    </div>
+                  </div>
+                  {/* Duplicate + Delete */}
+                  <div className="flex gap-1">
+                    <button
+                      className="flex-1 h-7 text-xs border rounded hover:bg-muted transition-colors flex items-center justify-center gap-1"
+                      onClick={() => handleDuplicateElement(el.id)}
+                    >
+                      Duplicate
+                    </button>
+                    <button
+                      className="flex-1 h-7 text-xs border border-destructive text-destructive rounded hover:bg-destructive hover:text-destructive-foreground transition-colors flex items-center justify-center gap-1"
+                      onClick={() => handleDeleteElement(el.id)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                      Delete
+                    </button>
+                  </div>
                 </div>
               );
             })()}
+          </div>
+
+          {/* Layouts */}
+          <div>
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Layouts</h3>
+            <LayoutPresetPicker
+              onApply={(presetId) => {
+                updateDeck((prev) => {
+                  const newSlides = [...prev.slides];
+                  const current = newSlides[activeSlideIndex];
+                  const slideV2 = isSlideV2(current) ? current : migrateSlide(current);
+                  newSlides[activeSlideIndex] = applyLayoutPreset(slideV2, presetId, true);
+                  return { ...prev, slides: newSlides };
+                });
+                setSelectedElementId(null);
+              }}
+            />
           </div>
 
           {/* Template */}

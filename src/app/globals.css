@@ -490,3 +490,15 @@ h2 {
   animation-delay: 0.4s;
 }
 
+
+/* Tiptap editor fills element container */
+.tiptap-editor,
+.tiptap-editor .ProseMirror {
+  width: 100%;
+  height: 100%;
+  outline: none;
+}
+
+.tiptap-editor p {
+  margin: 0;
+}

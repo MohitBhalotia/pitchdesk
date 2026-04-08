@@ -34,7 +34,7 @@ export interface TextElement extends BaseElement {
 
 export interface ShapeElement extends BaseElement {
   type: "shape";
-  shape: "rect" | "circle" | "line";
+  shape: "rect" | "circle" | "line" | "arrow";
   fill?: string;
   stroke?: string;
   strokeWidth?: number;
@@ -43,7 +43,7 @@ export interface ShapeElement extends BaseElement {
 
 export interface ImageElement extends BaseElement {
   type: "image";
-  imageUrl: string;
+  imageUrl?: string;
   imagePublicId?: string;
   objectFit?: "contain" | "cover" | "fill";
 }
@@ -60,7 +60,7 @@ export interface SlideV2 {
 
 export interface LegacySlide {
   slideType: string;
-  order: number;
+  order?: number;
   heading?: string;
   subheading?: string;
   bodyText?: string;
