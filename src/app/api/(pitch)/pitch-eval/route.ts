@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import { PitchEval } from '@/models/PitchEvalModel';
 import Pitch from '@/models/PitchModel';
 import IncubationProgram from '@/models/IncubationProgramModel';
-import Agent from '@/models/AgentModel';
+import { IAgent } from '@/models/AgentModel';
 import IncubationParticipant from '@/models/IncubationParticipant';
 import dbConnect from '@/lib/db';
 
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
         const program = await IncubationProgram.findById(pitch.incubationId)
           .populate('botId', 'name sector investmentStage geographicFocus description userInstructions');
         if (program?.botId) {
-          const agent = program.botId as any;
+          const agent = program.botId as unknown as IAgent;
           vc_context = {
             name: agent.name || '',
             sectors: agent.sector || [],

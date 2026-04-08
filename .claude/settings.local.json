@@ -9,7 +9,8 @@
       "WebSearch",
       "Bash(cat:*)",
       "Bash(grep -E \"\\\\.\\(tsx|ts\\)$\")",
-      "Bash(grep -E \"\\\\.\\(ts|d\\\\.ts\\)$\")"
+      "Bash(grep -E \"\\\\.\\(ts|d\\\\.ts\\)$\")",
+      "Bash(npm run:*)"
     ]
   }
 }
