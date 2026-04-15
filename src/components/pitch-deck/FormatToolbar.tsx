@@ -12,6 +12,10 @@ import {
   AlignRight,
   List,
   ListOrdered,
+  Highlighter,
+  Subscript,
+  Superscript,
+  CaseUpper,
 } from "lucide-react";
 import type { TextElement } from "@/types/slide-elements";
 
@@ -208,6 +212,72 @@ export default function FormatToolbar({
           if (val >= 8 && val <= 200) onElementChange({ fontSize: val });
         }}
       />
+
+      {sep}
+
+      {/* Highlight color */}
+      <label className="w-7 h-7 flex items-center justify-center rounded cursor-pointer hover:bg-slate-100 relative" title="Highlight">
+        <input
+          type="color"
+          className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+          value={element.highlight || "#fff59d"}
+          onChange={(e) => onElementChange({ highlight: e.target.value })}
+        />
+        <Highlighter className="h-3 w-3" style={{ color: element.highlight || "#94a3b8" }} />
+      </label>
+      {element.highlight && (
+        <button
+          className={`${btnBase} text-[10px]`}
+          title="Clear highlight"
+          onClick={() => onElementChange({ highlight: undefined })}
+        >
+          ✕
+        </button>
+      )}
+
+      {/* Subscript / Superscript */}
+      <button
+        className={`${btnBase} ${element.verticalAlign === "sub" ? btnActive : ""}`}
+        title="Subscript"
+        onClick={() => onElementChange({ verticalAlign: element.verticalAlign === "sub" ? undefined : "sub" })}
+      >
+        <Subscript className="h-3 w-3" />
+      </button>
+      <button
+        className={`${btnBase} ${element.verticalAlign === "super" ? btnActive : ""}`}
+        title="Superscript"
+        onClick={() => onElementChange({ verticalAlign: element.verticalAlign === "super" ? undefined : "super" })}
+      >
+        <Superscript className="h-3 w-3" />
+      </button>
+
+      {/* All Caps */}
+      <button
+        className={`${btnBase} ${element.textTransform === "uppercase" ? btnActive : ""}`}
+        title="All caps"
+        onClick={() => onElementChange({ textTransform: element.textTransform === "uppercase" ? "none" : "uppercase" })}
+      >
+        <CaseUpper className="h-3 w-3" />
+      </button>
+
+      {sep}
+
+      {/* Letter spacing */}
+      <div className="flex items-center gap-1" title="Letter spacing (em)">
+        <span className="text-[10px] text-slate-500">AV</span>
+        <input
+          type="number"
+          step={0.01}
+          min={-0.1}
+          max={0.5}
+          value={element.letterSpacing ?? 0}
+          className="w-10 h-6 text-xs border border-slate-200 rounded text-center bg-transparent focus:outline-none focus:border-slate-400"
+          onChange={(e) => {
+            const v = Number(e.target.value);
+            onElementChange({ letterSpacing: v === 0 ? undefined : v });
+          }}
+        />
+      </div>
     </div>
   );
 }

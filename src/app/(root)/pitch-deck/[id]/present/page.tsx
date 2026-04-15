@@ -32,6 +32,7 @@ interface Deck {
   title: string;
   templateId: string;
   slides: Slide[];
+  defaultTransition?: string;
 }
 
 export default function PresentPage() {
@@ -144,13 +145,16 @@ export default function PresentPage() {
       >
         {/* Slide */}
         <div
-          className="w-full max-w-[calc(100vh*16/9)] relative"
+          className={`w-full max-w-[calc(100vh*16/9)] relative ${
+            (deck.defaultTransition || "fade") === "fade" ? "present-fade"
+            : deck.defaultTransition === "slide-left" ? "present-slide-left"
+            : deck.defaultTransition === "slide-right" ? "present-slide-right"
+            : deck.defaultTransition === "zoom" ? "present-zoom" : ""
+          }`}
+          key={currentIndex}
           onClick={(e) => e.stopPropagation()}
         >
-          <div
-            className="transition-opacity duration-300"
-            style={{ aspectRatio: "16/9" }}
-          >
+          <div style={{ aspectRatio: "16/9" }}>
             <SlideRenderer
               slide={currentSlide}
               templateId={deck.templateId}
@@ -274,6 +278,16 @@ export default function PresentPage() {
       </div>
 
       {/* Keyboard hint (shown briefly on load) */}
+      <style jsx global>{`
+        @keyframes presFade { from { opacity: 0 } to { opacity: 1 } }
+        @keyframes presSlideLeft { from { opacity: 0; transform: translateX(40px) } to { opacity: 1; transform: translateX(0) } }
+        @keyframes presSlideRight { from { opacity: 0; transform: translateX(-40px) } to { opacity: 1; transform: translateX(0) } }
+        @keyframes presZoom { from { opacity: 0; transform: scale(0.94) } to { opacity: 1; transform: scale(1) } }
+        .present-fade { animation: presFade .35s ease-out both; }
+        .present-slide-left { animation: presSlideLeft .35s ease-out both; }
+        .present-slide-right { animation: presSlideRight .35s ease-out both; }
+        .present-zoom { animation: presZoom .35s ease-out both; }
+      `}</style>
     </div>
   );
 }

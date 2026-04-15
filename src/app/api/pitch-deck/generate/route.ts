@@ -181,7 +181,29 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { companyData, templateId = "modern-dark" } = body;
+    const {
+      companyData,
+      templateId = "modern-dark",
+      slideCount,
+      narrative,
+    } = body as {
+      companyData: Record<string, string>;
+      templateId?: string;
+      slideCount?: number;
+      narrative?: "fundraising" | "sales" | "partnership" | "internal";
+    };
+
+    const narrativeFocus: Record<string, string> = {
+      fundraising: "This deck is for investor fundraising. Emphasize market size, traction, unit economics, team strength, and a clear funding ask.",
+      sales: "This deck is for a sales pitch. Emphasize the customer's pain, how the product solves it, proof points, and a clear next step / CTA to evaluate.",
+      partnership: "This deck is for a strategic partnership pitch. Emphasize mutual fit, shared goals, integration opportunities, and win-win economics.",
+      internal: "This is an internal strategy deck. Emphasize clear decisions to be made, trade-offs, a concrete plan, and success metrics.",
+    };
+    const narrativeHint = narrative ? `\n\nNARRATIVE FOCUS: ${narrativeFocus[narrative]}` : "";
+    const requestedCount = slideCount && slideCount >= 6 && slideCount <= 20 ? slideCount : undefined;
+    const countHint = requestedCount
+      ? `\n\nSLIDE COUNT: Produce EXACTLY ${requestedCount} slides. Select the most important slides from the classic pitch arc to fit this count. Always keep title and closing.`
+      : "";
 
     if (!companyData || !companyData.companyName) {
       return NextResponse.json(
@@ -208,7 +230,7 @@ export async function POST(req: NextRequest) {
     const userPrompt = `Generate a professional investor pitch deck for the following company.
 
 COMPANY PROFILE:
-${dataLines}${websiteSection}
+${dataLines}${websiteSection}${narrativeHint}${countHint}
 
 RESEARCH REQUIREMENT: Before generating content, analyze the company's industry to infer:
 - Likely direct competitors and their positioning (even if not provided)
@@ -224,8 +246,9 @@ IMPORTANT INSTRUCTIONS:
 - Ensure all numbers are internally consistent across slides
 - The deck should read like it was written by the founding team, not a generic template`;
 
+    const model = process.env.AI_MODEL || "gpt-4o";
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user", content: userPrompt },

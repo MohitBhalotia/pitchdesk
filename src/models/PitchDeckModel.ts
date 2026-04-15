@@ -43,6 +43,9 @@ export interface IPitchDeck extends Document {
   slides: IPitchDeckSlide[];
   companyData: Record<string, string>;
   status: "generating" | "draft" | "published";
+  shareToken?: string;
+  shareEnabled?: boolean;
+  defaultTransition?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -52,41 +55,12 @@ const slideSchema = new Schema(
     slideType: { type: String, required: true },
     order: { type: Number, required: true },
     // New element-based model (Phase A)
-    elements: [
-      {
-        id: String,
-        type: { type: String, enum: ["text", "shape", "image", "icon"] },
-        x: Number,
-        y: Number,
-        width: Number,
-        height: Number,
-        zIndex: Number,
-        locked: Boolean,
-        // text fields
-        content: String,
-        fontSize: Number,
-        fontWeight: String,
-        fontStyle: String,
-        textAlign: String,
-        color: String,
-        lineHeight: Number,
-        fontFamily: String,
-        role: String,
-        // shape fields
-        shape: { type: String },
-        fill: String,
-        stroke: String,
-        strokeWidth: Number,
-        opacity: Number,
-        // image fields
-        imageUrl: String,
-        imagePublicId: String,
-        objectFit: String,
-        // icon fields
-        iconName: String,
-      },
-    ],
+    elements: {
+      type: [Schema.Types.Mixed],
+      default: undefined,
+    },
     background: String,
+    transition: String,
     // Legacy fields
     heading: String,
     subheading: String,
@@ -158,6 +132,9 @@ const pitchDeckSchema = new Schema<IPitchDeck>(
       enum: ["generating", "draft", "published"],
       default: "draft",
     },
+    shareToken: { type: String, index: true, sparse: true },
+    shareEnabled: { type: Boolean, default: false },
+    defaultTransition: { type: String, default: "fade" },
   },
   { timestamps: true }
 );

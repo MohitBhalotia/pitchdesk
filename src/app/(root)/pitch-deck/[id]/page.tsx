@@ -41,6 +41,16 @@ import {
   Play,
   AlertCircle,
   Image as ImageIcon,
+  BarChart3,
+  Table as TableIcon,
+  Grid3x3,
+  Keyboard,
+  History,
+  Share2,
+  ZoomIn,
+  ZoomOut,
+  Group,
+  Ungroup,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,7 +66,7 @@ import { v4 as uuid } from "uuid";
 import SlideRenderer from "@/components/pitch-deck/SlideRenderer";
 import { templateList, getTemplate } from "@/components/pitch-deck/templates";
 import { migrateDeck, migrateSlide, createDefaultElements, applyLayoutPreset } from "@/lib/slide-migration";
-import type { SlideElement, SlideV2, TextElement, ShapeElement, ImageElement } from "@/types/slide-elements";
+import type { SlideElement, SlideV2, TextElement, ShapeElement, ImageElement, ChartElement, TableElement, ShapeKind, SlideTransition } from "@/types/slide-elements";
 import { isSlideV2 } from "@/types/slide-elements";
 import LayoutPresetPicker from "@/components/pitch-deck/LayoutPresetPicker";
 import { FONT_FAMILIES } from "@/components/pitch-deck/FormatToolbar";
@@ -64,6 +74,7 @@ import GradientPicker from "@/components/pitch-deck/GradientPicker";
 import IconPicker from "@/components/pitch-deck/IconPicker";
 import ImageSearchPanel from "@/components/pitch-deck/ImageSearchPanel";
 import AIAssistPanel from "@/components/pitch-deck/AIAssistPanel";
+import ContextMenu, { type ContextMenuItem } from "@/components/pitch-deck/ContextMenu";
 import {
   DndContext,
   closestCenter,
@@ -150,6 +161,7 @@ function SortableThumbnail({
   onClick,
   onDelete,
   onDuplicate,
+  onContextMenu,
 }: {
   slide: Slide;
   index: number;
@@ -158,6 +170,7 @@ function SortableThumbnail({
   onClick: () => void;
   onDelete: () => void;
   onDuplicate: () => void;
+  onContextMenu?: (e: React.MouseEvent) => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: `slide-${index}`,
@@ -175,6 +188,7 @@ function SortableThumbnail({
           isActive ? "border-primary ring-2 ring-primary/20" : "border-border hover:border-primary/50"
         }`}
         onClick={onClick}
+        onContextMenu={onContextMenu}
       >
         <div className="absolute top-1 left-1 z-10 flex items-center gap-1">
           <div
@@ -231,8 +245,18 @@ export default function DeckEditorPage() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [generatingImage, setGeneratingImage] = useState(false);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isExporting, setIsExporting] = useState(false);
   const [showIconPicker, setShowIconPicker] = useState(false);
+  const [showGrid, setShowGrid] = useState(false);
+  const [snapEnabled, setSnapEnabled] = useState(true);
+  const [zoom, setZoom] = useState(100);
+  const [showShortcuts, setShowShortcuts] = useState(false);
+  const [showVersions, setShowVersions] = useState(false);
+  const [showShare, setShowShare] = useState(false);
+  const [shareInfo, setShareInfo] = useState<{ token?: string; enabled: boolean }>({ enabled: false });
+  const [versions, setVersions] = useState<Array<{ _id: string; label?: string; createdAt: string }>>([]);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; items: ContextMenuItem[] } | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const slideRefs = useRef<Record<number, HTMLDivElement | null>>({});
   const undoStack = useRef<Slide[][]>([]);
@@ -887,6 +911,324 @@ const handleElementChange = useCallback(
     [activeSlideIndex, updateDeck]
   );
 
+  // Multi-element change (batch)
+  const handleMultiElementChange = useCallback(
+    (patches: Array<{ id: string; patch: Partial<SlideElement> }>) => {
+      updateDeck((prev) => {
+        const newSlides = [...prev.slides];
+        const slide = newSlides[activeSlideIndex];
+        if (!slide.elements) return prev;
+        const patchMap = new Map(patches.map((p) => [p.id, p.patch]));
+        newSlides[activeSlideIndex] = {
+          ...slide,
+          elements: slide.elements.map((el) =>
+            patchMap.has(el.id) ? ({ ...el, ...patchMap.get(el.id) } as SlideElement) : el
+          ),
+        };
+        return { ...prev, slides: newSlides };
+      });
+    },
+    [activeSlideIndex, updateDeck]
+  );
+
+  // Selection handler
+  const handleSelect = useCallback((id: string | null, shiftKey?: boolean) => {
+    if (id === null) {
+      setSelectedElementId(null);
+      setSelectedIds([]);
+      return;
+    }
+    if (shiftKey) {
+      setSelectedIds((prev) => {
+        const next = prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id];
+        setSelectedElementId(next[next.length - 1] || null);
+        return next;
+      });
+    } else {
+      setSelectedElementId(id);
+      setSelectedIds([id]);
+    }
+  }, []);
+
+  // Drag-box selection
+  const handleDragBoxSelect = useCallback(
+    (box: { x: number; y: number; w: number; h: number }, shiftKey: boolean) => {
+      setDeck((d) => {
+        if (!d) return d;
+        const slide = d.slides[activeSlideIndex];
+        if (!slide.elements) return d;
+        const inBox = slide.elements
+          .filter(
+            (el) =>
+              el.x >= box.x &&
+              el.y >= box.y &&
+              el.x + el.width <= box.x + box.w &&
+              el.y + el.height <= box.y + box.h
+          )
+          .map((el) => el.id);
+        if (shiftKey) {
+          setSelectedIds((prev) => Array.from(new Set([...prev, ...inBox])));
+        } else {
+          setSelectedIds(inBox);
+        }
+        setSelectedElementId(inBox[inBox.length - 1] || null);
+        return d;
+      });
+    },
+    [activeSlideIndex]
+  );
+
+  // Insert chart element
+  const handleAddChartElement = useCallback(
+    (chartKind: ChartElement["chartKind"] = "bar") => {
+      const newEl: ChartElement = {
+        id: uuid(),
+        type: "chart",
+        chartKind,
+        labels: ["Q1", "Q2", "Q3", "Q4"],
+        values: [10, 25, 45, 80],
+        x: 15,
+        y: 25,
+        width: 70,
+        height: 55,
+        title: "",
+      };
+      updateDeck((prev) => {
+        const newSlides = [...prev.slides];
+        const slide = newSlides[activeSlideIndex];
+        newSlides[activeSlideIndex] = { ...slide, elements: [...(slide.elements || []), newEl] };
+        return { ...prev, slides: newSlides };
+      });
+      setSelectedElementId(newEl.id);
+    },
+    [activeSlideIndex, updateDeck]
+  );
+
+  // Insert table element
+  const handleAddTableElement = useCallback(() => {
+    const newEl: TableElement = {
+      id: uuid(),
+      type: "table",
+      rows: [
+        ["Metric", "Q1", "Q2", "Q3"],
+        ["Revenue", "$100K", "$250K", "$500K"],
+        ["Customers", "50", "125", "300"],
+      ],
+      headerRow: true,
+      x: 15,
+      y: 25,
+      width: 70,
+      height: 35,
+      fontSize: 14,
+    };
+    updateDeck((prev) => {
+      const newSlides = [...prev.slides];
+      const slide = newSlides[activeSlideIndex];
+      newSlides[activeSlideIndex] = { ...slide, elements: [...(slide.elements || []), newEl] };
+      return { ...prev, slides: newSlides };
+    });
+    setSelectedElementId(newEl.id);
+  }, [activeSlideIndex, updateDeck]);
+
+  // Element grouping
+  const handleGroupElements = useCallback(() => {
+    if (selectedIds.length < 2) {
+      toast.error("Select 2+ elements to group");
+      return;
+    }
+    const groupId = uuid();
+    updateDeck((prev) => {
+      const newSlides = [...prev.slides];
+      const slide = newSlides[activeSlideIndex];
+      if (!slide.elements) return prev;
+      newSlides[activeSlideIndex] = {
+        ...slide,
+        elements: slide.elements.map((el) =>
+          selectedIds.includes(el.id) ? ({ ...el, groupId } as SlideElement) : el
+        ),
+      };
+      return { ...prev, slides: newSlides };
+    });
+    toast.success("Elements grouped");
+  }, [selectedIds, activeSlideIndex, updateDeck]);
+
+  const handleUngroupElements = useCallback(() => {
+    if (selectedIds.length === 0) return;
+    updateDeck((prev) => {
+      const newSlides = [...prev.slides];
+      const slide = newSlides[activeSlideIndex];
+      if (!slide.elements) return prev;
+      newSlides[activeSlideIndex] = {
+        ...slide,
+        elements: slide.elements.map((el) =>
+          selectedIds.includes(el.id) ? ({ ...el, groupId: undefined } as SlideElement) : el
+        ),
+      };
+      return { ...prev, slides: newSlides };
+    });
+    toast.success("Ungrouped");
+  }, [selectedIds, activeSlideIndex, updateDeck]);
+
+  // When an element in a group is selected, auto-select its siblings
+  const selectGroupSiblings = useCallback(
+    (id: string) => {
+      const slide = deck?.slides[activeSlideIndex];
+      const target = slide?.elements?.find((e) => e.id === id);
+      if (!target?.groupId) return;
+      const siblings = slide!.elements!.filter((e) => e.groupId === target.groupId).map((e) => e.id);
+      setSelectedIds(siblings);
+      setSelectedElementId(id);
+    },
+    [deck, activeSlideIndex]
+  );
+  useEffect(() => {
+    if (selectedElementId && selectedIds.length <= 1) {
+      selectGroupSiblings(selectedElementId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedElementId]);
+
+  // Slide transition
+  const setSlideTransition = useCallback(
+    (t: SlideTransition) => {
+      updateDeck((prev) => {
+        const newSlides = [...prev.slides];
+        newSlides[activeSlideIndex] = { ...newSlides[activeSlideIndex], transition: t } as Slide & { transition?: SlideTransition };
+        return { ...prev, slides: newSlides };
+      });
+    },
+    [activeSlideIndex, updateDeck]
+  );
+
+  // Share link
+  const openShareDialog = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/pitch-deck/${deckId}`);
+      const data = await res.json();
+      setShareInfo({
+        token: data.deck?.shareToken,
+        enabled: !!data.deck?.shareEnabled,
+      });
+      setShowShare(true);
+    } catch {
+      toast.error("Failed to load share status");
+    }
+  }, [deckId]);
+
+  const toggleShare = useCallback(
+    async (enabled: boolean) => {
+      try {
+        const res = await fetch(`/api/pitch-deck/${deckId}/share`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ enabled }),
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        setShareInfo({ token: data.shareToken, enabled: data.shareEnabled });
+        toast.success(enabled ? "Sharing enabled" : "Sharing disabled");
+      } catch {
+        toast.error("Failed to update share status");
+      }
+    },
+    [deckId]
+  );
+
+  // Version history
+  const loadVersions = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/pitch-deck/${deckId}/versions`);
+      const data = await res.json();
+      setVersions(data.versions || []);
+    } catch {
+      toast.error("Failed to load versions");
+    }
+  }, [deckId]);
+
+  const saveVersion = useCallback(
+    async (label?: string) => {
+      try {
+        await fetch(`/api/pitch-deck/${deckId}/versions`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ label }),
+        });
+        toast.success("Version saved");
+        loadVersions();
+      } catch {
+        toast.error("Failed to save version");
+      }
+    },
+    [deckId, loadVersions]
+  );
+
+  const restoreVersion = useCallback(
+    async (versionId: string) => {
+      if (!confirm("Restore this version? Current changes will be overwritten.")) return;
+      try {
+        const res = await fetch(`/api/pitch-deck/${deckId}/versions/${versionId}`, {
+          method: "POST",
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        const migrated = migrateDeck(data.deck.slides);
+        setDeck({ ...data.deck, slides: migrated });
+        toast.success("Version restored");
+        setShowVersions(false);
+      } catch {
+        toast.error("Failed to restore version");
+      }
+    },
+    [deckId]
+  );
+
+  // Context menu handlers
+  const openElementContextMenu = useCallback(
+    (id: string, x: number, y: number) => {
+      const slide = deck?.slides[activeSlideIndex];
+      const el = slide?.elements?.find((e) => e.id === id);
+      if (!el) return;
+      const items: ContextMenuItem[] = [
+        { label: "Copy", shortcut: "Ctrl+C", onClick: () => { setSelectedElementId(id); handleCopyElement(); } },
+        { label: "Duplicate", shortcut: "Ctrl+D", onClick: () => handleDuplicateElement(id) },
+        { label: el.locked ? "Unlock" : "Lock", onClick: () => toggleLockElement(id) },
+        { separator: true, label: "" },
+        { label: "Bring Forward", onClick: () => handleElementChange(id, { zIndex: (el.zIndex || 1) + 1 }) },
+        { label: "Send Backward", onClick: () => handleElementChange(id, { zIndex: Math.max(0, (el.zIndex || 1) - 1) }) },
+        { separator: true, label: "" },
+        { label: "Delete", shortcut: "Del", danger: true, onClick: () => handleDeleteElement(id) },
+      ];
+      setContextMenu({ x, y, items });
+    },
+    [deck, activeSlideIndex, handleCopyElement, handleDuplicateElement, toggleLockElement, handleElementChange, handleDeleteElement]
+  );
+
+  const openCanvasContextMenu = useCallback(
+    (x: number, y: number) => {
+      const items: ContextMenuItem[] = [
+        { label: "Paste", shortcut: "Ctrl+V", onClick: handlePasteElement, disabled: clipboardRef.current.length === 0 },
+        { label: "Add Text", onClick: handleAddTextElement },
+        { label: "Add Rectangle", onClick: () => handleAddShapeElement("rect") },
+        { label: "Add Circle", onClick: () => handleAddShapeElement("circle") },
+        { separator: true, label: "" },
+        { label: "Select All", shortcut: "Ctrl+A", onClick: () => handleDragBoxSelect({ x: 0, y: 0, w: 100, h: 100 }, false) },
+      ];
+      setContextMenu({ x, y, items });
+    },
+    [handlePasteElement, handleAddTextElement, handleAddShapeElement, handleDragBoxSelect]
+  );
+
+  const openSlideThumbContextMenu = useCallback(
+    (index: number, x: number, y: number) => {
+      const items: ContextMenuItem[] = [
+        { label: "Duplicate Slide", onClick: () => duplicateSlide(index) },
+        { label: "Delete Slide", danger: true, onClick: () => deleteSlide(index) },
+      ];
+      setContextMenu({ x, y, items });
+    },
+    [duplicateSlide, deleteSlide]
+  );
+
   // Global keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -905,11 +1247,20 @@ const handleElementChange = useCallback(
       } else if (ctrl && e.key === "v" && !isTyping) {
         e.preventDefault();
         handlePasteElement();
+      } else if (ctrl && e.shiftKey && e.key === "G" && !isTyping) {
+        e.preventDefault();
+        handleUngroupElements();
+      } else if (ctrl && e.key === "g" && !isTyping) {
+        e.preventDefault();
+        handleGroupElements();
+      } else if (e.key === "?" && !isTyping) {
+        e.preventDefault();
+        setShowShortcuts(true);
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [handleUndo, handleRedo, handleCopyElement, handlePasteElement]);
+  }, [handleUndo, handleRedo, handleCopyElement, handlePasteElement, handleGroupElements, handleUngroupElements]);
 
   if (loading) {
     return (
@@ -1003,6 +1354,50 @@ const handleElementChange = useCallback(
               <Redo2 className="h-3.5 w-3.5" />
             </Button>
           </div>
+
+          {/* Group / Ungroup */}
+          <div className="flex items-center gap-0.5">
+            <Button variant="ghost" size="icon" className="h-7 w-7" title="Group (Ctrl+G)" onClick={handleGroupElements} disabled={selectedIds.length < 2}>
+              <Group className="h-3.5 w-3.5" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-7 w-7" title="Ungroup (Ctrl+Shift+G)" onClick={handleUngroupElements} disabled={selectedIds.length === 0}>
+              <Ungroup className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+
+          {/* Grid / Snap */}
+          <Button variant={showGrid ? "secondary" : "ghost"} size="icon" className="h-7 w-7" title="Toggle grid" onClick={() => setShowGrid((v) => !v)}>
+            <Grid3x3 className="h-3.5 w-3.5" />
+          </Button>
+          <Button variant={snapEnabled ? "secondary" : "ghost"} size="sm" className="h-7 px-2 text-[10px]" title="Toggle snap" onClick={() => setSnapEnabled((v) => !v)}>
+            Snap
+          </Button>
+
+          {/* Zoom */}
+          <div className="flex items-center gap-0.5 border rounded">
+            <button className="px-1 hover:bg-muted" title="Zoom out" onClick={() => setZoom((z) => Math.max(50, z - 10))}>
+              <ZoomOut className="h-3 w-3" />
+            </button>
+            <span className="text-[10px] tabular-nums w-8 text-center">{zoom}%</span>
+            <button className="px-1 hover:bg-muted" title="Zoom in" onClick={() => setZoom((z) => Math.min(200, z + 10))}>
+              <ZoomIn className="h-3 w-3" />
+            </button>
+          </div>
+
+          {/* Shortcuts */}
+          <Button variant="ghost" size="icon" className="h-7 w-7" title="Keyboard shortcuts (?)" onClick={() => setShowShortcuts(true)}>
+            <Keyboard className="h-3.5 w-3.5" />
+          </Button>
+
+          {/* Versions */}
+          <Button variant="ghost" size="icon" className="h-7 w-7" title="Version history" onClick={() => { setShowVersions(true); loadVersions(); }}>
+            <History className="h-3.5 w-3.5" />
+          </Button>
+
+          {/* Share */}
+          <Button variant="ghost" size="icon" className="h-7 w-7" title="Share" onClick={openShareDialog}>
+            <Share2 className="h-3.5 w-3.5" />
+          </Button>
 
           {/* Present button */}
           <Button
@@ -1127,6 +1522,10 @@ const handleElementChange = useCallback(
                   onClick={() => setActiveSlideIndex(index)}
                   onDelete={() => deleteSlide(index)}
                   onDuplicate={() => duplicateSlide(index)}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    openSlideThumbContextMenu(index, e.clientX, e.clientY);
+                  }}
                 />
               ))}
             </SortableContext>
@@ -1168,12 +1567,32 @@ const handleElementChange = useCallback(
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => handleAddShapeElement("rect")}>Rectangle</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleAddShapeElement("circle")}>Circle</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleAddShapeElement("line")}>Line</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleAddShapeElement("arrow")}>Arrow</DropdownMenuItem>
+                {(["rect","circle","line","arrow","triangle","diamond","star","pentagon","hexagon","parallelogram","rounded-rect","process-arrow","cloud"] as ShapeKind[]).map((s) => (
+                  <DropdownMenuItem key={s} onClick={() => handleAddShapeElement(s as "rect" | "circle" | "line" | "arrow")}>
+                    <span className="capitalize">{s.replace("-"," ")}</span>
+                  </DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" title="Add Chart">
+                  <BarChart3 className="h-3.5 w-3.5 mr-1" />
+                  Chart
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => handleAddChartElement("bar")}>Bar</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleAddChartElement("line")}>Line</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleAddChartElement("area")}>Area</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleAddChartElement("pie")}>Pie</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleAddChartElement("donut")}>Donut</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" title="Add Table" onClick={handleAddTableElement}>
+              <TableIcon className="h-3.5 w-3.5 mr-1" />
+              Table
+            </Button>
             <Button variant="ghost" size="sm" className="h-7 px-2 text-xs" title="Upload Image"
               disabled={uploadingImage}
               onClick={() => {
@@ -1223,18 +1642,27 @@ const handleElementChange = useCallback(
             onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; }}
             onDrop={handleCanvasDrop}>
             <div className="w-full max-w-4xl">
-              <SlideRenderer
-                slide={activeSlide}
-                templateId={deck.templateId}
-                isEditing={true}
-                selectedElementId={selectedElementId}
-                onSelectElement={setSelectedElementId}
-                onElementChange={handleElementChange}
-                onDeleteElement={handleDeleteElement}
-                onDuplicateElement={handleDuplicateElement}
-                exportMode={isExporting}
-                className="w-full rounded-lg shadow-2xl"
-              />
+              <div style={{ transform: `scale(${zoom / 100})`, transformOrigin: "center center", transition: "transform 0.15s" }}>
+                <SlideRenderer
+                  slide={activeSlide}
+                  templateId={deck.templateId}
+                  isEditing={true}
+                  selectedElementId={selectedElementId}
+                  selectedIds={selectedIds}
+                  onSelectElement={handleSelect}
+                  onElementChange={handleElementChange}
+                  onMultiElementChange={handleMultiElementChange}
+                  onDeleteElement={handleDeleteElement}
+                  onDuplicateElement={handleDuplicateElement}
+                  showGrid={showGrid}
+                  snapEnabled={snapEnabled}
+                  onContextMenuElement={openElementContextMenu}
+                  onContextMenuCanvas={openCanvasContextMenu}
+                  onDragBoxSelect={handleDragBoxSelect}
+                  exportMode={isExporting}
+                  className="w-full rounded-lg shadow-2xl"
+                />
+              </div>
             </div>
           </div>
 
@@ -1305,6 +1733,22 @@ const handleElementChange = useCallback(
                 value={activeSlide?.background || ""}
                 onChange={setSlideBackground}
               />
+            </div>
+
+            {/* Transition */}
+            <div className="mt-3">
+              <label className="text-xs text-muted-foreground block mb-1.5">Transition</label>
+              <select
+                className="w-full h-7 px-2 text-xs border rounded bg-background"
+                value={(activeSlide as Slide & { transition?: SlideTransition }).transition || "fade"}
+                onChange={(e) => setSlideTransition(e.target.value as SlideTransition)}
+              >
+                <option value="fade">Fade</option>
+                <option value="slide-left">Slide Left</option>
+                <option value="slide-right">Slide Right</option>
+                <option value="zoom">Zoom</option>
+                <option value="none">None</option>
+              </select>
             </div>
           </div>
 
@@ -1464,6 +1908,18 @@ const handleElementChange = useCallback(
                   {/* Shape-specific */}
                   {el.type === "shape" && (
                     <>
+                      <div>
+                        <label className="text-xs text-muted-foreground block mb-1">Shape</label>
+                        <select
+                          className="w-full h-7 px-2 text-xs border rounded bg-background capitalize"
+                          value={(el as ShapeElement).shape}
+                          onChange={(e) => handleElementChange(el.id, { shape: e.target.value as ShapeKind } as Partial<SlideElement>)}
+                        >
+                          {(["rect","circle","line","arrow","triangle","diamond","star","pentagon","hexagon","parallelogram","rounded-rect","process-arrow","cloud"] as ShapeKind[]).map((s) => (
+                            <option key={s} value={s}>{s.replace("-"," ")}</option>
+                          ))}
+                        </select>
+                      </div>
                       <div className="grid grid-cols-2 gap-1.5">
                         <div>
                           <label className="text-xs text-muted-foreground block mb-1">Fill</label>
@@ -1479,6 +1935,18 @@ const handleElementChange = useCallback(
                             onChange={(e) => handleElementChange(el.id, { stroke: e.target.value } as Partial<SlideElement>)}
                           />
                         </div>
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground block mb-1">Stroke Style</label>
+                        <select
+                          className="w-full h-7 px-2 text-xs border rounded bg-background"
+                          value={(el as ShapeElement).strokeStyle || "solid"}
+                          onChange={(e) => handleElementChange(el.id, { strokeStyle: e.target.value } as Partial<SlideElement>)}
+                        >
+                          <option value="solid">Solid</option>
+                          <option value="dashed">Dashed</option>
+                          <option value="dotted">Dotted</option>
+                        </select>
                       </div>
                       <div>
                         <label className="text-xs text-muted-foreground block mb-1">Stroke Width: {(el as ShapeElement).strokeWidth ?? 0}px</label>
@@ -1535,6 +2003,88 @@ const handleElementChange = useCallback(
                       </div>
                     </div>
                   )}
+
+                  {/* Chart-specific */}
+                  {el.type === "chart" && (
+                    <>
+                      <div>
+                        <label className="text-xs text-muted-foreground block mb-1">Chart Type</label>
+                        <select className="w-full h-7 px-2 text-xs border rounded bg-background"
+                          value={(el as ChartElement).chartKind}
+                          onChange={(e) => handleElementChange(el.id, { chartKind: e.target.value } as Partial<SlideElement>)}
+                        >
+                          <option value="bar">Bar</option>
+                          <option value="line">Line</option>
+                          <option value="area">Area</option>
+                          <option value="pie">Pie</option>
+                          <option value="donut">Donut</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground block mb-1">Labels (comma separated)</label>
+                        <input type="text" className="w-full h-7 px-2 text-xs border rounded bg-background"
+                          value={(el as ChartElement).labels.join(", ")}
+                          onChange={(e) => handleElementChange(el.id, { labels: e.target.value.split(",").map(s => s.trim()) } as Partial<SlideElement>)}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground block mb-1">Values (comma separated)</label>
+                        <input type="text" className="w-full h-7 px-2 text-xs border rounded bg-background"
+                          value={(el as ChartElement).values.join(", ")}
+                          onChange={(e) => {
+                            const vals = e.target.value.split(",").map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
+                            handleElementChange(el.id, { values: vals } as Partial<SlideElement>);
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-muted-foreground block mb-1">Title</label>
+                        <input type="text" className="w-full h-7 px-2 text-xs border rounded bg-background"
+                          value={(el as ChartElement).title || ""}
+                          onChange={(e) => handleElementChange(el.id, { title: e.target.value } as Partial<SlideElement>)}
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {/* Table-specific */}
+                  {el.type === "table" && (() => {
+                    const t = el as TableElement;
+                    return (
+                      <>
+                        <div className="flex gap-1">
+                          <button className="flex-1 h-7 text-xs border rounded hover:bg-muted"
+                            onClick={() => handleElementChange(el.id, { rows: [...t.rows, new Array(t.rows[0]?.length || 3).fill("")] } as Partial<SlideElement>)}>
+                            + Row
+                          </button>
+                          <button className="flex-1 h-7 text-xs border rounded hover:bg-muted"
+                            onClick={() => handleElementChange(el.id, { rows: t.rows.map(r => [...r, ""]) } as Partial<SlideElement>)}>
+                            + Column
+                          </button>
+                        </div>
+                        <div className="flex gap-1">
+                          <button className="flex-1 h-7 text-xs border rounded hover:bg-muted"
+                            disabled={t.rows.length <= 1}
+                            onClick={() => handleElementChange(el.id, { rows: t.rows.slice(0, -1) } as Partial<SlideElement>)}>
+                            − Row
+                          </button>
+                          <button className="flex-1 h-7 text-xs border rounded hover:bg-muted"
+                            disabled={(t.rows[0]?.length || 0) <= 1}
+                            onClick={() => handleElementChange(el.id, { rows: t.rows.map(r => r.slice(0, -1)) } as Partial<SlideElement>)}>
+                            − Column
+                          </button>
+                        </div>
+                        <div>
+                          <label className="text-xs text-muted-foreground flex items-center gap-2">
+                            <input type="checkbox" checked={!!t.headerRow}
+                              onChange={(e) => handleElementChange(el.id, { headerRow: e.target.checked } as Partial<SlideElement>)}
+                            />
+                            Header row
+                          </label>
+                        </div>
+                      </>
+                    );
+                  })()}
 
                   {/* Layer + Actions — all types */}
                   <div>
@@ -1757,6 +2307,106 @@ const handleElementChange = useCallback(
           </div>
         </div>
       </div>
+
+      {/* Context menu */}
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          items={contextMenu.items}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
+
+      {/* Shortcuts modal */}
+      {showShortcuts && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center" onClick={() => setShowShortcuts(false)}>
+          <div className="bg-background rounded-lg p-6 w-[480px] max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-lg font-semibold mb-4">Keyboard Shortcuts</h2>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              {[
+                ["Ctrl+Z", "Undo"],
+                ["Ctrl+Shift+Z", "Redo"],
+                ["Ctrl+C / Ctrl+V", "Copy / Paste"],
+                ["Ctrl+D", "Duplicate"],
+                ["Ctrl+G", "Group"],
+                ["Ctrl+Shift+G", "Ungroup"],
+                ["Ctrl+A", "Select all"],
+                ["Del", "Delete"],
+                ["Arrows", "Nudge 1%"],
+                ["Shift+Arrows", "Nudge 5%"],
+                ["Shift+Click", "Multi-select"],
+                ["?", "Show shortcuts"],
+              ].map(([k, v]) => (
+                <React.Fragment key={k}>
+                  <kbd className="px-2 py-0.5 bg-muted rounded text-xs font-mono">{k}</kbd>
+                  <span className="text-muted-foreground">{v}</span>
+                </React.Fragment>
+              ))}
+            </div>
+            <Button className="mt-4 w-full" variant="outline" onClick={() => setShowShortcuts(false)}>Close</Button>
+          </div>
+        </div>
+      )}
+
+      {/* Share modal */}
+      {showShare && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center" onClick={() => setShowShare(false)}>
+          <div className="bg-background rounded-lg p-6 w-[480px]" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-lg font-semibold mb-4">Share Deck</h2>
+            <label className="flex items-center gap-2 mb-4 text-sm">
+              <input type="checkbox" checked={shareInfo.enabled} onChange={(e) => toggleShare(e.target.checked)} />
+              Enable public view-only link
+            </label>
+            {shareInfo.enabled && shareInfo.token && (
+              <div className="space-y-2">
+                <label className="text-xs text-muted-foreground">Public link</label>
+                <div className="flex gap-2">
+                  <Input readOnly value={`${typeof window !== "undefined" ? window.location.origin : ""}/deck/${shareInfo.token}`} className="text-xs" />
+                  <Button size="sm" variant="outline" onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/deck/${shareInfo.token}`);
+                    toast.success("Copied");
+                  }}>Copy</Button>
+                </div>
+              </div>
+            )}
+            <Button className="mt-4 w-full" variant="outline" onClick={() => setShowShare(false)}>Close</Button>
+          </div>
+        </div>
+      )}
+
+      {/* Versions modal */}
+      {showVersions && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center" onClick={() => setShowVersions(false)}>
+          <div className="bg-background rounded-lg p-6 w-[520px] max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">Version History</h2>
+              <Button size="sm" onClick={() => {
+                const label = prompt("Label this version (optional)");
+                saveVersion(label || undefined);
+              }}>
+                Save current
+              </Button>
+            </div>
+            {versions.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No saved versions yet.</p>
+            ) : (
+              <ul className="space-y-2">
+                {versions.map((v) => (
+                  <li key={v._id} className="flex items-center justify-between border rounded p-2">
+                    <div>
+                      <p className="text-sm font-medium">{v.label || "Untitled snapshot"}</p>
+                      <p className="text-xs text-muted-foreground">{new Date(v.createdAt).toLocaleString()}</p>
+                    </div>
+                    <Button size="sm" variant="outline" onClick={() => restoreVersion(v._id)}>Restore</Button>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <Button className="mt-4 w-full" variant="outline" onClick={() => setShowVersions(false)}>Close</Button>
+          </div>
+        </div>
+      )}
 
       {/* Hidden slides for PDF export */}
       <div className="fixed -left-[9999px] top-0">

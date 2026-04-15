@@ -1,7 +1,59 @@
 import PptxGenJS from "pptxgenjs";
 import { migrateSlide } from "@/lib/slide-migration";
 import { isSlideV2 } from "@/types/slide-elements";
-import type { AnySlide, SlideV2, TextElement, ImageElement, ShapeElement } from "@/types/slide-elements";
+import type {
+  AnySlide,
+  SlideV2,
+  TextElement,
+  ImageElement,
+  ShapeElement,
+  TableElement,
+  ChartElement,
+} from "@/types/slide-elements";
+
+// Map Google Font names to nearest available PPTX fonts
+const FONT_MAP: Record<string, string> = {
+  Inter: "Calibri",
+  Montserrat: "Calibri",
+  Poppins: "Calibri",
+  "Plus Jakarta Sans": "Calibri",
+  Outfit: "Calibri",
+  "DM Sans": "Calibri",
+  "Bricolage Grotesque": "Calibri",
+  "Space Grotesk": "Calibri",
+  Syne: "Calibri",
+  Raleway: "Calibri",
+  Nunito: "Calibri",
+  Lato: "Calibri",
+  Roboto: "Arial",
+  "Source Sans 3": "Arial",
+  "Playfair Display": "Georgia",
+};
+function mapFont(name: string | undefined): string {
+  if (!name) return "Calibri";
+  return FONT_MAP[name] || "Calibri";
+}
+
+function parseGradient(css: string): { stops: Array<{ color: string; pos: number }>; angle: number } | null {
+  // Simple parser for: linear-gradient(135deg, #a 0%, #b 100%)
+  const m = /linear-gradient\(([^)]+)\)/i.exec(css);
+  if (!m) return null;
+  const parts = m[1].split(",").map((s) => s.trim());
+  let angle = 90;
+  let startIdx = 0;
+  if (/deg/i.test(parts[0])) {
+    angle = parseFloat(parts[0]);
+    startIdx = 1;
+  }
+  const stops: Array<{ color: string; pos: number }> = [];
+  for (let i = startIdx; i < parts.length; i++) {
+    const pm = /(#[0-9a-fA-F]{3,8})\s*(\d+)?%?/.exec(parts[i]);
+    if (pm) {
+      stops.push({ color: pm[1], pos: pm[2] ? parseInt(pm[2]) : (i === startIdx ? 0 : 100) });
+    }
+  }
+  return stops.length ? { stops, angle } : null;
+}
 
 interface SlideData {
   slideType: string;
@@ -89,14 +141,14 @@ function addContentSlide(pptx: PptxGenJS, slide: SlideData, colors: ThemeColors)
     s.addText(slide.heading, {
       x: 0.6, y: 0.8, w: 8.5, h: 0.7,
       fontSize: 28, bold: true, color: hexToRgb(colors.text),
-      fontFace: "Calibri",
+      fontFace: mapFont(undefined),
     });
   }
   if (slide.bodyText) {
     s.addText(slide.bodyText, {
       x: 0.6, y: 1.6, w: 8.5, h: 0.8,
       fontSize: 14, color: hexToRgb(colors.textSecondary),
-      fontFace: "Calibri",
+      fontFace: mapFont(undefined),
     });
   }
   if (slide.bulletPoints && slide.bulletPoints.length > 0) {
@@ -111,7 +163,7 @@ function addContentSlide(pptx: PptxGenJS, slide: SlideData, colors: ThemeColors)
     }));
     s.addText(bullets as PptxGenJS.TextProps[], {
       x: 0.6, y: 2.5, w: 8.5, h: 2.5,
-      fontFace: "Calibri",
+      fontFace: mapFont(undefined),
       valign: "top",
     });
   }
@@ -132,14 +184,14 @@ function addMetricsSlide(pptx: PptxGenJS, slide: SlideData, colors: ThemeColors)
     s.addText(slide.heading, {
       x: 0.6, y: 0.8, w: 8.5, h: 0.7,
       fontSize: 28, bold: true, color: hexToRgb(colors.text),
-      fontFace: "Calibri",
+      fontFace: mapFont(undefined),
     });
   }
   if (slide.bodyText) {
     s.addText(slide.bodyText, {
       x: 0.6, y: 1.6, w: 8.5, h: 0.6,
       fontSize: 14, color: hexToRgb(colors.textSecondary),
-      fontFace: "Calibri",
+      fontFace: mapFont(undefined),
     });
   }
 
@@ -183,7 +235,7 @@ function addMetricsSlide(pptx: PptxGenJS, slide: SlideData, colors: ThemeColors)
     }));
     s.addText(bullets as PptxGenJS.TextProps[], {
       x: 0.6, y: 4.5, w: 8.5, h: 0.8,
-      fontFace: "Calibri",
+      fontFace: mapFont(undefined),
       valign: "top",
     });
   }
@@ -203,14 +255,14 @@ function addTeamSlide(pptx: PptxGenJS, slide: SlideData, colors: ThemeColors) {
     s.addText(slide.heading, {
       x: 0.6, y: 0.8, w: 8.5, h: 0.7,
       fontSize: 28, bold: true, color: hexToRgb(colors.text),
-      fontFace: "Calibri",
+      fontFace: mapFont(undefined),
     });
   }
   if (slide.bodyText) {
     s.addText(slide.bodyText, {
       x: 0.6, y: 1.6, w: 8.5, h: 0.5,
       fontSize: 14, color: hexToRgb(colors.textSecondary),
-      fontFace: "Calibri",
+      fontFace: mapFont(undefined),
     });
   }
 
@@ -314,10 +366,32 @@ function htmlToPlainText(html: string): string {
     .trim();
 }
 
+const SHAPE_KIND_MAP: Record<string, keyof typeof PptxGenJS.prototype.ShapeType | string> = {
+  rect: "rect",
+  "rounded-rect": "roundRect",
+  circle: "ellipse",
+  triangle: "triangle",
+  diamond: "diamond",
+  star: "star5",
+  pentagon: "pentagon",
+  hexagon: "hexagon",
+  parallelogram: "parallelogram",
+  "process-arrow": "rightArrow",
+  cloud: "cloud",
+};
+
 function addElementsSlide(pptx: PptxGenJS, slide: SlideV2, colors: ThemeColors) {
   const s = pptx.addSlide();
   const bg = slide.background || colors.background;
-  s.background = { fill: hexToRgb(bg.replace(/^#/, "").length === 6 ? bg : colors.background) };
+  const grad = typeof bg === "string" ? parseGradient(bg) : null;
+  if (grad && grad.stops.length >= 2) {
+    // pptxgenjs doesn't support true gradients on slide bg; approximate with first stop
+    s.background = { fill: hexToRgb(grad.stops[0].color) };
+  } else if (typeof bg === "string" && bg.startsWith("#") && bg.replace("#", "").length === 6) {
+    s.background = { fill: hexToRgb(bg) };
+  } else {
+    s.background = { fill: hexToRgb(colors.background) };
+  }
   if (slide.notes) s.addNotes(slide.notes);
 
   for (const el of slide.elements) {
@@ -328,15 +402,21 @@ function addElementsSlide(pptx: PptxGenJS, slide: SlideV2, colors: ThemeColors) 
 
     if (el.type === "text") {
       const t = el as TextElement;
-      // Scale font: px at 1280px canvas → PPTX points (approx 1:1)
       const fontSize = t.fontSize || 16;
-      const textColor = t.color || (() => {
-        switch (t.role) {
-          case "metric-value": case "cta": return colors.accent;
-          case "heading": case "subheading": return colors.text;
-          default: return colors.textSecondary;
-        }
-      })();
+      const textColor =
+        t.color ||
+        (() => {
+          switch (t.role) {
+            case "metric-value":
+            case "cta":
+              return colors.accent;
+            case "heading":
+            case "subheading":
+              return colors.text;
+            default:
+              return colors.textSecondary;
+          }
+        })();
 
       if (t.role === "bullet-group") {
         const items = htmlToPlainText(t.content).split("\n").filter(Boolean);
@@ -351,63 +431,133 @@ function addElementsSlide(pptx: PptxGenJS, slide: SlideV2, colors: ThemeColors) 
         }));
         s.addText(bullets as PptxGenJS.TextProps[], {
           x, y, w, h,
-          fontFace: "Calibri",
+          fontFace: mapFont(t.fontFamily),
           valign: "top",
         });
       } else {
-        s.addText(htmlToPlainText(t.content || ""), {
+        const content = t.textTransform === "uppercase"
+          ? htmlToPlainText(t.content || "").toUpperCase()
+          : htmlToPlainText(t.content || "");
+        s.addText(content, {
           x, y, w, h,
           fontSize: Math.round(fontSize),
           bold: t.fontWeight === "bold",
           italic: t.fontStyle === "italic",
           color: hexToRgb(textColor),
           align: (t.textAlign as PptxGenJS.HAlign) || "left",
-          fontFace: "Calibri",
+          fontFace: mapFont(t.fontFamily),
           valign: "top",
           wrap: true,
+          charSpacing: t.letterSpacing ? Math.round(t.letterSpacing * 100) : undefined,
+          highlight: t.highlight ? hexToRgb(t.highlight) : undefined,
         });
       }
     } else if (el.type === "image") {
       const img = el as ImageElement;
-      if (!img.imageUrl) continue; // skip empty placeholders
+      if (!img.imageUrl) continue;
       try {
         s.addImage({ path: img.imageUrl, x, y, w, h });
       } catch {
-        // Image may fail if URL is not accessible during export; skip silently
+        // ignore
       }
     } else if (el.type === "shape") {
       const shape = el as ShapeElement;
       const fill = shape.fill || colors.primary;
-      if (shape.shape === "rect") {
-        s.addShape(pptx.ShapeType.rect, {
-          x, y, w, h,
-          fill: { color: hexToRgb(fill) },
-          line: shape.stroke ? { color: hexToRgb(shape.stroke), width: shape.strokeWidth || 1 } : undefined,
-        });
-      } else if (shape.shape === "circle") {
-        s.addShape(pptx.ShapeType.ellipse, {
-          x, y, w, h,
-          fill: { color: hexToRgb(fill) },
-          line: shape.stroke ? { color: hexToRgb(shape.stroke), width: shape.strokeWidth || 1 } : undefined,
-        });
-      } else if (shape.shape === "line") {
-        const lineColor = shape.strokeWidth && shape.strokeWidth > 0 ? (shape.stroke || fill) : fill;
+      const strokeColor = shape.stroke;
+      const strokeWidth = shape.strokeWidth || 0;
+      const dashType: "solid" | "dash" | "sysDot" =
+        shape.strokeStyle === "dashed"
+          ? "dash"
+          : shape.strokeStyle === "dotted"
+          ? "sysDot"
+          : "solid";
+      const line = strokeColor && strokeWidth > 0
+        ? { color: hexToRgb(strokeColor), width: strokeWidth, dashType }
+        : undefined;
+
+      if (shape.shape === "line") {
+        const lineColor = strokeWidth > 0 ? strokeColor || fill : fill;
         s.addShape(pptx.ShapeType.line, {
-          x, y,
-          w,
-          h: 0,
-          line: { color: hexToRgb(lineColor), width: shape.strokeWidth || 2 },
+          x, y, w, h: 0,
+          line: { color: hexToRgb(lineColor), width: strokeWidth || 2 },
         });
-      } else if (shape.shape === "arrow") {
-        const arrowColor = shape.strokeWidth && shape.strokeWidth > 0 ? (shape.stroke || fill) : fill;
-        // pptxgenjs uses "bentConnector2" or custom arrow marker; fall back to a line with right arrow via shape
+        continue;
+      }
+      if (shape.shape === "arrow") {
+        const arrowColor = strokeWidth > 0 ? strokeColor || fill : fill;
         s.addShape(pptx.ShapeType.rightArrow, {
-          x, y,
-          w,
-          h: Math.max(h, 0.15),
+          x, y, w, h: Math.max(h, 0.15),
           fill: { color: hexToRgb(arrowColor) },
           line: { color: hexToRgb(arrowColor), width: 1 },
         });
+        continue;
+      }
+
+      const kind = SHAPE_KIND_MAP[shape.shape] || "rect";
+      const shapeTypeMap = pptx.ShapeType as unknown as Record<string, PptxGenJS.SHAPE_NAME>;
+      const shapeType = shapeTypeMap[kind] || pptx.ShapeType.rect;
+      s.addShape(shapeType, {
+        x, y, w, h,
+        fill: { color: hexToRgb(fill) },
+        line,
+        rectRadius: shape.shape === "rounded-rect" ? (shape.cornerRadius || 20) / 100 : undefined,
+      });
+    } else if (el.type === "table") {
+      const tbl = el as TableElement;
+      if (!tbl.rows || tbl.rows.length === 0) continue;
+      const fontSize = tbl.fontSize || 12;
+      const headerFill = tbl.headerFill || colors.accent;
+      const headerColor = tbl.headerColor || "#FFFFFF";
+      const bodyFill = tbl.bodyFill || colors.surface;
+      const bodyColor = tbl.bodyColor || colors.text;
+      const tableData = tbl.rows.map((row, ri) =>
+        row.map((cell) => ({
+          text: cell,
+          options: {
+            fill: { color: hexToRgb(tbl.headerRow && ri === 0 ? headerFill : bodyFill) },
+            color: hexToRgb(tbl.headerRow && ri === 0 ? headerColor : bodyColor),
+            bold: tbl.headerRow && ri === 0,
+            fontSize,
+            fontFace: mapFont(undefined),
+          },
+        }))
+      );
+      try {
+        s.addTable(tableData as PptxGenJS.TableRow[], {
+          x, y, w, h,
+          border: { type: "solid", color: hexToRgb(tbl.borderColor || colors.textSecondary), pt: 0.5 },
+          fontSize,
+        });
+      } catch {
+        // ignore
+      }
+    } else if (el.type === "chart") {
+      const ch = el as ChartElement;
+      const chartTypeMap: Record<string, string> = {
+        bar: "bar",
+        line: "line",
+        area: "area",
+        pie: "pie",
+        donut: "doughnut",
+      };
+      const chartType = chartTypeMap[ch.chartKind] || "bar";
+      try {
+        // @ts-expect-error chart type string accepted at runtime
+        s.addChart(chartType, [
+          {
+            name: ch.title || "Series",
+            labels: ch.labels,
+            values: ch.values,
+          },
+        ], {
+          x, y, w, h,
+          showLegend: ch.chartKind === "pie" || ch.chartKind === "donut",
+          chartColors: (ch.colors && ch.colors.length > 0 ? ch.colors : [colors.accent, colors.primary, colors.secondary])
+            .map((c) => hexToRgb(c)),
+          title: ch.title || undefined,
+        });
+      } catch {
+        // ignore
       }
     }
   }
