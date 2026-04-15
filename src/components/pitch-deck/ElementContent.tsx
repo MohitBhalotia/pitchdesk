@@ -15,6 +15,8 @@ import type {
   ImageElement,
 } from "@/types/slide-elements";
 import FormatToolbar from "./FormatToolbar";
+import { ICON_CATALOG } from "./IconPicker";
+import type { IconElement } from "@/types/slide-elements";
 
 interface ElementContentProps {
   element: SlideElement;
@@ -70,6 +72,7 @@ function TextContent({
     fontStyle: el.fontStyle === "italic" ? "italic" : "normal",
     textAlign: el.textAlign || "left",
     lineHeight: el.lineHeight || 1.4,
+    fontFamily: el.fontFamily ? `'${el.fontFamily}', sans-serif` : undefined,
     width: "100%",
     height: "100%",
     overflow: "hidden",
@@ -199,6 +202,7 @@ function TiptapTextContent({
 
   const editor = useEditor(
     {
+      immediatelyRender: false,
       extensions: [
         StarterKit,
         TextStyle,
@@ -451,6 +455,27 @@ export default function ElementContent({
         el={element as ImageElement}
         themeColors={themeColors}
       />
+    );
+  }
+
+  if (element.type === "icon") {
+    const iconEl = element as IconElement;
+    const entry = ICON_CATALOG.find((ic) => ic.name === iconEl.iconName);
+    if (!entry) return null;
+    const { Icon } = entry;
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: iconEl.color || themeColors.text,
+        }}
+      >
+        <Icon style={{ width: "100%", height: "100%" }} />
+      </div>
     );
   }
 

@@ -8,7 +8,12 @@
       "Bash(grep -rn \"export\\\\|deck\\\\|pptx\\\\|powerpoint\" /d/Projects/pitchdesk/backend/api/*.py)",
       "Bash(xargs grep:*)",
       "Bash(npx next:*)",
-      "Bash(grep -v \"^$\")"
+      "Bash(grep -v \"^$\")",
+      "Bash(grep -E \"\\\\.\\(ts|js\\)$\")",
+      "Bash(grep -E \"\\\\.ts$\")",
+      "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
+      "Bash(grep -r \"export.*function\" /d/Projects/pitchdesk/src/lib/*.ts)",
+      "Bash(xargs cat:*)"
     ]
   }
 }

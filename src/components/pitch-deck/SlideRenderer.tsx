@@ -24,6 +24,8 @@ interface SlideRendererProps {
   selectedElementId?: string | null;
   onSelectElement?: (id: string | null) => void;
   onElementChange?: (id: string, patch: Partial<SlideElement>) => void;
+  onDeleteElement?: (id: string) => void;
+  onDuplicateElement?: (id: string) => void;
   exportMode?: boolean;
   className?: string;
   onClick?: () => void;
@@ -37,6 +39,8 @@ export default function SlideRenderer({
   selectedElementId = null,
   onSelectElement,
   onElementChange,
+  onDeleteElement,
+  onDuplicateElement,
   exportMode = false,
   className = "",
   onClick,
@@ -59,6 +63,8 @@ export default function SlideRenderer({
         selectedElementId={selectedElementId}
         onSelectElement={onSelectElement ?? (() => {})}
         onElementChange={onElementChange ?? (() => {})}
+        onDeleteElement={onDeleteElement}
+        onDuplicateElement={onDuplicateElement}
         exportMode={exportMode}
       />
     </SlideFrame>

@@ -55,7 +55,7 @@ const slideSchema = new Schema(
     elements: [
       {
         id: String,
-        type: { type: String, enum: ["text", "shape", "image"] },
+        type: { type: String, enum: ["text", "shape", "image", "icon"] },
         x: Number,
         y: Number,
         width: Number,
@@ -70,6 +70,7 @@ const slideSchema = new Schema(
         textAlign: String,
         color: String,
         lineHeight: Number,
+        fontFamily: String,
         role: String,
         // shape fields
         shape: { type: String },
@@ -81,6 +82,8 @@ const slideSchema = new Schema(
         imageUrl: String,
         imagePublicId: String,
         objectFit: String,
+        // icon fields
+        iconName: String,
       },
     ],
     background: String,

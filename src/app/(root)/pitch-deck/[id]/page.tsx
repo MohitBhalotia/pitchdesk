@@ -26,6 +26,21 @@ import {
   AlignLeft,
   AlignCenter,
   AlignRight,
+  Lock,
+  Unlock,
+  AlignHorizontalJustifyCenter,
+  AlignVerticalJustifyCenter,
+  AlignStartHorizontal,
+  AlignEndHorizontal,
+  AlignStartVertical,
+  AlignEndVertical,
+  Undo2,
+  Redo2,
+  Copy,
+  Check,
+  Play,
+  AlertCircle,
+  Image as ImageIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,6 +59,11 @@ import { migrateDeck, migrateSlide, createDefaultElements, applyLayoutPreset } f
 import type { SlideElement, SlideV2, TextElement, ShapeElement, ImageElement } from "@/types/slide-elements";
 import { isSlideV2 } from "@/types/slide-elements";
 import LayoutPresetPicker from "@/components/pitch-deck/LayoutPresetPicker";
+import { FONT_FAMILIES } from "@/components/pitch-deck/FormatToolbar";
+import GradientPicker from "@/components/pitch-deck/GradientPicker";
+import IconPicker from "@/components/pitch-deck/IconPicker";
+import ImageSearchPanel from "@/components/pitch-deck/ImageSearchPanel";
+import AIAssistPanel from "@/components/pitch-deck/AIAssistPanel";
 import {
   DndContext,
   closestCenter,
@@ -129,6 +149,7 @@ function SortableThumbnail({
   templateId,
   onClick,
   onDelete,
+  onDuplicate,
 }: {
   slide: Slide;
   index: number;
@@ -136,6 +157,7 @@ function SortableThumbnail({
   templateId: string;
   onClick: () => void;
   onDelete: () => void;
+  onDuplicate: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
     id: `slide-${index}`,
@@ -164,15 +186,23 @@ function SortableThumbnail({
             {index + 1}
           </div>
         </div>
-        <button
-          className="absolute top-1 right-1 z-10 bg-red-500/80 hover:bg-red-500 text-white rounded p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-        >
-          <Trash2 className="h-3 w-3" />
-        </button>
+        {/* Action buttons - visible on hover */}
+        <div className="absolute top-1 right-1 z-10 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            className="bg-black/60 hover:bg-black/80 text-white rounded p-0.5"
+            title="Duplicate slide"
+            onClick={(e) => { e.stopPropagation(); onDuplicate(); }}
+          >
+            <Copy className="h-3 w-3" />
+          </button>
+          <button
+            className="bg-red-500/80 hover:bg-red-500 text-white rounded p-0.5"
+            title="Delete slide"
+            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+          >
+            <Trash2 className="h-3 w-3" />
+          </button>
+        </div>
         <div className="pointer-events-none">
           <SlideRenderer slide={slide} templateId={templateId} className="w-full" />
         </div>
@@ -202,8 +232,13 @@ export default function DeckEditorPage() {
   const [generatingImage, setGeneratingImage] = useState(false);
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [showIconPicker, setShowIconPicker] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const slideRefs = useRef<Record<number, HTMLDivElement | null>>({});
+  const undoStack = useRef<Slide[][]>([]);
+  const redoStack = useRef<Slide[][]>([]);
+  const clipboardRef = useRef<SlideElement[]>([]);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -234,8 +269,9 @@ export default function DeckEditorPage() {
   const autoSave = useCallback(
     (updatedDeck: Deck) => {
       if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+      setSaveStatus("saving");
+      setSaving(true);
       saveTimeoutRef.current = setTimeout(async () => {
-        setSaving(true);
         try {
           await fetch(`/api/pitch-deck/${deckId}`, {
             method: "PUT",
@@ -246,8 +282,11 @@ export default function DeckEditorPage() {
               slides: updatedDeck.slides,
             }),
           });
+          setSaveStatus("saved");
+          setTimeout(() => setSaveStatus("idle"), 2500);
         } catch (error) {
           console.error("Auto-save failed:", error);
+          setSaveStatus("error");
         } finally {
           setSaving(false);
         }
@@ -257,9 +296,17 @@ export default function DeckEditorPage() {
   );
 
   const updateDeck = useCallback(
-    (updater: (prev: Deck) => Deck) => {
+    (updater: (prev: Deck) => Deck, skipUndo = false) => {
       setDeck((prev) => {
         if (!prev) return prev;
+        if (!skipUndo) {
+          // Deep-clone slides for undo snapshot
+          undoStack.current = [
+            ...undoStack.current.slice(-49),
+            JSON.parse(JSON.stringify(prev.slides)),
+          ];
+          redoStack.current = [];
+        }
         const updated = updater(prev);
         autoSave(updated);
         return updated;
@@ -270,6 +317,8 @@ export default function DeckEditorPage() {
 
 const handleElementChange = useCallback(
     (elementId: string, patch: Partial<SlideElement>) => {
+      // Skip undo for pure text content changes (don't create undo entry per keystroke)
+      const isContentOnly = Object.keys(patch).length === 1 && "content" in patch;
       updateDeck((prev) => {
         const newSlides = [...prev.slides];
         const slide = newSlides[activeSlideIndex];
@@ -281,7 +330,7 @@ const handleElementChange = useCallback(
           ),
         };
         return { ...prev, slides: newSlides };
-      });
+      }, isContentOnly);
     },
     [activeSlideIndex, updateDeck]
   );
@@ -345,6 +394,67 @@ const handleElementChange = useCallback(
           ...slide,
           elements: [...slide.elements, copy],
         };
+        return { ...prev, slides: newSlides };
+      });
+    },
+    [activeSlideIndex, updateDeck]
+  );
+
+  // Align selected element to slide edges / center
+  const alignElement = useCallback(
+    (mode: "left" | "center-h" | "right" | "top" | "center-v" | "bottom") => {
+      if (!selectedElementId) return;
+      updateDeck((prev) => {
+        const newSlides = [...prev.slides];
+        const slide = newSlides[activeSlideIndex];
+        if (!slide.elements) return prev;
+        newSlides[activeSlideIndex] = {
+          ...slide,
+          elements: slide.elements.map((el) => {
+            if (el.id !== selectedElementId) return el;
+            let patch: Partial<SlideElement> = {};
+            switch (mode) {
+              case "left":       patch = { x: 0 }; break;
+              case "center-h":   patch = { x: (100 - el.width) / 2 }; break;
+              case "right":      patch = { x: 100 - el.width }; break;
+              case "top":        patch = { y: 0 }; break;
+              case "center-v":   patch = { y: (100 - el.height) / 2 }; break;
+              case "bottom":     patch = { y: 100 - el.height }; break;
+            }
+            return { ...el, ...patch } as SlideElement;
+          }),
+        };
+        return { ...prev, slides: newSlides };
+      });
+    },
+    [selectedElementId, activeSlideIndex, updateDeck]
+  );
+
+  // Toggle lock on selected element
+  const toggleLockElement = useCallback(
+    (elementId: string) => {
+      updateDeck((prev) => {
+        const newSlides = [...prev.slides];
+        const slide = newSlides[activeSlideIndex];
+        if (!slide.elements) return prev;
+        newSlides[activeSlideIndex] = {
+          ...slide,
+          elements: slide.elements.map((el) =>
+            el.id === elementId ? { ...el, locked: !el.locked } : el
+          ),
+        };
+        return { ...prev, slides: newSlides };
+      });
+    },
+    [activeSlideIndex, updateDeck]
+  );
+
+  // Update slide background
+  const setSlideBackground = useCallback(
+    (bg: string) => {
+      updateDeck((prev) => {
+        const newSlides = [...prev.slides];
+        newSlides[activeSlideIndex] = { ...newSlides[activeSlideIndex], background: bg };
         return { ...prev, slides: newSlides };
       });
     },
@@ -439,6 +549,87 @@ const handleElementChange = useCallback(
     },
     [activeSlideIndex, updateDeck, deck]
   );
+
+  const duplicateSlide = useCallback(
+    (index: number) => {
+      updateDeck((prev) => {
+        const original = prev.slides[index];
+        const copy: Slide = {
+          ...JSON.parse(JSON.stringify(original)),
+          order: index + 1,
+        };
+        const newSlides = [
+          ...prev.slides.slice(0, index + 1),
+          copy,
+          ...prev.slides.slice(index + 1),
+        ].map((s, i) => ({ ...s, order: i }));
+        return { ...prev, slides: newSlides };
+      });
+      setActiveSlideIndex(index + 1);
+      toast.success("Slide duplicated");
+    },
+    [updateDeck]
+  );
+
+  const handleUndo = useCallback(() => {
+    if (undoStack.current.length === 0) return;
+    const prevSlides = undoStack.current[undoStack.current.length - 1];
+    undoStack.current = undoStack.current.slice(0, -1);
+    setDeck((d) => {
+      if (!d) return d;
+      redoStack.current = [JSON.parse(JSON.stringify(d.slides)), ...redoStack.current.slice(0, 49)];
+      const updated = { ...d, slides: prevSlides };
+      autoSave(updated);
+      return updated;
+    });
+  }, [autoSave]);
+
+  const handleRedo = useCallback(() => {
+    if (redoStack.current.length === 0) return;
+    const nextSlides = redoStack.current[0];
+    redoStack.current = redoStack.current.slice(1);
+    setDeck((d) => {
+      if (!d) return d;
+      undoStack.current = [...undoStack.current.slice(-49), JSON.parse(JSON.stringify(d.slides))];
+      const updated = { ...d, slides: nextSlides };
+      autoSave(updated);
+      return updated;
+    });
+  }, [autoSave]);
+
+  const handleCopyElement = useCallback(() => {
+    if (!selectedElementId) return;
+    setDeck((d) => {
+      if (!d) return d;
+      const slide = d.slides[activeSlideIndex];
+      const el = slide?.elements?.find((e) => e.id === selectedElementId);
+      if (el) {
+        clipboardRef.current = [JSON.parse(JSON.stringify(el))];
+        toast.success("Element copied");
+      }
+      return d;
+    });
+  }, [selectedElementId, activeSlideIndex]);
+
+  const handlePasteElement = useCallback(() => {
+    if (clipboardRef.current.length === 0) return;
+    const newEls = clipboardRef.current.map((el) => ({
+      ...JSON.parse(JSON.stringify(el)),
+      id: uuid(),
+      x: Math.min(el.x + 5, 85),
+      y: Math.min(el.y + 5, 85),
+    }));
+    updateDeck((prev) => {
+      const newSlides = [...prev.slides];
+      const slide = newSlides[activeSlideIndex];
+      newSlides[activeSlideIndex] = {
+        ...slide,
+        elements: [...(slide.elements || []), ...newEls],
+      };
+      return { ...prev, slides: newSlides };
+    });
+    setSelectedElementId(newEls[0].id);
+  }, [activeSlideIndex, updateDeck]);
 
   const changeTemplate = useCallback(
     (templateId: string) => {
@@ -669,6 +860,57 @@ const handleElementChange = useCallback(
     }
   }, [deck, activeSlideIndex, updateDeck]);
 
+  // Insert icon element
+  const handleAddIconElement = useCallback(
+    (iconName: string) => {
+      const newEl: SlideElement = {
+        id: uuid(),
+        type: "icon",
+        iconName,
+        x: 40,
+        y: 35,
+        width: 20,
+        height: 30,
+        color: undefined,
+      } as SlideElement;
+      updateDeck((prev) => {
+        const newSlides = [...prev.slides];
+        const slide = newSlides[activeSlideIndex];
+        newSlides[activeSlideIndex] = {
+          ...slide,
+          elements: [...(slide.elements || []), newEl],
+        };
+        return { ...prev, slides: newSlides };
+      });
+      setSelectedElementId(newEl.id);
+    },
+    [activeSlideIndex, updateDeck]
+  );
+
+  // Global keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const isMac = typeof navigator !== "undefined" && navigator.platform.includes("Mac");
+      const ctrl = isMac ? e.metaKey : e.ctrlKey;
+      const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
+      const isTyping = tag === "input" || tag === "textarea" || (e.target as HTMLElement)?.isContentEditable;
+      if (ctrl && e.key === "z" && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      } else if (ctrl && (e.key === "y" || (e.key === "z" && e.shiftKey))) {
+        e.preventDefault();
+        handleRedo();
+      } else if (ctrl && e.key === "c" && !isTyping) {
+        handleCopyElement();
+      } else if (ctrl && e.key === "v" && !isTyping) {
+        e.preventDefault();
+        handlePasteElement();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [handleUndo, handleRedo, handleCopyElement, handlePasteElement]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -715,11 +957,65 @@ const handleElementChange = useCallback(
               {deck.title}
             </h1>
           )}
-          {saving && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
-          {!saving && <span className="text-xs text-muted-foreground">Auto-saved</span>}
+          <div className="flex items-center gap-1 ml-1">
+            {saveStatus === "saving" && (
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Saving…
+              </span>
+            )}
+            {saveStatus === "saved" && (
+              <span className="flex items-center gap-1 text-xs text-green-600">
+                <Check className="h-3 w-3" />
+                Saved
+              </span>
+            )}
+            {saveStatus === "error" && (
+              <span className="flex items-center gap-1 text-xs text-red-500">
+                <AlertCircle className="h-3 w-3" />
+                Save failed
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Undo/Redo */}
+          <div className="flex items-center gap-0.5">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              title="Undo (Ctrl+Z)"
+              onClick={handleUndo}
+              disabled={undoStack.current.length === 0}
+            >
+              <Undo2 className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              title="Redo (Ctrl+Shift+Z)"
+              onClick={handleRedo}
+              disabled={redoStack.current.length === 0}
+            >
+              <Redo2 className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+
+          {/* Present button */}
+          <Button
+            variant="default"
+            size="sm"
+            className="h-7 text-xs"
+            title="Present slideshow"
+            onClick={() => window.open(`/pitch-deck/${deckId}/present`, "_blank")}
+          >
+            <Play className="h-3.5 w-3.5 mr-1" />
+            Present
+          </Button>
+
           {/* Template Switcher */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -747,26 +1043,68 @@ const handleElementChange = useCallback(
             Notes
           </Button>
 
-          <Button variant="outline" size="sm" onClick={exportPDF}>
-            <Download className="h-4 w-4 mr-1" />
-            PDF
-          </Button>
-
-          <Button variant="outline" size="sm" onClick={async () => {
-            if (!deck) return;
-            toast.info("Generating PPTX...");
-            try {
-              const { exportDeckToPPTX } = await import("@/lib/pptx-export");
-              await exportDeckToPPTX(deck.title, deck.slides, currentTemplate.metadata.colors);
-              toast.success("PPTX exported successfully!");
-            } catch (error) {
-              console.error("PPTX export failed:", error);
-              toast.error("Failed to export PPTX");
-            }
-          }}>
-            <FileSpreadsheet className="h-4 w-4 mr-1" />
-            PPTX
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Download className="h-4 w-4 mr-1" />
+                Export
+                <ChevronDown className="h-3 w-3 ml-1" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={exportPDF}>
+                <Download className="h-3.5 w-3.5 mr-2" />
+                Export as PDF
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={async () => {
+                if (!deck) return;
+                toast.info("Generating PPTX...");
+                try {
+                  const { exportDeckToPPTX } = await import("@/lib/pptx-export");
+                  await exportDeckToPPTX(deck.title, deck.slides, currentTemplate.metadata.colors);
+                  toast.success("PPTX exported successfully!");
+                } catch (error) {
+                  console.error("PPTX export failed:", error);
+                  toast.error("Failed to export PPTX");
+                }
+              }}>
+                <FileSpreadsheet className="h-3.5 w-3.5 mr-2" />
+                Export as PPTX
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={async () => {
+                if (!deck) return;
+                toast.info("Exporting slides as PNG...");
+                setIsExporting(true);
+                await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+                try {
+                  const html2canvas = (await import("html2canvas")).default;
+                  const JSZip = (await import("jszip")).default;
+                  const zip = new JSZip();
+                  for (let i = 0; i < deck.slides.length; i++) {
+                    const slideEl = slideRefs.current[i];
+                    if (!slideEl) continue;
+                    const canvas = await html2canvas(slideEl, { scale: 2, useCORS: true, backgroundColor: null, width: 1280, height: 720 });
+                    const blob = await new Promise<Blob>((res) => canvas.toBlob((b) => res(b!), "image/png"));
+                    zip.file(`slide-${i + 1}.png`, blob);
+                  }
+                  const content = await zip.generateAsync({ type: "blob" });
+                  const a = document.createElement("a");
+                  a.href = URL.createObjectURL(content);
+                  a.download = `${deck.title.replace(/\s+/g, "-").toLowerCase()}-slides.zip`;
+                  a.click();
+                  toast.success("PNG slides exported!");
+                } catch (error) {
+                  console.error("PNG export failed:", error);
+                  toast.error("Failed to export PNGs");
+                } finally {
+                  setIsExporting(false);
+                }
+              }}>
+                <ImageIcon className="h-3.5 w-3.5 mr-2" />
+                Export as PNG (ZIP)
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -788,6 +1126,7 @@ const handleElementChange = useCallback(
                   templateId={deck.templateId}
                   onClick={() => setActiveSlideIndex(index)}
                   onDelete={() => deleteSlide(index)}
+                  onDuplicate={() => duplicateSlide(index)}
                 />
               ))}
             </SortableContext>
@@ -856,7 +1195,29 @@ const handleElementChange = useCallback(
               <Sparkles className="h-3.5 w-3.5 mr-1" />
               AI Image
             </Button>
+            <Button
+              variant={showIconPicker ? "secondary" : "ghost"}
+              size="sm"
+              className="h-7 px-2 text-xs"
+              title="Insert icon"
+              onClick={() => setShowIconPicker((v) => !v)}
+            >
+              <Zap className="h-3.5 w-3.5 mr-1" />
+              Icons
+            </Button>
           </div>
+          {/* Icon picker panel */}
+          {showIconPicker && (
+            <div className="border-b px-4 py-3 bg-background/95">
+              <p className="text-xs font-medium mb-2">Click an icon to add it to the slide</p>
+              <IconPicker
+                onSelect={(name) => {
+                  handleAddIconElement(name);
+                  setShowIconPicker(false);
+                }}
+              />
+            </div>
+          )}
 
           <div className="flex-1 flex items-center justify-center p-8 bg-muted/20"
             onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; }}
@@ -869,6 +1230,8 @@ const handleElementChange = useCallback(
                 selectedElementId={selectedElementId}
                 onSelectElement={setSelectedElementId}
                 onElementChange={handleElementChange}
+                onDeleteElement={handleDeleteElement}
+                onDuplicateElement={handleDuplicateElement}
                 exportMode={isExporting}
                 className="w-full rounded-lg shadow-2xl"
               />
@@ -934,6 +1297,15 @@ const handleElementChange = useCallback(
               </DropdownMenuContent>
             </DropdownMenu>
             <p className="text-xs text-muted-foreground mt-1">Slide {activeSlideIndex + 1} of {deck.slides.length}</p>
+
+            {/* Background */}
+            <div className="mt-3">
+              <label className="text-xs text-muted-foreground block mb-1.5">Background</label>
+              <GradientPicker
+                value={activeSlide?.background || ""}
+                onChange={setSlideBackground}
+              />
+            </div>
           </div>
 
           {/* Element Properties */}
@@ -944,22 +1316,96 @@ const handleElementChange = useCallback(
                 ? activeSlide?.elements?.find((e) => e.id === selectedElementId)
                 : null;
               if (!el) {
-                return <p className="text-xs text-muted-foreground">Click an element to edit its properties</p>;
+                return <p className="text-xs text-muted-foreground">Click an element to select it</p>;
               }
               return (
                 <div className="space-y-3">
+                  {/* Type badge */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground px-1.5 py-0.5 bg-muted rounded">
+                      {el.type}
+                    </span>
+                    <button
+                      className={`h-6 px-2 text-xs border rounded flex items-center gap-1 transition-colors ${el.locked ? "bg-orange-50 border-orange-300 text-orange-600" : "hover:bg-muted"}`}
+                      onClick={() => toggleLockElement(el.id)}
+                      title={el.locked ? "Unlock element" : "Lock element"}
+                    >
+                      {el.locked ? <Lock className="h-3 w-3" /> : <Unlock className="h-3 w-3" />}
+                      {el.locked ? "Locked" : "Lock"}
+                    </button>
+                  </div>
+
+                  {/* Position & Size */}
+                  <div>
+                    <label className="text-xs text-muted-foreground block mb-1.5">Position & Size (%)</label>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {(["x", "y", "width", "height"] as const).map((prop) => (
+                        <div key={prop} className="flex items-center gap-1 border rounded px-1.5 py-0.5 bg-background">
+                          <span className="text-[10px] text-muted-foreground uppercase w-5 shrink-0">{prop}</span>
+                          <input
+                            type="number"
+                            min={prop === "width" || prop === "height" ? 1 : 0}
+                            max={100}
+                            step={0.5}
+                            className="w-full text-xs bg-transparent focus:outline-none text-right"
+                            value={Math.round(el[prop] * 10) / 10}
+                            onChange={(e) => {
+                              const v = parseFloat(e.target.value);
+                              if (!isNaN(v)) handleElementChange(el.id, { [prop]: Math.max(0, Math.min(100, v)) });
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Alignment */}
+                  <div>
+                    <label className="text-xs text-muted-foreground block mb-1.5">Align to Slide</label>
+                    <div className="grid grid-cols-3 gap-1">
+                      <button className="h-7 border rounded hover:bg-muted flex items-center justify-center" title="Align left" onClick={() => alignElement("left")}><AlignStartVertical className="h-3 w-3" /></button>
+                      <button className="h-7 border rounded hover:bg-muted flex items-center justify-center" title="Center horizontally" onClick={() => alignElement("center-h")}><AlignHorizontalJustifyCenter className="h-3 w-3" /></button>
+                      <button className="h-7 border rounded hover:bg-muted flex items-center justify-center" title="Align right" onClick={() => alignElement("right")}><AlignEndVertical className="h-3 w-3" /></button>
+                      <button className="h-7 border rounded hover:bg-muted flex items-center justify-center" title="Align top" onClick={() => alignElement("top")}><AlignStartHorizontal className="h-3 w-3" /></button>
+                      <button className="h-7 border rounded hover:bg-muted flex items-center justify-center" title="Center vertically" onClick={() => alignElement("center-v")}><AlignVerticalJustifyCenter className="h-3 w-3" /></button>
+                      <button className="h-7 border rounded hover:bg-muted flex items-center justify-center" title="Align bottom" onClick={() => alignElement("bottom")}><AlignEndHorizontal className="h-3 w-3" /></button>
+                    </div>
+                  </div>
+
+                  {/* Text-specific */}
                   {el.type === "text" && (
                     <>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <div>
+                          <label className="text-xs text-muted-foreground block mb-1">Font Size</label>
+                          <input
+                            type="number" min={8} max={200}
+                            className="w-full h-7 px-2 text-xs border rounded bg-background"
+                            value={(el as TextElement).fontSize || 16}
+                            onChange={(e) => handleElementChange(el.id, { fontSize: Number(e.target.value) } as Partial<TextElement>)}
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-muted-foreground block mb-1">Line Height</label>
+                          <input
+                            type="number" min={1} max={3} step={0.1}
+                            className="w-full h-7 px-2 text-xs border rounded bg-background"
+                            value={(el as TextElement).lineHeight || 1.4}
+                            onChange={(e) => handleElementChange(el.id, { lineHeight: Number(e.target.value) } as Partial<TextElement>)}
+                          />
+                        </div>
+                      </div>
                       <div>
-                        <label className="text-xs text-muted-foreground block mb-1">Font Size</label>
-                        <input
-                          type="number"
-                          min={8}
-                          max={120}
+                        <label className="text-xs text-muted-foreground block mb-1">Font</label>
+                        <select
                           className="w-full h-7 px-2 text-xs border rounded bg-background"
-                          value={(el as TextElement).fontSize || 16}
-                          onChange={(e) => handleElementChange(el.id, { fontSize: Number(e.target.value) } as Partial<TextElement>)}
-                        />
+                          value={(el as TextElement).fontFamily || ""}
+                          onChange={(e) => handleElementChange(el.id, { fontFamily: e.target.value || undefined } as Partial<TextElement>)}
+                        >
+                          {FONT_FAMILIES.map((f) => (
+                            <option key={f.value} value={f.value}>{f.label}</option>
+                          ))}
+                        </select>
                       </div>
                       <div>
                         <label className="text-xs text-muted-foreground block mb-1">Style</label>
@@ -1007,91 +1453,123 @@ const handleElementChange = useCallback(
                           {(el as TextElement).color && (
                             <button className="text-xs text-muted-foreground hover:text-foreground"
                               onClick={() => handleElementChange(el.id, { color: undefined } as Partial<TextElement>)}>
-                              Reset
+                              Reset to theme
                             </button>
                           )}
                         </div>
                       </div>
                     </>
                   )}
+
+                  {/* Shape-specific */}
                   {el.type === "shape" && (
                     <>
-                      <div>
-                        <label className="text-xs text-muted-foreground block mb-1">Fill Color</label>
-                        <input
-                          type="color"
-                          className="w-8 h-7 rounded border cursor-pointer"
-                          value={(el as ShapeElement).fill || "#3b82f6"}
-                          onChange={(e) => handleElementChange(el.id, { fill: e.target.value } as Partial<SlideElement>)}
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs text-muted-foreground block mb-1">Stroke Color</label>
-                        <input
-                          type="color"
-                          className="w-8 h-7 rounded border cursor-pointer"
-                          value={(el as ShapeElement).stroke || "#000000"}
-                          onChange={(e) => handleElementChange(el.id, { stroke: e.target.value } as Partial<SlideElement>)}
-                        />
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <div>
+                          <label className="text-xs text-muted-foreground block mb-1">Fill</label>
+                          <input type="color" className="w-full h-7 rounded border cursor-pointer"
+                            value={(el as ShapeElement).fill || "#3b82f6"}
+                            onChange={(e) => handleElementChange(el.id, { fill: e.target.value } as Partial<SlideElement>)}
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-muted-foreground block mb-1">Stroke</label>
+                          <input type="color" className="w-full h-7 rounded border cursor-pointer"
+                            value={(el as ShapeElement).stroke || "#000000"}
+                            onChange={(e) => handleElementChange(el.id, { stroke: e.target.value } as Partial<SlideElement>)}
+                          />
+                        </div>
                       </div>
                       <div>
                         <label className="text-xs text-muted-foreground block mb-1">Stroke Width: {(el as ShapeElement).strokeWidth ?? 0}px</label>
-                        <input
-                          type="range"
-                          min={0}
-                          max={10}
+                        <input type="range" min={0} max={12} className="w-full"
                           value={(el as ShapeElement).strokeWidth ?? 0}
-                          className="w-full"
                           onChange={(e) => handleElementChange(el.id, { strokeWidth: Number(e.target.value) } as Partial<SlideElement>)}
                         />
                       </div>
                       <div>
                         <label className="text-xs text-muted-foreground block mb-1">Opacity: {Math.round(((el as ShapeElement).opacity ?? 1) * 100)}%</label>
-                        <input
-                          type="range"
-                          min={0}
-                          max={100}
+                        <input type="range" min={0} max={100} className="w-full"
                           value={Math.round(((el as ShapeElement).opacity ?? 1) * 100)}
-                          className="w-full"
                           onChange={(e) => handleElementChange(el.id, { opacity: Number(e.target.value) / 100 } as Partial<SlideElement>)}
                         />
                       </div>
                     </>
                   )}
-                  {/* Z-index controls — all element types */}
+
+                  {/* Icon-specific */}
+                  {el.type === "icon" && (
+                    <div>
+                      <label className="text-xs text-muted-foreground block mb-1">Icon Color</label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          className="w-8 h-7 rounded border cursor-pointer"
+                          value={(el as {color?: string}).color || "#ffffff"}
+                          onChange={(e) => handleElementChange(el.id, { color: e.target.value } as Partial<SlideElement>)}
+                        />
+                        {(el as {color?: string}).color && (
+                          <button className="text-xs text-muted-foreground hover:text-foreground"
+                            onClick={() => handleElementChange(el.id, { color: undefined } as Partial<SlideElement>)}>
+                            Reset to theme
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Image-specific */}
+                  {el.type === "image" && (
+                    <div>
+                      <label className="text-xs text-muted-foreground block mb-1">Fit</label>
+                      <div className="flex gap-1">
+                        {(["contain", "cover", "fill"] as const).map((fit) => (
+                          <button
+                            key={fit}
+                            className={`flex-1 h-7 text-xs border rounded capitalize transition-colors ${(el as ImageElement).objectFit === fit ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
+                            onClick={() => handleElementChange(el.id, { objectFit: fit } as Partial<SlideElement>)}
+                          >
+                            {fit}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Layer + Actions — all types */}
                   <div>
-                    <label className="text-xs text-muted-foreground block mb-1">Layer Order</label>
+                    <label className="text-xs text-muted-foreground block mb-1">Layer</label>
                     <div className="flex gap-1">
-                      <button
-                        className="flex-1 h-7 text-xs border rounded hover:bg-muted transition-colors"
-                        onClick={() => handleElementChange(el.id, { zIndex: (el.zIndex || 1) + 1 } as Partial<SlideElement>)}
-                      >
-                        Bring Forward
+                      <button className="flex-1 h-7 text-xs border rounded hover:bg-muted transition-colors"
+                        onClick={() => handleElementChange(el.id, { zIndex: (el.zIndex || 1) + 1 })}>
+                        Forward
                       </button>
-                      <button
-                        className="flex-1 h-7 text-xs border rounded hover:bg-muted transition-colors"
-                        onClick={() => handleElementChange(el.id, { zIndex: Math.max(0, (el.zIndex || 1) - 1) } as Partial<SlideElement>)}
-                      >
-                        Send Back
+                      <button className="flex-1 h-7 text-xs border rounded hover:bg-muted transition-colors"
+                        onClick={() => handleElementChange(el.id, { zIndex: Math.max(0, (el.zIndex || 1) - 1) })}>
+                        Backward
                       </button>
                     </div>
                   </div>
-                  {/* Duplicate + Delete */}
                   <div className="flex gap-1">
                     <button
-                      className="flex-1 h-7 text-xs border rounded hover:bg-muted transition-colors flex items-center justify-center gap-1"
+                      className="flex-1 h-7 text-xs border rounded hover:bg-muted transition-colors"
                       onClick={() => handleDuplicateElement(el.id)}
+                      title="Duplicate (Ctrl+D)"
                     >
                       Duplicate
                     </button>
                     <button
                       className="flex-1 h-7 text-xs border border-destructive text-destructive rounded hover:bg-destructive hover:text-destructive-foreground transition-colors flex items-center justify-center gap-1"
                       onClick={() => handleDeleteElement(el.id)}
+                      title="Delete (Del)"
                     >
                       <Trash2 className="h-3 w-3" />
                       Delete
                     </button>
                   </div>
+                  <p className="text-[10px] text-muted-foreground">
+                    Tip: Del to delete · Ctrl+D to duplicate · Arrow keys to nudge · Shift+Arrow for 5%
+                  </p>
                 </div>
               );
             })()}
@@ -1138,9 +1616,31 @@ const handleElementChange = useCallback(
             </div>
           </div>
 
+          {/* AI Assist */}
+          {(() => {
+            const selectedEl = selectedElementId
+              ? activeSlide?.elements?.find((e) => e.id === selectedElementId)
+              : null;
+            const isText = selectedEl?.type === "text";
+            return (
+              <div>
+                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">AI Assist</h3>
+                <AIAssistPanel
+                  selectedContent={isText ? (selectedEl as TextElement).content : ""}
+                  scope="element"
+                  onAccept={(newContent) => {
+                    if (selectedElementId) {
+                      handleElementChange(selectedElementId, { content: newContent } as Partial<SlideElement>);
+                    }
+                  }}
+                />
+              </div>
+            );
+          })()}
+
           {/* AI Actions */}
           <div>
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">AI Actions</h3>
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">AI Regenerate</h3>
             <div className="space-y-2">
               <Button variant="outline" size="sm" className="w-full justify-start text-xs"
                 disabled={regenerating}
@@ -1200,21 +1700,59 @@ const handleElementChange = useCallback(
           {/* Images */}
           <div>
             <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Images</h3>
-            <div className="space-y-2">
-              <p className="text-xs text-muted-foreground">Use the toolbar above to add images. Images are draggable elements — select one and use the Element panel to delete.</p>
-              <p className="text-xs text-muted-foreground">Or drag & drop an image onto the slide</p>
-            </div>
+            <ImageSearchPanel
+              onSelect={(url) => {
+                // Insert selected image as a new image element
+                const newImageEl: SlideElement = {
+                  id: uuid(),
+                  type: "image",
+                  imageUrl: url,
+                  x: 30,
+                  y: 10,
+                  width: 40,
+                  height: 60,
+                  zIndex: 10,
+                  objectFit: "cover",
+                };
+                updateDeck((prev) => {
+                  const newSlides = [...prev.slides];
+                  const slide = newSlides[activeSlideIndex];
+                  const elements = slide.elements || [];
+                  const placeholderIdx = elements.findIndex(
+                    (e) => e.type === "image" && !(e as ImageElement).imageUrl
+                  );
+                  if (placeholderIdx >= 0) {
+                    const updated = [...elements];
+                    updated[placeholderIdx] = {
+                      ...updated[placeholderIdx],
+                      imageUrl: url,
+                      objectFit: "cover",
+                    } as SlideElement;
+                    newSlides[activeSlideIndex] = { ...slide, elements: updated };
+                  } else {
+                    newSlides[activeSlideIndex] = { ...slide, elements: [...elements, newImageEl] };
+                  }
+                  return { ...prev, slides: newSlides };
+                });
+                toast.success("Image added to slide!");
+              }}
+            />
+            <p className="text-xs text-muted-foreground mt-2">Or drag & drop an image onto the slide canvas</p>
           </div>
 
           {/* Tips */}
           <div>
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Tips</h3>
+            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Keyboard Shortcuts</h3>
             <div className="space-y-1 text-xs text-muted-foreground">
-              <p>Click element to select + edit</p>
-              <p>Drag elements to reposition</p>
+              <p><kbd className="px-1 bg-muted rounded text-[10px]">Ctrl+Z</kbd> Undo</p>
+              <p><kbd className="px-1 bg-muted rounded text-[10px]">Ctrl+Shift+Z</kbd> Redo</p>
+              <p><kbd className="px-1 bg-muted rounded text-[10px]">Ctrl+C</kbd> Copy element</p>
+              <p><kbd className="px-1 bg-muted rounded text-[10px]">Ctrl+V</kbd> Paste element</p>
+              <p><kbd className="px-1 bg-muted rounded text-[10px]">Ctrl+D</kbd> Duplicate element</p>
+              <p><kbd className="px-1 bg-muted rounded text-[10px]">Del</kbd> Delete element</p>
+              <p><kbd className="px-1 bg-muted rounded text-[10px]">Arrow</kbd> Nudge 1% · Shift+Arrow 5%</p>
               <p>Drag corners to resize</p>
               <p>Drag slide thumbnails to reorder</p>
-              <p>Changes auto-save</p>
             </div>
           </div>
         </div>

@@ -39,6 +39,8 @@ interface ElementCanvasProps {
   selectedElementId: string | null;
   onSelectElement: (id: string | null) => void;
   onElementChange: (id: string, patch: Partial<SlideElement>) => void;
+  onDeleteElement?: (id: string) => void;
+  onDuplicateElement?: (id: string) => void;
   exportMode?: boolean;
   textEditingId?: string | null;
   onTextEditingChange?: (id: string | null) => void;
@@ -51,6 +53,8 @@ export default function ElementCanvas({
   selectedElementId,
   onSelectElement,
   onElementChange,
+  onDeleteElement,
+  onDuplicateElement,
   exportMode = false,
   textEditingId: externalTextEditingId,
   onTextEditingChange,
@@ -63,16 +67,55 @@ export default function ElementCanvas({
     onTextEditingChange?.(id);
   }, [onTextEditingChange]);
 
-  // Escape key exits text editing
+  // Keyboard shortcuts
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && textEditingId) {
-        setTextEditingId(null);
+      const tag = (e.target as HTMLElement)?.tagName;
+      const isInputFocused = tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.isContentEditable;
+
+      // Escape: exit text editing
+      if (e.key === "Escape") {
+        if (textEditingId) { setTextEditingId(null); }
+        return;
+      }
+
+      // Don't intercept when user is typing in an editor or input
+      if (textEditingId || isInputFocused) return;
+      if (!isEditing || !selectedElementId) return;
+
+      // Delete / Backspace → delete selected element
+      if (e.key === "Delete" || e.key === "Backspace") {
+        e.preventDefault();
+        onDeleteElement?.(selectedElementId);
+        onSelectElement(null);
+        return;
+      }
+
+      // Ctrl/Cmd+D → duplicate
+      if (e.key === "d" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        onDuplicateElement?.(selectedElementId);
+        return;
+      }
+
+      // Arrow keys → nudge (1% per step, 5% with Shift)
+      if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
+        e.preventDefault();
+        const el = elements.find((el) => el.id === selectedElementId);
+        if (!el) return;
+        const step = e.shiftKey ? 5 : 1;
+        const dx = e.key === "ArrowLeft" ? -step : e.key === "ArrowRight" ? step : 0;
+        const dy = e.key === "ArrowUp" ? -step : e.key === "ArrowDown" ? step : 0;
+        onElementChange(selectedElementId, {
+          x: Math.max(0, Math.min(100 - el.width, el.x + dx)),
+          y: Math.max(0, Math.min(100 - el.height, el.y + dy)),
+        });
       }
     };
+
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [textEditingId, setTextEditingId]);
+  }, [textEditingId, selectedElementId, isEditing, elements, onDeleteElement, onDuplicateElement, onSelectElement, onElementChange, setTextEditingId]);
 
   const sorted = [...elements].sort(
     (a, b) => (a.zIndex ?? 1) - (b.zIndex ?? 1)

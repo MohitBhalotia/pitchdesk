@@ -11,7 +11,7 @@ export type ElementRole =
 
 export interface BaseElement {
   id: string;
-  type: "text" | "shape" | "image";
+  type: "text" | "shape" | "image" | "icon";
   x: number; // % of slide width, 0–100
   y: number; // % of slide height, 0–100
   width: number; // % of slide width, 0–100
@@ -29,6 +29,7 @@ export interface TextElement extends BaseElement {
   textAlign?: "left" | "center" | "right";
   color?: string;
   lineHeight?: number;
+  fontFamily?: string;
   role?: ElementRole;
 }
 
@@ -48,7 +49,13 @@ export interface ImageElement extends BaseElement {
   objectFit?: "contain" | "cover" | "fill";
 }
 
-export type SlideElement = TextElement | ShapeElement | ImageElement;
+export interface IconElement extends BaseElement {
+  type: "icon";
+  iconName: string;
+  color?: string;
+}
+
+export type SlideElement = TextElement | ShapeElement | ImageElement | IconElement;
 
 export interface SlideV2 {
   slideType: string;
