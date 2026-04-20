@@ -48,3 +48,6 @@ mytodo.txt
 
 *.md
 !README.md
+
+# design handoff bundles
+.design-handoff/
