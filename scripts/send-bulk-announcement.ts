@@ -263,6 +263,14 @@ function chunkArray<T>(arr: T[], size: number): T[][] {
 
 async function sendBulkAnnouncement() {
   try {
+    // Verify BREVO_API_KEY is loaded from .env
+    const apiKey = process.env.BREVO_API_KEY;
+    if (!apiKey) {
+      console.error("❌ BREVO_API_KEY is not set in .env — cannot send emails.");
+      process.exit(1);
+    }
+    console.log(`🔑 BREVO_API_KEY loaded: ${apiKey.slice(0, 10)}...${apiKey.slice(-4)}`);
+
     console.log("📧 Veqiro Announcement — Bulk Email Script");
     console.log(`   Subject : ${SUBJECT}`);
     console.log(`   Sender  : ${SENDER.name} <${SENDER.email}>`);
@@ -303,10 +311,7 @@ async function sendBulkAnnouncement() {
     }
 
     const api = new TransactionalEmailsApi();
-    api.setApiKey(
-      TransactionalEmailsApiApiKeys.apiKey,
-      process.env.BREVO_API_KEY as string
-    );
+    api.setApiKey(TransactionalEmailsApiApiKeys.apiKey, apiKey);
 
     let totalSent = 0;
     const failedBatches: { batchIndex: number; emails: string[]; error: string }[] = [];
