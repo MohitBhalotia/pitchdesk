@@ -1,5 +1,5 @@
 import PitchModel from "@/models/PitchModel";
-import { inngest } from "./client";
+import { emailSendEvent, inngest, pitchUpdateEvent } from "./client";
 import dbConnect from "@/lib/db";
 import { userPlanModel } from "@/models/UserPlanModel";
 import Competition from "@/models/Competition";
@@ -18,13 +18,13 @@ import IncubationParticipant from "@/models/IncubationParticipant";
 export const updatePitch = inngest.createFunction(
   {
     id: "update-pitch",
+    triggers: [{ event: pitchUpdateEvent }],
     batchEvents: {
       maxSize: 5,
       timeout: "30s",
       key: "event.data.pitchId", // Optional: batch events by user ID
     },
   },
-  { event: "pitch.update" },
   async ({ events, step }) => {
     let duration = 0;
     let transcript: Array<{
@@ -188,6 +188,7 @@ export const sendEmail = inngest.createFunction(
   {
     id: "send-email",
     name: "Send Email",
+    triggers: [{ event: emailSendEvent }],
     concurrency: {
       limit: 1, // Only 1 email processes at a time to respect 2 req/sec limit
     },
@@ -198,7 +199,6 @@ export const sendEmail = inngest.createFunction(
     },
     retries: 3,
   },
-  { event: "email.send" },
   async ({ event, step }) => {
     const emailData: EmailEventData = event.data;
 

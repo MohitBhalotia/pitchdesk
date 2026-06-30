@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { inngest } from "@/lib/inngest/client";
+import { inngest, pitchUpdateEvent } from "@/lib/inngest/client";
 
 export async function POST(req: NextRequest) {
   try {
     const { pitchId, sessionId, competitionId, incubationId, userId, transcript, duration } = await req.json();
-    inngest.send({
-      name: "pitch.update",
-      data: {
+    await inngest.send(
+      pitchUpdateEvent.create({
         pitchId: pitchId,
         sessionId: sessionId,
         competitionId: competitionId ?? null,
@@ -14,8 +13,8 @@ export async function POST(req: NextRequest) {
         userId: userId,
         transcript: transcript,
         duration: duration,
-      },
-    });
+      })
+    );
     return NextResponse.json(
       { success: true, message: "Pitch updated successfully" },
       { status: 200 }
