@@ -305,7 +305,7 @@ export default function Header1() {
                   !(item.name === "Pricing" && pathname === "/payment") && (
                     <li key={item.name}>
                       <Link
-                        href={item.href2 ?? item.href1}
+                        href={user ? item.href2 ?? item.href1 : item.href1}
                         className="block px-2 py-2 rounded-lg font-medium hover:bg-muted"
                         onClick={(e) => {
                           if (item.href1.startsWith("#")) {
@@ -313,7 +313,7 @@ export default function Header1() {
                             setIsMobileMenuOpen(false);
                             setTimeout(() => {
                               handleSmoothScroll(item.href1);
-                            }, 3000);
+                            }, 300);
                           } else {
                             setIsMobileMenuOpen(false);
                           }

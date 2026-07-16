@@ -20,7 +20,7 @@ const PAID_PLANS = Object.values(plans).filter((p) => p.planId);
 
 // ─── PopularBackground ───────────────────────────────────────────────────────
 const PopularBackground = () => (
-  <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,119,0.3),rgba(255,255,255,0))] dark:bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(45,30,220,0.4),rgba(255,255,255,0))] pointer-events-none" />
+  <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.06] to-transparent pointer-events-none" />
 );
 
 // ─── PricingCard ─────────────────────────────────────────────────────────────
@@ -44,7 +44,7 @@ const PricingCard = ({
       className={cn(
         "relative flex flex-col gap-6 overflow-hidden rounded-2xl border p-6 shadow transition-all duration-300 hover:shadow-lg",
         "bg-background text-foreground",
-        isPopular && "ring-2 ring-violet-600/50"
+        isPopular && "ring-2 ring-primary/40"
       )}
     >
       {isPopular && <PopularBackground />}
@@ -54,7 +54,7 @@ const PricingCard = ({
         <plan.icon className="h-5 w-5 text-muted-foreground" />
         <h2 className="text-xl font-semibold capitalize">{plan.name}</h2>
         {isPopular && (
-          <Badge className="ml-auto bg-violet-700 px-2 py-1 text-white hover:bg-primary">
+          <Badge className="ml-auto bg-primary px-2 py-1 text-primary-foreground hover:bg-primary">
             <Sparkles className="mr-1 h-3.5 w-3.5" /> Most Popular
           </Badge>
         )}
@@ -74,7 +74,7 @@ const PricingCard = ({
             <span
               className={cn(
                 "text-3xl font-bold flex items-center gap-0.5",
-                isPopular ? "text-violet-600" : "text-foreground"
+                isPopular ? "text-primary" : "text-foreground"
               )}
             >
               <DollarSign className="h-6 w-6" />
@@ -91,7 +91,7 @@ const PricingCard = ({
           <span
             className={cn(
               "text-3xl font-bold flex items-center gap-0.5",
-              isPopular ? "text-violet-600" : "text-foreground"
+              isPopular ? "text-primary" : "text-foreground"
             )}
           >
             <DollarSign className="h-6 w-6" />
@@ -117,10 +117,8 @@ const PricingCard = ({
               className={cn(
                 "flex h-5 w-5 shrink-0 items-center justify-center rounded-full mt-0.5",
                 feature.included
-                  ? isPopular
-                    ? "bg-violet-600/10 text-violet-600"
-                    : "bg-green-500/10 text-green-600"
-                  : "bg-red-500/10 text-red-500"
+                  ? "bg-primary/10 text-primary"
+                  : "bg-muted text-muted-foreground/50"
               )}
             >
               {feature.included ? (
@@ -138,12 +136,8 @@ const PricingCard = ({
 
       {/* CTA Button */}
       <Button
-        className={cn(
-          "h-fit w-full rounded-lg font-medium transition-all duration-300",
-          isPopular
-            ? "bg-violet-700 hover:bg-violet-800 text-white"
-            : ""
-        )}
+        variant={isPopular ? "default" : "outline"}
+        className="h-fit w-full font-medium transition-all duration-300"
         onClick={() => submitPayment(plan.planId!)}
         disabled={loading}
       >

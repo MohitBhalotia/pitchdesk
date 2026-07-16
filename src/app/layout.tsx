@@ -1,6 +1,9 @@
 import React from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
+import { getServerSession } from "next-auth";
+import authOptions from "@/lib/auth";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
 import SessionWrapper from "../components/SessionWrapper";
@@ -14,6 +17,13 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const displayFont = localFont({
+  src: "../fonts/ABCFavorit-Bold.woff2",
+  weight: "700",
+  variable: "--font-display",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -95,15 +105,17 @@ if (process.env.NODE_ENV !== "development") {
 }
 
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getServerSession(authOptions);
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${displayFont.variable} antialiased`}
         suppressHydrationWarning
       >
         <ThemeProvider
@@ -112,7 +124,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SessionWrapper>
+          <SessionWrapper session={session}>
             {children}
             <Toaster position="bottom-right" richColors />
           </SessionWrapper>
