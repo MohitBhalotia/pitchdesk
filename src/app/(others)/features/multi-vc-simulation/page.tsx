@@ -49,7 +49,7 @@ export default function MultiVCSimulationPage() {
                             ← Back to Features
                         </Link>
 
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-6">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-mint text-mint-foreground rounded-full text-sm font-medium mb-6">
                             <Users className="w-4 h-4" />
                             Shark Tank Style Practice
                         </div>
@@ -95,16 +95,16 @@ export default function MultiVCSimulationPage() {
                             </p>
 
                             <div className="grid sm:grid-cols-3 gap-4 sm:gap-6 mt-8">
-                                <div className="text-center p-4 sm:p-6 bg-primary/5 rounded-xl border border-primary/20">
-                                    <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">2–5+</div>
+                                <div className="text-center p-4 sm:p-6 bg-mint/25 rounded-xl">
+                                    <div className="text-3xl sm:text-4xl font-bold text-ink mb-2">2–5+</div>
                                     <p className="text-sm sm:text-base text-muted-foreground">AI VCs in the room</p>
                                 </div>
-                                <div className="text-center p-4 sm:p-6 bg-primary/5 rounded-xl border border-primary/20">
-                                    <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">Panel</div>
+                                <div className="text-center p-4 sm:p-6 bg-yellow/25 rounded-xl">
+                                    <div className="text-3xl sm:text-4xl font-bold text-ink mb-2">Panel</div>
                                     <p className="text-sm sm:text-base text-muted-foreground">Realistic dynamics</p>
                                 </div>
-                                <div className="text-center p-4 sm:p-6 bg-primary/5 rounded-xl border border-primary/20">
-                                    <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">Safe</div>
+                                <div className="text-center p-4 sm:p-6 bg-pink/25 rounded-xl">
+                                    <div className="text-3xl sm:text-4xl font-bold text-ink mb-2">Safe</div>
                                     <p className="text-sm sm:text-base text-muted-foreground">Practice before the real panel</p>
                                 </div>
                             </div>

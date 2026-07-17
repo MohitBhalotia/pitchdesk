@@ -164,6 +164,13 @@ const features = [
 const liveFeatures = features.slice(0, 8);
 const upcomingFeatures = features.slice(8);
 
+const iconColors = [
+    "bg-mint text-mint-foreground",
+    "bg-yellow text-yellow-foreground",
+    "bg-pink text-pink-foreground",
+    "bg-lavender text-lavender-foreground",
+];
+
 export default function FeaturesPage() {
     const breadcrumbSchema = generateBreadcrumbSchema([
         { name: 'Home', url: '/' },
@@ -198,12 +205,12 @@ export default function FeaturesPage() {
                 {/* Hero Section */}
                 <section className="container mx-auto px-4 py-12 sm:py-16 md:py-20">
                     <div className="max-w-4xl mx-auto text-center">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-6">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-lavender text-lavender-foreground rounded-full text-sm font-medium mb-6">
                             <Sparkles className="w-4 h-4" />
                             Complete Pitch Training Platform
                         </div>
 
-                        <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
+                        <h1 className="text-3xl sm:text-4xl md:text-6xl mb-6 leading-tight">
                             Everything You Need to <span className="text-primary">Master Your Pitch</span>
                         </h1>
 
@@ -233,7 +240,7 @@ export default function FeaturesPage() {
                 <section className="container mx-auto px-4 py-12 sm:py-16">
                     <div className="max-w-6xl mx-auto">
                         <div className="mb-8 sm:mb-10">
-                            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
+                            <h2 className="text-2xl sm:text-3xl mb-2">
                                 Live in the Product
                             </h2>
                             <p className="text-muted-foreground max-w-2xl">
@@ -247,10 +254,10 @@ export default function FeaturesPage() {
                                     <Link
                                         key={index}
                                         href={feature.href}
-                                        className="group bg-card rounded-xl p-6 sm:p-7 border border-border hover:border-primary/30 hover:shadow-md transition-all duration-300"
+                                        className="group bg-card rounded-2xl p-6 sm:p-7 hover:-translate-y-1 transition-all duration-300"
                                     >
-                                        <div className="w-11 h-11 sm:w-12 sm:h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-5 group-hover:bg-primary/20 transition-colors">
-                                            <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                                        <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center mb-5 ${iconColors[index % iconColors.length]}`}>
+                                            <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
                                         </div>
 
                                         <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">

@@ -71,9 +71,9 @@ export default function CrowdfundingPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <div className="inline-flex items-center space-x-3 bg-primary/20 border border-primary/30 px-6 py-3 rounded-full mb-8">
-            <Sparkles className="w-5 h-5 text-primary" />
-            <span className="text-lg font-semibold text-primary">COMING SOON</span>
+          <div className="inline-flex items-center space-x-3 bg-yellow px-6 py-3 rounded-full mb-8">
+            <Sparkles className="w-5 h-5 text-yellow-foreground" />
+            <span className="text-lg font-semibold text-yellow-foreground">COMING SOON</span>
           </div>
 
           <h1 className="text-4xl sm:text-6xl font-bold mb-6">
@@ -103,14 +103,21 @@ export default function CrowdfundingPage() {
           </div>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-            {features.map((feature, index) => (
+            {features.map((feature, index) => {
+              const accents = [
+                "bg-mint text-mint-foreground",
+                "bg-yellow text-yellow-foreground",
+                "bg-pink text-pink-foreground",
+                "bg-lavender text-lavender-foreground",
+              ];
+              return (
               <motion.div
                 key={index}
-                className="p-6 bg-card rounded-lg border border-border hover:border-primary/50 transition-colors"
-                whileHover={{ y: -2 }}
+                className="p-6 bg-card rounded-2xl"
+                whileHover={{ y: -4 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary mb-4">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${accents[index % accents.length]}`}>
                   {feature.icon}
                 </div>
                 <h3 className="text-lg font-semibold mb-2">
@@ -120,7 +127,8 @@ export default function CrowdfundingPage() {
                   {feature.description}
                 </p>
               </motion.div>
-            ))}
+              );
+            })}
           </div>
         </motion.section>
 

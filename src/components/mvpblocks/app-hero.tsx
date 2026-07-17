@@ -1,9 +1,10 @@
 "use client";
-import { CircleAlert, Command } from "lucide-react";
+import { CircleAlert, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import TextGenerateEffect from "@/components/ui/typewriter";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import {
   Banner,
   BannerAction,
@@ -15,76 +16,100 @@ import {
 export default function AppHero() {
   const router = useRouter();
   return (
-    <section className=" mt-10 mb-30 min-h-screen container mx-auto max-w-7xl px-4 py-20 animate-in fade-in duration-500">
-      <div className="-mt-8  mb-4">
-        <Banner className="rounded-lg">
-          <BannerIcon icon={CircleAlert} />
+    <section className="mt-28 mb-20 container mx-auto max-w-7xl px-6 py-10 animate-in fade-in duration-500">
+      <div className="mb-6">
+        <Banner className="rounded-2xl bg-lavender text-ink">
+          <BannerIcon icon={CircleAlert} className="border-ink/10 bg-ink/5" />
           <BannerTitle>
             You can now compete in various competitions across the world!
           </BannerTitle>
           <div className="ml-auto flex items-center gap-2">
-            <BannerAction onClick={() => router.push("/competitions")}>
+            <BannerAction
+              onClick={() => router.push("/competitions")}
+              className="hover:bg-ink/10 hover:text-ink"
+            >
               Learn more
             </BannerAction>
-            <BannerClose />
+            <BannerClose className="hover:bg-ink/10 hover:text-ink" />
           </div>
         </Banner>
       </div>
-      <div
-        className="mb-4 inline-block w-fit rounded-full border bg-white/5 px-4 py-1.5 backdrop-blur-lg animate-in fade-in duration-700 delay-200"
-        style={{ boxShadow: "0 0 10px 0 #e60a6430 inset" }}
-      >
-        <span className="text-sm font-medium">
-          <Command className="mr-2 inline-block h-4 w-4" />
-          Introducing Pitch Desk
-        </span>
-      </div>
 
-      <div className="relative z-10 mt-6">
-        <h1 className="mb-4 text-left text-5xl font-normal tracking-tight md:text-7xl">
-          <span className="text-foreground">
-            <TextGenerateEffect words="Simulate VC Rooms &" />
-          </span>
-          <br />
-          <span className="text-foreground font-medium">
-            <TextGenerateEffect words=" Refine Your Pitch." />
-          </span>
-        </h1>
+      <div className="grid items-center gap-12 lg:grid-cols-2">
+        <div className="relative z-10">
+          <div className="mb-6 inline-flex w-fit items-center rounded-full bg-mint px-4 py-1.5 animate-in fade-in duration-700 delay-200">
+            <Sparkles className="mr-2 inline-block h-4 w-4 text-mint-foreground" />
+            <span className="text-sm font-medium text-mint-foreground">
+              Introducing PitchDesk
+            </span>
+          </div>
 
-        <p className="text-foreground/50 mb-8 max-w-2xl text-left text-lg md:text-xl animate-in slide-in-from-bottom-4 duration-500 delay-400">
-          Pitch with power. Land the deal. AI VC agents listen to your pitch in
-          real time, ask sharp questions, give instant feedback, and simulate
-          VCs with diverse personalities
-        </p>
+          <h1 className="mb-6 text-left text-5xl font-display font-extrabold tracking-tight md:text-6xl">
+            <span className="text-ink">
+              <TextGenerateEffect words="Simulate VC rooms." />
+            </span>
+            <br />
+            <motion.span
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="text-ink"
+            >
+              Refine your{" "}
+              <span className="bg-clip-text text-transparent [background-image:linear-gradient(90deg,#e0879e,#a5a9e0)]">
+                pitch.
+              </span>
+            </motion.span>
+          </h1>
 
-        <div className="flex flex-col items-start gap-4 sm:flex-row animate-in slide-in-from-bottom-4 duration-500 delay-500">
-          <Button
-            onClick={() => router.push("/signup")}
-            size="lg"
-            className="rounded-full bg-gradient-to-b from-primary/80 to-primary/90 text-white shadow-[0px_2px_0px_0px_rgba(255,255,255,0.3)_inset]"
-          >
-            Try it for Free
-          </Button>
-          {/* <Button size="lg" variant="link">
-            View Markets <ArrowRight className="ml-2 h-4 w-4" />
-          </Button> */}
+          <p className="text-ink/60 mb-10 max-w-lg text-left text-lg md:text-xl animate-in slide-in-from-bottom-4 duration-500 delay-400">
+            AI VC agents listen to your pitch in real time, ask sharp
+            questions, give instant feedback, and help you land the deal.
+          </p>
+
+          <div className="flex flex-col items-start gap-4 sm:flex-row animate-in slide-in-from-bottom-4 duration-500 delay-500">
+            <Button
+              onClick={() => router.push("/signup")}
+              size="lg"
+              className="rounded-full bg-ink text-cream hover:bg-ink/90 px-8 py-6 text-base"
+            >
+              Try it for Free
+            </Button>
+          </div>
         </div>
+
+        <motion.div
+          className="relative"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 }}
+        >
+          <div className="relative rounded-3xl bg-pink/40 p-4">
+            <Image
+              src="/images/hero-pitch-illustration.png"
+              alt="Founder pitching to a panel of AI VC judges"
+              width={900}
+              height={700}
+              className="h-full w-full rounded-2xl object-cover"
+              priority
+            />
+          </div>
+        </motion.div>
       </div>
 
       <motion.div
         className="relative"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 }}
+        transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
       >
-        <div className="border-2 border-black relative mt-10 z-10 mx-auto max-w-5xl rounded-2xl shadow-[0_0_50px_rgba(155,135,245,0.2)]">
-          <div
-            style={{
-              backgroundImage: "var(--dashboard-src)",
-            }}
-            role="img"
-            aria-label="Quick Voice Dashboard"
-            className="h-full w-full aspect-[22.5/11]  rounded-2xl border border-white/10 bg-cover "
+        <div className="relative mt-16 z-10 mx-auto max-w-5xl rounded-3xl border border-border bg-white p-2 shadow-sm">
+          <Image
+            src="/light-dashboard.png"
+            alt="PitchDesk dashboard preview"
+            width={1440}
+            height={704}
+            className="h-full w-full aspect-[22.5/11] rounded-2xl object-cover"
           />
         </div>
       </motion.div>

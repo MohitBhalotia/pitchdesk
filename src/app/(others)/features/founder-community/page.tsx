@@ -52,7 +52,7 @@ export default function FounderCommunityPage() {
                             ← Back to Features
                         </Link>
 
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-6">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-mint text-mint-foreground rounded-full text-sm font-medium mb-6">
                             <Users className="w-4 h-4" />
                             Startup Founder Network
                         </div>
@@ -97,16 +97,16 @@ export default function FounderCommunityPage() {
                             </p>
 
                             <div className="grid sm:grid-cols-3 gap-4 sm:gap-6 mt-8">
-                                <div className="text-center p-4 sm:p-6 bg-primary/5 rounded-xl border border-primary/20">
-                                    <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">Share</div>
+                                <div className="text-center p-4 sm:p-6 bg-mint/25 rounded-xl">
+                                    <div className="text-3xl sm:text-4xl font-bold text-ink mb-2">Share</div>
                                     <p className="text-sm sm:text-base text-muted-foreground">Blogs, tips & learnings</p>
                                 </div>
-                                <div className="text-center p-4 sm:p-6 bg-primary/5 rounded-xl border border-primary/20">
-                                    <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">Discuss</div>
+                                <div className="text-center p-4 sm:p-6 bg-yellow/25 rounded-xl">
+                                    <div className="text-3xl sm:text-4xl font-bold text-ink mb-2">Discuss</div>
                                     <p className="text-sm sm:text-base text-muted-foreground">Problems & solutions</p>
                                 </div>
-                                <div className="text-center p-4 sm:p-6 bg-primary/5 rounded-xl border border-primary/20">
-                                    <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">Connect</div>
+                                <div className="text-center p-4 sm:p-6 bg-pink/25 rounded-xl">
+                                    <div className="text-3xl sm:text-4xl font-bold text-ink mb-2">Connect</div>
                                     <p className="text-sm sm:text-base text-muted-foreground">With fellow founders</p>
                                 </div>
                             </div>

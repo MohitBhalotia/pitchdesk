@@ -23,31 +23,30 @@ interface TeamCardProps {
   index: number;
 }
 
+const avatarColors = [
+  { solid: "bg-mint", soft: "bg-mint/30" },
+  { solid: "bg-yellow", soft: "bg-yellow/30" },
+  { solid: "bg-pink", soft: "bg-pink/30" },
+  { solid: "bg-lavender", soft: "bg-lavender/30" },
+];
+
 export default function TeamCard({ member, index }: TeamCardProps) {
   const [imageError, setImageError] = useState(false);
+  const color = avatarColors[index % avatarColors.length];
 
   return (
-    <div 
-      className="group relative bg-card rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-border/50 hover:border-primary/20"
+    <div
+      className="group relative bg-card rounded-2xl transition-all duration-500 hover:-translate-y-1 overflow-hidden"
       style={{
         animationDelay: `${index * 100}ms`,
       }}
     >
-      {/* Background Gradient Effect */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      
       <div className="relative overflow-hidden">
         {/* Avatar Container */}
-        <div className="relative w-full h-72 bg-gradient-to-br from-primary/15 to-secondary/15 flex items-center justify-center overflow-hidden">
-          {/* Animated background pattern */}
-          <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity duration-500">
-            <div className="absolute top-0 left-0 w-32 h-32 bg-primary rounded-full -translate-x-1/2 -translate-y-1/2" />
-            <div className="absolute bottom-0 right-0 w-32 h-32 bg-secondary rounded-full translate-x-1/2 translate-y-1/2" />
-          </div>
-          
+        <div className={`relative w-full h-72 ${color.soft} flex items-center justify-center overflow-hidden`}>
           {/* Avatar Circle with Actual Image */}
-          <div className="relative z-10 w-40 h-40 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-full flex items-center justify-center border-4 border-white/10 group-hover:border-white/20 transition-all duration-500 shadow-2xl overflow-hidden">
-            <div className="w-36 h-36 bg-gradient-to-br from-primary/30 to-secondary/30 rounded-full flex items-center justify-center backdrop-blur-sm overflow-hidden">
+          <div className={`relative z-10 w-40 h-40 ${color.solid} rounded-full flex items-center justify-center transition-all duration-500 overflow-hidden`}>
+            <div className="w-36 h-36 rounded-full flex items-center justify-center overflow-hidden">
               {!imageError ? (
                 <Image 
                   src={member.image}

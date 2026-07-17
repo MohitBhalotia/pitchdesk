@@ -48,11 +48,11 @@ export default function IncubationListPage() {
     return (
         <div className="container mx-auto p-6 max-w-7xl pt-28 sm:pt-32">
             <div className="mb-10 sm:mb-12 text-center max-w-2xl mx-auto">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium mb-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-yellow text-yellow-foreground rounded-full text-xs font-medium mb-4">
                     <Briefcase className="w-3.5 h-3.5" />
                     Investment Programs
                 </div>
-                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight mb-3">
+                <h1 className="text-3xl sm:text-4xl tracking-tight mb-3">
                     Investment Programs
                 </h1>
                 <p className="text-base sm:text-lg text-muted-foreground">
@@ -75,12 +75,20 @@ export default function IncubationListPage() {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
-                    {programs.map((program) => (
-                        <Card key={program._id} className="flex flex-col hover:shadow-md transition-all duration-300 border-t-4 border-t-primary">
+                    {programs.map((program, index) => {
+                        const accents = [
+                            { bg: "bg-mint", border: "border-t-mint" },
+                            { bg: "bg-yellow", border: "border-t-yellow" },
+                            { bg: "bg-pink", border: "border-t-pink" },
+                            { bg: "bg-lavender", border: "border-t-lavender" },
+                        ];
+                        const accent = accents[index % accents.length];
+                        return (
+                        <Card key={program._id} className={`flex flex-col hover:-translate-y-1 transition-all duration-300 border-t-4 ${accent.border}`}>
                             <CardHeader>
                                 <div className="flex items-center gap-3 mb-4">
-                                    <div className="p-2 rounded-full bg-primary">
-                                        <Briefcase className="h-5 w-5 text-primary-foreground" />
+                                    <div className={`p-2 rounded-full ${accent.bg}`}>
+                                        <Briefcase className="h-5 w-5 text-ink" />
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium">{program.organizationName}</p>
@@ -100,7 +108,7 @@ export default function IncubationListPage() {
                             </CardContent>
                             <CardFooter className="pt-4 border-t">
                                 <Button
-                                    className="w-full group"
+                                    className="w-full group rounded-full"
                                     onClick={() => router.push(`/incubations/${program._id}`)}
                                 >
                                     View Details
@@ -108,7 +116,8 @@ export default function IncubationListPage() {
                                 </Button>
                             </CardFooter>
                         </Card>
-                    ))}
+                        );
+                    })}
                 </div>
 
 

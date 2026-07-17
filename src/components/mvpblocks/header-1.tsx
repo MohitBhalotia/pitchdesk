@@ -11,8 +11,6 @@ import {
   LogOut,
 } from "lucide-react";
 import Link from "next/link";
-import { useTheme } from "next-themes";
-import { ModeToggle } from "../theme-toggle";
 import Image from "next/image";
 import { Avatar } from "@radix-ui/react-avatar";
 import { AvatarFallback } from "../ui/avatar";
@@ -65,7 +63,6 @@ export default function Header1() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-  const { theme } = useTheme();
 
   const handleSmoothScroll = (href: string) => {
     if (href.startsWith("#")) {
@@ -89,15 +86,13 @@ export default function Header1() {
   return (
     <header
       className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${isScrolled
-          ? theme === "dark"
-            ? "bg-black/80 backdrop-blur shadow-lg"
-            : "bg-white/80 backdrop-blur shadow-lg"
+          ? "bg-cream/90 backdrop-blur border-b border-border"
           : "bg-transparent"
         }`}
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-6 sm:px-8 lg:px-10">
         {/* Top row */}
-        <div className="flex h-16 items-center justify-between">
+        <div className="flex h-20 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-full  ">
@@ -106,15 +101,15 @@ export default function Header1() {
                 alt="PitchDesk Logo"
                 width={40}
                 height={40}
-                className="dark:invert rounded-full"
+                className="rounded-full"
               />
             </div>
-            <span className=" text-xl font-bold ">PitchDesk</span>
+            <span className="text-xl font-display font-bold">PitchDesk</span>
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center space-x-8">
-            <ul className="flex items-center space-x-6">
+          <nav className="hidden lg:flex items-center space-x-1">
+            <ul className="flex items-center space-x-1">
               {navItems.map(
                 (item) =>
                   !(item.name === "Pricing" && pathname === "/payment") && (
@@ -134,7 +129,7 @@ export default function Header1() {
                             handleSmoothScroll(item.href1);
                           }
                         }}
-                        className="flex items-center space-x-1 font-medium text-foreground hover:text-primary transition"
+                        className="flex items-center space-x-1 rounded-full px-4 py-2 font-medium text-ink/70 hover:bg-muted hover:text-ink transition-colors"
                       >
                         <span>{item.name}</span>
                         {item.hasDropdown && (
@@ -178,9 +173,8 @@ export default function Header1() {
             </ul>
           </nav>
 
-          {/* Right Side (Auth + Theme) */}
+          {/* Right Side (Auth) */}
           <div className="flex items-center gap-2">
-            <ModeToggle />
             <div className="hidden lg:flex">
               {authLoading || user ? (
                 <div className="flex items-center gap-2">
@@ -257,17 +251,13 @@ export default function Header1() {
                 <div className="hidden lg:flex items-center space-x-4">
                   <Link
                     href="/login"
-                    className="hidden lg:block font-medium hover:text-primary transition"
+                    className="hidden lg:block font-medium text-ink/70 hover:text-ink transition"
                   >
                     Sign In
                   </Link>
                   <Link
                     href="/signup"
-                    className="inline-flex items-center space-x-2 rounded-full px-6 py-2.5 font-medium text-white transition-all duration-200 hover:shadow-lg"
-                    style={{
-                      backgroundImage:
-                        "linear-gradient(to right, var(--primary), #1e40af)",
-                    }}
+                    className="inline-flex items-center space-x-2 rounded-full bg-ink px-6 py-2.5 font-medium text-cream transition-all duration-200 hover:bg-ink/90"
                   >
                     Get Started
                   </Link>
@@ -293,7 +283,7 @@ export default function Header1() {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.nav
-            className="lg:hidden mx-4  mt-2 rounded-xl border border-border bg-background shadow-xl backdrop-blur p-4 space-y-2"
+            className="lg:hidden mx-4 mt-2 rounded-2xl border border-border bg-cream shadow-xl backdrop-blur p-4 space-y-2"
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
@@ -370,7 +360,7 @@ export default function Header1() {
                   </Link>
                   <Link
                     href="/signup"
-                    className="block w-full rounded-lg bg-gradient-to-r from-primary to-blue-800 py-2 text-center font-medium text-white hover:shadow-lg transition"
+                    className="block w-full rounded-full bg-ink py-2.5 text-center font-medium text-cream hover:bg-ink/90 transition"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Get Started

@@ -1,16 +1,18 @@
 import React from 'react';
 import { Shield, Lock, Eye, Database, FileCheck, Users, Mail, CheckCircle2 } from 'lucide-react';
 
+const tintColors = ['bg-mint/40', 'bg-yellow/40', 'bg-pink/40', 'bg-lavender/40'];
+
 const PrivacyPolicy = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-      <div className="container mx-auto px-4 py-12 max-w-5xl">
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-16 max-w-5xl">
         {/* Header Section */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-            <Shield className="w-8 h-8 text-primary" />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-lavender mb-4">
+            <Shield className="w-8 h-8 text-lavender-foreground" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl mb-4 text-ink">
             Data Privacy & Confidentiality
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
@@ -53,8 +55,8 @@ const PrivacyPolicy = () => {
                 { title: 'Proprietary Technology', desc: 'Technical specifications, intellectual property details, and innovation concepts' },
                 { title: 'Partnership Information', desc: 'Investor relationships, strategic partnerships, and business negotiations' },
               ].map((item, idx) => (
-                <div key={idx} className="flex gap-3 p-3 rounded-md bg-muted/50">
-                  <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                <div key={idx} className={`flex gap-3 p-3 rounded-xl ${tintColors[idx % tintColors.length]}`}>
+                  <CheckCircle2 className="w-5 h-5 text-ink flex-shrink-0 mt-0.5" />
                   <div>
                     <p className="font-medium text-foreground">{item.title}</p>
                     <p className="text-sm text-muted-foreground">{item.desc}</p>
@@ -149,8 +151,8 @@ const PrivacyPolicy = () => {
                   { title: 'Correction Rights', desc: 'You can update or correct any information in your account' },
                   { title: 'Deletion Rights', desc: 'You can request complete deletion of your data, and we will permanently remove it from our systems' },
                 ].map((item, idx) => (
-                  <div key={idx} className="flex gap-3 p-3 rounded-md bg-muted/50">
-                    <CheckCircle2 className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                  <div key={idx} className={`flex gap-3 p-3 rounded-xl ${tintColors[idx % tintColors.length]}`}>
+                    <CheckCircle2 className="w-5 h-5 text-ink flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="font-medium text-foreground">{item.title}</p>
                       <p className="text-sm text-muted-foreground">{item.desc}</p>
@@ -231,10 +233,10 @@ const PrivacyPolicy = () => {
 
         {/* Contact Section */}
         <section className="mb-12">
-          <div className="bg-primary/5 border border-primary/20 rounded-lg p-6 md:p-8">
+          <div className="bg-mint/25 rounded-3xl p-6 md:p-8">
             <div className="flex items-start gap-4">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 flex-shrink-0">
-                <Mail className="w-6 h-6 text-primary" />
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-mint flex-shrink-0">
+                <Mail className="w-6 h-6 text-mint-foreground" />
               </div>
               <div>
                 <h2 className="text-2xl font-bold mb-3">Contact Our Privacy Team</h2>
@@ -260,7 +262,7 @@ const PrivacyPolicy = () => {
 
         {/* Final Promise */}
         <section className="mb-8">
-          <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg border border-primary/20 p-6 md:p-8 text-center">
+          <div className="bg-pink/25 rounded-3xl p-6 md:p-8 text-center">
             <h2 className="text-2xl font-bold mb-4">Our Promise to You</h2>
             <p className="text-lg text-muted-foreground mb-4 leading-relaxed">
               <span className="font-semibold text-foreground">At PitchDesk, your success is our mission, and your privacy is our foundation.</span> We&apos;re not just building AI tools for pitch training - we&apos;re creating a trusted ecosystem where founders can safely refine their strategies, practice their presentations, and prepare for funding rounds without compromising their competitive advantage.

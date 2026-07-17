@@ -49,7 +49,7 @@ export default function PitchAnalysisPage() {
                             ← Back to Features
                         </Link>
 
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-6">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow text-yellow-foreground rounded-full text-sm font-medium mb-6">
                             <BarChart3 className="w-4 h-4" />
                             Scores + Feedback + Improvement Tips
                         </div>
@@ -96,16 +96,16 @@ export default function PitchAnalysisPage() {
                             </p>
 
                             <div className="grid sm:grid-cols-3 gap-6 mt-8">
-                                <div className="text-center p-6 bg-primary/5 rounded-xl">
-                                    <div className="text-4xl font-bold text-primary mb-2">/100</div>
+                                <div className="text-center p-6 bg-mint/25 rounded-xl">
+                                    <div className="text-4xl font-bold text-ink mb-2">/100</div>
                                     <p className="text-muted-foreground">Comprehensive pitch score</p>
                                 </div>
-                                <div className="text-center p-6 bg-primary/5 rounded-xl">
-                                    <div className="text-4xl font-bold text-primary mb-2">7+</div>
+                                <div className="text-center p-6 bg-yellow/25 rounded-xl">
+                                    <div className="text-4xl font-bold text-ink mb-2">7+</div>
                                     <p className="text-muted-foreground">Scoring categories</p>
                                 </div>
-                                <div className="text-center p-6 bg-primary/5 rounded-xl">
-                                    <div className="text-4xl font-bold text-primary mb-2">Actionable</div>
+                                <div className="text-center p-6 bg-pink/25 rounded-xl">
+                                    <div className="text-4xl font-bold text-ink mb-2">Actionable</div>
                                     <p className="text-muted-foreground">Improvement tips per weakness</p>
                                 </div>
                             </div>

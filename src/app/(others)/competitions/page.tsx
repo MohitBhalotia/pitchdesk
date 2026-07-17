@@ -65,7 +65,7 @@ export default function TournamentsPage() {
     return (
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-8 sm:pt-32">
         <div className="mb-10 sm:mb-12 text-center max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-pink text-pink-foreground rounded-full text-xs font-medium mb-4">
             <Trophy className="w-3.5 h-3.5" />
             Live Competitions
           </div>
@@ -106,7 +106,7 @@ export default function TournamentsPage() {
     return (
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-8 sm:pt-32">
         <div className="mb-10 sm:mb-12 text-center max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-pink text-pink-foreground rounded-full text-xs font-medium mb-4">
             <Trophy className="w-3.5 h-3.5" />
             Live Competitions
           </div>
@@ -128,7 +128,7 @@ export default function TournamentsPage() {
               <p>{error}</p>
               <Button
                 onClick={() => window.location.reload()}
-                className="mt-4"
+                className="mt-4 rounded-full"
                 variant="outline"
               >
                 Try Again
@@ -215,7 +215,7 @@ export default function TournamentsPage() {
               </CardContent>
 
               <CardFooter>
-                <Button asChild className="w-full">
+                <Button asChild className="w-full rounded-full">
                   <Link href={`/competitions/${competition._id}`}>
                     View Details
                   </Link>

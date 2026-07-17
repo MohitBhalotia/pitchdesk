@@ -64,40 +64,12 @@ const handleSubmit = async (e: React.FormEvent) => {
   return (
     <section
       id="contact-us"
-      className="relative w-full overflow-hidden py-16 md:py-24"
+      className="relative w-full overflow-hidden py-20 md:py-28"
     >
-      {/* Light mode glows */}
-      <div
-        className="absolute top-0 left-0 h-[500px] w-[500px] rounded-full opacity-20 blur-[120px] dark:hidden"
-        style={{
-          background: `radial-gradient(circle at center, #2563eb, transparent 70%)`,
-        }}
-      />
-      <div
-        className="absolute right-0 bottom-0 h-[300px] w-[300px] rounded-full opacity-10 blur-[100px] dark:hidden"
-        style={{
-          background: `radial-gradient(circle at center, #2563eb, transparent 70%)`,
-        }}
-      />
-
-      {/* Dark mode glows */}
-      <div
-        className="absolute top-0 left-0 h-[500px] w-[500px] rounded-full opacity-20 blur-[120px] hidden dark:block"
-        style={{
-          background: `radial-gradient(circle at center, #8b5cf6, transparent 70%)`,
-        }}
-      />
-      <div
-        className="absolute right-0 bottom-0 h-[300px] w-[300px] rounded-full opacity-10 blur-[100px] hidden dark:block"
-        style={{
-          background: `radial-gradient(circle at center, #8b5cf6, transparent 70%)`,
-        }}
-      />
-
-      <div className="relative z-10 container mx-auto px-4 md:px-6">
-        <div className="border-border/40 bg-secondary/20 mx-auto max-w-5xl overflow-hidden rounded-[28px] border shadow-xl backdrop-blur-sm">
+      <div className="relative z-10 container mx-auto px-6 md:px-6">
+        <div className="bg-lavender/30 mx-auto max-w-5xl overflow-hidden rounded-[32px]">
           <div className="grid md:grid-cols-2">
-            <div className="relative p-6 md:p-10" ref={formRef}>
+            <div className="relative p-8 md:p-12" ref={formRef}>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={
@@ -107,10 +79,10 @@ const handleSubmit = async (e: React.FormEvent) => {
                 className="flex items-center w-full gap-2"
               >
                 <div className="flex itesms-center gap-2 relative">
-                  <h2 className="from-foreground to-foreground/80 mb-2 bg-gradient-to-r bg-clip-text text-4xl font-bold tracking-tight text-transparent md:text-5xl">
+                  <h2 className="text-ink mb-2 text-4xl font-display font-extrabold tracking-tight md:text-5xl">
                     Contact
                   </h2>
-                  <span className="text-primary relative -mt-2 sm:-mt-3 z-10 w-full text-4xl font-bold md:text-5xl">
+                  <span className="text-ink/50 relative -mt-2 sm:-mt-3 z-10 w-full text-4xl font-display font-extrabold md:text-5xl">
                     Us
                   </span>
                 </div>
@@ -121,7 +93,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                   maxSize={1.4}
                   particleDensity={500}
                   className="absolute inset-0 top-0 h-24 w-full"
-                  particleColor="#2563eb"
+                  particleColor="#1a1a1a"
                 />), [])}
               </motion.div>
 
@@ -194,7 +166,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                   <Button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full  text-white shadow-[0px_2px_0px_0px_rgba(255,255,255,0.3)_inset] bg gradient from-purple-500 to-purple-700"
+                    className="w-full rounded-full bg-ink text-cream hover:bg-ink/90"
                   >
                     {isSubmitting ? (
                       <span className="flex items-center justify-center">
@@ -221,7 +193,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               className="relative my-8 flex items-center justify-center overflow-hidden px-2"
             >
               <div className="flex flex-col items-center justify-center overflow-hidden">
-                <article className="relative mx-auto h-[350px] min-h-60 max-w-[450px] overflow-hidden rounded-3xl border bg-gradient-to-b  p-6 text-3xl tracking-tight text-white from-purple-500 to-purple-100/10 md:h-[450px] md:min-h-80 md:p-8 md:text-4xl md:leading-[1.05] lg:text-5xl">
+                <article className="relative mx-auto h-[350px] min-h-60 max-w-[450px] overflow-hidden rounded-3xl bg-ink p-6 text-3xl font-display tracking-tight text-cream md:h-[450px] md:min-h-80 md:p-8 md:text-4xl md:leading-[1.05] lg:text-5xl">
                   Pitch with Power Practice with AI!
                   <div className="absolute -right-20 -bottom-20 z-10 mx-auto flex h-full w-full max-w-[300px] items-center justify-center transition-all duration-700 hover:scale-105 md:-right-28 md:-bottom-28 md:max-w-[550px]">
                     {useMemo(() => (

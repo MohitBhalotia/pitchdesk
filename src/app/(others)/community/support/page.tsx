@@ -384,7 +384,7 @@ export default function SupportPage() {
             </section>
 
             {/* Need Help Section */}
-            <section className="py-14 px-4 bg-muted/30">
+            <section className="py-14 px-4 bg-yellow/20">
                 <div className="max-w-2xl mx-auto text-center">
                     <h2 className="text-3xl font-bold mb-6">Still need assistance?</h2>
                     <p className="text-muted-foreground mb-8">
@@ -392,7 +392,7 @@ export default function SupportPage() {
                     </p>
                     <Button
                         onClick={() => setShowForm(!showForm)}
-                        className="text-lg px-8 py-3"
+                        className="text-lg px-8 py-3 rounded-full"
                         size="lg"
                     >
                         <MessageCircle className="h-5 w-5 mr-2" />
@@ -694,44 +694,44 @@ export default function SupportPage() {
                 <div className="max-w-4xl mx-auto">
                     <h2 className="text-3xl font-bold text-center mb-12">Get in Touch</h2>
                     <div className="flex flex-wrap justify-center gap-6">
-                        <Card className="text-center w-50 min-h-[180px] flex flex-col">
+                        <Card className="text-center w-50 min-h-[180px] flex flex-col bg-mint/25">
                             <CardHeader className="flex-grow-0">
-                                <Phone className="h-8 w-8 mx-auto mb-2 text-primary" />
+                                <Phone className="h-8 w-8 mx-auto mb-2 text-ink" />
                                 <CardTitle className="text-lg">Phone</CardTitle>
                             </CardHeader>
                             <CardContent className="flex-grow flex items-center justify-center">
                                 <a
                                      href={`tel:${CONTACT_DETAILS.phone}`}
-                                    className="text-muted-foreground hover:text-primary transition-colors break-all text-sm"
+                                    className="text-muted-foreground hover:text-ink transition-colors break-all text-sm"
                                 >
                                     {CONTACT_DETAILS.phone}
                                 </a>
                             </CardContent>
                         </Card>
-                        <Card className="text-center w-50 min-h-[180px] flex flex-col">
+                        <Card className="text-center w-50 min-h-[180px] flex flex-col bg-yellow/25">
                             <CardHeader className="flex-grow-0">
-                                <Mail className="h-8 w-8 mx-auto mb-2 text-primary" />
+                                <Mail className="h-8 w-8 mx-auto mb-2 text-ink" />
                                 <CardTitle className="text-lg">Email</CardTitle>
                             </CardHeader>
                             <CardContent className="flex-grow flex items-center justify-center">
                                 <a
                                     href={`mailto:${CONTACT_DETAILS.email}`}
-                                    className="text-muted-foreground hover:text-primary transition-colors break-all text-sm"
+                                    className="text-muted-foreground hover:text-ink transition-colors break-all text-sm"
                                 >
                                     {CONTACT_DETAILS.email}
                                 </a>
                             </CardContent>
                         </Card>
 
-                        <Card className="text-center w-50 min-h-[180px] flex flex-col">
+                        <Card className="text-center w-50 min-h-[180px] flex flex-col bg-pink/25">
                             <CardHeader className="flex-grow-0">
-                                <Instagram className="h-8 w-8 mx-auto mb-2 text-primary" />
+                                <Instagram className="h-8 w-8 mx-auto mb-2 text-ink" />
                                 <CardTitle className="text-lg">Instagram</CardTitle>
                             </CardHeader>
                             <CardContent className="flex-grow flex items-center justify-center">
                                 <a
                                     href={CONTACT_DETAILS.social.instagram}
-                                    className="text-muted-foreground hover:text-primary transition-colors text-sm"
+                                    className="text-muted-foreground hover:text-ink transition-colors text-sm"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
@@ -740,15 +740,15 @@ export default function SupportPage() {
                             </CardContent>
                         </Card>
 
-                        <Card className="text-center w-50 min-h-[180px] flex flex-col">
+                        <Card className="text-center w-50 min-h-[180px] flex flex-col bg-lavender/25">
                             <CardHeader className="flex-grow-0">
-                                <Linkedin className="h-8 w-8 mx-auto mb-2 text-primary" />
+                                <Linkedin className="h-8 w-8 mx-auto mb-2 text-ink" />
                                 <CardTitle className="text-lg">LinkedIn</CardTitle>
                             </CardHeader>
                             <CardContent className="flex-grow flex items-center justify-center">
                                 <a
                                     href={CONTACT_DETAILS.social.linkedin}
-                                    className="text-muted-foreground hover:text-primary transition-colors text-sm"
+                                    className="text-muted-foreground hover:text-ink transition-colors text-sm"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >

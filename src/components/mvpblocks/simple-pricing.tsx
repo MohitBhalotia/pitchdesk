@@ -106,6 +106,13 @@ const featureRows: FeatureRow[] = [
   },
 ];
 
+const planAccents = [
+  "bg-mint text-mint-foreground",
+  "bg-yellow text-yellow-foreground",
+  "bg-pink text-pink-foreground",
+  "bg-lavender text-lavender-foreground",
+];
+
 function boolCell(feature?: FeatureItem): CellValue {
   return feature?.included ? { kind: "check" } : { kind: "cross" };
 }
@@ -148,14 +155,14 @@ export default function SimplePricing() {
   return (
     <div
       id="pricing"
-      className="not-prose py-16 relative flex w-full flex-col gap-12 overflow-hidden px-4 text-center"
+      className="not-prose py-20 md:py-28 relative flex w-full flex-col gap-12 overflow-hidden px-6 text-center"
     >
       <div className="flex flex-col items-center justify-center gap-6">
         <Badge
           variant="outline"
-          className="border-primary/20 bg-primary/5 rounded-full px-4 py-1 text-sm font-medium"
+          className="border-none bg-lavender text-lavender-foreground rounded-full px-4 py-1 text-sm font-medium"
         >
-          <Sparkles className="text-primary mr-1 h-3.5 w-3.5" />
+          <Sparkles className="mr-1 h-3.5 w-3.5" />
           Simple, Transparent Pricing
         </Badge>
         <motion.h2
@@ -163,18 +170,18 @@ export default function SimplePricing() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="max-w-2xl text-3xl font-bold sm:text-4xl"
+          className="max-w-2xl text-3xl font-display font-extrabold text-ink sm:text-4xl"
         >
           Start free and scale as you grow
         </motion.h2>
-        <p className="text-muted-foreground max-w-md text-base">
+        <p className="text-ink/60 max-w-md text-base">
           No hidden fees, no surprises — compare exactly what each plan
           includes.
         </p>
 
         {isEarlyBirdActive && (
-          <div className="bg-green-50 border border-green-200 text-green-800 rounded-full px-4 py-2 text-sm font-medium flex items-center justify-center gap-2">
-            <Sparkles className="h-4 w-4 text-green-600" />
+          <div className="bg-mint text-mint-foreground rounded-full px-4 py-2 text-sm font-medium flex items-center justify-center gap-2">
+            <Sparkles className="h-4 w-4" />
             Early Bird Offer: Get <b className="mx-1">50% Off</b> on all plans
             till{" "}
             {EARLY_BIRD_EXPIRY.toLocaleDateString("en-IN", {
@@ -186,44 +193,69 @@ export default function SimplePricing() {
         )}
       </div>
 
-      <div className="mx-auto w-full max-w-6xl overflow-x-auto rounded-lg border border-border">
+      <div className="mx-auto w-full max-w-6xl overflow-x-auto rounded-3xl border border-border">
         <table className="w-full min-w-[860px] border-collapse text-left">
           <thead>
             <tr className="border-b border-border">
-              <th className="sticky left-0 z-10 w-56 bg-background p-5 align-bottom text-sm font-medium text-muted-foreground">
+              <th className="sticky left-0 z-10 w-56 bg-background p-5 align-bottom text-sm font-medium text-ink/60">
                 Compare plans
               </th>
-              {planList.map((plan) => (
+              {planList.map((plan, index) => (
                 <th
                   key={plan.id}
                   className={cn(
-                    "relative min-w-[140px] px-4 py-6 align-bottom",
-                    plan.popular && "bg-primary/[0.04]"
+                    "relative min-w-[150px] px-4 pt-8 pb-6 align-bottom",
+                    plan.popular ? "bg-ink text-cream" : "bg-transparent"
                   )}
                 >
-                  {plan.popular && (
-                    <Badge className="absolute -top-3 right-0 left-0 mx-auto w-fit bg-primary text-primary-foreground px-3 py-0.5 text-xs">
-                      Popular
+                  {plan.popular ? (
+                    <Badge className="absolute -top-3 right-0 left-0 mx-auto w-fit bg-mint text-mint-foreground px-3 py-0.5 text-xs">
+                      Most Popular
                     </Badge>
-                  )}
-                  <div className="flex flex-col items-center gap-2.5">
+                  ) : (
                     <div
                       className={cn(
-                        "flex h-9 w-9 items-center justify-center rounded-full",
+                        "absolute left-4 right-4 top-0 h-1 rounded-full",
+                        planAccents[index % planAccents.length].split(" ")[0]
+                      )}
+                    />
+                  )}
+                  <div className="flex flex-col items-center gap-2">
+                    <div
+                      className={cn(
+                        "flex h-10 w-10 items-center justify-center rounded-full",
                         plan.popular
-                          ? "bg-primary/10 text-primary"
-                          : "bg-secondary text-foreground"
+                          ? "bg-cream/10 text-cream"
+                          : planAccents[index % planAccents.length]
                       )}
                     >
                       <plan.icon className="h-4 w-4" />
                     </div>
-                    <span className="font-semibold">{plan.name}</span>
-                    <span className="flex items-baseline gap-1 text-2xl font-bold">
+                    <span className="font-display font-bold">{plan.name}</span>
+                    <span
+                      className={cn(
+                        "text-xs leading-snug max-w-[10rem]",
+                        plan.popular ? "text-cream/60" : "text-ink/50"
+                      )}
+                    >
+                      {plan.description}
+                    </span>
+                    <span
+                      className={cn(
+                        "flex items-baseline gap-1 font-display font-extrabold mt-1",
+                        plan.popular ? "text-3xl" : "text-2xl"
+                      )}
+                    >
                       {plan.price === 0 ? (
                         "Free"
                       ) : isEarlyBirdActive ? (
                         <>
-                          <span className="text-sm font-normal text-muted-foreground line-through">
+                          <span
+                            className={cn(
+                              "text-sm font-normal line-through",
+                              plan.popular ? "text-cream/50" : "text-ink/40"
+                            )}
+                          >
                             ${plan.price}
                           </span>
                           ${plan.price * EARLY_BIRD_DISCOUNT}
@@ -231,6 +263,14 @@ export default function SimplePricing() {
                       ) : (
                         `$${plan.price}`
                       )}
+                    </span>
+                    <span
+                      className={cn(
+                        "text-[11px]",
+                        plan.popular ? "text-cream/50" : "text-ink/40"
+                      )}
+                    >
+                      {plan.minutes} min practice
                     </span>
                   </div>
                 </th>
@@ -259,7 +299,7 @@ export default function SimplePricing() {
                     key={plan.id}
                     className={cn(
                       "px-4 py-3.5 text-center",
-                      plan.popular && "bg-primary/[0.03]"
+                      plan.popular && "bg-ink/[0.03]"
                     )}
                   >
                     <Cell value={row.getValue(plan)} />
@@ -276,13 +316,13 @@ export default function SimplePricing() {
                   key={plan.id}
                   className={cn(
                     "px-4 py-6 align-top",
-                    plan.popular && "bg-primary/[0.04]"
+                    plan.popular && "bg-ink/[0.03]"
                   )}
                 >
                   {user?.role === plan.id ? (
                     <Button
                       size="sm"
-                      className="w-full bg-white text-black"
+                      className="w-full rounded-full bg-white text-black"
                       disabled
                     >
                       Current Plan
@@ -291,8 +331,8 @@ export default function SimplePricing() {
                     <Button
                       size="sm"
                       onClick={handleCta}
-                      variant={plan.popular ? "default" : "outline"}
-                      className="w-full"
+                      variant={plan.popular ? "secondary" : "outline"}
+                      className="w-full rounded-full"
                     >
                       {plan.cta}
                     </Button>

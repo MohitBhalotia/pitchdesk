@@ -15,7 +15,10 @@ export default function AdvisorsPage() {
             <div className="max-w-7xl mx-auto">
                 {/* Header Section */}
                 <div className="text-center mb-16 mt-12">
-                    <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6">
+                    <span className="inline-flex items-center gap-2 bg-lavender text-lavender-foreground px-4 py-1.5 rounded-full text-sm font-medium mb-6">
+                        Advisory Board
+                    </span>
+                    <h1 className="text-4xl md:text-5xl mb-6">
                         Our Advisory Board
                     </h1>
                     <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
@@ -25,8 +28,8 @@ export default function AdvisorsPage() {
                 </div>
 
                 <div className="flex flex-wrap justify-center gap-8">
-                    {advisors.map((advisor) => (
-                        <AdvisorCard key={advisor.id} advisor={advisor} />
+                    {advisors.map((advisor, index) => (
+                        <AdvisorCard key={advisor.id} advisor={advisor} colorIndex={index} />
                     ))}
                 </div>
             </div>
@@ -40,12 +43,15 @@ interface AdvisorCardProps {
         image: string
         scope: string
     }
+    colorIndex: number
 }
 
-function AdvisorCard({ advisor }: AdvisorCardProps) {
+const cardColors = ["bg-mint/30", "bg-yellow/30", "bg-pink/30", "bg-lavender/30"];
+
+function AdvisorCard({ advisor, colorIndex }: AdvisorCardProps) {
     return (
-        <Card className="w-full max-w-sm border-border bg-card overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-            <CardContent className="px-2">
+        <Card className={`w-full max-w-sm border-none overflow-hidden shadow-none ${cardColors[colorIndex % cardColors.length]}`}>
+            <CardContent className="px-3">
                 <div className="relative aspect-[4/5] w-full">
                     <Image
                         src={advisor.image}
@@ -57,8 +63,8 @@ function AdvisorCard({ advisor }: AdvisorCardProps) {
                         quality={90}
                     />
                 </div>
-                <div className="pt-2 text-center">
-                    <p className="text-xl font-bold text-muted-foreground">{advisor.scope}</p>
+                <div className="pt-3 pb-1 text-center">
+                    <p className="text-xl font-bold text-ink">{advisor.scope}</p>
                 </div>
             </CardContent>
         </Card>
