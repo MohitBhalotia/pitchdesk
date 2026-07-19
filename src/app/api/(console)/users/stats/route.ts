@@ -48,8 +48,13 @@ export async function GET(req: Request) {
     const totalPitchGenerated = generatedPitches.length;
 
     //total pitches evaluated
-    const evaluatedPitches = await PitchEval.find({ userId: userId });
+    const evaluatedPitches = await PitchEval.find({ userId: userId }).sort({ createdAt: 1 });
     const totalPitchEvaluated = evaluatedPitches.length;
+
+    const scoreHistory = evaluatedPitches.map((evalDoc) => ({
+      date: evalDoc.createdAt,
+      score: evalDoc.scores?.TotalScore ?? 0,
+    }));
 
     return NextResponse.json({
       planName: plan.name,
@@ -58,6 +63,7 @@ export async function GET(req: Request) {
       totalTime:plan.pitchesTime,
       remainingTime,
       totalPitchEvaluated,
+      scoreHistory,
     });
   } catch (err) {
     console.error("Error fetching user stats:", err);

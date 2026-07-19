@@ -48,7 +48,7 @@ export default function RealTimeFeedbackPage() {
                             ← Back to Features
                         </Link>
 
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-6">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow text-yellow-foreground rounded-full text-sm font-medium mb-6">
                             <Radio className="w-4 h-4" />
                             Live AI Coaching
                         </div>
@@ -109,9 +109,9 @@ export default function RealTimeFeedbackPage() {
                                     </ul>
                                 </div>
 
-                                <div className="p-4 sm:p-6 bg-primary/5 rounded-xl border border-primary/20">
+                                <div className="p-4 sm:p-6 bg-mint/25 rounded-xl">
                                     <h3 className="text-lg sm:text-xl font-bold text-foreground mb-3 flex items-center gap-2">
-                                        <span className="text-primary">✓</span> PitchDesk Voice Practice
+                                        <span className="text-ink">✓</span> PitchDesk Voice Practice
                                     </h3>
                                     <ul className="space-y-2 text-sm sm:text-base text-muted-foreground">
                                         <li>→ Speak naturally like a real meeting</li>

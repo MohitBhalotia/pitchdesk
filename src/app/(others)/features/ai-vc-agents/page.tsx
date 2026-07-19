@@ -48,7 +48,7 @@ export default function AIVCAgentsPage() {
                             ← Back to Features
                         </Link>
 
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-6">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow text-yellow-foreground rounded-full text-sm font-medium mb-6">
                             <Bot className="w-4 h-4" />
                             For VCs & Institutions
                         </div>
@@ -96,16 +96,16 @@ export default function AIVCAgentsPage() {
                             </p>
 
                             <div className="grid md:grid-cols-3 gap-6 mt-8">
-                                <div className="text-center p-6 bg-primary/5 rounded-xl">
-                                    <div className="text-4xl font-bold text-primary mb-2">100%</div>
+                                <div className="text-center p-6 bg-mint/25 rounded-xl">
+                                    <div className="text-4xl font-bold text-ink mb-2">100%</div>
                                     <p className="text-muted-foreground">Customizable to your thesis</p>
                                 </div>
-                                <div className="text-center p-6 bg-primary/5 rounded-xl">
-                                    <div className="text-4xl font-bold text-primary mb-2">24/7</div>
+                                <div className="text-center p-6 bg-yellow/25 rounded-xl">
+                                    <div className="text-4xl font-bold text-ink mb-2">24/7</div>
                                     <p className="text-muted-foreground">Autonomous screening</p>
                                 </div>
-                                <div className="text-center p-6 bg-primary/5 rounded-xl">
-                                    <div className="text-4xl font-bold text-primary mb-2">Consistent</div>
+                                <div className="text-center p-6 bg-pink/25 rounded-xl">
+                                    <div className="text-4xl font-bold text-ink mb-2">Consistent</div>
                                     <p className="text-muted-foreground">No bias or fatigue</p>
                                 </div>
                             </div>

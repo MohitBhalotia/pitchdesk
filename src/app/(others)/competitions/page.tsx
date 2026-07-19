@@ -63,9 +63,13 @@ export default function TournamentsPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-8 sm:pt-32">
+        <div className="mb-10 sm:mb-12 text-center max-w-2xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-pink text-pink-foreground rounded-full text-xs font-medium mb-4">
+            <Trophy className="w-3.5 h-3.5" />
+            Live Competitions
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-bold mb-3">
             Competitions
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground">
@@ -100,9 +104,13 @@ export default function TournamentsPage() {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-8 sm:pt-32">
+        <div className="mb-10 sm:mb-12 text-center max-w-2xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-pink text-pink-foreground rounded-full text-xs font-medium mb-4">
+            <Trophy className="w-3.5 h-3.5" />
+            Live Competitions
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-bold mb-3">
             Competitions
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground">
@@ -120,7 +128,7 @@ export default function TournamentsPage() {
               <p>{error}</p>
               <Button
                 onClick={() => window.location.reload()}
-                className="mt-4"
+                className="mt-4 rounded-full"
                 variant="outline"
               >
                 Try Again
@@ -133,9 +141,13 @@ export default function TournamentsPage() {
   }
 
   return (
-    <div className="container mx-auto pb-20 px-4 sm:px-8 lg:px-12">
-      <div className="mb-6 sm:mb-8">
-        <h1 className="text-3xl  font-bold mb-2">Competitions</h1>
+    <div className="container mx-auto pt-28 pb-20 px-4 sm:px-8 sm:pt-32 lg:px-12">
+      <div className="mb-10 sm:mb-12 text-center max-w-2xl mx-auto">
+        <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium mb-4">
+          <Trophy className="w-3.5 h-3.5" />
+          Live Competitions
+        </div>
+        <h1 className="text-3xl sm:text-4xl font-bold mb-3">Competitions</h1>
         <p className="text-sm sm:text-base text-muted-foreground">
           Discover and participate in entrepreneurship competitions from
           colleges worldwide
@@ -203,7 +215,7 @@ export default function TournamentsPage() {
               </CardContent>
 
               <CardFooter>
-                <Button asChild className="w-full">
+                <Button asChild className="w-full rounded-full">
                   <Link href={`/competitions/${competition._id}`}>
                     View Details
                   </Link>

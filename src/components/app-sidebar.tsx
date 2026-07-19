@@ -25,7 +25,6 @@ import Image from "next/image";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
-import { ModeToggle } from "@/components/theme-toggle";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Sidebar,
@@ -287,32 +286,26 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <div className="flex justify-between items-center">
-                <Link
-                  href="/dashboard"
-                  className="flex items-center gap-3 flex-1"
-                >
-                  <div className="relative h-10 w-10 ">
-                    <Image
-                      src="/logo.png"
-                      alt="PitchDesk Logo"
-                      width={40}
-                      height={40}
-                      className="dark:invert rounded-full"
-                    />
-                  </div>
-
-                  <div className="text-left">
-                    <span className="text-2xl font-bold truncate">
-                      PitchDesk
-                    </span>
-                  </div>
-                </Link>
-
-                <div className="flex justify-center">
-                  <ModeToggle />
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-3 flex-1"
+              >
+                <div className="relative h-10 w-10 ">
+                  <Image
+                    src="/logo.png"
+                    alt="PitchDesk Logo"
+                    width={40}
+                    height={40}
+                    className="rounded-full"
+                  />
                 </div>
-              </div>
+
+                <div className="text-left">
+                  <span className="text-2xl font-bold truncate">
+                    PitchDesk
+                  </span>
+                </div>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

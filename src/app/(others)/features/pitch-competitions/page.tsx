@@ -48,7 +48,7 @@ export default function PitchCompetitionsPage() {
                             ← Back to Features
                         </Link>
 
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-6">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-pink text-pink-foreground rounded-full text-sm font-medium mb-6">
                             <Trophy className="w-4 h-4" />
                             Compete & Get Discovered
                         </div>
@@ -96,16 +96,16 @@ export default function PitchCompetitionsPage() {
                             </p>
 
                             <div className="grid sm:grid-cols-3 gap-4 sm:gap-6 mt-8">
-                                <div className="text-center p-4 sm:p-6 bg-primary/5 rounded-xl border border-primary/20">
-                                    <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">24/7</div>
+                                <div className="text-center p-4 sm:p-6 bg-mint/25 rounded-xl">
+                                    <div className="text-3xl sm:text-4xl font-bold text-ink mb-2">24/7</div>
                                     <p className="text-sm sm:text-base text-muted-foreground">Compete anytime</p>
                                 </div>
-                                <div className="text-center p-4 sm:p-6 bg-primary/5 rounded-xl border border-primary/20">
-                                    <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">AI-Judged</div>
+                                <div className="text-center p-4 sm:p-6 bg-yellow/25 rounded-xl">
+                                    <div className="text-3xl sm:text-4xl font-bold text-ink mb-2">AI-Judged</div>
                                     <p className="text-sm sm:text-base text-muted-foreground">Fair & consistent scoring</p>
                                 </div>
-                                <div className="text-center p-4 sm:p-6 bg-primary/5 rounded-xl border border-primary/20">
-                                    <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">Real VCs</div>
+                                <div className="text-center p-4 sm:p-6 bg-pink/25 rounded-xl">
+                                    <div className="text-3xl sm:text-4xl font-bold text-ink mb-2">Real VCs</div>
                                     <p className="text-sm sm:text-base text-muted-foreground">Watching the leaderboard</p>
                                 </div>
                             </div>

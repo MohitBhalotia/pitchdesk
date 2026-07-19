@@ -48,7 +48,7 @@ export default function InvestmentProgramsPage() {
                             ← Back to Features
                         </Link>
 
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-6">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-lavender text-lavender-foreground rounded-full text-sm font-medium mb-6">
                             <Building2 className="w-4 h-4" />
                             For VCs & Institutions
                         </div>
@@ -96,16 +96,16 @@ export default function InvestmentProgramsPage() {
                             </p>
 
                             <div className="grid md:grid-cols-3 gap-6 mt-8">
-                                <div className="text-center p-6 bg-primary/5 rounded-xl">
-                                    <div className="text-4xl font-bold text-primary mb-2">100%</div>
+                                <div className="text-center p-6 bg-mint/25 rounded-xl">
+                                    <div className="text-4xl font-bold text-ink mb-2">100%</div>
                                     <p className="text-muted-foreground">Digital program management</p>
                                 </div>
-                                <div className="text-center p-6 bg-primary/5 rounded-xl">
-                                    <div className="text-4xl font-bold text-primary mb-2">AI-Powered</div>
+                                <div className="text-center p-6 bg-yellow/25 rounded-xl">
+                                    <div className="text-4xl font-bold text-ink mb-2">AI-Powered</div>
                                     <p className="text-muted-foreground">Automated application screening</p>
                                 </div>
-                                <div className="text-center p-6 bg-primary/5 rounded-xl">
-                                    <div className="text-4xl font-bold text-primary mb-2">Scalable</div>
+                                <div className="text-center p-6 bg-pink/25 rounded-xl">
+                                    <div className="text-4xl font-bold text-ink mb-2">Scalable</div>
                                     <p className="text-muted-foreground">Manage any cohort size</p>
                                 </div>
                             </div>

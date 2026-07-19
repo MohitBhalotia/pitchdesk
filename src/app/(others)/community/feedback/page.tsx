@@ -189,7 +189,7 @@ export default function FeedbackPage() {
             {/* Quick Poll Section */}
             <section className="py-16 px-4 ">
                 <div className="max-w-2xl mx-auto text-center">
-                    <div className="bg-card rounded-2xl p-8 border shadow-sm">
+                    <div className="bg-lavender/25 rounded-3xl p-8">
                         <h3 className="text-2xl font-bold mb-4">How satisfied are you with your experience today?</h3>
                         <div className="flex items-center justify-center gap-4 mb-4">
                             <div className="flex items-center gap-2">
@@ -200,7 +200,7 @@ export default function FeedbackPage() {
                         <p className="text-muted-foreground mb-6">Based on 147 recent responses</p>
                         <Button
                             onClick={() => setShowForm(!showForm)}
-                            className="text-lg px-8 py-3"
+                            className="text-lg px-8 py-3 rounded-full"
                             size="lg"
                         >
                             <MessageSquare className="h-5 w-5 mr-2" />
@@ -363,7 +363,7 @@ export default function FeedbackPage() {
                                     {/* Submit Button */}
                                     <Button
                                         type="submit"
-                                        className="w-full"
+                                        className="w-full rounded-full"
                                         size="lg"
                                         disabled={isSubmitting}
                                     >

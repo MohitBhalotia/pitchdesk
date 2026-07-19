@@ -49,7 +49,7 @@ export default function AIVirtualCofounderPage() {
                             ← Back to Features
                         </Link>
 
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-6">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-pink text-pink-foreground rounded-full text-sm font-medium mb-6">
                             <UserPlus className="w-4 h-4" />
                             Your AI Partner
                         </div>
@@ -95,16 +95,16 @@ export default function AIVirtualCofounderPage() {
                             </p>
 
                             <div className="grid sm:grid-cols-3 gap-4 sm:gap-6 mt-8">
-                                <div className="text-center p-4 sm:p-6 bg-primary/5 rounded-xl border border-primary/20">
-                                    <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">Daily</div>
+                                <div className="text-center p-4 sm:p-6 bg-mint/25 rounded-xl">
+                                    <div className="text-3xl sm:text-4xl font-bold text-ink mb-2">Daily</div>
                                     <p className="text-sm sm:text-base text-muted-foreground">Conversations that compound</p>
                                 </div>
-                                <div className="text-center p-4 sm:p-6 bg-primary/5 rounded-xl border border-primary/20">
-                                    <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">Context</div>
+                                <div className="text-center p-4 sm:p-6 bg-yellow/25 rounded-xl">
+                                    <div className="text-3xl sm:text-4xl font-bold text-ink mb-2">Context</div>
                                     <p className="text-sm sm:text-base text-muted-foreground">Remembers your startup</p>
                                 </div>
-                                <div className="text-center p-4 sm:p-6 bg-primary/5 rounded-xl border border-primary/20">
-                                    <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">Always on</div>
+                                <div className="text-center p-4 sm:p-6 bg-pink/25 rounded-xl">
+                                    <div className="text-3xl sm:text-4xl font-bold text-ink mb-2">Always on</div>
                                     <p className="text-sm sm:text-base text-muted-foreground">No scheduling needed</p>
                                 </div>
                             </div>

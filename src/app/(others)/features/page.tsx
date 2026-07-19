@@ -17,7 +17,8 @@ import {
     Lightbulb,
     Search,
     Database,
-    LineChart
+    LineChart,
+    Clock
 } from 'lucide-react';
 import { generateSEOMetadata, generateBreadcrumbSchema } from '@/lib/seo';
 
@@ -156,6 +157,20 @@ const features = [
     },
 ];
 
+// The first 8 are live in the product today. The remaining 8 have
+// marketing/preview pages describing what's coming, but aren't wired into
+// the product workspace yet — kept separate below so we're not overstating
+// what's actually usable right now.
+const liveFeatures = features.slice(0, 8);
+const upcomingFeatures = features.slice(8);
+
+const iconColors = [
+    "bg-mint text-mint-foreground",
+    "bg-yellow text-yellow-foreground",
+    "bg-pink text-pink-foreground",
+    "bg-lavender text-lavender-foreground",
+];
+
 export default function FeaturesPage() {
     const breadcrumbSchema = generateBreadcrumbSchema([
         { name: 'Home', url: '/' },
@@ -190,12 +205,12 @@ export default function FeaturesPage() {
                 {/* Hero Section */}
                 <section className="container mx-auto px-4 py-12 sm:py-16 md:py-20">
                     <div className="max-w-4xl mx-auto text-center">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-6">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-lavender text-lavender-foreground rounded-full text-sm font-medium mb-6">
                             <Sparkles className="w-4 h-4" />
                             Complete Pitch Training Platform
                         </div>
 
-                        <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
+                        <h1 className="text-3xl sm:text-4xl md:text-6xl mb-6 leading-tight">
                             Everything You Need to <span className="text-primary">Master Your Pitch</span>
                         </h1>
 
@@ -224,24 +239,32 @@ export default function FeaturesPage() {
                 {/* Features Grid */}
                 <section className="container mx-auto px-4 py-12 sm:py-16">
                     <div className="max-w-6xl mx-auto">
-                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-                            {features.map((feature, index) => {
+                        <div className="mb-8 sm:mb-10">
+                            <h2 className="text-2xl sm:text-3xl mb-2">
+                                Live in the Product
+                            </h2>
+                            <p className="text-muted-foreground max-w-2xl">
+                                Ready to use today — jump in and start practicing.
+                            </p>
+                        </div>
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+                            {liveFeatures.map((feature, index) => {
                                 const Icon = feature.icon;
                                 return (
                                     <Link
                                         key={index}
                                         href={feature.href}
-                                        className="group bg-card rounded-2xl p-6 sm:p-8 shadow-lg border border-border hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
+                                        className="group bg-card rounded-2xl p-6 sm:p-7 hover:-translate-y-1 transition-all duration-300"
                                     >
-                                        <div className="w-12 h-12 sm:w-14 sm:h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
-                                            <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
+                                        <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center mb-5 ${iconColors[index % iconColors.length]}`}>
+                                            <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
                                         </div>
 
-                                        <h3 className="text-lg sm:text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">
+                                        <h3 className="text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
                                             {feature.title}
                                         </h3>
 
-                                        <p className="text-sm sm:text-base text-muted-foreground mb-4 leading-relaxed">
+                                        <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
                                             {feature.description}
                                         </p>
 
@@ -249,6 +272,52 @@ export default function FeaturesPage() {
                                             Explore Feature
                                             <ArrowRight className="w-4 h-4" />
                                         </div>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </section>
+
+                {/* Coming Soon */}
+                <section className="container mx-auto px-4 py-12 sm:py-16">
+                    <div className="max-w-6xl mx-auto">
+                        <div className="mb-8 sm:mb-10 max-w-2xl">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 bg-accent text-accent-foreground rounded-full text-xs font-medium mb-4">
+                                <Clock className="w-3.5 h-3.5" />
+                                In the Lab
+                            </div>
+                            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
+                                Building the Future of Fundraising
+                            </h2>
+                            <p className="text-muted-foreground">
+                                These are next up on our roadmap. Take a look at what&apos;s
+                                coming, and stay tuned — we&apos;re building fast.
+                            </p>
+                        </div>
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+                            {upcomingFeatures.map((feature, index) => {
+                                const Icon = feature.icon;
+                                return (
+                                    <Link
+                                        key={index}
+                                        href={feature.href}
+                                        className="group relative bg-card/60 rounded-xl p-5 sm:p-6 border border-dashed border-border hover:border-primary/30 transition-all duration-300"
+                                    >
+                                        <span className="absolute top-4 right-4 px-2 py-0.5 rounded-full text-[10px] font-medium bg-accent text-accent-foreground">
+                                            Coming Soon
+                                        </span>
+                                        <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary/10 transition-colors">
+                                            <Icon className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                                        </div>
+
+                                        <h3 className="text-base font-bold text-foreground mb-1.5 pr-16">
+                                            {feature.title}
+                                        </h3>
+
+                                        <p className="text-sm text-muted-foreground leading-relaxed">
+                                            {feature.description}
+                                        </p>
                                     </Link>
                                 );
                             })}

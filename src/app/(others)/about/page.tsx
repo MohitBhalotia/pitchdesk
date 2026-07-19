@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Target, Users, TrendingUp, Building2, Sparkles, ArrowRight } from 'lucide-react';
 import { generateSEOMetadata, generateOrganizationSchema, generateBreadcrumbSchema } from '@/lib/seo';
 
@@ -34,12 +35,12 @@ export default function AboutPage() {
                 {/* Hero Section */}
                 <section className="container mx-auto px-4 py-12 sm:py-16 md:py-24">
                     <div className="max-w-4xl mx-auto text-center">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-6">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-lavender text-lavender-foreground rounded-full text-sm font-medium mb-6">
                             <Sparkles className="w-4 h-4" />
                             The Future of Startup Pitching
                         </div>
 
-                        <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
+                        <h1 className="text-3xl sm:text-4xl md:text-6xl mb-6 leading-tight">
                             What is <span className="text-primary">PitchDesk</span>?
                         </h1>
 
@@ -50,18 +51,31 @@ export default function AboutPage() {
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
                             <Link
                                 href="/start-a-pitch"
-                                className="px-6 sm:px-8 py-3 sm:py-4 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-all duration-300 flex items-center justify-center gap-2"
+                                className="px-6 sm:px-8 py-3 sm:py-4 bg-primary text-primary-foreground rounded-full font-semibold hover:opacity-90 transition-all duration-300 flex items-center justify-center gap-2"
                             >
                                 Start Practicing Free
                                 <ArrowRight className="w-5 h-5" />
                             </Link>
                             <Link
                                 href="/features"
-                                className="px-6 sm:px-8 py-3 sm:py-4 bg-secondary text-secondary-foreground rounded-lg font-semibold border border-border hover:bg-accent transition-all duration-300"
+                                className="px-6 sm:px-8 py-3 sm:py-4 bg-secondary text-secondary-foreground rounded-full font-semibold hover:bg-mint/70 transition-all duration-300"
                             >
                                 Explore Features
                             </Link>
                         </div>
+                    </div>
+                </section>
+
+                {/* Hero Visual */}
+                <section className="container mx-auto px-4 pb-12 sm:pb-16">
+                    <div className="max-w-4xl mx-auto rounded-3xl bg-mint/30 p-3">
+                        <Image
+                            src="/images/about-team-illustration.png"
+                            alt="Founders and mentors collaborating on a pitch"
+                            width={1200}
+                            height={500}
+                            className="w-full rounded-2xl object-cover"
+                        />
                     </div>
                 </section>
 
@@ -110,9 +124,9 @@ export default function AboutPage() {
                             </div>
 
                             {/* Solution Card */}
-                            <div className="bg-primary/5 rounded-2xl p-6 sm:p-8 shadow-lg border border-primary/20 hover:shadow-xl transition-shadow">
-                                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-primary rounded-xl flex items-center justify-center mb-6">
-                                    <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 text-primary-foreground" />
+                            <div className="bg-yellow/20 rounded-2xl p-6 sm:p-8 hover:shadow-xl transition-shadow">
+                                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-yellow rounded-xl flex items-center justify-center mb-6">
+                                    <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 text-yellow-foreground" />
                                 </div>
 
                                 <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-4">The Solution</h3>
@@ -167,7 +181,7 @@ export default function AboutPage() {
                                     We built a <strong className="text-foreground">startup pitch evaluation software</strong> that levels the playing field—using AI to give every founder the same quality of practice that accelerator-backed teams get.
                                 </p>
 
-                                <p className="text-lg sm:text-xl font-semibold text-foreground border-l-4 border-primary pl-6 py-2 bg-primary/5 rounded">
+                                <p className="text-lg sm:text-xl font-semibold text-foreground border-l-4 border-pink pl-6 py-2 bg-pink/15 rounded">
                                     Our vision: Make pitch perfection inevitable, not accidental.
                                 </p>
 

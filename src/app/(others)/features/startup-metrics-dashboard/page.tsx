@@ -52,7 +52,7 @@ export default function StartupMetricsDashboardPage() {
                             ← Back to Features
                         </Link>
 
-                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium mb-6">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 bg-pink text-pink-foreground rounded-full text-sm font-medium mb-6">
                             <BarChart3 className="w-4 h-4" />
                             Founder Analytics
                         </div>
@@ -98,16 +98,16 @@ export default function StartupMetricsDashboardPage() {
                             </p>
 
                             <div className="grid sm:grid-cols-3 gap-4 sm:gap-6 mt-8">
-                                <div className="text-center p-4 sm:p-6 bg-primary/5 rounded-xl border border-primary/20">
-                                    <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">Metrics</div>
+                                <div className="text-center p-4 sm:p-6 bg-mint/25 rounded-xl">
+                                    <div className="text-3xl sm:text-4xl font-bold text-ink mb-2">Metrics</div>
                                     <p className="text-sm sm:text-base text-muted-foreground">Revenue, growth, churn</p>
                                 </div>
-                                <div className="text-center p-4 sm:p-6 bg-primary/5 rounded-xl border border-primary/20">
-                                    <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">Runway</div>
+                                <div className="text-center p-4 sm:p-6 bg-yellow/25 rounded-xl">
+                                    <div className="text-3xl sm:text-4xl font-bold text-ink mb-2">Runway</div>
                                     <p className="text-sm sm:text-base text-muted-foreground">Burn rate & cash position</p>
                                 </div>
-                                <div className="text-center p-4 sm:p-6 bg-primary/5 rounded-xl border border-primary/20">
-                                    <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">Reports</div>
+                                <div className="text-center p-4 sm:p-6 bg-pink/25 rounded-xl">
+                                    <div className="text-3xl sm:text-4xl font-bold text-ink mb-2">Reports</div>
                                     <p className="text-sm sm:text-base text-muted-foreground">Investor-ready updates</p>
                                 </div>
                             </div>
