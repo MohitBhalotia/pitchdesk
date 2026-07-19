@@ -9,7 +9,7 @@
     "baseColor": "stone",
     "cssVariables": true,
     "prefix": ""
-  },
+  }, 
   "iconLibrary": "lucide",
   "aliases": {
     "components": "@/components",
