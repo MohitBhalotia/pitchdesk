@@ -11,11 +11,6 @@ import { Check, X, Sparkles } from "lucide-react";
 import { plans, type Plan, type FeatureItem } from "data/plans";
 import { useSession } from "next-auth/react";
 
-// 🏷️ Early Bird Offer Setup
-const EARLY_BIRD_DISCOUNT = 0.5; // 50% off
-const EARLY_BIRD_EXPIRY = new Date("2025-12-31");
-const isEarlyBirdActive = new Date() < EARLY_BIRD_EXPIRY;
-
 type CellValue =
   | { kind: "check" }
   | { kind: "cross" }
@@ -178,19 +173,6 @@ export default function SimplePricing() {
           No hidden fees, no surprises — compare exactly what each plan
           includes.
         </p>
-
-        {isEarlyBirdActive && (
-          <div className="bg-mint text-mint-foreground rounded-full px-4 py-2 text-sm font-medium flex items-center justify-center gap-2">
-            <Sparkles className="h-4 w-4" />
-            Early Bird Offer: Get <b className="mx-1">50% Off</b> on all plans
-            till{" "}
-            {EARLY_BIRD_EXPIRY.toLocaleDateString("en-IN", {
-              day: "numeric",
-              month: "short",
-            })}
-            !
-          </div>
-        )}
       </div>
 
       <div className="mx-auto w-full max-w-6xl overflow-x-auto rounded-3xl border border-border">
@@ -246,23 +228,7 @@ export default function SimplePricing() {
                         plan.popular ? "text-3xl" : "text-2xl"
                       )}
                     >
-                      {plan.price === 0 ? (
-                        "Free"
-                      ) : isEarlyBirdActive ? (
-                        <>
-                          <span
-                            className={cn(
-                              "text-sm font-normal line-through",
-                              plan.popular ? "text-cream/50" : "text-ink/40"
-                            )}
-                          >
-                            ${plan.price}
-                          </span>
-                          ${plan.price * EARLY_BIRD_DISCOUNT}
-                        </>
-                      ) : (
-                        `$${plan.price}`
-                      )}
+                      {plan.price === 0 ? "Free" : `$${plan.price}`}
                     </span>
                     <span
                       className={cn(

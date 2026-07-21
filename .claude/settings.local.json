@@ -18,7 +18,9 @@
       "Bash(taskkill //F //PID 3108)",
       "Bash(netstat -ano)",
       "Bash(awk '{print $5}')",
-      "Bash(taskkill //F //PID 24484)"
+      "Bash(taskkill //F //PID 24484)",
+      "Bash(mkdir -p \"C:\\\\Users\\\\NARESH\\\\.claude\\\\plans\")",
+      "Read(//c/Users/NARESH/.claude/plans/**)"
     ]
   }
 }

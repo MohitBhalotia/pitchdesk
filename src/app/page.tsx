@@ -8,12 +8,14 @@ import TestimonialsCarousel from "@/components/mvpblocks/testimonials-carousel";
 import PrivacyPreview from "@/components/mvpblocks/privacy-preview";
 import CreateIncubation from "@/components/mvpblocks/create-incubation";
 import StatsBand from "@/components/mvpblocks/stats-band";
+import AIVCPanel from "@/components/mvpblocks/ai-vc-panel";
 export default function Home() {
   return (
     <>
       <Header1  />
       <AppHero />
       <StatsBand />
+      <AIVCPanel />
       <FeatureSteps />
       <CreateIncubation />
       <TestimonialsCarousel />

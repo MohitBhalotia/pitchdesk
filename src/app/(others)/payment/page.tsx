@@ -10,11 +10,6 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { plans, Plan } from "data/plans";
 
-// ─── Early Bird Config ───────────────────────────────────────────────────────
-const EARLY_BIRD_DISCOUNT = 0.5; // 50% off
-const EARLY_BIRD_EXPIRY = new Date("2025-12-31");
-const isEarlyBirdActive = new Date() < EARLY_BIRD_EXPIRY;
-
 // Only show paid plans on the payment page (plans that have a Razorpay planId)
 const PAID_PLANS = Object.values(plans).filter((p) => p.planId);
 
@@ -33,10 +28,6 @@ const PricingCard = ({
   colorIndex: number;
 }) => {
   const isPopular = plan.popular;
-  const discountedPrice =
-    isEarlyBirdActive && plan.price > 0
-      ? plan.price * EARLY_BIRD_DISCOUNT
-      : plan.price;
 
   return (
     <div
@@ -63,29 +54,10 @@ const PricingCard = ({
 
       {/* Price */}
       <div className="flex flex-col gap-1">
-        {isEarlyBirdActive ? (
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className={cn("line-through text-base flex items-center gap-0.5", isPopular ? "text-cream/40" : "text-muted-foreground")}>
-              <DollarSign className="h-4 w-4" />
-              {plan.price}
-            </span>
-            <span className="text-3xl font-bold flex items-center gap-0.5">
-              <DollarSign className="h-6 w-6" />
-              {discountedPrice}
-            </span>
-            <Badge
-              variant="outline"
-              className="text-mint-foreground border-none bg-mint text-xs"
-            >
-              50% OFF
-            </Badge>
-          </div>
-        ) : (
-          <span className="text-3xl font-bold flex items-center gap-0.5">
-            <DollarSign className="h-6 w-6" />
-            {plan.price}
-          </span>
-        )}
+        <span className="text-3xl font-bold flex items-center gap-0.5">
+          <DollarSign className="h-6 w-6" />
+          {plan.price}
+        </span>
         <span className={cn("text-xs", isPopular ? "text-cream/40" : "text-muted-foreground")}>one-time</span>
       </div>
 
@@ -241,25 +213,16 @@ export default function PricingSection() {
     <section className="flex flex-col items-center mt-20 gap-10 py-16 bg-background">
       {/* Header */}
       <div className="space-y-4 text-center">
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-lavender text-lavender-foreground rounded-full text-sm font-medium">
+          <Sparkles className="w-4 h-4" />
+          Simple, Transparent Pricing
+        </div>
         <h1 className="text-4xl md:text-5xl">Plans and Pricing</h1>
         <p className="text-muted-foreground max-w-xl mx-auto">
           Choose the plan that best suits your needs and start refining your
           pitch today.
         </p>
       </div>
-
-      {/* Early Bird Banner */}
-      {isEarlyBirdActive && (
-        <div className="bg-mint text-mint-foreground rounded-full px-4 py-2 text-sm font-medium flex items-center justify-center gap-2">
-          <Sparkles className="h-4 w-4" />
-          Early Bird Offer: Get <b>50% Off</b> on all plans till{" "}
-          {EARLY_BIRD_EXPIRY.toLocaleDateString("en-IN", {
-            day: "numeric",
-            month: "short",
-          })}
-          !
-        </div>
-      )}
 
       {/* Pricing Cards */}
       <div className="grid w-full max-w-6xl grid-cols-1 gap-6 px-4 sm:grid-cols-2 lg:grid-cols-4">

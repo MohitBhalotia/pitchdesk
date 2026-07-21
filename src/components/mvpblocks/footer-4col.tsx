@@ -83,7 +83,7 @@ const contactInfo = [
 
 export default function Footer4Col() {
   return (
-    <footer className="bg-mint mt-24 w-full">
+    <footer className="bg-mint-deep mt-24 w-full">
       <div className="mx-auto max-w-screen-xl px-6 pt-20 pb-8 sm:px-6 lg:px-8 lg:pt-28">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* LEFT SECTION */}
@@ -96,19 +96,19 @@ export default function Footer4Col() {
                 height={40}
                 className="rounded-full"
               />
-              <span className="text-2xl font-display font-bold text-mint-foreground">
+              <span className="text-2xl font-display font-bold text-mint-deep-foreground">
                 PitchDesk
               </span>
             </div>
 
-            <p className="text-mint-foreground/60 mt-6 max-w-md text-center sm:text-left">
+            <p className="text-mint-deep-foreground/60 mt-6 max-w-md text-center sm:text-left">
               {data.company.description}
             </p>
 
             <ul className="mt-8 flex justify-center gap-6 sm:justify-start">
               {socialLinks.map(({ icon: Icon, label, href }) => (
                 <li key={label}>
-                  <Link href={href} className="text-mint-foreground hover:text-mint-foreground/70">
+                  <Link href={href} className="text-mint-deep-foreground hover:text-mint-deep-foreground/70">
                     <span className="sr-only">{label}</span>
                     <Icon className="size-6" />
                   </Link>
@@ -121,11 +121,11 @@ export default function Footer4Col() {
           <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-5 lg:col-span-2">
             {/* ABOUT + COMPANY */}
             <div className="text-center sm:text-left">
-              <p className="text-lg font-display font-bold text-mint-foreground">Company</p>
+              <p className="text-lg font-display font-bold text-mint-deep-foreground">Company</p>
               <ul className="mt-8 space-y-4 text-sm">
                 {data.aboutCompany.map(({ text, href }) => (
                   <li key={text}>
-                    <Link href={href} className="text-mint-foreground/70">
+                    <Link href={href} className="text-mint-deep-foreground/70">
                       {text}
                     </Link>
                   </li>
@@ -135,11 +135,11 @@ export default function Footer4Col() {
 
             {/* FOR FOUNDERS */}
             <div className="text-center sm:text-left">
-              <p className="text-lg font-display font-bold text-mint-foreground">For Founders</p>
+              <p className="text-lg font-display font-bold text-mint-deep-foreground">For Founders</p>
               <ul className="mt-8 space-y-4 text-sm">
                 {data.founders.map(({ text, href }) => (
                   <li key={text}>
-                    <Link href={href} className="text-mint-foreground/70">
+                    <Link href={href} className="text-mint-deep-foreground/70">
                       {text}
                     </Link>
                   </li>
@@ -149,11 +149,11 @@ export default function Footer4Col() {
 
             {/* FOR VCs */}
             <div className="text-center sm:text-left">
-              <p className="text-lg font-display font-bold text-mint-foreground">For VCs</p>
+              <p className="text-lg font-display font-bold text-mint-deep-foreground">For VCs</p>
               <ul className="mt-8 space-y-4 text-sm">
                 {data.vcs.map(({ text, href }) => (
                   <li key={text}>
-                    <Link href={href} className="text-mint-foreground/70">
+                    <Link href={href} className="text-mint-deep-foreground/70">
                       {text}
                     </Link>
                   </li>
@@ -163,11 +163,11 @@ export default function Footer4Col() {
 
             {/* HELP + CONTACT */}
             {/* <div className="text-center sm:text-left">
-              <p className="text-lg font-display font-bold text-mint-foreground">Helpful Links</p>
+              <p className="text-lg font-display font-bold text-mint-deep-foreground">Helpful Links</p>
               <ul className="mt-8 space-y-4 text-sm">
                 {helpfulLinks.map(({ text, href }) => (
                   <li key={text}>
-                    <Link href={href} className="text-mint-foreground/70">
+                    <Link href={href} className="text-mint-deep-foreground/70">
                       {text}
                     </Link>
                   </li>
@@ -188,7 +188,7 @@ export default function Footer4Col() {
                           {text}
                         </address>
                       ) : (
-                        <span className="text-mint-foreground/70">
+                        <span className="text-mint-deep-foreground/70">
                           {text}
                         </span>
                       )}
@@ -199,11 +199,11 @@ export default function Footer4Col() {
             </div> */}
 
             <div className="text-center sm:text-left">
-              <p className="text-lg font-display font-bold text-mint-foreground">Helpful Links</p>
+              <p className="text-lg font-display font-bold text-mint-deep-foreground">Helpful Links</p>
               <ul className="mt-8 space-y-4 text-sm">
                 {helpfulLinks.map(({ text, href }) => (
                   <li key={text}>
-                    <Link href={href} className="text-mint-foreground/70">
+                    <Link href={href} className="text-mint-deep-foreground/70">
                       {text}
                     </Link>
                   </li>
@@ -212,7 +212,7 @@ export default function Footer4Col() {
             </div>
 
             <div className="text-center sm:text-left">
-              <p className="text-lg font-display font-bold text-mint-foreground">Contact Us</p>
+              <p className="text-lg font-display font-bold text-mint-deep-foreground">Contact Us</p>
               <ul className="mt-8 space-y-4 text-sm">
                 {contactInfo.map(({ icon: Icon, text, isAddress, href }) => (
                   <li key={text}>
@@ -226,7 +226,7 @@ export default function Footer4Col() {
                           {text}
                         </address>
                       ) : (
-                        <span className="text-mint-foreground/70">{text}</span>
+                        <span className="text-mint-deep-foreground/70">{text}</span>
                       )}
                     </a>
                   </li>
@@ -237,11 +237,11 @@ export default function Footer4Col() {
         </div>
 
         {/* BOTTOM */}
-        <div className="mt-12 border-t border-mint-foreground/10 pt-6 text-center sm:flex sm:justify-between">
-          <p className="text-sm text-mint-foreground/70">
+        <div className="mt-12 border-t border-mint-deep-foreground/10 pt-6 text-center sm:flex sm:justify-between">
+          <p className="text-sm text-mint-deep-foreground/70">
             © {new Date().getFullYear()} {data.company.name}
           </p>
-          <p className="text-sm text-mint-foreground/70">All rights reserved.</p>
+          <p className="text-sm text-mint-deep-foreground/70">All rights reserved.</p>
         </div>
       </div>
     </footer>

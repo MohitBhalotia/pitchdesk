@@ -15,6 +15,7 @@ const features = [
     image: "/step1.jpg",
     color: "bg-mint text-mint-foreground",
     line: "bg-mint/30",
+    ring: "ring-mint/30",
   },
   {
     step: "02",
@@ -25,6 +26,7 @@ const features = [
     image: "/step2.jpg",
     color: "bg-yellow text-yellow-foreground",
     line: "bg-yellow/30",
+    ring: "ring-yellow/30",
   },
   {
     step: "03",
@@ -35,6 +37,7 @@ const features = [
     image: "/step3.jpg",
     color: "bg-pink text-pink-foreground",
     line: "bg-pink/30",
+    ring: "ring-pink/30",
   },
   {
     step: "04",
@@ -45,6 +48,7 @@ const features = [
     image: "/step4.jpg",
     color: "bg-lavender text-lavender-foreground",
     line: "bg-lavender/30",
+    ring: "ring-lavender/30",
   },
 ];
 
@@ -92,8 +96,9 @@ export default function FeatureSteps() {
                   viewport={{ once: true, amount: 0.4 }}
                   transition={{ duration: 0.6, ease: "easeOut" }}
                   className={cn(
-                    "relative h-[220px] overflow-hidden rounded-3xl p-3 md:h-[320px]",
+                    "relative h-[220px] overflow-hidden rounded-3xl p-3 ring-2 ring-offset-2 ring-offset-background md:h-[320px]",
                     feature.line,
+                    feature.ring,
                     imageFirst ? "md:order-1" : "md:order-2"
                   )}
                 >
