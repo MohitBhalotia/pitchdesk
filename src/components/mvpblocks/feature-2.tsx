@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Rocket, FileText, TrendingUp, Sparkles } from "lucide-react";
@@ -12,7 +13,8 @@ const features = [
     content:
       "Select your preferred VC personality and pitch in English. Navigate through negotiation rounds and receive final verdicts on your presentation.",
     icon: <Rocket className="h-6 w-6" />,
-    image: "/step1.jpg",
+    bigIcon: <Rocket className="h-14 w-14" />,
+    image: "/images/step1-present-pitch.png",
     color: "bg-mint text-mint-foreground",
     line: "bg-mint/30",
     ring: "ring-mint/30",
@@ -23,7 +25,8 @@ const features = [
     content:
       "A detailed analysis of your pitch and the Q&A session by our AI-powered pitch analyzer. Get suggestions and changes to make it better.",
     icon: <FileText className="h-6 w-6" />,
-    image: "/step2.jpg",
+    bigIcon: <FileText className="h-14 w-14" />,
+    image: "/images/step2-pitch-report.png",
     color: "bg-yellow text-yellow-foreground",
     line: "bg-yellow/30",
     ring: "ring-yellow/30",
@@ -34,7 +37,8 @@ const features = [
     content:
       "Build your presence among our partnered venture capitalists and list yourself on our crowdfunding platform.",
     icon: <TrendingUp className="h-6 w-6" />,
-    image: "/step3.jpg",
+    bigIcon: <TrendingUp className="h-14 w-14" />,
+    image: "/images/step3-investor-visibility.png",
     color: "bg-pink text-pink-foreground",
     line: "bg-pink/30",
     ring: "ring-pink/30",
@@ -45,12 +49,41 @@ const features = [
     content:
       "Get a personalized pitch script written by our highly trained AI agent — tailored to your startup and your market.",
     icon: <Sparkles className="h-6 w-6" />,
-    image: "/step4.jpg",
+    bigIcon: <Sparkles className="h-14 w-14" />,
+    image: "/images/step4-pitch-script.png",
     color: "bg-lavender text-lavender-foreground",
     line: "bg-lavender/30",
     ring: "ring-lavender/30",
   },
 ];
+
+function StepImage({ feature }: { feature: (typeof features)[number] }) {
+  const [failed, setFailed] = useState(false);
+
+  if (failed) {
+    return (
+      <div
+        className={cn(
+          "flex h-full w-full items-center justify-center rounded-2xl",
+          feature.color
+        )}
+      >
+        {feature.bigIcon}
+      </div>
+    );
+  }
+
+  return (
+    <Image
+      src={feature.image}
+      alt={feature.title}
+      className="h-full w-full rounded-2xl object-cover"
+      width={1000}
+      height={500}
+      onError={() => setFailed(true)}
+    />
+  );
+}
 
 export default function FeatureSteps() {
   return (
@@ -102,13 +135,7 @@ export default function FeatureSteps() {
                     imageFirst ? "md:order-1" : "md:order-2"
                   )}
                 >
-                  <Image
-                    src={feature.image}
-                    alt={feature.title}
-                    className="h-full w-full rounded-2xl object-cover"
-                    width={1000}
-                    height={500}
-                  />
+                  <StepImage feature={feature} />
                 </motion.div>
 
                 <motion.div

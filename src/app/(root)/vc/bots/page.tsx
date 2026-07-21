@@ -127,7 +127,7 @@ export default function VCBotsPage() {
                                 <div className="mt-4 flex items-center gap-2">
                                     <span
                                         className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset ${bot.isActive
-                                            ? "bg-green-50 text-green-700 ring-green-600/20"
+                                            ? "bg-mint/30 text-mint-deep ring-mint-deep/30"
                                             : "bg-red-50 text-red-700 ring-red-600/20"
                                             }`}
                                     >

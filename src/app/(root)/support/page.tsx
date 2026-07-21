@@ -628,9 +628,9 @@ export default function SupportPage() {
             {ticketSummary && (
                 <section className="py-16 px-4">
                     <div className="max-w-2xl mx-auto">
-                        <Card className="border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-800">
+                        <Card className="border-mint bg-mint/20">
                             <CardHeader>
-                                <CardTitle className="flex items-center gap-2 text-green-700 dark:text-green-400">
+                                <CardTitle className="flex items-center gap-2 text-mint-deep">
                                     <CheckCircle className="h-5 w-5" />
                                     Ticket Submitted Successfully!
                                 </CardTitle>
@@ -644,7 +644,7 @@ export default function SupportPage() {
                                         <Badge variant="outline" className="font-mono">
                                             #{ticketSummary.id}
                                         </Badge>
-                                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                        <Badge className="bg-mint text-mint-foreground">
                                             Submitted
                                         </Badge>
                                     </div>

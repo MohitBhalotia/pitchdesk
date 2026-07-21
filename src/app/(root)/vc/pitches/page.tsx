@@ -142,7 +142,7 @@ export default function VCPitchReviewPage() {
             wishlist: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
             hold: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
             rejected: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300",
-            accepted: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
+            accepted: "bg-mint text-mint-foreground",
         };
         return (
             <Badge className={styles[status as keyof typeof styles] || "bg-gray-100"}>
@@ -152,7 +152,7 @@ export default function VCPitchReviewPage() {
     };
 
     const getScoreColor = (score: number) => {
-        if (score >= 80) return "text-green-600 dark:text-green-400";
+        if (score >= 80) return "text-mint-deep";
         if (score >= 60) return "text-blue-600 dark:text-blue-400";
         if (score >= 40) return "text-yellow-600 dark:text-yellow-400";
         return "text-red-600 dark:text-red-400";
@@ -312,7 +312,7 @@ export default function VCPitchReviewPage() {
                                 <Button
                                     variant={app.status === 'accepted' ? 'default' : 'outline'}
                                     size="sm"
-                                    className={`w-full text-xs ${app.status === 'accepted' ? 'bg-green-600 hover:bg-green-700 text-white hover:text-white' : 'bg-transparent text-green-600 border-green-200 hover:bg-green-50 hover:text-green-700'}`}
+                                    className={`w-full text-xs ${app.status === 'accepted' ? 'bg-mint-deep hover:bg-mint-deep/90 text-mint-deep-foreground hover:text-mint-deep-foreground' : 'bg-transparent text-mint-deep border-mint hover:bg-mint/20 hover:text-mint-deep'}`}
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         updateStatus(app._id, 'accepted', app.status);
