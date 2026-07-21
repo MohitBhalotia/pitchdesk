@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Check, X, Sparkles } from "lucide-react";
 import { plans, type Plan, type FeatureItem } from "data/plans";
@@ -108,26 +109,42 @@ const planAccents = [
   "bg-lavender text-lavender-foreground",
 ];
 
+const planCardTints = ["bg-mint/20", "bg-yellow/20", "bg-pink/20", "bg-lavender/20"];
+
 function boolCell(feature?: FeatureItem): CellValue {
   return feature?.included ? { kind: "check" } : { kind: "cross" };
 }
 
-function Cell({ value }: { value: CellValue }) {
+function Cell({ value, inverted = false }: { value: CellValue; inverted?: boolean }) {
   if (value.kind === "check") {
     return (
-      <div className="mx-auto flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary">
+      <div
+        className={cn(
+          "mx-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full",
+          inverted ? "bg-mint/20 text-mint" : "bg-mint-deep/10 text-mint-deep"
+        )}
+      >
         <Check className="h-3.5 w-3.5" />
       </div>
     );
   }
   if (value.kind === "cross") {
     return (
-      <div className="mx-auto flex h-6 w-6 items-center justify-center rounded-full bg-muted text-muted-foreground/50">
+      <div
+        className={cn(
+          "mx-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full",
+          inverted ? "bg-destructive/20 text-destructive" : "bg-destructive/10 text-destructive"
+        )}
+      >
         <X className="h-3.5 w-3.5" />
       </div>
     );
   }
-  return <span className="text-sm font-medium text-foreground">{value.text}</span>;
+  return (
+    <span className={cn("text-sm font-medium", inverted ? "text-cream" : "text-foreground")}>
+      {value.text}
+    </span>
+  );
 }
 
 export default function SimplePricing() {
@@ -136,6 +153,12 @@ export default function SimplePricing() {
   const user = session?.user;
 
   const planList = Object.values(plans);
+  const [selectedPlanId, setSelectedPlanId] = useState(
+    planList.find((p) => p.popular)?.id ?? planList[0].id
+  );
+  const selectedPlan =
+    planList.find((p) => p.id === selectedPlanId) ?? planList[0];
+  const selectedIndex = planList.findIndex((p) => p.id === selectedPlan.id);
 
   const handleCta = () => {
     if (user) {
@@ -175,7 +198,120 @@ export default function SimplePricing() {
         </p>
       </div>
 
-      <div className="mx-auto w-full max-w-6xl overflow-x-auto rounded-3xl border border-border">
+      {/* Mobile: plan tabs + single full-detail card, no horizontal scrolling */}
+      <div className="mx-auto w-full max-w-md text-left md:hidden">
+        <div className="grid grid-cols-3 gap-2">
+          {planList.map((plan) => (
+            <button
+              key={plan.id}
+              onClick={() => setSelectedPlanId(plan.id)}
+              className={cn(
+                "truncate rounded-full px-3 py-2 text-sm font-medium transition-colors",
+                plan.id === selectedPlan.id
+                  ? "bg-ink text-cream"
+                  : "bg-muted text-ink/60"
+              )}
+            >
+              {plan.name}
+            </button>
+          ))}
+        </div>
+
+        <div
+          className={cn(
+            "relative mt-4 overflow-hidden rounded-3xl p-6",
+            selectedPlan.popular
+              ? "bg-ink text-cream"
+              : cn(planCardTints[selectedIndex % planCardTints.length], "text-foreground")
+          )}
+        >
+          {selectedPlan.popular && (
+            <Badge className="absolute top-4 right-4 bg-mint text-mint-foreground px-3 py-0.5 text-xs">
+              Most Popular
+            </Badge>
+          )}
+          <div className="flex items-center gap-3">
+            <div
+              className={cn(
+                "flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
+                selectedPlan.popular
+                  ? "bg-cream/10 text-cream"
+                  : planAccents[selectedIndex % planAccents.length]
+              )}
+            >
+              <selectedPlan.icon className="h-4 w-4" />
+            </div>
+            <div>
+              <div className="font-display font-bold">{selectedPlan.name}</div>
+              <p
+                className={cn(
+                  "text-xs leading-snug",
+                  selectedPlan.popular ? "text-cream/60" : "text-ink/50"
+                )}
+              >
+                {selectedPlan.description}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-4 flex items-baseline gap-2">
+            <span className="font-display text-3xl font-extrabold">
+              {selectedPlan.price === 0 ? "Free" : `$${selectedPlan.price}`}
+            </span>
+            <span
+              className={cn(
+                "text-xs",
+                selectedPlan.popular ? "text-cream/50" : "text-ink/40"
+              )}
+            >
+              {selectedPlan.minutes} min practice
+            </span>
+          </div>
+
+          <ul className="mt-6 space-y-3 border-t border-current/10 pt-6">
+            {featureRows.map((row) => (
+              <li
+                key={row.label}
+                className="flex items-center justify-between gap-3 text-sm"
+              >
+                <span
+                  className={cn(
+                    "min-w-0",
+                    selectedPlan.popular ? "text-cream/80" : "text-foreground/80"
+                  )}
+                >
+                  {row.label}
+                </span>
+                <div className="flex w-20 shrink-0 items-center justify-center">
+                  <Cell value={row.getValue(selectedPlan)} inverted={selectedPlan.popular} />
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          {user?.role === selectedPlan.id ? (
+            <Button
+              size="sm"
+              className="mt-6 w-full rounded-full bg-white text-black"
+              disabled
+            >
+              Current Plan
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              onClick={handleCta}
+              variant={selectedPlan.popular ? "secondary" : "outline"}
+              className="mt-6 w-full rounded-full"
+            >
+              {selectedPlan.cta}
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Desktop/tablet: full comparison table */}
+      <div className="mx-auto hidden w-full max-w-6xl overflow-x-auto rounded-3xl border border-border md:block">
         <table className="w-full min-w-[860px] border-collapse text-left">
           <thead>
             <tr className="border-b border-border">
@@ -264,11 +400,13 @@ export default function SimplePricing() {
                   <td
                     key={plan.id}
                     className={cn(
-                      "px-4 py-3.5 text-center",
+                      "px-4 py-3.5",
                       plan.popular && "bg-ink/[0.03]"
                     )}
                   >
-                    <Cell value={row.getValue(plan)} />
+                    <div className="flex items-center justify-center">
+                      <Cell value={row.getValue(plan)} />
+                    </div>
                   </td>
                 ))}
               </tr>

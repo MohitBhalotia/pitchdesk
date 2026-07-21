@@ -77,8 +77,8 @@ const PricingCard = ({
               className={cn(
                 "flex h-5 w-5 shrink-0 items-center justify-center rounded-full mt-0.5",
                 feature.included
-                  ? isPopular ? "bg-cream/15 text-cream" : "bg-ink/10 text-ink"
-                  : isPopular ? "bg-cream/5 text-cream/30" : "bg-muted text-muted-foreground/50"
+                  ? isPopular ? "bg-mint/20 text-mint" : "bg-mint-deep/10 text-mint-deep"
+                  : isPopular ? "bg-destructive/20 text-destructive" : "bg-destructive/10 text-destructive"
               )}
             >
               {feature.included ? (

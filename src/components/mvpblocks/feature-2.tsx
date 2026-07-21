@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Rocket, FileText, TrendingUp, Sparkles } from "lucide-react";
 import Image from "next/image";
@@ -14,7 +13,7 @@ const features = [
       "Select your preferred VC personality and pitch in English. Navigate through negotiation rounds and receive final verdicts on your presentation.",
     icon: <Rocket className="h-6 w-6" />,
     bigIcon: <Rocket className="h-14 w-14" />,
-    image: "/images/step1-present-pitch.png",
+    image: "/images/step1-present-pitch.jpg",
     color: "bg-mint text-mint-foreground",
     line: "bg-mint/30",
     ring: "ring-mint/30",
@@ -26,7 +25,7 @@ const features = [
       "A detailed analysis of your pitch and the Q&A session by our AI-powered pitch analyzer. Get suggestions and changes to make it better.",
     icon: <FileText className="h-6 w-6" />,
     bigIcon: <FileText className="h-14 w-14" />,
-    image: "/images/step2-pitch-report.png",
+    image: "/images/step2-pitch-report.jpg",
     color: "bg-yellow text-yellow-foreground",
     line: "bg-yellow/30",
     ring: "ring-yellow/30",
@@ -38,7 +37,7 @@ const features = [
       "Build your presence among our partnered venture capitalists and list yourself on our crowdfunding platform.",
     icon: <TrendingUp className="h-6 w-6" />,
     bigIcon: <TrendingUp className="h-14 w-14" />,
-    image: "/images/step3-investor-visibility.png",
+    image: "/images/step3-investor-visibility.jpg",
     color: "bg-pink text-pink-foreground",
     line: "bg-pink/30",
     ring: "ring-pink/30",
@@ -50,7 +49,7 @@ const features = [
       "Get a personalized pitch script written by our highly trained AI agent — tailored to your startup and your market.",
     icon: <Sparkles className="h-6 w-6" />,
     bigIcon: <Sparkles className="h-14 w-14" />,
-    image: "/images/step4-pitch-script.png",
+    image: "/images/step4-pitch-script.jpg",
     color: "bg-lavender text-lavender-foreground",
     line: "bg-lavender/30",
     ring: "ring-lavender/30",
@@ -123,11 +122,7 @@ export default function FeatureSteps() {
                   {feature.step}
                 </div>
 
-                <motion.div
-                  initial={{ opacity: 0, x: imageFirst ? -40 : 40 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, amount: 0.4 }}
-                  transition={{ duration: 0.6, ease: "easeOut" }}
+                <div
                   className={cn(
                     "relative h-[220px] overflow-hidden rounded-3xl p-3 ring-2 ring-offset-2 ring-offset-background md:h-[320px]",
                     feature.line,
@@ -136,15 +131,9 @@ export default function FeatureSteps() {
                   )}
                 >
                   <StepImage feature={feature} />
-                </motion.div>
+                </div>
 
-                <motion.div
-                  initial={{ opacity: 0, x: imageFirst ? 40 : -40 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, amount: 0.4 }}
-                  transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
-                  className={cn(imageFirst ? "md:order-2" : "md:order-1")}
-                >
+                <div className={cn(imageFirst ? "md:order-2" : "md:order-1")}>
                   <div
                     className={cn(
                       "mb-4 flex h-12 w-12 items-center justify-center rounded-2xl md:hidden",
@@ -162,7 +151,7 @@ export default function FeatureSteps() {
                   <p className="text-ink/60 text-base md:text-lg mt-3 leading-relaxed">
                     {feature.content}
                   </p>
-                </motion.div>
+                </div>
               </div>
             );
           })}

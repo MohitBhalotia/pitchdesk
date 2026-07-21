@@ -152,7 +152,7 @@ export default function AppHero() {
               </div>
             ) : (
               <Image
-                src="/images/hero-pitch-illustration.png"
+                src="/images/hero-pitch-illustration.jpg"
                 alt="Founder pitching to a panel of AI VC judges"
                 width={900}
                 height={700}

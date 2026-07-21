@@ -47,7 +47,7 @@ export default function AboutHeroImage() {
 
   return (
     <Image
-      src="/images/about-team-illustration.png"
+      src="/images/about-team-illustration.jpg"
       alt="Founders and mentors collaborating on a pitch"
       width={1200}
       height={500}
