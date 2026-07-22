@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Target, Users, TrendingUp, Building2, Sparkles, ArrowRight } from 'lucide-react';
 import { generateSEOMetadata, generateOrganizationSchema, generateBreadcrumbSchema } from '@/lib/seo';
+import AboutHeroImage from '@/components/AboutHeroImage';
 
 export const metadata: Metadata = generateSEOMetadata({
     title: 'About PitchDesk | AI-Powered Pitch Practice & VC Simulation Platform',
@@ -69,13 +69,7 @@ export default function AboutPage() {
                 {/* Hero Visual */}
                 <section className="container mx-auto px-4 pb-12 sm:pb-16">
                     <div className="max-w-4xl mx-auto rounded-3xl bg-mint/30 p-3">
-                        <Image
-                            src="/images/about-team-illustration.png"
-                            alt="Founders and mentors collaborating on a pitch"
-                            width={1200}
-                            height={500}
-                            className="w-full rounded-2xl object-cover"
-                        />
+                        <AboutHeroImage />
                     </div>
                 </section>
 

@@ -111,8 +111,11 @@ export default function Header1() {
           <nav className="hidden lg:flex items-center space-x-1">
             <ul className="flex items-center space-x-1">
               {navItems.map(
-                (item) =>
-                  !(item.name === "Pricing" && pathname === "/payment") && (
+                (item) => {
+                  const isActive =
+                    item.href1 === pathname ||
+                    (item.href2 && item.href2 === pathname);
+                  return !(item.name === "Pricing" && pathname === "/payment") && (
                     <li
                       key={item.name}
                       className="relative"
@@ -129,7 +132,11 @@ export default function Header1() {
                             handleSmoothScroll(item.href1);
                           }
                         }}
-                        className="flex items-center space-x-1 rounded-full px-4 py-2 font-medium text-ink/70 hover:bg-muted hover:text-ink transition-colors"
+                        className={`flex items-center space-x-1 rounded-full px-4 py-2 font-medium transition-colors ${
+                          isActive
+                            ? "bg-mint-deep text-mint-deep-foreground"
+                            : "text-ink/70 hover:bg-muted hover:text-ink"
+                        }`}
                       >
                         <span>{item.name}</span>
                         {item.hasDropdown && (
@@ -168,7 +175,8 @@ export default function Header1() {
                         </AnimatePresence>
                       )}
                     </li>
-                  )
+                  );
+                }
               )}
             </ul>
           </nav>
@@ -291,12 +299,19 @@ export default function Header1() {
           >
             <ul className="space-y-2 h-[300px] overflow-auto">
               {navItems.map(
-                (item) =>
-                  !(item.name === "Pricing" && pathname === "/payment") && (
+                (item) => {
+                  const isActive =
+                    item.href1 === pathname ||
+                    (item.href2 && item.href2 === pathname);
+                  return !(item.name === "Pricing" && pathname === "/payment") && (
                     <li key={item.name}>
                       <Link
                         href={user ? item.href2 ?? item.href1 : item.href1}
-                        className="block px-2 py-2 rounded-lg font-medium hover:bg-muted"
+                        className={`block px-2 py-2 rounded-lg font-medium ${
+                          isActive
+                            ? "bg-mint-deep text-mint-deep-foreground"
+                            : "hover:bg-muted"
+                        }`}
                         onClick={(e) => {
                           if (item.href1.startsWith("#")) {
                             e.preventDefault();
@@ -330,7 +345,8 @@ export default function Header1() {
                           </ul>
                         ))}
                     </li>
-                  )
+                  );
+                }
               )}
             </ul>
             <div className="pt-4 border-t">

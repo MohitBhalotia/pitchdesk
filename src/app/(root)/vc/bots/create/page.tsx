@@ -984,7 +984,7 @@ export default function CreateBotPage() {
                                                     <>
                                                         <div className="text-center">
                                                             <div className="flex items-center gap-2 justify-center mb-2">
-                                                                <Check className="h-5 w-5 text-green-500" />
+                                                                <Check className="h-5 w-5 text-mint-deep" />
                                                                 <h3 className="font-semibold text-lg">Recording Complete!</h3>
                                                             </div>
                                                             <p className="text-sm text-muted-foreground mb-4">
@@ -1258,7 +1258,7 @@ export default function CreateBotPage() {
                                             ) : (
                                                 <div className="space-y-4">
                                                     <div className="flex items-center gap-2 mb-2">
-                                                        <Check className="h-5 w-5 text-green-500" />
+                                                        <Check className="h-5 w-5 text-mint-deep" />
                                                         <h3 className="font-semibold">Photo Captured!</h3>
                                                     </div>
 

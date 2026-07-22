@@ -13,7 +13,7 @@ export function generateSEOMetadata({
     title,
     description,
     canonical,
-    ogImage = '/og-image.png',
+    ogImage = '/og-image.jpg',
     keywords = [],
     type = 'website',
 }: SEOMetadataProps): Metadata {

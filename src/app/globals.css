@@ -49,6 +49,8 @@
   --color-cream: var(--cream);
   --color-mint: var(--mint);
   --color-mint-foreground: var(--mint-foreground);
+  --color-mint-deep: var(--mint-deep);
+  --color-mint-deep-foreground: var(--mint-deep-foreground);
   --color-yellow: var(--yellow);
   --color-yellow-foreground: var(--yellow-foreground);
   --color-pink: var(--pink);
@@ -63,8 +65,10 @@
   /* Pastel color-block palette */
   --ink: #1a1a1a;
   --cream: #fdfbf6;
-  --mint: #c9e4c5;
+  --mint: #9fd696;
   --mint-foreground: #1a1a1a;
+  --mint-deep: #2f6b46;
+  --mint-deep-foreground: #fdfbf6;
   --yellow: #f3e3a3;
   --yellow-foreground: #1a1a1a;
   --pink: #f4c9d6;

@@ -173,7 +173,7 @@ export default function ApplicationsPage() {
             case "wishlist":
                 return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
             case "accepted":
-                return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
+                return "bg-mint text-mint-foreground";
             case "rejected":
                 return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
             case "hold":
@@ -184,7 +184,7 @@ export default function ApplicationsPage() {
     };
 
     const getScoreColor = (score: number) => {
-        if (score >= 80) return "text-green-600 dark:text-green-400";
+        if (score >= 80) return "text-mint-deep";
         if (score >= 60) return "text-blue-600 dark:text-blue-400";
         if (score >= 40) return "text-yellow-600 dark:text-yellow-400";
         return "text-red-600 dark:text-red-400";
@@ -266,7 +266,7 @@ export default function ApplicationsPage() {
                 </Card>
                 <Card>
                     <CardContent className="pt-6">
-                        <div className="text-2xl font-bold text-green-600">
+                        <div className="text-2xl font-bold text-mint-deep">
                             {applications.filter((a) => a.status === "accepted").length}
                         </div>
                         <p className="text-xs text-muted-foreground">Accepted</p>
@@ -557,14 +557,14 @@ export default function ApplicationsPage() {
                                                             )}
 
                                                             {pitchOverviews[application.pitchId._id].strengths && pitchOverviews[application.pitchId._id].strengths!.length > 0 && (
-                                                                <div className="bg-green-50 dark:bg-green-900/10 p-3 rounded-md border border-green-200 dark:border-green-800/30">
-                                                                    <p className="text-xs font-bold text-green-700 dark:text-green-400 uppercase mb-2 flex items-center gap-1">
+                                                                <div className="bg-mint/20 p-3 rounded-md border border-mint">
+                                                                    <p className="text-xs font-bold text-mint-deep uppercase mb-2 flex items-center gap-1">
                                                                         <CheckCircle2 className="h-3 w-3" /> Strengths
                                                                     </p>
                                                                     <ul className="space-y-1">
                                                                         {pitchOverviews[application.pitchId._id].strengths!.map((s: string, i: number) => (
                                                                             <li key={i} className="text-sm text-foreground/90 flex items-start gap-2">
-                                                                                <span className="text-green-500 mt-0.5">•</span>{s}
+                                                                                <span className="text-mint-deep mt-0.5">•</span>{s}
                                                                             </li>
                                                                         ))}
                                                                     </ul>
@@ -638,7 +638,7 @@ export default function ApplicationsPage() {
                                                 <Button
                                                     variant={application.status === "accepted" ? "default" : "outline"}
                                                     size="sm"
-                                                    className={application.status === "accepted" ? "bg-green-600 hover:bg-green-700 text-white hover:text-white" : "bg-transparent text-green-600 border-green-300 hover:bg-green-50 hover:text-green-700"}
+                                                    className={application.status === "accepted" ? "bg-mint-deep hover:bg-mint-deep/90 text-mint-deep-foreground hover:text-mint-deep-foreground" : "bg-transparent text-mint-deep border-mint hover:bg-mint/20 hover:text-mint-deep"}
                                                     onClick={() => updateApplicationStatus(application._id, "accepted", application.status)}
                                                 >
                                                     Accept

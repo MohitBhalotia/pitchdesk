@@ -100,7 +100,7 @@ export default function ConnectVCsPage() {
               <Card>
                 <CardContent className="pt-6">
                   <div className="flex flex-col items-center text-center space-y-3">
-                    <Calendar className="h-8 w-8 text-green-500" />
+                    <Calendar className="h-8 w-8 text-mint-deep" />
                     <h3 className="font-semibold text-foreground">Schedule Introduction</h3>
                     <p className="text-sm text-muted-foreground">
                       Direct introductions to our partner VCs

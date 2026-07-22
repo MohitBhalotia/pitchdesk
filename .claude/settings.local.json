@@ -18,7 +18,17 @@
       "Bash(taskkill //F //PID 3108)",
       "Bash(netstat -ano)",
       "Bash(awk '{print $5}')",
-      "Bash(taskkill //F //PID 24484)"
+      "Bash(taskkill //F //PID 24484)",
+      "Bash(mkdir -p \"C:\\\\Users\\\\NARESH\\\\.claude\\\\plans\")",
+      "Read(//c/Users/NARESH/.claude/plans/**)",
+      "Bash(npx tsc *)",
+      "Bash(echo \"TSC_EXIT=$?\")",
+      "Bash(powershell -NoProfile -Command \"Get-CimInstance Win32_Process -Filter \\\\\"Name='node.exe'\\\\\" | Select-Object ProcessId, CommandLine | Format-List\")",
+      "Bash(powershell -NoProfile -Command \"Get-NetTCPConnection -State Listen | Where-Object {\\\\$_.LocalPort -in 3000,3001,3002,3003} | Select-Object LocalAddress, LocalPort, OwningProcess | Format-Table -AutoSize\")",
+      "Bash(powershell -NoProfile -Command 'Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | Where-Object {$_.LocalPort -in 3000,3001,3002,3003} | Select-Object LocalPort, OwningProcess')",
+      "Bash(break)",
+      "Bash(curl -s -o /dev/null -w \"landing:%{http_code}\\\\n\" http://localhost:3000/)",
+      "Bash(curl -s http://localhost:3000/)"
     ]
   }
 }
