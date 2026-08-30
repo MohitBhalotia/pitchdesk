@@ -11,8 +11,8 @@ const MessageSchema = new Schema<Message>({
         required: true
     },
     timestamp: {
-        type: String,
-        default: Date.now().toString()
+        type: Date,
+        default: Date.now
     },
 })
 
@@ -35,6 +35,15 @@ const PitchSchema = new Schema<Pitch>(
             type: Schema.Types.ObjectId,
             ref: 'IncubationProgram',
             default: null
+        },
+        agentId: {
+            type: Schema.Types.ObjectId,
+            ref: 'Agent',
+            default: null
+        },
+        pitchNumber: {
+            type: Number,
+            min: 1
         },
         title: {
             type: String
@@ -66,6 +75,15 @@ const PitchSchema = new Schema<Pitch>(
             type: Schema.Types.Mixed,
             default: null
         }
+    },
+    { timestamps: true }
+)
+
+PitchSchema.index(
+    { userId: 1, pitchNumber: 1 },
+    {
+        unique: true,
+        partialFilterExpression: { pitchNumber: { $type: "number" } }
     }
 )
 

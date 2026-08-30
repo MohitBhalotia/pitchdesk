@@ -16,7 +16,7 @@ import Image from "next/image";
 const ConversationMessageDisplay: FC<{
   message: ConversationMessage;
   firstInSequence: boolean;
-  agent: Agent;
+  agent?: Agent | null;
 }> = ({ message, firstInSequence, agent }) => (
   <div
     className={`flex flex-col ${
@@ -35,10 +35,10 @@ const ConversationMessageDisplay: FC<{
       >
         {isUserMessage(message) ? (
           <UserIcon />
-        ) : agent.image ? (
+        ) : agent?.image ? (
           <Image
             src={agent.image}
-            alt={agent.name}
+            alt={agent.name || "AI VC"}
             width={40}
             height={40}
             className="rounded-full"
@@ -79,10 +79,11 @@ const isFirstMessageInSpeakerSequence = (
   return isUserMessage(message) !== isUserMessage(previousMessage);
 };
 
-function Conversation({ agent }: { agent: Agent }) {
+function Conversation({ agent }: { agent?: Agent | null }) {
   const { displayOrder } = useVoiceBot();
   const scrollRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
+  const agentName = agent?.name?.trim() || "AI VC";
 
   useLayoutEffect(() => {
     if (scrollRef.current) {
@@ -94,8 +95,8 @@ function Conversation({ agent }: { agent: Agent }) {
     <div className="bg-gray-900 shadow-lg overflow-auto h-screen">
       <div className="h-full flex flex-col justify-between">
         <div className="flex gap-2 justify-center border-b text-white border-gray-800 shadow-xl py-4 mx-8 text-lg font-bold text-gray-450">
-          <p className="md:block hidden">Conversation</p>
-          <p>Transcript :</p>
+          <p className="md:block hidden">Live conversation with</p>
+          <p>{agentName}</p>
         </div>
 
         <div

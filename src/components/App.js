@@ -21,9 +21,11 @@ const AnimationManager = dynamic(() => import("./AnimationManager"), {
   ssr: false,
 });
 
+const noop = () => {};
+
 export const App = ({
   defaultStsConfig,
-  onMessageEvent = () => {},
+  onMessageEvent = noop,
   requiresUserActionToInitialize = false,
   className = "",
 }) => {
@@ -57,7 +59,6 @@ export const App = ({
   const agentVoiceAnalyser = useRef(null);
   const userVoiceAnalyser = useRef(null);
   const startTimeRef = useRef(-1);
-  const [data, setData] = useState();
   const [isInitialized, setIsInitialized] = useState(
     requiresUserActionToInitialize ? false : null
   );
@@ -98,10 +99,10 @@ export const App = ({
     );
   }, []);
 
-  const clearAudioBuffer = () => {
+  const clearAudioBuffer = useCallback(() => {
     scheduledAudioSources.current.forEach((source) => source.stop());
     scheduledAudioSources.current = [];
-  };
+  }, []);
 
   // MICROPHONE AND SOCKET MANAGEMENT
   /**
@@ -210,29 +211,131 @@ export const App = ({
     }
   }, [microphoneAudioContext, microphone]);
 
+  const maybeRecordBehindTheScenesEvent = useCallback((serverMsg) => {
+    switch (serverMsg.type) {
+      case EventType.SETTINGS_APPLIED:
+        addBehindTheScenesEvent({ type: EventType.SETTINGS_APPLIED });
+        break;
+      case EventType.USER_STARTED_SPEAKING:
+        if (status === VoiceBotStatus.SPEAKING) {
+          addBehindTheScenesEvent({ type: "Interruption" });
+        }
+        addBehindTheScenesEvent({ type: EventType.USER_STARTED_SPEAKING });
+        break;
+      case EventType.AGENT_STARTED_SPEAKING:
+        addBehindTheScenesEvent({ type: EventType.AGENT_STARTED_SPEAKING });
+        break;
+      case EventType.CONVERSATION_TEXT:
+        addBehindTheScenesEvent({
+          type: EventType.CONVERSATION_TEXT,
+          role: serverMsg.role,
+          content: serverMsg.content,
+        });
+        break;
+      case EventType.END_OF_THOUGHT:
+        addBehindTheScenesEvent({ type: EventType.END_OF_THOUGHT });
+        break;
+    }
+  }, [addBehindTheScenesEvent, status]);
+
   /**
-   * Handles incoming WebSocket messages. Differentiates between ArrayBuffer data and other data types (basically just string type).
-   * */
-  const onMessage = useCallback(
-    async (event) => {
-      if (event.data instanceof ArrayBuffer) {
+   * Process every text event as it arrives. Using a single `data` state value
+   * here used to collapse rapid consecutive WebSocket events into the last
+   * render, which is why persisted transcripts could contain messages that
+   * the live transcript missed.
+   */
+  const processServerMessage = useCallback((rawData) => {
+    if (typeof rawData !== "string") return;
+
+    try {
+      const parsedData = JSON.parse(rawData);
+      if (!parsedData) throw new Error("No data returned in JSON.");
+
+      maybeRecordBehindTheScenesEvent(parsedData);
+
+      if (parsedData.role === "user") {
+        startListening();
+        if (
+          status !== VoiceBotStatus.SLEEPING &&
+          parsedData.type === "History" &&
+          parsedData.content
+        ) {
+          addVoicebotMessage({ user: parsedData.content });
+        }
+      }
+
+      if (parsedData.role === "assistant") {
         if (
           status !== VoiceBotStatus.SLEEPING &&
           !isWaitingForUserVoiceAfterSleep.current
         ) {
-          bufferAudio(event.data); // Process the ArrayBuffer data to play the audio
+          startSpeaking();
+          if (parsedData.type === "History" && parsedData.content) {
+            addVoicebotMessage({ assistant: parsedData.content });
+          }
         }
-      } else {
-        console.log(event?.data);
-        // Handle other types of messages such as strings
-        addTranscriptMessage(event.data);
-        setData(event.data);
-        onMessageEvent(event.data);
       }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [bufferAudio, status]
-  );
+
+      if (parsedData.type === EventType.AGENT_AUDIO_DONE) {
+        startListening();
+      }
+
+      if (parsedData.type === EventType.USER_STARTED_SPEAKING) {
+        isWaitingForUserVoiceAfterSleep.current = false;
+        startListening();
+        clearAudioBuffer();
+      }
+
+      if (parsedData.type === EventType.AGENT_STARTED_SPEAKING) {
+        const { tts_latency, ttt_latency, total_latency } = parsedData;
+        if (tts_latency && ttt_latency) {
+          addVoicebotMessage({ tts_latency, ttt_latency, total_latency });
+        }
+      }
+    } catch (error) {
+      console.error(rawData, error);
+    }
+  }, [
+    addVoicebotMessage,
+    clearAudioBuffer,
+    isWaitingForUserVoiceAfterSleep,
+    maybeRecordBehindTheScenesEvent,
+    startListening,
+    startSpeaking,
+    status,
+  ]);
+
+  /**
+   * Handles incoming WebSocket messages. Binary messages contain audio;
+   * string messages contain transcript and conversation events.
+   */
+  const onMessage = useCallback((event) => {
+    if (event.data instanceof ArrayBuffer) {
+      if (
+        status !== VoiceBotStatus.SLEEPING &&
+        !isWaitingForUserVoiceAfterSleep.current
+      ) {
+        bufferAudio(event.data);
+      }
+      return;
+    }
+
+    addTranscriptMessage(event.data);
+    processServerMessage(event.data);
+    onMessageEvent(event.data);
+  }, [
+    addTranscriptMessage,
+    bufferAudio,
+    isWaitingForUserVoiceAfterSleep,
+    onMessageEvent,
+    processServerMessage,
+    status,
+  ]);
+
+  const onMessageRef = useRef(onMessage);
+  useEffect(() => {
+    onMessageRef.current = onMessage;
+  }, [onMessage]);
 
   /**
    * Opens Deepgram when the microphone opens.
@@ -262,116 +365,11 @@ export const App = ({
    */
   useEffect(() => {
     if (socket) {
-      socket.addEventListener("message", onMessage);
-      return () => socket.removeEventListener("message", onMessage);
+      const handleMessage = (event) => onMessageRef.current(event);
+      socket.addEventListener("message", handleMessage);
+      return () => socket.removeEventListener("message", handleMessage);
     }
-  }, [socket, onMessage]);
-
-  /**
-   * Manage responses to incoming data from WebSocket.
-   * This useEffect primarily handles string-based data that is expected to represent JSON-encoded messages determining actions based on the nature of the message
-   * */
-  useEffect(() => {
-    /**
-     * When the API returns a message event, several possible things can occur.
-     *
-     * 1. If it's a user message, check if it's a wake word or a stop word and add it to the queue.
-     * 2. If it's an agent message, add it to the queue.
-     * 3. If the message type is `AgentAudioDone` switch the app state to `START_LISTENING`
-     */
-
-    if (typeof data === "string") {
-      const userRole = (data) => {
-        const userTranscript = data.content;
-
-        /**
-         * When the user says something, add it to the conversation queue.
-         */
-        if (
-          status !== VoiceBotStatus.SLEEPING &&
-          data.type === "History" &&
-          userTranscript !== ""
-        ) {
-          addVoicebotMessage({ user: userTranscript });
-        }
-      };
-
-      /**
-       * When the assistant/agent says something, add it to the conversation queue.
-       */
-      const assistantRole = (data) => {
-        console.log(data);
-        if (
-          status !== VoiceBotStatus.SLEEPING &&
-          !isWaitingForUserVoiceAfterSleep.current
-        ) {
-          startSpeaking();
-          const assistantTranscript = data.content;
-          if (data.type === "History" && assistantTranscript !== "") {
-            addVoicebotMessage({ assistant: assistantTranscript });
-          }
-        }
-      };
-
-      try {
-        const parsedData = JSON.parse(data);
-
-        /**
-         * Nothing was parsed so return an error.
-         */
-        if (!parsedData) {
-          throw new Error("No data returned in JSON.");
-        }
-
-        maybeRecordBehindTheScenesEvent(parsedData);
-
-        /**
-         * If it's a user message.
-         */
-        if (parsedData.role === "user") {
-          startListening();
-          userRole(parsedData);
-        }
-
-        /**
-         * If it's an agent message.
-         */
-        if (parsedData.role === "assistant") {
-          if (status !== VoiceBotStatus.SLEEPING) {
-            startSpeaking();
-          }
-          assistantRole(parsedData);
-        }
-
-        /**
-         * The agent has finished speaking so we reset the sleep timer.
-         */
-        if (parsedData.type === EventType.AGENT_AUDIO_DONE) {
-          // Note: It's not quite correct that the agent goes to the listening state upon receiving
-          // `AgentAudioDone`. When that message is sent, it just means that all of the agent's
-          // audio has arrived at the client, but the client will still be in the process of playing
-          // it, which means the agent is still speaking. In practice, with the way the server
-          // currently sends audio, this means Talon will deem the agent speech finished right when
-          // the agent begins speaking the final sentence of its reply.
-          startListening();
-        }
-        if (parsedData.type === EventType.USER_STARTED_SPEAKING) {
-          isWaitingForUserVoiceAfterSleep.current = false;
-          startListening();
-          clearAudioBuffer();
-        }
-        if (parsedData.type === EventType.AGENT_STARTED_SPEAKING) {
-          const { tts_latency, ttt_latency, total_latency } = parsedData;
-          if (!tts_latency || !ttt_latency) return;
-          const latencyMessage = { tts_latency, ttt_latency, total_latency };
-          addVoicebotMessage(latencyMessage);
-        }
-      } catch (error) {
-        console.error(data, error);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, socket]);
+  }, [socket]);
 
   const handleVoiceBotAction = () => {
     if (requiresUserActionToInitialize && !isInitialized) {
@@ -380,46 +378,6 @@ export const App = ({
 
     if (status !== VoiceBotStatus.NONE) {
       toggleSleep();
-    }
-  };
-
-  const maybeRecordBehindTheScenesEvent = (serverMsg) => {
-    switch (serverMsg.type) {
-      case EventType.SETTINGS_APPLIED:
-        addBehindTheScenesEvent({
-          type: EventType.SETTINGS_APPLIED,
-        });
-        break;
-      case EventType.USER_STARTED_SPEAKING:
-        if (status === VoiceBotStatus.SPEAKING) {
-          addBehindTheScenesEvent({
-            type: "Interruption",
-          });
-        }
-        addBehindTheScenesEvent({
-          type: EventType.USER_STARTED_SPEAKING,
-        });
-        break;
-      case EventType.AGENT_STARTED_SPEAKING:
-        addBehindTheScenesEvent({
-          type: EventType.AGENT_STARTED_SPEAKING,
-        });
-        break;
-      case EventType.CONVERSATION_TEXT: {
-        const role = serverMsg.role;
-        const content = serverMsg.content;
-        addBehindTheScenesEvent({
-          type: EventType.CONVERSATION_TEXT,
-          role: role,
-          content: content,
-        });
-        break;
-      }
-      case EventType.END_OF_THOUGHT:
-        addBehindTheScenesEvent({
-          type: EventType.END_OF_THOUGHT,
-        });
-        break;
     }
   };
 

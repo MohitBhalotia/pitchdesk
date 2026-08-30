@@ -49,16 +49,21 @@ function HomeContent() {
   const isPractice = searchParams.get("practice");
   const competitionId = searchParams.get("competitionId");
   const incubationId = searchParams.get("incubationId");
-  if (competitionId) {
-    setCompetitionId(competitionId);
-  }
-  const [agent, setAgent] = useState<object | null>(null);
+  const [agent, setAgent] = useState<Agent | null>(null);
   const [pitchId, setPitchId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setCompetitionId(competitionId);
+  }, [competitionId, setCompetitionId]);
+
   useEffect(() => {
     if (agentId) {
-      getAgentConfig(agentId as string).then((agent) => {
-        setAgent(agent);
-      });
+      getAgentConfig(agentId)
+        .then((selectedAgent) => setAgent(selectedAgent))
+        .catch((error) => {
+          console.error("Error fetching AI VC details:", error);
+          setAgent(null);
+        });
     }
   }, [agentId]);
   const [loading, setLoading] = useState(false);
@@ -75,6 +80,7 @@ function HomeContent() {
         const res = await axios.post("/api/start-pitch", {
           userId: session?.user?._id,
           sessionId: "Pitchdesk" + Math.ceil(Math.random() * 1000000),
+          agentId,
           competitionId,
           incubationId,
         });
@@ -129,12 +135,22 @@ function HomeContent() {
       });
     };
     if (started) {
-      setInterval(() => {
+      const interval = setInterval(() => {
         console.log("Updating pitch");
         updatePitch();
       }, 10000);
+      return () => clearInterval(interval);
     }
-  }, [started]);
+  }, [
+    competitionId,
+    durationRef,
+    incubationId,
+    pitchId,
+    session?.user?._id,
+    sessionIdRef,
+    started,
+    transcriptRef,
+  ]);
 
   const handleStop = useCallback(async () => {
     console.log("Ending pitch");
@@ -155,7 +171,17 @@ function HomeContent() {
     setTimeout(() => {
       window.close();
     }, 3000);
-  }, [closeSocket, stopMicrophone]);
+  }, [
+    closeSocket,
+    competitionId,
+    durationRef,
+    incubationId,
+    pitchId,
+    session?.user?._id,
+    sessionIdRef,
+    stopMicrophone,
+    transcriptRef,
+  ]);
 
   useEffect(() => {
     const summary = async () => {
@@ -166,12 +192,13 @@ function HomeContent() {
     }
     if (started) {
       console.log("Starting summary");
-      setInterval(() => {
+      const interval = setInterval(() => {
         console.log("Updating summary");
         summary();
       }, 1*60*1000);
+      return () => clearInterval(interval);
     }
-  }, [started]);
+  }, [started, transcriptRef]);
   // Automatically end session when duration exceeds remaining time
   useEffect(() => {
     if (
@@ -216,6 +243,7 @@ function HomeContent() {
       setConfig(null);
     }
   };
+  const agentName = agent?.name?.trim() || "AI VC";
   if (exit) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -281,7 +309,8 @@ function HomeContent() {
               <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
                 PitchDesk
               </h1>
-              <p className="text-gray-600">Interact with your AI Shark</p>
+              <p className="text-gray-400 text-sm">You are pitching to</p>
+              <p className="text-white text-xl font-semibold mt-1">{agentName}</p>
             </div>
 
             <div className="flex flex-col items-center space-y-2">
@@ -416,7 +445,7 @@ function HomeContent() {
           <Suspense
             fallback={<div className="text-white">Loading conversation...</div>}
           >
-            <Conversation agent={agent as Agent} />
+            <Conversation agent={agent} />
           </Suspense>
         </div>
       </div>
