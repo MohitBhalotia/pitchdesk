@@ -50,6 +50,11 @@ interface PitchImprovement {
   createdAt: string;
 }
 
+interface PitchMeta {
+  title: string;
+  agentName: string;
+}
+
 // Exact max scores from backend system prompt
 const MICRO_MAX_SCORES: Record<string, Record<string, number>> = {
   "Introduction": {
@@ -345,6 +350,7 @@ export default function EvaluationPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [pitchMeta, setPitchMeta] = useState<PitchMeta | null>(null);
 
   // Improvement state
   const [improvement, setImprovement] = useState<PitchImprovement | null>(null);
@@ -380,6 +386,9 @@ export default function EvaluationPage() {
         if (data.evaluation) {
           setEvaluation(data.evaluation);
         }
+        if (data.pitch) {
+          setPitchMeta(data.pitch);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
@@ -411,6 +420,9 @@ export default function EvaluationPage() {
       }
 
       setEvaluation(data.evaluation);
+      if (data.pitch) {
+        setPitchMeta(data.pitch);
+      }
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to generate evaluation"
@@ -519,10 +531,10 @@ export default function EvaluationPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground">
-            Pitch Evaluation
+            {pitchMeta?.title || "Pitch Evaluation"}
           </h1>
           <p className="text-muted-foreground mt-2">
-            Detailed analysis of your pitch performance
+            Detailed analysis of your pitch with {pitchMeta?.agentName || "AI VC"}
           </p>
         </div>
 

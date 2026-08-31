@@ -108,5 +108,6 @@ export const config = {
     "/investors",
     "/invite-competition",
     "/competitions/:path*",
+    "/incubations/:path*",
   ],
 };

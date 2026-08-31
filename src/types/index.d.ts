@@ -15,6 +15,7 @@ declare global {
     company: mongoose.Schema.Types.ObjectId | null;
     provider: "credentials" | "google";
     signupStep2Done: boolean;
+    pitchSequence: number;
   }
 
   export interface Company extends Document {
@@ -43,6 +44,8 @@ declare global {
     userId: mongoose.Schema.Types.ObjectId | null;
     competitionId: mongoose.Schema.Types.ObjectId | null;
     incubationId: mongoose.Schema.Types.ObjectId | null;
+    agentId: mongoose.Schema.Types.ObjectId | null;
+    pitchNumber?: number;
     title: string
     lastUpdated: Date;
     startTime: Date;
@@ -70,7 +73,7 @@ declare global {
   export interface Message {
     role: "user" | "bot";
     content: string;
-    timestamp: string
+    timestamp: Date
   }
 
   export interface IPlan extends Document {
@@ -120,5 +123,4 @@ declare global {
 
 
 }
-
 

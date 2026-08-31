@@ -53,6 +53,11 @@ const userSchema = new Schema<User>(
       type: Boolean,
       default: false,
     },
+    pitchSequence: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
     company: {
       type: Schema.Types.ObjectId,
       ref: "Company",

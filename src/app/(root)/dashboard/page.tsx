@@ -41,9 +41,23 @@ interface ScorePoint {
 interface RecentPitch {
   _id: string;
   title?: string;
-  createdAt: string;
+  createdAt?: string;
+  startTime?: string;
   duration?: number;
 }
+
+const formatRecentPitchDate = (pitch: RecentPitch) => {
+  const value = pitch.startTime || pitch.createdAt;
+  if (!value) return "Date unavailable";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Date unavailable";
+
+  return date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+  });
+};
 
 const getPerformanceLabel = (score: number) =>
   score >= 85
@@ -475,10 +489,7 @@ const RecentActivity = ({ router }: { router: ReturnType<typeof useRouter> }) =>
                   {pitch.title || "Untitled pitch session"}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {new Date(pitch.createdAt).toLocaleDateString(undefined, {
-                    month: "short",
-                    day: "numeric",
-                  })}
+                  {formatRecentPitchDate(pitch)}
                   {pitch.duration ? ` · ${Math.round(pitch.duration / 60)} min` : ""}
                 </p>
               </div>

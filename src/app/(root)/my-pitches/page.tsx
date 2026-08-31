@@ -39,12 +39,42 @@ interface Message {
 
 interface Pitch {
   _id: string;
-  title: string;
-  duration: number;
-  conversationHistory: Message[];
-  startTime: string;
-  updatedAt: string;
+  title?: string;
+  duration?: number;
+  conversationHistory?: Message[];
+  startTime?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  agentId?: string | { _id: string; name?: string } | null;
 }
+
+const getPitchDate = (pitch: Pitch) => {
+  const date = new Date(pitch.startTime || pitch.createdAt || 0);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const formatPitchDate = (pitch: Pitch) =>
+  getPitchDate(pitch)?.toLocaleDateString() || "Date unavailable";
+
+const formatMessageTime = (timestamp?: string) => {
+  if (!timestamp) return "Time unavailable";
+
+  const date = /^\d+$/.test(timestamp)
+    ? new Date(Number(timestamp))
+    : new Date(timestamp);
+
+  if (Number.isNaN(date.getTime())) return "Time unavailable";
+
+  return date.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+const getAgentName = (pitch: Pitch) =>
+  typeof pitch.agentId === "object" && pitch.agentId?.name
+    ? pitch.agentId.name
+    : "AI VC";
 
 export default function PitchTranscripts() {
   const [pitches, setPitches] = useState<Pitch[]>([]);
@@ -84,7 +114,13 @@ export default function PitchTranscripts() {
           const pitchesData = Array.isArray(data)
             ? data
             : data.pitches || data.data || [];
-          setPitches(pitchesData);
+          setPitches(
+            [...pitchesData].sort(
+              (a, b) =>
+                (getPitchDate(b)?.getTime() ?? 0) -
+                (getPitchDate(a)?.getTime() ?? 0)
+            )
+          );
         }
       } catch (error) {
         console.error("Error fetching pitches:", error);
@@ -99,9 +135,11 @@ export default function PitchTranscripts() {
 
   const togglePitchExpansion = (pitchId: string) => {
     const newExpanded = new Set(expandedPitches);
-    newExpanded.has(pitchId)
-      ? newExpanded.delete(pitchId)
-      : newExpanded.add(pitchId);
+    if (newExpanded.has(pitchId)) {
+      newExpanded.delete(pitchId);
+    } else {
+      newExpanded.add(pitchId);
+    }
     setExpandedPitches(newExpanded);
   };
 
@@ -111,15 +149,15 @@ export default function PitchTranscripts() {
 
   const filteredPitches = pitches.filter(
     (pitch) =>
-      pitch.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      pitch.conversationHistory.some((msg) =>
+      (pitch.title || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (pitch.conversationHistory || []).some((msg) =>
         msg.content.toLowerCase().includes(searchTerm.toLowerCase())
       )
   );
 
   const startEditing = (pitch: Pitch) => {
     setEditingPitchId(pitch._id);
-    setEditTitle(pitch.title);
+    setEditTitle(pitch.title || "");
   };
 
   const cancelEditing = () => {
@@ -365,7 +403,7 @@ export default function PitchTranscripts() {
                             </div>
                           ) : (
                             <CardTitle className="text-lg sm:text-xl flex items-center gap-2 flex-wrap">
-                              {pitch.title}
+                              {pitch.title || "Untitled pitch"}
                               {!isVC && (
                                 <Button
                                   variant="ghost"
@@ -384,7 +422,7 @@ export default function PitchTranscripts() {
                         <CardDescription className="flex flex-wrap gap-3 text-sm">
                           <span className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
-                            {new Date(pitch.startTime).toLocaleDateString()}
+                            {formatPitchDate(pitch)}
                           </span>
                           <span className="flex items-center gap-1">
                             <Clock className="h-4 w-4" />
@@ -392,6 +430,10 @@ export default function PitchTranscripts() {
                           </span>
                           <Badge variant="outline">
                             {conversationHistory.length} messages
+                          </Badge>
+                          <Badge variant="secondary" className="flex items-center gap-1">
+                            <Bot className="h-3 w-3" />
+                            {getAgentName(pitch)}
                           </Badge>
                         </CardDescription>
                       </div>
@@ -481,7 +523,7 @@ export default function PitchTranscripts() {
                                       )}
                                     </div>
                                     <span className="text-xs font-medium capitalize">
-                                      {msg.role}
+                                      {msg.role === "bot" ? getAgentName(pitch) : "You"}
                                     </span>
                                     <span
                                       className={`text-xs ml-4 ${
@@ -490,12 +532,7 @@ export default function PitchTranscripts() {
                                           : "text-muted-foreground"
                                       }`}
                                     >
-                                      {new Date(
-                                        msg.timestamp
-                                      ).toLocaleTimeString([], {
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                      })}
+                                      {formatMessageTime(msg.timestamp)}
                                     </span>
                                   </div>
                                   <p className="text-sm break-words">

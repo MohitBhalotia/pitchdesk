@@ -1241,7 +1241,7 @@ async def regenerate_avatar(image: UploadFile = File(...)):
         # Convert to PIL Image
         pil_image = Image.open(BytesIO(image_bytes)).convert("RGBA")
         session_id = str(uuid.uuid4())
-        
+         
         # Generate avatar
         result = regenerate_image_with_gemini(pil_image, session_id)
         

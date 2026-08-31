@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import { PitchEval } from '@/models/PitchEvalModel';
 import Pitch from '@/models/PitchModel';
 import IncubationProgram from '@/models/IncubationProgramModel';
-import { IAgent } from '@/models/AgentModel';
+import Agent, { IAgent } from '@/models/AgentModel';
 import IncubationParticipant from '@/models/IncubationParticipant';
 import dbConnect from '@/lib/db';
 
@@ -77,6 +77,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const selectedAgent = pitch.agentId
+      ? await Agent.findById(pitch.agentId).select('name').lean()
+      : null;
+    const pitchMeta = {
+      title: pitch.title || 'Untitled pitch',
+      agentName: selectedAgent?.name?.trim() || 'AI VC',
+    };
+
     const existingEvaluation = await PitchEval.findOne({
       pitchId: new mongoose.Types.ObjectId(pitchId),
     });
@@ -86,6 +94,7 @@ export async function POST(req: NextRequest) {
         NextResponse.json({
           message: 'Evaluation already exists',
           evaluation: existingEvaluation,
+          pitch: pitchMeta,
           exists: true,
         })
       );
@@ -171,6 +180,7 @@ export async function POST(req: NextRequest) {
       NextResponse.json({
         message: 'Evaluation created successfully',
         evaluation: newEvaluation,
+        pitch: pitchMeta,
         exists: false,
       }, { status: 201 })
     );

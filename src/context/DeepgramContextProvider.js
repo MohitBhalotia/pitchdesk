@@ -1,7 +1,6 @@
 "use client";
 import { createContext, useContext, useState, useRef, useEffect } from "react";
 import { getAuthToken, sendKeepAliveMessage } from "../utils/deepgramUtils";
-import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 
 const DeepgramContext = createContext();
@@ -17,9 +16,8 @@ const DeepgramContextProvider = ({ children }) => {
   const transcriptRef = useRef([]);
   const sessionIdRef = useRef(null);
   const isConnecting = useRef(false);
-  const { data: session } = useSession();
   const [duration, setDuration] = useState(0);
-  const [competitionId, setCompetitionId] = useState(null);
+  const [, setCompetitionId] = useState(null);
   const durationRef = useRef(0);
   const closePromiseResolveRef = useRef(null);
 
@@ -40,7 +38,7 @@ const DeepgramContextProvider = ({ children }) => {
           type: parsedMessage.type,
           role: parsedMessage.role === "assistant" ? "bot" : parsedMessage.role, // Convert "assistant" to "bot" for schema
           content: parsedMessage.content,
-          timeStamp: new Date(), // Add current timestamp
+          timestamp: new Date().toISOString(),
         };
 
         transcriptRef.current = [...transcriptRef.current, formattedMessage];
