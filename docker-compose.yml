@@ -1,0 +1,24 @@
+services:
+  worker:
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - worker/.env
+    environment:
+      - REDIS_URL=redis://:${REDIS_PASSWORD:?REDIS_PASSWORD is required}@redis:6379
+    depends_on:
+      - redis
+
+  # Bound to the internal Docker network only — no ports published to the
+  # host or public internet (plans/RAG_feature.md Section 4 ops notes).
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:?REDIS_PASSWORD is required}"]
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+
+volumes:
+  redis-data:

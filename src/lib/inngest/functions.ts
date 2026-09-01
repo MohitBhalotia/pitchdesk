@@ -1,9 +1,7 @@
 import PitchModel from "@/models/PitchModel";
 import { emailSendEvent, inngest, pitchUpdateEvent } from "./client";
 import dbConnect from "@/lib/db";
-import { userPlanModel } from "@/models/UserPlanModel";
-import Competition from "@/models/Competition";
-import Participant from "@/models/Participant";
+import { deductPitchCredits, PitchCreditError } from "@/lib/services/pitchCredits";
 
 import { EmailEventData } from "./email-types";
 import resendInviteTeamMember from "@/lib/resend/resend-invite";
@@ -13,7 +11,6 @@ import resendContactUs from "@/lib/resend/resend-contactUs";
 import resendVCNotification from "@/lib/resend/resend-vc-notification";
 import resendApplicationAccepted from "@/lib/resend/resend-application-accepted";
 import resendApplicationRejected from "@/lib/resend/resend-application-rejected";
-import IncubationParticipant from "@/models/IncubationParticipant";
 
 export const updatePitch = inngest.createFunction(
   {
@@ -81,91 +78,25 @@ export const updatePitch = inngest.createFunction(
       if (step2.success) {
         const step3 = await step.run("deduct-credits", async () => {
           await dbConnect();
-          const user = await userPlanModel.findOne({
-            userId: events[0].data.userId,
-          });
-          if (!user) {
-            return { success: false, error: "User not found" };
-          }
-          const pitch = await PitchModel.findById(events[0].data.pitchId);
-          if (!pitch) {
-            return { success: false, error: "Pitch not found" };
-          }
-          const usedMinutes = Math.ceil(step1?.duration / 60);
-
-          if (usedMinutes > pitch.creditsUsed) {
-            const newCreditsUsed = usedMinutes - (pitch.creditsUsed ?? 0);
-            pitch.creditsUsed = usedMinutes;
-            await pitch.save();
-            if (events[0].data.competitionId) {
-              console.log("Competition ID found");
-              const competition = await Competition.findById(
-                events[0].data.competitionId
-              );
-              if (!competition) {
-                return { success: false, error: "Competition not found" };
-              }
-              if (competition.isPractice) {
-                console.log("Practice competition");
-                user.pitchTimeRemaining -= newCreditsUsed;
-                const participant = await Participant.findOne({
-                  userId: events[0].data.userId,
-                  competitionId: events[0].data.competitionId,
-                });
-                if (!participant) {
-                  return { success: false, error: "Participant not found" };
-                }
-                participant.pitchSubmitted = true;
-                await participant.save();
-                await user.save();
-                return {
-                  success: true,
-                  message: "Practice competition pitch updated successfully",
-                };
-              } else {
-                console.log("Normal Competition found");
-                const participant = await Participant.findOne({
-                  userId: events[0].data.userId,
-                  competitionId: events[0].data.competitionId,
-                });
-                if (!participant) {
-                  return { success: false, error: "Participant not found" };
-                }
-                participant.pitchTime -= newCreditsUsed;
-                participant.pitchSubmitted = true;
-                await participant.save();
-                return {
-                  success: true,
-                  message: "Normal competition pitch updated successfully",
-                };
-              }
-            } 
-            // Handle incubation program pitches
-            else if (events[0].data.incubationId) {
-              console.log("Incubation ID found");
-              const incubationParticipant = await IncubationParticipant.findOne({
-                founderId: events[0].data.userId,
-                programId: events[0].data.incubationId,
-              });
-              if (!incubationParticipant) {
-                return { success: false, error: "Incubation participant not found" };
-              }
-              incubationParticipant.pitchTime -= newCreditsUsed;
-              incubationParticipant.pitchSubmitted = true;
-              await incubationParticipant.save();
-              return {
-                success: true,
-                message: "Incubation pitch updated successfully",
-              };
+          try {
+            const result = await deductPitchCredits({
+              pitchId: events[0].data.pitchId,
+              userId: events[0].data.userId,
+              duration: step1?.duration,
+              competitionId: events[0].data.competitionId,
+              incubationId: events[0].data.incubationId,
+            });
+            return {
+              success: true,
+              message: result.deducted
+                ? "Credits deducted successfully"
+                : "Pitch updated successfully",
+            };
+          } catch (error) {
+            if (error instanceof PitchCreditError) {
+              return { success: false, error: error.message };
             }
-            else {
-              user.pitchTimeRemaining -= newCreditsUsed;
-              await user.save();
-              console.log("user after deduction", user.pitchTimeRemaining);
-              return { success: true, message: "Pitch updated successfully" };
-            }
-          } else {
-            return { success: true, message: "Pitch updated successfully" };
+            throw error;
           }
         });
         if (step3.success) {

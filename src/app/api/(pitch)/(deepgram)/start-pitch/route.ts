@@ -1,103 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
-import PitchModel from "@/models/PitchModel";
 import { userPlanModel } from "@/models/UserPlanModel";
 import Competition from "@/models/Competition";
 import Participant from "@/models/Participant";
 import IncubationParticipant from "@/models/IncubationParticipant";
-import UserModel from "@/models/UserModel";
-import mongoose from "mongoose";
-
-const DEFAULT_PITCH_TITLE_PATTERN = /^Pitch (\d+)$/;
-
-async function getNextPitchNumber(userId: string) {
-  const existingNumberedPitches = await PitchModel.find({
-    userId,
-    title: { $regex: DEFAULT_PITCH_TITLE_PATTERN },
-  })
-    .select("title pitchNumber")
-    .lean();
-
-  const highestExistingNumber = existingNumberedPitches.reduce((highest, pitch) => {
-    const titleMatch = pitch.title?.match(DEFAULT_PITCH_TITLE_PATTERN);
-    const numberFromTitle = titleMatch ? Number(titleMatch[1]) : 0;
-    return Math.max(highest, pitch.pitchNumber ?? 0, numberFromTitle);
-  }, 0);
-
-  // The per-user counter is incremented atomically. For existing users it is
-  // first raised to the highest legacy "Pitch N" value, so deleting a pitch
-  // never makes a future title collide with or reuse an earlier number.
-  const updatedUser = await UserModel.findByIdAndUpdate(
-    userId,
-    [
-      {
-        $set: {
-          pitchSequence: {
-            $add: [
-              {
-                $max: [
-                  { $ifNull: ["$pitchSequence", 0] },
-                  highestExistingNumber,
-                ],
-              },
-              1,
-            ],
-          },
-        },
-      },
-    ],
-    { new: true }
-  );
-
-  if (!updatedUser) {
-    throw new Error("User not found while allocating a pitch title");
-  }
-
-  return updatedUser.pitchSequence;
-}
-
-async function createNumberedPitch({
-  userId,
-  sessionId,
-  agentId,
-  competitionId,
-  incubationId,
-}: {
-  userId: string;
-  sessionId: string;
-  agentId?: string | null;
-  competitionId?: string | null;
-  incubationId?: string | null;
-}) {
-  const pitchNumber = await getNextPitchNumber(userId);
-  const storedAgentId =
-    agentId && mongoose.Types.ObjectId.isValid(agentId) ? agentId : null;
-
-  return PitchModel.create({
-    userId,
-    pitchNumber,
-    title: `Pitch ${pitchNumber}`,
-    sessionId,
-    agentId: storedAgentId,
-    lastUpdated: Date.now(),
-    startTime: Date.now(),
-    competitionId: competitionId ?? null,
-    incubationId: incubationId ?? null,
-  });
-}
+import {
+  resolveSessionUserId,
+  UnauthorizedError,
+  UserMismatchError,
+} from "@/lib/services/authGuard";
+import { createPitchForSession as createNumberedPitch } from "@/lib/services/pitchSession";
 
 export async function POST(req: NextRequest) {
   try {
     await dbConnect();
-    const { userId, sessionId, agentId, competitionId, incubationId } = await req.json();
-    if (!userId)
-      return NextResponse.json(
-        {
-          success: false,
-          message: "User ID is required",
-        },
-        { status: 400 }
-      );
+    const { userId: bodyUserId, sessionId, agentId, competitionId, incubationId } = await req.json();
+
+    let userId: string;
+    try {
+      userId = await resolveSessionUserId(bodyUserId);
+    } catch (error) {
+      if (error instanceof UnauthorizedError) {
+        return NextResponse.json(
+          { success: false, message: error.message },
+          { status: 401 }
+        );
+      }
+      if (error instanceof UserMismatchError) {
+        return NextResponse.json(
+          { success: false, message: error.message },
+          { status: 403 }
+        );
+      }
+      throw error;
+    }
 
     const user = await userPlanModel.findOne({ userId });
 

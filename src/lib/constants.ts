@@ -1,5 +1,6 @@
 "use client";
 import axios from "axios";
+import { buildGenericAgentSettings } from "@/lib/voiceConfig/genericAgentSettings";
 
 export const getAgentConfig = async (agentId: string) => {
   if (!agentId) {
@@ -213,50 +214,7 @@ Risk Assessment
 
 export const stsConfig = async (agentId: string) => {
   const agent = await getAgentConfig(agentId);
-  const tts=agent.vcId? {type: "cartesia" as const,
-          model_id: "sonic-3",
-          voice: {
-            mode: "id",
-            id: agent.voice,
-          },
-          language: "en",
-        }: {type: "deepgram" as const, model: agent.voice as string}
-  return {
-    type: "Settings" as const,
-    audio: {
-      input: {
-        encoding: "linear16",
-        sample_rate: 16000,
-      },
-      output: {
-        encoding: "linear16",
-        sample_rate: 24000,
-        container: "none",
-      },
-    },
-    agent: {
-      language: "en",
-      listen: {
-        provider: {
-          type: "deepgram" as const,
-          model: "nova-3",
-          smart_format: true,
-        },
-      },
-      speak: {
-        provider: tts,
-      },
-      think: {
-        provider: {
-          type: "open_ai" as const,
-          model: "gpt-4o",
-        },
-        prompt: agent.systemPrompt as string,
-
-      },
-      greeting: agent.firstMessage as string,
-    },
-  };
+  return buildGenericAgentSettings(agent);
 };
 
 // // Voice constants

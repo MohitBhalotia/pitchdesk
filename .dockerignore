@@ -1,0 +1,13 @@
+node_modules
+.next
+out
+build
+coverage
+.git
+.vercel
+backend/venv
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+npm-debug.log*
