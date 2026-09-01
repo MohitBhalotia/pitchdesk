@@ -7,3 +7,14 @@
 export function isPitchRoomsEnabled(): boolean {
   return process.env.PITCH_ROOMS_ENABLED === "true";
 }
+
+/**
+ * Client-safe mirror of the same flag, for UI that decides in the browser
+ * (nav links, redirects) whether to show the room experience at all — the
+ * actual security boundary is always the server-side check above (every
+ * `/api/pitch-rooms/*` route and `middleware.ts` re-check it). Keep both
+ * env vars in sync when flipping this feature on.
+ */
+export function isPitchRoomsEnabledClient(): boolean {
+  return process.env.NEXT_PUBLIC_PITCH_ROOMS_ENABLED === "true";
+}

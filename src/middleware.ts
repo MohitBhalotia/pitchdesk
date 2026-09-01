@@ -11,7 +11,11 @@ const protectedRoutes = [
   "/my-pitches",
   "/payment",
   "/investors",
+  "/pitch-rooms",
+  "/pitch-rooms/:path*",
 ];
+
+const PITCH_ROOMS_ENABLED = process.env.PITCH_ROOMS_ENABLED === "true";
 
 // ⭐ Basic Auth Check (only for staging / preview)
 function checkBasicAuth(request: NextRequest) {
@@ -78,6 +82,21 @@ export async function middleware(request: NextRequest) {
   if (!token && (protectedRoutes.includes(url.pathname) || url.pathname.startsWith("/vc/"))) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
+
+  // Legacy bookmark redirect: /start-a-pitch -> /pitch-rooms, once the room
+  // feature is actually enabled. While disabled, /start-a-pitch keeps
+  // working exactly as before.
+  if (PITCH_ROOMS_ENABLED && url.pathname === "/start-a-pitch") {
+    return NextResponse.redirect(new URL("/pitch-rooms", request.url));
+  }
+
+  // Pitch rooms are gated behind the same kill switch server-side; if
+  // someone reaches this URL while the feature is off, send them to the
+  // pre-existing equivalent page instead of a dead route.
+  if (!PITCH_ROOMS_ENABLED && url.pathname.startsWith("/pitch-rooms")) {
+    return NextResponse.redirect(new URL("/start-a-pitch", request.url));
+  }
+
   return NextResponse.next();
 }
 
@@ -93,6 +112,8 @@ export const config = {
     "/vc/:path*",
     "/start-pitch/:path*",
     "/start-a-pitch",
+    "/pitch-rooms",
+    "/pitch-rooms/:path*",
     "/generate-pitch/:path*",
     "/verify/:path*",
     "/my-pitches",

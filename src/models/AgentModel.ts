@@ -8,6 +8,14 @@ export interface IAgent extends Document {
   image: string;
   tags: string[];
 
+  // "generic" (default, existing VC bots) or "pitch_room" (the three fixed
+  // room coaches, plans/RAG_feature.md Section 3). Room agents are only
+  // selectable for pitch-room sessions — never generic/competition/incubation.
+  agentKind: "generic" | "pitch_room";
+  // Stable identifier for the three fixed room agents (e.g. "maya-shah"),
+  // used by the idempotent seed script instead of a fragile name match.
+  slug?: string;
+
   // VC Bot specific fields
   vcId?: mongoose.Types.ObjectId;
   description?: string;
@@ -50,6 +58,17 @@ const agentSchema = new Schema({
   tags: [{
     type: String,
   }],
+
+  agentKind: {
+    type: String,
+    enum: ["generic", "pitch_room"],
+    default: "generic",
+  },
+  slug: {
+    type: String,
+    unique: true,
+    sparse: true,
+  },
 
   // VC Bot Extensions
   vcId: {

@@ -38,6 +38,7 @@ import {
 
 import { useSession } from "next-auth/react";
 import { Session } from "next-auth";
+import { isPitchRoomsEnabledClient } from "@/lib/featureFlags";
 
 const getUserFromSession = (session: Session) => ({
   name: session?.user?.fullName || "User",
@@ -144,11 +145,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: "/my-pitches",
         icon: History,
       },
-      {
-        title: "Start pitch",
-        url: "/start-a-pitch",
-        icon: Mic,
-      },
+      isPitchRoomsEnabledClient()
+        ? {
+            title: "Pitch Room",
+            url: "/pitch-rooms",
+            icon: Mic,
+          }
+        : {
+            title: "Start pitch",
+            url: "/start-a-pitch",
+            icon: Mic,
+          },
       {
         title: "Generate pitch",
         url: "/generate-pitch",

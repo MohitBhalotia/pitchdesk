@@ -4,6 +4,8 @@ import { userPlanModel } from "@/models/UserPlanModel";
 import Competition from "@/models/Competition";
 import Participant from "@/models/Participant";
 import IncubationParticipant from "@/models/IncubationParticipant";
+import AgentModel from "@/models/AgentModel";
+import mongoose from "mongoose";
 import {
   resolveSessionUserId,
   UnauthorizedError,
@@ -33,6 +35,18 @@ export async function POST(req: NextRequest) {
         );
       }
       throw error;
+    }
+
+    // Pitch-room agents are only selectable for room sessions (Phase 3), not
+    // this generic/competition/incubation flow.
+    if (agentId && mongoose.Types.ObjectId.isValid(agentId)) {
+      const agent = await AgentModel.findById(agentId).select("agentKind").lean();
+      if (agent?.agentKind === "pitch_room") {
+        return NextResponse.json(
+          { success: false, message: "This agent is only available inside a pitch room" },
+          { status: 400 }
+        );
+      }
     }
 
     const user = await userPlanModel.findOne({ userId });

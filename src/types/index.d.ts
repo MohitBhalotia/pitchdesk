@@ -18,6 +18,17 @@ declare global {
     pitchSequence: number;
   }
 
+  export interface PitchRoom extends Document {
+    userId: mongoose.Schema.Types.ObjectId;
+    name: string;
+    practiceFocus?: string | null;
+    status: "active" | "archived";
+    // Populated in Phase 2 once KnowledgeBase exists.
+    knowledgeBaseId?: mongoose.Schema.Types.ObjectId | null;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
   export interface Company extends Document {
     companyName: string;
     websiteUrl: string;
@@ -62,6 +73,9 @@ declare global {
     firstMessage: string;
     systemPrompt: string;
     image: string;
+    agentKind?: "generic" | "pitch_room";
+    slug?: string;
+    description?: string;
   }
 
   // export interface Conversation {
