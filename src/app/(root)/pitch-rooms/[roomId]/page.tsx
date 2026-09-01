@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { PitchRoomSummary, RoomAgentSummary } from "@/components/pitch-rooms/types";
+import { KnowledgeBaseSection } from "@/components/pitch-rooms/KnowledgeBaseSection";
+import { StartupFactsSection } from "@/components/pitch-rooms/StartupFactsSection";
 
 export default function PitchRoomDetailPage() {
   const { roomId } = useParams<{ roomId: string }>();
@@ -29,6 +31,7 @@ export default function PitchRoomDetailPage() {
   const [name, setName] = useState("");
   const [practiceFocus, setPracticeFocus] = useState("");
   const [saving, setSaving] = useState(false);
+  const [hasReadyKnowledgeBase, setHasReadyKnowledgeBase] = useState(false);
 
   const [agents, setAgents] = useState<RoomAgentSummary[] | null>(null);
 
@@ -90,8 +93,6 @@ export default function PitchRoomDetailPage() {
     );
   }
 
-  const hasKnowledgeBase = Boolean(room.knowledgeBaseId);
-
   return (
     <main className="max-w-4xl mx-auto py-8 px-4 sm:px-6 space-y-8">
       <div>
@@ -142,18 +143,7 @@ export default function PitchRoomDetailPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {hasKnowledgeBase ? (
-            <p className="text-sm text-muted-foreground">Knowledge base ready.</p>
-          ) : (
-            <div className="border border-dashed border-border rounded-lg p-6 text-center">
-              <p className="text-sm text-muted-foreground mb-3">
-                No knowledge base yet. Document upload is coming in the next update.
-              </p>
-              <Button disabled title="Coming soon">
-                Create Knowledge Base
-              </Button>
-            </div>
-          )}
+          <KnowledgeBaseSection roomId={roomId} onReadyChange={setHasReadyKnowledgeBase} />
         </CardContent>
       </Card>
 
@@ -169,10 +159,7 @@ export default function PitchRoomDetailPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">
-            No metrics yet — these are extracted automatically once you add a
-            knowledge base.
-          </p>
+          <StartupFactsSection roomId={roomId} refreshKey={hasReadyKnowledgeBase ? 1 : 0} />
         </CardContent>
       </Card>
 
@@ -197,7 +184,7 @@ export default function PitchRoomDetailPage() {
         <CardHeader>
           <CardTitle>Choose a room coach</CardTitle>
           <CardDescription>
-            {hasKnowledgeBase
+            {hasReadyKnowledgeBase
               ? "Pick who you want to pitch to for your next session."
               : "Add a knowledge base to start a pitch session in this room."}
           </CardDescription>
@@ -228,8 +215,8 @@ export default function PitchRoomDetailPage() {
                   <Button
                     size="sm"
                     className="mt-2 w-full"
-                    disabled={!hasKnowledgeBase}
-                    title={hasKnowledgeBase ? undefined : "Add a knowledge base first"}
+                    disabled={!hasReadyKnowledgeBase}
+                    title={hasReadyKnowledgeBase ? undefined : "Add a knowledge base first"}
                   >
                     Start pitch
                   </Button>

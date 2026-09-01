@@ -29,6 +29,108 @@ declare global {
     updatedAt: Date;
   }
 
+  export type KnowledgeBaseStatus = "empty" | "processing" | "ready" | "failed";
+
+  export interface KnowledgeBaseContradiction {
+    metric: string;
+    period?: string | null;
+    factIds: mongoose.Schema.Types.ObjectId[];
+    note: string;
+  }
+
+  export interface KnowledgeBase extends Document {
+    userId: mongoose.Schema.Types.ObjectId;
+    roomId: mongoose.Schema.Types.ObjectId;
+    status: KnowledgeBaseStatus;
+    activeRevision: number;
+    startupBrief: string | null;
+    contradictions: KnowledgeBaseContradiction[];
+    sourceCount: number;
+    totalBytes: number;
+    chunkCount: number;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
+  export type KnowledgeSourceStage =
+    | "uploading"
+    | "queued"
+    | "parsing"
+    | "extracting"
+    | "embedding"
+    | "ready"
+    | "failed"
+    | "deleting";
+
+  export type KnowledgeSourceType = "file" | "pasted_text";
+
+  export interface KnowledgeSource extends Document {
+    userId: mongoose.Schema.Types.ObjectId;
+    roomId: mongoose.Schema.Types.ObjectId;
+    knowledgeBaseId: mongoose.Schema.Types.ObjectId;
+    sourceType: KnowledgeSourceType;
+    fileName?: string | null;
+    fileType?: string | null;
+    cloudinaryPublicId?: string | null;
+    cloudinaryResourceType?: string | null;
+    cloudinaryFormat?: string | null;
+    cloudinaryBytes?: number | null;
+    pastedText?: string | null;
+    contentHash?: string | null;
+    stage: KnowledgeSourceStage;
+    revision: number;
+    errorMessage?: string | null;
+    pageCount?: number | null;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
+  export type ChunkElementType = "heading" | "paragraph" | "table" | "chart" | "image_caption";
+
+  export interface KnowledgeChunk extends Document {
+    userId: mongoose.Schema.Types.ObjectId;
+    roomId: mongoose.Schema.Types.ObjectId;
+    knowledgeBaseId: mongoose.Schema.Types.ObjectId;
+    knowledgeBaseRevision: number;
+    sourceId: mongoose.Schema.Types.ObjectId;
+    sourceType: KnowledgeSourceType;
+    elementType: ChunkElementType;
+    locator?: string | null;
+    chunkIndex: number;
+    tokenCount: number;
+    text: string;
+    embedding: number[];
+    embeddingModel: string;
+    embeddingModelVersion: string;
+    contentHash: string;
+    createdAt: Date;
+  }
+
+  export type StartupFactValueType = "actual" | "projected" | "historical";
+  export type StartupFactProvenance = "extracted" | "founder_correction";
+  export type StartupFactStatus = "active" | "disabled";
+
+  export interface StartupFact extends Document {
+    userId: mongoose.Schema.Types.ObjectId;
+    roomId: mongoose.Schema.Types.ObjectId;
+    knowledgeBaseId: mongoose.Schema.Types.ObjectId;
+    metric: string;
+    rawValue: string;
+    numericValue: number | null;
+    unit?: string | null;
+    currency?: string | null;
+    period?: string | null;
+    valueType: StartupFactValueType;
+    confidence: number;
+    provenance: StartupFactProvenance;
+    status: StartupFactStatus;
+    sourceId?: mongoose.Schema.Types.ObjectId | null;
+    locator?: string | null;
+    supersedesFactId?: mongoose.Schema.Types.ObjectId | null;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+
   export interface Company extends Document {
     companyName: string;
     websiteUrl: string;
