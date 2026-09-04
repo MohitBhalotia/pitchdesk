@@ -12,7 +12,8 @@
     "worker:dev": "tsx watch worker/src/index.ts",
     "worker:start": "tsx worker/src/index.ts",
     "atlas:check-indexes": "tsx scripts/atlas/check-atlas-indexes.ts",
-    "seed:room-agents": "tsx scripts/seed-room-agents.ts"
+    "seed:room-agents": "tsx scripts/seed-room-agents.ts",
+    "eval:rag": "tsx scripts/eval/run-rag-eval.ts"
   },
   "dependencies": {
     "@deepgram/sdk": "^4.11.2",

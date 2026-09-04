@@ -2,6 +2,7 @@ import { SignJWT, jwtVerify, errors as joseErrors } from "jose";
 import mongoose from "mongoose";
 import RoomToolSessionModel from "@/models/RoomToolSessionModel";
 import { cacheGet, cacheSet } from "@/lib/redis";
+import { logMetric } from "@/lib/observability/metrics";
 
 /**
  * Signing/verification for the short-lived room-session token that Deepgram
@@ -121,12 +122,14 @@ export async function verifyRoomToolSessionToken(
     try {
       const scope = JSON.parse(cached) as RoomToolSessionScope;
       if (new Date(scope.expiresAt).getTime() > Date.now()) {
+        logMetric("cache_lookup", { cacheType: "room_tool_session", hit: true });
         return scope;
       }
     } catch {
       // fall through to a fresh Mongo lookup
     }
   }
+  logMetric("cache_lookup", { cacheType: "room_tool_session", hit: false });
 
   if (!mongoose.Types.ObjectId.isValid(sessionId)) return null;
   const record = await RoomToolSessionModel.findById(sessionId).lean();

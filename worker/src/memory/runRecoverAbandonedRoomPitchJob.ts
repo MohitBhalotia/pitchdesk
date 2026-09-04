@@ -1,6 +1,7 @@
 import PitchModel from "../../../src/models/PitchModel";
 import { deductPitchCredits, PitchCreditError } from "../../../src/lib/services/pitchCredits";
 import { enqueueGenerateRoomMemory } from "../../../src/lib/queues";
+import { logMetric } from "../../../src/lib/observability/metrics";
 
 /** Matches the sweep's staleness window in sweepAbandonedRoomPitches.ts. */
 const ABANDONED_THRESHOLD_MS = 5 * 60 * 1000;
@@ -44,4 +45,11 @@ export async function runRecoverAbandonedRoomPitchJob(pitchId: string): Promise<
   }
 
   await enqueueGenerateRoomMemory({ pitchId: String(pitch._id) });
+
+  logMetric("memory_job_completed", {
+    jobType: "recover-abandoned-room-pitch",
+    pitchId: String(pitch._id),
+    roomId: String(pitch.pitchRoomId),
+    recoveredDurationSeconds: Math.round(durationSeconds),
+  });
 }

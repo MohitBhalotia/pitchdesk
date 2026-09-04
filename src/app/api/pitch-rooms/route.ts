@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
-import { isPitchRoomsEnabled } from "@/lib/featureFlags";
+import { isPitchRoomsEnabled, isRoomCreationEnabled, isPitchRoomsEnabledForUser } from "@/lib/featureFlags";
 import { resolveSessionUserId, UnauthorizedError } from "@/lib/services/authGuard";
 import {
   listRoomsForUser,
@@ -38,6 +38,15 @@ export async function POST(req: NextRequest) {
   await dbConnect();
   try {
     const userId = await resolveSessionUserId();
+
+    // Independent kill switch + staged-rollout gate (Section 5) -- both sit
+    // in front of room creation specifically, the funnel entry point into
+    // ever using this feature. An existing room's other routes (settings,
+    // knowledge base, sessions) are unaffected by either.
+    if (!isRoomCreationEnabled() || !isPitchRoomsEnabledForUser(userId)) {
+      return NextResponse.json({ success: false, message: "Not found" }, { status: 404 });
+    }
+
     const { name, practiceFocus } = await req.json();
     const room = await createRoomForUser({ userId, name, practiceFocus });
     return NextResponse.json({ success: true, data: { room } }, { status: 201 });

@@ -208,6 +208,24 @@ declare global {
   }
 
   /**
+   * A scored async-production-sampling record (plans/RAG_feature.md Section
+   * 7, Phase 5) -- deliberately does NOT store the sampled query or
+   * retrieved passages long-term, only the judge's scores/metadata, even
+   * though the ephemeral `eval-sample-async` job data (Redis, auto-expired)
+   * legitimately carries them for the judge call itself.
+   */
+  export interface EvalSample extends Document {
+    callId: string;
+    toolName: string;
+    roomId: mongoose.Schema.Types.ObjectId;
+    found: boolean;
+    relevanceScore: number;
+    groundednessScore: number;
+    reason?: string | null;
+    createdAt: Date;
+  }
+
+  /**
    * Scope record backing a signed, short-lived room-session token (Section 4
    * & 6). Tool-call routes verify the bearer token's signature/expiry, then
    * check this record isn't revoked -- the Redis validation cache in front

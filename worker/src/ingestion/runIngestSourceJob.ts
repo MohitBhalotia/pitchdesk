@@ -17,6 +17,7 @@ import {
   MAX_PAGES_PER_DOCUMENT,
 } from "../../../src/lib/ingestion/limits";
 import type { UnstructuredElement } from "../../../src/lib/ingestion/types";
+import { logMetric } from "../../../src/lib/observability/metrics";
 
 /** A failure that retrying can never fix -- BullMQ should not burn attempts on it. */
 class NonRetryableIngestError extends Error {}
@@ -46,6 +47,7 @@ async function recomputeKnowledgeBaseStatus(knowledgeBaseId: unknown) {
  * the worker, never inline in a Next.js route.
  */
 export async function runIngestSourceJob(sourceId: string, revision: number): Promise<void> {
+  const startedAt = Date.now();
   const source = await KnowledgeSourceModel.findById(sourceId);
   if (!source) return; // deleted after the job was enqueued
   if (source.revision !== revision) return; // superseded by a newer retry
@@ -195,6 +197,15 @@ export async function runIngestSourceJob(sourceId: string, revision: number): Pr
     await source.save();
 
     await recomputeKnowledgeBaseStatus(source.knowledgeBaseId);
+
+    logMetric("ingestion_completed", {
+      sourceId,
+      roomId: String(source.roomId),
+      durationMs: Date.now() - startedAt,
+      pageCount: source.pageCount,
+      chunkCount: chunkCandidates.length,
+      embeddingCount: embeddings.length,
+    });
   } catch (error) {
     const isNonRetryable = error instanceof NonRetryableIngestError;
     source.stage = "failed";
@@ -202,6 +213,14 @@ export async function runIngestSourceJob(sourceId: string, revision: number): Pr
     await source.save();
 
     await recomputeKnowledgeBaseStatus(source.knowledgeBaseId);
+
+    logMetric("ingestion_failed", {
+      sourceId,
+      roomId: String(source.roomId),
+      durationMs: Date.now() - startedAt,
+      nonRetryable: isNonRetryable,
+      errorMessage: source.errorMessage,
+    });
 
     if (isNonRetryable) return; // don't let BullMQ retry something that can never succeed
     throw error; // let BullMQ retry with backoff

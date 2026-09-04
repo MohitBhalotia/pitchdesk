@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import KnowledgeChunkModel from "@/models/KnowledgeChunkModel";
 import { embedTexts } from "@/lib/ingestion/embedTexts";
 import { cacheGet, cacheSet } from "@/lib/redis";
+import { logMetric } from "@/lib/observability/metrics";
 
 /**
  * Live retrieval for the `search_knowledge_base` Deepgram tool
@@ -170,11 +171,14 @@ export async function searchKnowledgeBase(
   const cached = await cacheGet(cacheKey);
   if (cached) {
     try {
-      return JSON.parse(cached) as RetrievedPassage[];
+      const passages = JSON.parse(cached) as RetrievedPassage[];
+      logMetric("cache_lookup", { cacheType: "retrieval", hit: true });
+      return passages;
     } catch {
       // fall through to a live search
     }
   }
+  logMetric("cache_lookup", { cacheType: "retrieval", hit: false });
 
   const [queryVector] = await embedTexts([query]);
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { isPitchRoomsEnabled } from "@/lib/featureFlags";
+import { isRoomToolsEnabled } from "@/lib/featureFlags";
 import { handleRoomTool, NOT_FOUND_RESULT } from "@/lib/rag/toolHandler";
 import { searchPreviousPitchMemory } from "@/lib/rag/memorySearch";
 
@@ -15,11 +15,11 @@ const ArgsSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  if (!isPitchRoomsEnabled()) {
+  if (!isRoomToolsEnabled()) {
     return NextResponse.json(NOT_FOUND_RESULT);
   }
 
-  return handleRoomTool(req, async (scope, rawArgs) => {
+  return handleRoomTool(req, "search_previous_pitch_memory", async (scope, rawArgs) => {
     const parsed = ArgsSchema.safeParse(rawArgs);
     if (!parsed.success) {
       return NOT_FOUND_RESULT;

@@ -76,8 +76,19 @@ export function enqueueRecoverAbandonedRoomPitch(
 
 // --- eval-sample-async -------------------------------------------------------
 // Fire-and-forget from a live tool call — callers must never await this.
+// Job data / consumer implemented in Phase 5 (src/lib/rag/toolHandler.ts
+// samples ~1% of search_knowledge_base calls; worker/src/eval scores them
+// offline). `query`/`resultText` live here in queued Redis data for the
+// worker's LLM-judge to score against — never written to console/log output
+// (Section 5's "never log document bodies/passages/prompts" rule is about
+// logs, not this legitimate, access-scoped evaluation pipeline).
 export interface EvalSampleAsyncJobData {
   callId: string;
+  toolName: string;
+  roomId: string;
+  query: string;
+  resultText: string;
+  found: boolean;
 }
 
 export function enqueueEvalSampleAsync(data: EvalSampleAsyncJobData) {

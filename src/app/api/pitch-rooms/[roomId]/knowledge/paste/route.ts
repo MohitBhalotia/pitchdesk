@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
-import { isPitchRoomsEnabled } from "@/lib/featureFlags";
+import { isRoomIngestionEnabled } from "@/lib/featureFlags";
 import { resolveSessionUserId } from "@/lib/services/authGuard";
 import { createPastedTextSource } from "@/lib/services/knowledgeSources";
 import { toErrorResponse } from "@/lib/services/apiErrors";
@@ -10,7 +10,7 @@ interface RouteParams {
 }
 
 export async function POST(req: NextRequest, { params }: RouteParams) {
-  if (!isPitchRoomsEnabled()) {
+  if (!isRoomIngestionEnabled()) {
     return NextResponse.json({ success: false, message: "Not found" }, { status: 404 });
   }
 

@@ -5,6 +5,7 @@ import { extractPitchMemory, buildMemorySummaryText } from "../../../src/lib/mem
 import { embedTexts } from "../../../src/lib/ingestion/embedTexts";
 import { EMBEDDING_MODEL, EMBEDDING_MODEL_VERSION } from "../../../src/lib/ingestion/limits";
 import { enqueueRegenerateRoomMemoryDigest } from "../../../src/lib/queues";
+import { logMetric } from "../../../src/lib/observability/metrics";
 
 function isDuplicateKeyError(error: unknown): boolean {
   return Boolean(
@@ -20,6 +21,7 @@ function isDuplicateKeyError(error: unknown): boolean {
  * index, so a retried delivery can never create a duplicate.
  */
 export async function runGenerateRoomMemoryJob(pitchId: string): Promise<void> {
+  const startedAt = Date.now();
   const pitch = await PitchModel.findById(pitchId).lean();
   if (!pitch) return; // deleted before the job ran
   if (!pitch.pitchRoomId) return; // generic pitch -- no room memory to generate
@@ -48,6 +50,12 @@ export async function runGenerateRoomMemoryJob(pitchId: string): Promise<void> {
     });
   } catch (error) {
     if (isDuplicateKeyError(error)) return; // lost a race with a concurrent/retried delivery
+    logMetric("memory_job_failed", {
+      jobType: "generate-room-memory",
+      pitchId,
+      durationMs: Date.now() - startedAt,
+      errorMessage: error instanceof Error ? error.message : "unknown error",
+    });
     throw error;
   }
 
@@ -62,4 +70,11 @@ export async function runGenerateRoomMemoryJob(pitchId: string): Promise<void> {
       version: room.memoryDigestVersion,
     });
   }
+
+  logMetric("memory_job_completed", {
+    jobType: "generate-room-memory",
+    pitchId,
+    roomId: String(pitch.pitchRoomId),
+    durationMs: Date.now() - startedAt,
+  });
 }

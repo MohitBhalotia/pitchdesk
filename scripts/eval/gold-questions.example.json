@@ -1,0 +1,11 @@
+[
+  {
+    "_comment": "One entry per gold question. userId/roomId/knowledgeBaseId/knowledgeBaseRevision must belong to real, already-ingested data in whatever DB this runs against (CI/staging fixtures, never production traffic -- Section 7). relevantChunkIds are the KnowledgeChunk _ids a correct retrieval should surface for this query.",
+    "userId": "507f1f77bcf86cd799439001",
+    "roomId": "507f1f77bcf86cd799439002",
+    "knowledgeBaseId": "507f1f77bcf86cd799439003",
+    "knowledgeBaseRevision": 1,
+    "query": "What is our current ARR?",
+    "relevantChunkIds": ["507f1f77bcf86cd799439010"]
+  }
+]
