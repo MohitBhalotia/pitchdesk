@@ -57,6 +57,17 @@ describe("buildRoomAgentSettings", () => {
     expect(settings.agent.think.prompt).toContain("Two different ARR figures found");
   });
 
+  it("omits the memory-digest section when absent, includes it (truncated) when present", () => {
+    const without = buildRoomAgentSettings(baseInput());
+    expect(without.agent.think.prompt).not.toContain("remember from previous sessions");
+
+    const digest = "D".repeat(2000);
+    const withDigest = buildRoomAgentSettings(baseInput({ memoryDigest: digest }));
+    expect(withDigest.agent.think.prompt).toContain("remember from previous sessions");
+    const digestSection = withDigest.agent.think.prompt.split("remember from previous sessions")[1];
+    expect(digestSection.length).toBeLessThan(1300);
+  });
+
   it("attaches exactly the three read-only room tools with the bearer token in their headers", () => {
     const settings = buildRoomAgentSettings(baseInput());
     const functions = settings.agent.think.functions;

@@ -32,6 +32,14 @@ const PitchRoomSchema = new Schema<PitchRoom>(
       ref: "KnowledgeBase",
       default: null,
     },
+    memoryDigest: {
+      type: String,
+      default: null,
+    },
+    memoryDigestVersion: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

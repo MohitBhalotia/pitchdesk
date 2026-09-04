@@ -4,8 +4,20 @@ import dbConnect from "../../src/lib/db";
 import { getRedisClient } from "../../src/lib/redis";
 import { createQueueConnection } from "../../src/lib/queues/connection";
 import { QUEUE_NAMES } from "../../src/lib/queues/queueNames";
-import type { IngestSourceJobData } from "../../src/lib/queues";
+import type {
+  IngestSourceJobData,
+  GenerateRoomMemoryJobData,
+  RegenerateRoomMemoryDigestJobData,
+  RecoverAbandonedRoomPitchJobData,
+} from "../../src/lib/queues";
 import { runIngestSourceJob } from "./ingestion/runIngestSourceJob";
+import { runGenerateRoomMemoryJob } from "./memory/runGenerateRoomMemoryJob";
+import { runRegenerateRoomMemoryDigestJob } from "./memory/runRegenerateRoomMemoryDigestJob";
+import { runRecoverAbandonedRoomPitchJob } from "./memory/runRecoverAbandonedRoomPitchJob";
+import { sweepAbandonedRoomPitches } from "./memory/sweepAbandonedRoomPitches";
+
+/** How often the worker checks for room pitches with a dead heartbeat and no clean End Session. */
+const ABANDONED_SWEEP_INTERVAL_MS = 5 * 60 * 1000;
 
 /**
  * Dedicated worker process (Section 4 of plans/RAG_feature.md): the sole
@@ -13,8 +25,8 @@ import { runIngestSourceJob } from "./ingestion/runIngestSourceJob";
  * rebuilds, abandoned-session recovery, async eval sampling). It imports
  * Mongoose models straight from `src/models/*` — no schema duplication.
  *
- * ingest-source has a real processor (Phase 2); the remaining queues still
- * log-and-acknowledge until their processors land in Phase 4.
+ * ingest-source (Phase 2) and the three Phase 4 memory queues have real
+ * processors; eval-sample-async still logs-and-acknowledges until Phase 5.
  */
 async function main() {
   await dbConnect();
@@ -24,8 +36,14 @@ async function main() {
   await redis.ping();
   console.log("[worker] connected to Redis");
 
+  const implementedQueueNames: string[] = [
+    QUEUE_NAMES.INGEST_SOURCE,
+    QUEUE_NAMES.GENERATE_ROOM_MEMORY,
+    QUEUE_NAMES.REGENERATE_ROOM_MEMORY_DIGEST,
+    QUEUE_NAMES.RECOVER_ABANDONED_ROOM_PITCH,
+  ];
   const stubQueueNames = Object.values(QUEUE_NAMES).filter(
-    (name) => name !== QUEUE_NAMES.INGEST_SOURCE
+    (name) => !implementedQueueNames.includes(name)
   );
 
   const workers = [
@@ -33,6 +51,27 @@ async function main() {
       QUEUE_NAMES.INGEST_SOURCE,
       async (job: Job<IngestSourceJobData>) => {
         await runIngestSourceJob(job.data.sourceId, job.data.revision);
+      },
+      { connection: createQueueConnection() }
+    ),
+    new Worker<GenerateRoomMemoryJobData>(
+      QUEUE_NAMES.GENERATE_ROOM_MEMORY,
+      async (job: Job<GenerateRoomMemoryJobData>) => {
+        await runGenerateRoomMemoryJob(job.data.pitchId);
+      },
+      { connection: createQueueConnection() }
+    ),
+    new Worker<RegenerateRoomMemoryDigestJobData>(
+      QUEUE_NAMES.REGENERATE_ROOM_MEMORY_DIGEST,
+      async (job: Job<RegenerateRoomMemoryDigestJobData>) => {
+        await runRegenerateRoomMemoryDigestJob(job.data.roomId, job.data.version);
+      },
+      { connection: createQueueConnection() }
+    ),
+    new Worker<RecoverAbandonedRoomPitchJobData>(
+      QUEUE_NAMES.RECOVER_ABANDONED_ROOM_PITCH,
+      async (job: Job<RecoverAbandonedRoomPitchJobData>) => {
+        await runRecoverAbandonedRoomPitchJob(job.data.pitchId);
       },
       { connection: createQueueConnection() }
     ),
@@ -52,8 +91,17 @@ async function main() {
 
   console.log(`[worker] listening on queues: ${Object.values(QUEUE_NAMES).join(", ")}`);
 
+  const sweepInterval = setInterval(() => {
+    sweepAbandonedRoomPitches()
+      .then((count) => {
+        if (count > 0) console.log(`[worker] abandoned-pitch sweep: recovered ${count} pitch(es)`);
+      })
+      .catch((error) => console.error("[worker] abandoned-pitch sweep failed:", error));
+  }, ABANDONED_SWEEP_INTERVAL_MS);
+
   const shutdown = async () => {
     console.log("[worker] shutting down...");
+    clearInterval(sweepInterval);
     await Promise.all(workers.map((w) => w.close()));
     await redis.quit();
     process.exit(0);

@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "sonner";
 import Image from "next/image";
-import { FileText, Sparkles, History as HistoryIcon } from "lucide-react";
+import { FileText, Sparkles, History as HistoryIcon, Brain } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,6 +22,7 @@ import type { PitchRoomSummary, RoomAgentSummary } from "@/components/pitch-room
 import { KnowledgeBaseSection } from "@/components/pitch-rooms/KnowledgeBaseSection";
 import { StartupFactsSection } from "@/components/pitch-rooms/StartupFactsSection";
 import { RoomPitchHistorySection } from "@/components/pitch-rooms/RoomPitchHistorySection";
+import { RoomMemorySection } from "@/components/pitch-rooms/RoomMemorySection";
 
 export default function PitchRoomDetailPage() {
   const { roomId } = useParams<{ roomId: string }>();
@@ -174,6 +175,22 @@ export default function PitchRoomDetailPage() {
         </CardHeader>
         <CardContent>
           <RoomPitchHistorySection roomId={roomId} />
+        </CardContent>
+      </Card>
+
+      {/* Room memory */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Brain className="w-5 h-5 text-primary" />
+            Room memory
+          </CardTitle>
+          <CardDescription>
+            What your coach remembers about you across sessions in this room.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <RoomMemorySection roomId={roomId} />
         </CardContent>
       </Card>
 

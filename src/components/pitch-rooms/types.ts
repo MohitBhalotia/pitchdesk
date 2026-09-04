@@ -48,6 +48,17 @@ export interface KnowledgeSourceSummary {
   createdAt: string;
 }
 
+export interface RoomMemorySummary {
+  _id: string;
+  founderClaims: string[];
+  weaknesses: string[];
+  decisions: string[];
+  newFacts: string[];
+  recurringDifficulties: string[];
+  summaryText: string;
+  createdAt: string;
+}
+
 export interface RoomPitchSummary {
   _id: string;
   title?: string | null;

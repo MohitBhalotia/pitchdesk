@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import PitchModel from "@/models/PitchModel";
 import { deductPitchCredits, PitchCreditError } from "@/lib/services/pitchCredits";
+import { enqueueGenerateRoomMemory } from "@/lib/queues";
 
 const CREDIT_ERROR_STATUS: Record<PitchCreditError["code"], number> = {
   PITCH_NOT_FOUND: 404,
@@ -42,6 +43,13 @@ export async function POST(req: Request) {
         );
       }
       throw error;
+    }
+
+    // Fires the Phase 4 memory pipeline for room pitches only -- a generic
+    // pitch has no pitchRoomId and nothing to remember it against. Producer
+    // side only: this enqueues, the worker does the actual generation.
+    if (pitch.pitchRoomId) {
+      await enqueueGenerateRoomMemory({ pitchId: String(pitch._id) });
     }
 
     return NextResponse.json(

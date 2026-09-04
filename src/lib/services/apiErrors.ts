@@ -3,6 +3,7 @@ import { UnauthorizedError, UserMismatchError } from "./authGuard";
 import { PitchRoomError } from "./pitchRooms";
 import { KnowledgeSourceError } from "./knowledgeSources";
 import { StartupFactError } from "./startupFacts";
+import { RoomMemoryError } from "./roomMemory";
 
 /** Shared error-to-HTTP-response mapping for the pitch-room API routes. */
 export function toErrorResponse(error: unknown, logContext: string) {
@@ -15,7 +16,8 @@ export function toErrorResponse(error: unknown, logContext: string) {
   if (
     error instanceof PitchRoomError ||
     error instanceof KnowledgeSourceError ||
-    error instanceof StartupFactError
+    error instanceof StartupFactError ||
+    error instanceof RoomMemoryError
   ) {
     return NextResponse.json(
       { success: false, message: error.message },

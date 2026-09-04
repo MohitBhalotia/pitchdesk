@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import authOptions from "@/lib/auth";
 import Agent from "@/models/AgentModel";
 import UserModel from "@/models/UserModel";
+import { deleteMemoryForPitch } from "@/lib/services/roomMemory";
 
 const DEFAULT_PITCH_TITLE_PATTERN = /^Pitch (\d+)$/;
 
@@ -143,6 +144,13 @@ export async function DELETE(req: NextRequest) {
     }
 
     await preservePitchSequence(session.user._id, pitch);
+
+    // Deleting a pitch deletes its derived room memory too (Phase 4 exit
+    // condition) -- a no-op for generic pitches, which have no pitchRoomId.
+    if (pitch.pitchRoomId) {
+      await deleteMemoryForPitch(String(pitch.pitchRoomId), String(pitch._id));
+    }
+
     await pitch.deleteOne();
 
     return NextResponse.json({ message: "Pitch deleted successfully" })

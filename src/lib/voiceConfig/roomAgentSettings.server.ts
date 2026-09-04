@@ -17,6 +17,7 @@
 const MAX_STARTUP_BRIEF_CHARS = 2000;
 const MAX_PRACTICE_FOCUS_CHARS = 500;
 const MAX_CONTRADICTIONS_CHARS = 800;
+const MAX_MEMORY_DIGEST_CHARS = 1200;
 
 const TOOL_USE_INSTRUCTIONS = `--- Tools available this session ---
 You have three tools backed by this room's knowledge base and history:
@@ -70,6 +71,8 @@ export interface RoomAgentSettingsInput {
   agent: RoomAgentPersonaInput;
   room: RoomInfoInput;
   knowledgeBase: RoomKnowledgeBaseInput | null;
+  /** Compact cross-session digest (Phase 4) -- null/absent for a room's first session. */
+  memoryDigest?: string | null;
   /** Signed room-session token; embedded as a bearer header on every tool endpoint. */
   roomToolSessionToken: string;
   /** Publicly reachable origin Deepgram's backend calls the tool endpoints on. */
@@ -107,6 +110,15 @@ function buildDynamicPromptSections(input: RoomAgentSettingsInput): string {
         list,
         MAX_CONTRADICTIONS_CHARS
       )}\nAsk the founder to clarify which figure is current rather than picking one yourself.`
+    );
+  }
+
+  if (input.memoryDigest) {
+    sections.push(
+      `--- What you remember from previous sessions in this room ---\n${truncate(
+        input.memoryDigest,
+        MAX_MEMORY_DIGEST_CHARS
+      )}`
     );
   }
 

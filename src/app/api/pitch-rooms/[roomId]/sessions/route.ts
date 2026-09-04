@@ -134,6 +134,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         startupBrief: knowledgeBase.startupBrief ?? null,
         contradictions: knowledgeBase.contradictions ?? [],
       },
+      memoryDigest: room.memoryDigest ?? null,
       roomToolSessionToken: token,
       baseUrl,
     });

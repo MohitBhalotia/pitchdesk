@@ -25,6 +25,12 @@ declare global {
     status: "active" | "archived";
     // Populated in Phase 2 once KnowledgeBase exists.
     knowledgeBaseId?: mongoose.Schema.Types.ObjectId | null;
+    // Phase 4: the compact cross-session digest injected into future room
+    // prompts. `memoryDigestVersion` bumps on every regeneration -- used as
+    // the BullMQ job-dedup key (`digest:{roomId}:{version}`) and as the
+    // Redis memory-digest cache's invalidation signal.
+    memoryDigest?: string | null;
+    memoryDigestVersion: number;
     createdAt: Date;
     updatedAt: Date;
   }
@@ -174,6 +180,31 @@ declare global {
     conversationHistory?: Message[];
     creditsUsed?: number;
     overview?: PitchOverview;
+  }
+
+  /**
+   * One bounded, structured memory per completed room pitch
+   * (plans/RAG_feature.md Phase 4). Never stores the transcript -- only a
+   * searchable summary plus its embedding, categorized into what future
+   * sessions actually need to recall. Unique on (roomId, pitchId) so a
+   * retried `generate-room-memory` job can never create a duplicate.
+   */
+  export interface RoomMemory extends Document {
+    userId: mongoose.Schema.Types.ObjectId;
+    roomId: mongoose.Schema.Types.ObjectId;
+    pitchId: mongoose.Schema.Types.ObjectId;
+    founderClaims: string[];
+    weaknesses: string[];
+    decisions: string[];
+    newFacts: string[];
+    recurringDifficulties: string[];
+    /** Bounded (~1,500 char) text combining the categories above -- what gets embedded. */
+    summaryText: string;
+    embedding: number[];
+    embeddingModel: string;
+    embeddingModelVersion: string;
+    createdAt: Date;
+    updatedAt: Date;
   }
 
   /**
