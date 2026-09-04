@@ -55,6 +55,38 @@ describe("createPitchForSession", () => {
     expect(pitch.agentId).toBeNull();
   });
 
+  it("sets pitchMode to 'room' and stores the room/agent name snapshots when pitchRoomId is given", async () => {
+    mockNoExistingPitches();
+    asMock(UserModel.findByIdAndUpdate).mockResolvedValue({ pitchSequence: 1 });
+    asMock(PitchModel.create).mockImplementation((doc: unknown) => Promise.resolve(doc));
+
+    const pitch = await createPitchForSession({
+      userId: "u1",
+      sessionId: "s1",
+      agentId: null,
+      pitchRoomId: "room1",
+      roomName: "My Room",
+      agentName: "Maya Shah",
+    });
+
+    expect(pitch).toMatchObject({
+      pitchMode: "room",
+      pitchRoomId: "room1",
+      roomName: "My Room",
+      agentName: "Maya Shah",
+    });
+  });
+
+  it("defaults to pitchMode 'generic' when no pitchRoomId is given", async () => {
+    mockNoExistingPitches();
+    asMock(UserModel.findByIdAndUpdate).mockResolvedValue({ pitchSequence: 1 });
+    asMock(PitchModel.create).mockImplementation((doc: unknown) => Promise.resolve(doc));
+
+    const pitch = await createPitchForSession({ userId: "u1", sessionId: "s1" });
+
+    expect(pitch).toMatchObject({ pitchMode: "generic", pitchRoomId: null });
+  });
+
   it("throws when the user cannot be found while allocating a title", async () => {
     mockNoExistingPitches();
     asMock(UserModel.findByIdAndUpdate).mockResolvedValue(null);

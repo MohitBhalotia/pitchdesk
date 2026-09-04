@@ -158,6 +158,13 @@ declare global {
     competitionId: mongoose.Schema.Types.ObjectId | null;
     incubationId: mongoose.Schema.Types.ObjectId | null;
     agentId: mongoose.Schema.Types.ObjectId | null;
+    // Pitch-room fields (plans/RAG_feature.md Phase 3, Section 6). Unset on
+    // every pre-existing/generic pitch -- absence means "generic", no
+    // migration required.
+    pitchRoomId?: mongoose.Schema.Types.ObjectId | null;
+    pitchMode?: "generic" | "room";
+    roomName?: string | null;
+    agentName?: string | null;
     pitchNumber?: number;
     title: string
     lastUpdated: Date;
@@ -167,6 +174,30 @@ declare global {
     conversationHistory?: Message[];
     creditsUsed?: number;
     overview?: PitchOverview;
+  }
+
+  /**
+   * Scope record backing a signed, short-lived room-session token (Section 4
+   * & 6). Tool-call routes verify the bearer token's signature/expiry, then
+   * check this record isn't revoked -- the Redis validation cache in front
+   * of it exists purely for latency, never as the source of truth.
+   */
+  export interface RoomToolSession extends Document {
+    userId: mongoose.Schema.Types.ObjectId;
+    roomId: mongoose.Schema.Types.ObjectId;
+    pitchId: mongoose.Schema.Types.ObjectId;
+    agentId: mongoose.Schema.Types.ObjectId;
+    knowledgeBaseId: mongoose.Schema.Types.ObjectId | null;
+    knowledgeBaseRevision: number;
+    expiresAt: Date;
+    revoked: boolean;
+    // Circuit breaker (Section 2): consecutive tool-call failures within this
+    // session. Reset to 0 on any successful call; at 3, callers short-circuit
+    // to "not found" without touching Mongo/OpenAI for the rest of the session.
+    consecutiveFailures: number;
+    callCount: number;
+    createdAt: Date;
+    updatedAt: Date;
   }
 
   interface Agent {

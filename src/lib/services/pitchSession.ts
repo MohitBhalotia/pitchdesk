@@ -56,6 +56,12 @@ export interface CreatePitchForSessionInput {
   agentId?: string | null;
   competitionId?: string | null;
   incubationId?: string | null;
+  // Pitch-room fields (plans/RAG_feature.md Phase 3). `roomName`/`agentName`
+  // are snapshots at session-start time -- they never change if the room or
+  // agent is renamed later, matching how `pitchNumber`/`title` already work.
+  pitchRoomId?: string | null;
+  roomName?: string | null;
+  agentName?: string | null;
 }
 
 /**
@@ -69,6 +75,9 @@ export async function createPitchForSession({
   agentId,
   competitionId,
   incubationId,
+  pitchRoomId,
+  roomName,
+  agentName,
 }: CreatePitchForSessionInput) {
   const pitchNumber = await getNextPitchNumber(userId);
   const storedAgentId =
@@ -84,5 +93,9 @@ export async function createPitchForSession({
     startTime: Date.now(),
     competitionId: competitionId ?? null,
     incubationId: incubationId ?? null,
+    pitchRoomId: pitchRoomId ?? null,
+    pitchMode: pitchRoomId ? "room" : "generic",
+    roomName: roomName ?? null,
+    agentName: agentName ?? null,
   });
 }

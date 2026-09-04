@@ -27,6 +27,7 @@ import {
   Trash2,
   Save,
   X,
+  DoorOpen,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import PopupVideo from "@/components/PopupVideo";
@@ -46,6 +47,10 @@ interface Pitch {
   createdAt?: string;
   updatedAt?: string;
   agentId?: string | { _id: string; name?: string } | null;
+  // Pitch-room fields (plans/RAG_feature.md Phase 3) -- unset on generic pitches.
+  pitchRoomId?: string | null;
+  roomName?: string | null;
+  agentName?: string | null;
 }
 
 const getPitchDate = (pitch: Pitch) => {
@@ -72,9 +77,9 @@ const formatMessageTime = (timestamp?: string) => {
 };
 
 const getAgentName = (pitch: Pitch) =>
-  typeof pitch.agentId === "object" && pitch.agentId?.name
-    ? pitch.agentId.name
-    : "AI VC";
+  (typeof pitch.agentId === "object" && pitch.agentId?.name) ||
+  pitch.agentName ||
+  "AI VC";
 
 export default function PitchTranscripts() {
   const [pitches, setPitches] = useState<Pitch[]>([]);
@@ -435,6 +440,12 @@ export default function PitchTranscripts() {
                             <Bot className="h-3 w-3" />
                             {getAgentName(pitch)}
                           </Badge>
+                          {pitch.roomName && (
+                            <Badge variant="outline" className="flex items-center gap-1">
+                              <DoorOpen className="h-3 w-3" />
+                              {pitch.roomName}
+                            </Badge>
+                          )}
                         </CardDescription>
                       </div>
 

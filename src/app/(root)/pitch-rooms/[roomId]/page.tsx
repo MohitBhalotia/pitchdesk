@@ -21,6 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { PitchRoomSummary, RoomAgentSummary } from "@/components/pitch-rooms/types";
 import { KnowledgeBaseSection } from "@/components/pitch-rooms/KnowledgeBaseSection";
 import { StartupFactsSection } from "@/components/pitch-rooms/StartupFactsSection";
+import { RoomPitchHistorySection } from "@/components/pitch-rooms/RoomPitchHistorySection";
 
 export default function PitchRoomDetailPage() {
   const { roomId } = useParams<{ roomId: string }>();
@@ -172,10 +173,7 @@ export default function PitchRoomDetailPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">
-            No pitches in this room yet. Once you start practicing here, sessions
-            will show up in this list.
-          </p>
+          <RoomPitchHistorySection roomId={roomId} />
         </CardContent>
       </Card>
 
@@ -217,6 +215,9 @@ export default function PitchRoomDetailPage() {
                     className="mt-2 w-full"
                     disabled={!hasReadyKnowledgeBase}
                     title={hasReadyKnowledgeBase ? undefined : "Add a knowledge base first"}
+                    onClick={() =>
+                      router.push(`/pitch-rooms/${roomId}/pitch?agentId=${agent._id}`)
+                    }
                   >
                     Start pitch
                   </Button>

@@ -53,6 +53,7 @@ interface PitchImprovement {
 interface PitchMeta {
   title: string;
   agentName: string;
+  roomName?: string | null;
 }
 
 // Exact max scores from backend system prompt
@@ -535,6 +536,7 @@ export default function EvaluationPage() {
           </h1>
           <p className="text-muted-foreground mt-2">
             Detailed analysis of your pitch with {pitchMeta?.agentName || "AI VC"}
+            {pitchMeta?.roomName ? ` in ${pitchMeta.roomName}` : ""}
           </p>
         </div>
 

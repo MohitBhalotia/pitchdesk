@@ -82,7 +82,10 @@ export async function POST(req: NextRequest) {
       : null;
     const pitchMeta = {
       title: pitch.title || 'Untitled pitch',
-      agentName: selectedAgent?.name?.trim() || 'AI VC',
+      agentName: selectedAgent?.name?.trim() || pitch.agentName || 'AI VC',
+      // Pitch-room fields (plans/RAG_feature.md Phase 3) -- undefined for
+      // every generic pitch, so the evaluation page shows no room badge.
+      roomName: pitch.roomName || null,
     };
 
     const existingEvaluation = await PitchEval.findOne({

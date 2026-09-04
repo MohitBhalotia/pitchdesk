@@ -41,6 +41,26 @@ const PitchSchema = new Schema<Pitch>(
             ref: 'Agent',
             default: null
         },
+        // Pitch-room fields (plans/RAG_feature.md Phase 3). Unset on every
+        // pre-existing/generic pitch -- absence means "generic".
+        pitchRoomId: {
+            type: Schema.Types.ObjectId,
+            ref: 'PitchRoom',
+            default: null
+        },
+        pitchMode: {
+            type: String,
+            enum: ["generic", "room"],
+            default: "generic"
+        },
+        roomName: {
+            type: String,
+            default: null
+        },
+        agentName: {
+            type: String,
+            default: null
+        },
         pitchNumber: {
             type: Number,
             min: 1

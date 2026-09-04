@@ -48,6 +48,16 @@ export interface KnowledgeSourceSummary {
   createdAt: string;
 }
 
+export interface RoomPitchSummary {
+  _id: string;
+  title?: string | null;
+  agentName?: string | null;
+  duration?: number | null;
+  startTime?: string | null;
+  endTime?: string | null;
+  createdAt: string;
+}
+
 export interface StartupFactSummary {
   _id: string;
   metric: string;
