@@ -29,6 +29,7 @@ export async function POST(req: Request) {
         const response = await axios.post(`${fastApiUrl}/image/regenerate`, fastApiFormData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
+                'X-Internal-Api-Key': process.env.INTERNAL_API_KEY || '',
             },
         });
 

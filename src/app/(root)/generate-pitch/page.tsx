@@ -464,7 +464,7 @@ export default function PitchGenerator() {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_FASTAPI_BACKEND}/generate-pitch`,
+        `/api/fastapi-proxy/generate-pitch`,
         {
           method: "POST",
           body: formDataToSubmit,

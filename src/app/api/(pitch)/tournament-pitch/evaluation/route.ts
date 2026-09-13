@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
     // Send transcript to FastAPI competition evaluation endpoint
     const fastAPIResponse = await fetch(`${process.env.NEXT_PUBLIC_FASTAPI_BACKEND}/evaluate-competition`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-Internal-Api-Key': process.env.INTERNAL_API_KEY || '' },
       body: JSON.stringify({ transcript: conversationHistory }),
     });
 

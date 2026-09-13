@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "X-Internal-Api-Key": process.env.INTERNAL_API_KEY || "",
         },
         body: JSON.stringify(body),
         cache: "no-store", //everytime the user makes a request, the response is fresh

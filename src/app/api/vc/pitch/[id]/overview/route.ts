@@ -40,6 +40,8 @@ export async function GET(req: Request, context: RouteContext) {
         try {
             const response = await axios.post(`${fastApiUrl}/generate-overview`, {
                 transcript: pitch.conversationHistory
+            }, {
+                headers: { "X-Internal-Api-Key": process.env.INTERNAL_API_KEY || "" },
             });
 
             const overview = response.data.overview;

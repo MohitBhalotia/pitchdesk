@@ -16,9 +16,10 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com https://blocks.mvp-subha.me https://i.postimg.cc https://*.razorpay.com",
               "font-src 'self'",
-              // pitchdesk-backend/pitchdesk-fastapi.vercel.app kept during the
-              // Vercel -> VPS/Coolify cutover; drop once DNS fully switches over.
-              "connect-src 'self' https://api.deepgram.com wss://api.deepgram.com wss://agent.deepgram.com https://*.vercel-insights.com https://va.vercel-scripts.com https://pitchdesk-backend.vercel.app https://pitchdesk-fastapi.vercel.app https://fastapi.pitchdesk.in https://vercel.live https://api.razorpay.com https://lumberjack.razorpay.com",
+              // FastAPI is no longer called from the browser (every call site is
+              // now a server-side proxy through this app, see src/lib/fastapiClient.ts
+              // and src/app/api/fastapi-proxy/*) so no fastapi.* origin belongs here.
+              "connect-src 'self' https://api.deepgram.com wss://api.deepgram.com wss://agent.deepgram.com https://*.vercel-insights.com https://va.vercel-scripts.com https://vercel.live https://api.razorpay.com https://lumberjack.razorpay.com",
               "frame-src https://*.razorpay.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",

@@ -24,6 +24,8 @@ export async function POST(req: Request) {
         try {
             const response = await axios.post(`${fastApiUrl}/refine-description`, {
                 description
+            }, {
+                headers: { "X-Internal-Api-Key": process.env.INTERNAL_API_KEY || "" },
             });
 
             return NextResponse.json(response.data);

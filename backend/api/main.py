@@ -9,7 +9,9 @@ from pydantic import BaseModel
 from dotenv import load_dotenv
 from openai import OpenAI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, HTTPException, Form, UploadFile, File
+from fastapi import FastAPI, HTTPException, Form, UploadFile, File, Request
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import JSONResponse
 from typing import List, Optional, Dict
 from PIL import Image
 from google import genai
@@ -45,13 +47,47 @@ TEMPERATURE = 0.3
 # --------------------- FASTAPI APP ---------------------
 app = FastAPI(title="Pitch API", version="2.2")
 
+# Only pitchdesk.in (and NEXT_PUBLIC_APP_URL, for previews/other envs) may call
+# this API from a browser. Server-to-server calls (Next.js API routes, the
+# worker) aren't browser requests, so CORS doesn't apply to them at all --
+# they're covered instead by the INTERNAL_API_KEY check below.
+_default_origins = "https://pitchdesk.in,https://www.pitchdesk.in"
+ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("CORS_ALLOWED_ORIGINS", _default_origins).split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Or ["http://localhost:3000"] for stricter security
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type", "X-Internal-Api-Key"],
 )
+
+# --------------------- INTERNAL SERVICE AUTH ---------------------
+# Shared secret between pitchdesk-web and pitchdesk-api on the Coolify
+# internal network. Not a user-auth system -- it just stops this API from
+# being usable by anyone who isn't our own Next.js server. If INTERNAL_API_KEY
+# isn't set, the check is skipped (so local dev without the var keeps working).
+INTERNAL_API_KEY = os.getenv("INTERNAL_API_KEY")
+_PUBLIC_PATHS = {"/", "/health"}
+
+
+class InternalApiKeyMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        if (
+            INTERNAL_API_KEY
+            and request.method != "OPTIONS"
+            and request.url.path not in _PUBLIC_PATHS
+            and request.headers.get("x-internal-api-key") != INTERNAL_API_KEY
+        ):
+            return JSONResponse(status_code=401, content={"error": "Unauthorized"})
+        return await call_next(request)
+
+
+app.add_middleware(InternalApiKeyMiddleware)
 
 # Load the pitch samples once at startup
 # with open("sample_pitches.txt", "r", encoding="utf-8") as f:

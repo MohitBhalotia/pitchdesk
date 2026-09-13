@@ -34,6 +34,8 @@ export async function POST(req: Request) {
                 investment_stage: investmentStage,
                 geographic_focus: geographicFocus,
                 user_instructions: userInstructions,
+            }, {
+                headers: { "X-Internal-Api-Key": process.env.INTERNAL_API_KEY || "" },
             });
 
             const data = response.data;

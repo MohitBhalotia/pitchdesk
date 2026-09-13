@@ -112,6 +112,7 @@ export async function POST(req: NextRequest) {
                 body: params,
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Internal-Api-Key': process.env.INTERNAL_API_KEY || '',
                 },
             }
         );

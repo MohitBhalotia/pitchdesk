@@ -185,7 +185,7 @@ function HomeContent() {
 
   useEffect(() => {
     const summary = async () => {
-      const summary = await axios.post(`${process.env.NEXT_PUBLIC_FASTAPI_BACKEND}/5minsummmary`, {
+      const summary = await axios.post(`/api/fastapi-proxy/five-min-summary`, {
         transcript: transcriptRef.current,
       });
       console.log("Summary:", summary);
