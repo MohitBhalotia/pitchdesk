@@ -1,5 +1,28 @@
 # Pitchdesk on Coolify — Deployment Plan & Runbook
 
+## Live status (2026-09-13, after first real deploy attempt)
+
+`dev` was merged into `main` and pushed — this already triggered a real
+deploy via an existing GitHub webhook (auto-deploy-on-push is confirmed
+working, no extra setup needed there):
+
+- **pitchdesk-worker: deployed and healthy.** Logs confirm `connected to
+  MongoDB`, `connected to Redis`, listening on all 5 queues. Redis/Mongo
+  wiring is correct.
+- **pitchdesk-web: built and started, but not reachable.** Next.js logs show
+  a clean `✓ Ready`, but Coolify's Traefik proxy returns `502 Bad Gateway`
+  on the app's placeholder domain. A restart produced a fresh container with
+  the same result, which points at the proxy/Docker-network layer rather
+  than the app itself. Not yet resolved — see §11.
+- **pitchdesk-api: still failing to build.** Root cause found: Coolify's
+  "Dockerfile Location" (`/backend/Dockerfile`) is applied *relative to*
+  "Base Directory" (`/backend`), so it's actually looking for
+  `backend/backend/Dockerfile`, which doesn't exist. Fix is a one-field
+  change in the Coolify UI (§1) — no MCP tool exists to edit application
+  config, only to read/deploy/control, so this needs to be done by hand.
+
+## Section index below (original plan)
+
 Status as of 2026-09-14. VPS: "Contabo" (public IP `169.58.222.221`), Coolify
 project "PitchDesk" (single `production` environment), 3 apps:
 
@@ -15,29 +38,26 @@ history** — nothing has actually been built/deployed yet.
 
 ---
 
-## 1. Critical blocker found: Coolify is tracking the wrong branch
+## 1. ~~Critical blocker~~ RESOLVED: `main` now has everything, one Coolify field still needs a manual fix
 
-All three Coolify apps are configured to build from **`main`**. Every pitch-room /
-RAG / worker feature — and the Dockerfiles themselves — only exist on `dev` /
-`pitch-room`. `main` currently has none of it (no Dockerfile, no
-`output: "standalone"`, no worker, no pitch rooms).
+`dev` has been merged into `main` and pushed (done). That immediately
+triggered real deploys via an existing GitHub webhook.
 
-**I could not merge `dev` → `main` and push myself** — that action is
-classified as a production deploy and is blocked from automatic execution.
-You need to do it yourself (or explicitly tell me to run it, which will
-prompt you for approval):
+**pitchdesk-api needs one manual fix in the Coolify UI before it will build**
+— I have no tool that can edit application config, only read/deploy/control:
 
-```bash
-git checkout main
-git merge dev --no-edit
-git push origin main
-git checkout pitch-room   # back to your working branch
-```
+1. Open pitchdesk-api in Coolify → Configuration → General/Build settings.
+2. Change **Dockerfile Location** from `/backend/Dockerfile` to `/Dockerfile`.
+3. Leave **Base Directory** as `/backend`.
+4. Redeploy (push a commit, or click Redeploy — either triggers a build).
 
-Everything below assumes this has been done — **do this first**, then deploy.
-Once `main` is updated, if Vercel is still connected to this repo it will
-also auto-redeploy from `main` (harmless — all the changes here work fine on
-Vercel too — but see §7 for winding Vercel down).
+Why: Coolify resolves Dockerfile Location *relative to* Base Directory, so
+the current value resolves to `backend/backend/Dockerfile`, which doesn't
+exist — that's the exact build failure in the logs.
+
+If Vercel is still connected to this repo it will also auto-redeploy from
+`main` now (harmless — everything here works fine on Vercel too — see §7 for
+winding it down once Coolify is confirmed fully working).
 
 ---
 
@@ -311,22 +331,51 @@ Still to do, your side:
 
 ---
 
+## 11. Open issue: pitchdesk-web gets 502 from Traefik
+
+The app itself is fine — container logs show `▲ Next.js 15.4.10` /
+`✓ Ready` on every start, including after a manual restart that produced a
+fresh container. But `curl` against its placeholder domain
+(`bfble9iqylvt93oz73ghprgb.169.58.222.221.sslip.io`) returns:
+- HTTP: `502 Bad Gateway` (Traefik's own generic error page — it matched a
+  route for the host but couldn't reach the backend).
+- HTTPS: `503 Service Unavailable`.
+
+This is consistent with the new container not being (or not yet being)
+correctly registered with Traefik on the shared `coolify` Docker network —
+not an application bug. I didn't go further because the next natural fix
+(restarting the shared Traefik/proxy service) briefly affects every other
+app on this server, including your Veqiro apps, and you asked me to wait
+rather than do that. To check/fix this yourself:
+- In Coolify, open pitchdesk-web → check if the UI shows any proxy/domain
+  warning (sometimes visible there but not over the API).
+- Try Coolify's server-level "Restart Proxy" (Server → Contabo → Proxy tab)
+  during a low-traffic moment — it's a few seconds of blip for all apps on
+  this server, not destructive.
+- Or tell me to go ahead and I'll trigger it and verify pitchdesk-web (and
+  confirm Veqiro's apps come back clean) right after.
+- If a proxy restart doesn't fix it, the next thing to check (needs SSH,
+  which I don't have) is `docker network inspect coolify` to confirm the
+  pitchdesk-web container is actually attached to it.
+
 ## Your action items, in order
 
-1. **Merge `dev` → `main` and push** (§1) — I couldn't do this automatically.
-2. In Coolify, add/fix the env vars listed in §3 on all three apps (generate
+1. ~~Merge `dev` → `main` and push~~ — done.
+2. Fix pitchdesk-api's Dockerfile Location field in Coolify (§1) and
+   redeploy — or tell me once it's fixed and I'll trigger it.
+3. Decide how to handle pitchdesk-web's 502 (§11) — check the UI, restart
+   the shared proxy yourself, or tell me to do it.
+4. In Coolify, add/fix the env vars listed in §3 on all three apps (generate
    and share `INTERNAL_API_KEY` between web + api).
-3. Get the internal hostnames for pitchdesk-api and shared-redis from their
+5. Get the internal hostnames for pitchdesk-api and shared-redis from their
    Coolify pages and use them for `FASTAPI_BACKEND` / `REDIS_URL` (§4).
-4. Whitelist `169.58.222.221` in MongoDB Atlas Network Access.
-5. Tell me to go ahead — I'll deploy all three apps in order and report back
-   logs/health.
-6. Set the real domains on each app in Coolify (§7) and point DNS at
+6. Whitelist `169.58.222.221` in MongoDB Atlas Network Access.
+7. Set the real domains on each app in Coolify (§7) and point DNS at
    `169.58.222.221`; adjust Cloudflare SSL mode if applicable.
-7. Confirm auto-deploy-on-push is wired (§8) and turn on Coolify deployment
-   notifications.
-8. Smoke-test a full pitch session and a full pitch-room session (including
+8. Confirm auto-deploy-on-push is wired (§8, already looking good) and turn
+   on Coolify deployment notifications.
+9. Smoke-test a full pitch session and a full pitch-room session (including
    a document upload) end-to-end on the new domain.
-9. Flip `PITCH_ROOMS_ENABLED` / `NEXT_PUBLIC_PITCH_ROOMS_ENABLED` to `true`
-   once step 8 passes.
-10. Only then start winding down Vercel (§9).
+10. Flip `PITCH_ROOMS_ENABLED` / `NEXT_PUBLIC_PITCH_ROOMS_ENABLED` to `true`
+    once step 9 passes.
+11. Only then start winding down Vercel (§9).
