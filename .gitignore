@@ -48,3 +48,4 @@ mytodo.txt
 
 # *.md
 !README.md
+.env*.local
