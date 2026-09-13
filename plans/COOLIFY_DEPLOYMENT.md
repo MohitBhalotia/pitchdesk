@@ -358,24 +358,91 @@ rather than do that. To check/fix this yourself:
   which I don't have) is `docker network inspect coolify` to confirm the
   pitchdesk-web container is actually attached to it.
 
-## Your action items, in order
+## Your action items — full checklist
 
-1. ~~Merge `dev` → `main` and push~~ — done.
-2. Fix pitchdesk-api's Dockerfile Location field in Coolify (§1) and
-   redeploy — or tell me once it's fixed and I'll trigger it.
-3. Decide how to handle pitchdesk-web's 502 (§11) — check the UI, restart
-   the shared proxy yourself, or tell me to do it.
-4. In Coolify, add/fix the env vars listed in §3 on all three apps (generate
-   and share `INTERNAL_API_KEY` between web + api).
-5. Get the internal hostnames for pitchdesk-api and shared-redis from their
-   Coolify pages and use them for `FASTAPI_BACKEND` / `REDIS_URL` (§4).
-6. Whitelist `169.58.222.221` in MongoDB Atlas Network Access.
-7. Set the real domains on each app in Coolify (§7) and point DNS at
-   `169.58.222.221`; adjust Cloudflare SSL mode if applicable.
-8. Confirm auto-deploy-on-push is wired (§8, already looking good) and turn
-   on Coolify deployment notifications.
-9. Smoke-test a full pitch session and a full pitch-room session (including
-   a document upload) end-to-end on the new domain.
-10. Flip `PITCH_ROOMS_ENABLED` / `NEXT_PUBLIC_PITCH_ROOMS_ENABLED` to `true`
-    once step 9 passes.
-11. Only then start winding down Vercel (§9).
+### A. Unblock the two broken deploys
+- [ ] **pitchdesk-api**: Configuration → Build settings → change **Dockerfile
+  Location** from `/backend/Dockerfile` to `/Dockerfile` (keep Base
+  Directory as `/backend`). Redeploy after.
+- [ ] **pitchdesk-web** (502 from Traefik, §11): open its Coolify page and
+  check for a proxy/domain warning, or use Server → Contabo → Proxy →
+  Restart Proxy (few-second blip for every app on the server, incl.
+  Veqiro's) — or tell me to do it and I'll verify Veqiro's apps too
+  afterward.
+
+### B. Env vars to add
+- [ ] `INTERNAL_API_KEY` — generate once (`openssl rand -hex 32`), paste the
+  **same value** into both pitchdesk-web and pitchdesk-api.
+- [ ] `CORS_ALLOWED_ORIGINS` on pitchdesk-api — `https://pitchdesk.in,https://www.pitchdesk.in`
+- [ ] `NEXTAUTH_URL` on pitchdesk-web — `https://pitchdesk.in`
+
+### C. Env vars to fix (currently wrong/placeholder values)
+- [ ] `FASTAPI_BACKEND` (pitchdesk-web) → pitchdesk-api's **internal**
+  Coolify hostname, e.g. `http://<internal-hostname>:8000` (see it on
+  pitchdesk-api's Coolify page) — not a public URL.
+- [ ] `NEXT_PUBLIC_FASTAPI_BACKEND` (pitchdesk-web) → can be the same
+  internal hostname now (browser never calls FastAPI anymore).
+- [ ] `REDIS_URL` (pitchdesk-web + pitchdesk-worker) → copy the exact
+  connection string from the shared-redis resource's Configuration tab in
+  Coolify. Make sure it's identical on both apps.
+- [ ] `MONGO_URI` (pitchdesk-web) → your real Atlas connection string.
+- [ ] `NEXT_PUBLIC_APP_URL` (pitchdesk-web) → `https://pitchdesk.in`
+- [ ] Double check `NEXTAUTH_SECRET`, Google OAuth client ID/secret, and
+  every other copied-from-Vercel value isn't a stale preview/dev value.
+- [ ] Leave `PITCH_ROOMS_ENABLED` / `NEXT_PUBLIC_PITCH_ROOMS_ENABLED` as
+  `false` until step F below passes.
+
+### D. Database & networking
+- [ ] MongoDB Atlas → Network Access → whitelist `169.58.222.221` (the
+  Contabo server's IP).
+- [ ] pitchdesk-api health check: Configuration → Health Checks → point at
+  `/health` instead of `/`, enable it.
+
+### E. Domains / DNS / Cloudflare
+- [ ] Coolify → pitchdesk-api → Domains → set `fastapi.pitchdesk.in`
+  (replace the sslip.io placeholder).
+- [ ] Coolify → pitchdesk-web → Domains → set `pitchdesk.in` and
+  `www.pitchdesk.in`.
+- [ ] At your DNS provider: `A` records for `pitchdesk.in`,
+  `www.pitchdesk.in`, and `fastapi.pitchdesk.in`, all → `169.58.222.221`.
+- [ ] If DNS is on Cloudflare with the orange-cloud proxy on: either turn it
+  **off** (grey cloud) for these 3 records so Coolify's Let's Encrypt cert
+  issuance works, or keep it on and set SSL mode to **Full (strict)** once
+  Coolify's cert is live (never "Flexible" — causes redirect loops).
+- [ ] Google Cloud Console → OAuth client → confirm
+  `https://pitchdesk.in/api/auth/callback/google` is in the authorized
+  redirect URIs (domain isn't changing, so likely already fine — just
+  confirm).
+- [ ] Razorpay webhook: no change needed, same `pitchdesk.in` domain.
+
+### F. GitHub / CI-CD / deploy visibility
+- [ ] Auto-deploy-on-push already works (confirmed — pushing to `main`
+  triggered real builds via an existing webhook). Just confirm "Automatic
+  Deployment" is toggled on for all 3 apps in Coolify, General settings.
+- [ ] Set up Coolify deploy notifications so you get a Vercel-style signal:
+  Team/Project Settings → Notifications → connect Discord/Slack/Telegram/
+  email → enable "Deployment success" and "Deployment failure".
+- [ ] (Optional) Check each app's Configuration → Source — if it's on the
+  dedicated "pitchdesk-git" GitHub App rather than generic "Public GitHub",
+  you also get ✔/✖ commit-status checks on GitHub itself, Vercel-style.
+
+### G. Security
+- [ ] Server firewall: confirm only ports 22 (SSH) and 80/443 (Traefik) are
+  publicly reachable on the Contabo box — not Coolify's dashboard port, not
+  Redis/Mongo. Check `ufw status` or your provider's firewall panel.
+- [ ] Rotate `NEXTAUTH_SECRET` / `ROOM_SESSION_TOKEN_SECRET` / any API key
+  only if you think it was ever exposed outside your own Vercel account —
+  otherwise reusing existing values is fine.
+- [ ] (Later, not urgent) Consider rate-limiting the public FastAPI/Next
+  endpoints before any paid-tier scaling.
+
+### H. Before going fully live
+- [ ] Smoke-test a full generic pitch session end-to-end on the new
+  Coolify-served domain.
+- [ ] Smoke-test a full pitch-room session, including a knowledge-base
+  document upload (exercises the worker's ingestion pipeline).
+- [ ] Flip `PITCH_ROOMS_ENABLED` and `NEXT_PUBLIC_PITCH_ROOMS_ENABLED` to
+  `true` once both pass.
+- [ ] Only then start winding down Vercel (§9) — detach the domain first,
+  keep the Vercel project around for a few days as a rollback option before
+  deleting anything.
