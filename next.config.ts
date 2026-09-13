@@ -18,7 +18,7 @@ const nextConfig: NextConfig = {
               "font-src 'self'",
               // pitchdesk-backend/pitchdesk-fastapi.vercel.app kept during the
               // Vercel -> VPS/Coolify cutover; drop once DNS fully switches over.
-              "connect-src 'self' https://api.deepgram.com wss://api.deepgram.com wss://agent.deepgram.com https://*.vercel-insights.com https://va.vercel-scripts.com https://pitchdesk-backend.vercel.app https://pitchdesk-fastapi.vercel.app https://api.pitchdesk.in https://vercel.live https://api.razorpay.com https://lumberjack.razorpay.com",
+              "connect-src 'self' https://api.deepgram.com wss://api.deepgram.com wss://agent.deepgram.com https://*.vercel-insights.com https://va.vercel-scripts.com https://pitchdesk-backend.vercel.app https://pitchdesk-fastapi.vercel.app https://fastapi.pitchdesk.in https://vercel.live https://api.razorpay.com https://lumberjack.razorpay.com",
               "frame-src https://*.razorpay.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",
